@@ -1,0 +1,8 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Local OS metadata and exported builds
+.DS_Store
+/build/
+/builds/
