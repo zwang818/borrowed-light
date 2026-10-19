@@ -1,2 +1,6 @@
-# Normalize EOL for all files that Git considers text files.
+# 统一换行符：避免 Windows / macOS 之间把整行都标成改动。
 * text=auto eol=lf
+
+# 说明：目前素材是像素图和小音效，直接用普通 Git 提交即可，不需要 Git LFS。
+# 什么时候才需要 LFS：出现「单个素材 > 10MB」或「仓库总量 > 100MB」时，
+# 再按 docs/version_control.md 的说明启用，并确保每个人先装好 git-lfs。
