@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="RoomData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/exploration/room_data.gd" id="1_room_data"]
+
+[resource]
+script = ExtResource("1_room_data")
+room_id = "test_room_01"
+display_name = "测试房间 01"
+spawn_point = Vector2(200, 200)
+exploration_areas = Array[Resource]([])
+objects = Array[Resource]([])
+exits = Array[Resource]([])

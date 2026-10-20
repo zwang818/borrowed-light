@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://tests/manual/c_progress/progress_test.gd" id="1_progress_test"]
+[ext_resource type="PackedScene" path="res://scenes/runtime/room_manager.tscn" id="2_room_manager"]
+
+[node name="ProgressTest" type="Node2D"]
+script = ExtResource("1_progress_test")
+
+[node name="RoomManager" parent="." instance=ExtResource("2_room_manager")]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="CanvasLayer"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 600.0
+offset_bottom = 200.0
+theme_override_font_sizes/font_size = 16
+text = "C 模块测试入口初始化中..."
+autowrap_mode = 3
+
+[node name="Instructions" type="Label" parent="CanvasLayer"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -120.0
+offset_right = 600.0
+offset_bottom = -16.0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 14
+text = "操作：WASD 移动 | E 交互终端 | Enter 模拟死亡重试 | Esc 暂停"
+autowrap_mode = 3
+
+[node name="RoomContainer" type="Node2D" parent="."]
