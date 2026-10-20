@@ -1,0 +1,851 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/levels/graybox/graybox_wall.tscn" id="1_wall"]
+[ext_resource type="Script" path="res://scenes/levels/graybox/graybox_floor.gd" id="2_floor"]
+[ext_resource type="Script" path="res://scenes/levels/graybox/map_marker.gd" id="3_marker"]
+[ext_resource type="Script" path="res://scenes/levels/graybox/graybox_metrics.gd" id="4_metrics"]
+[ext_resource type="PackedScene" path="res://scenes/levels/graybox/graybox_polygon_wall.tscn" id="5_chamfer"]
+
+[node name="AbdomenGraybox" type="Node2D"]
+metadata/schema_version = 1
+metadata/layout_revision = 2
+metadata/graybox_only = true
+metadata/map_bounds = Rect2(128, 32, 1120, 2688)
+metadata/metrics_script = ExtResource("4_metrics")
+
+[node name="Floors" type="Node2D" parent="."]
+
+[node name="Arrival" type="Node2D" parent="Floors"]
+position = Vector2(192, 2080)
+script = ExtResource("2_floor")
+size = Vector2(832, 544)
+floor_color = Color(0.145098, 0.211765, 0.231373, 1)
+
+[node name="EntryThreshold" type="Node2D" parent="Floors"]
+position = Vector2(512, 2624)
+script = ExtResource("2_floor")
+size = Vector2(128, 64)
+floor_color = Color(0.160784, 0.231373, 0.25098, 1)
+
+[node name="TeachingNeck" type="Node2D" parent="Floors"]
+position = Vector2(544, 2016)
+script = ExtResource("2_floor")
+size = Vector2(128, 64)
+floor_color = Color(0.160784, 0.231373, 0.25098, 1)
+
+[node name="WeaponBay" type="Node2D" parent="Floors"]
+position = Vector2(352, 1792)
+script = ExtResource("2_floor")
+size = Vector2(512, 224)
+floor_color = Color(0.188235, 0.227451, 0.243137, 1)
+
+[node name="GunThreshold" type="Node2D" parent="Floors"]
+position = Vector2(544, 1728)
+script = ExtResource("2_floor")
+size = Vector2(64, 64)
+floor_color = Color(0.254902, 0.25098, 0.223529, 1)
+
+[node name="FirstCombat" type="Node2D" parent="Floors"]
+position = Vector2(256, 1440)
+script = ExtResource("2_floor")
+size = Vector2(480, 288)
+floor_color = Color(0.2, 0.231373, 0.254902, 1)
+
+[node name="LowerPassage" type="Node2D" parent="Floors"]
+position = Vector2(576, 1152)
+script = ExtResource("2_floor")
+size = Vector2(128, 288)
+floor_color = Color(0.160784, 0.219608, 0.243137, 1)
+
+[node name="WorkshopBranch" type="Node2D" parent="Floors"]
+position = Vector2(704, 1344)
+script = ExtResource("2_floor")
+size = Vector2(160, 64)
+floor_color = Color(0.211765, 0.235294, 0.223529, 1)
+
+[node name="WorkshopBend" type="Node2D" parent="Floors"]
+position = Vector2(800, 1408)
+script = ExtResource("2_floor")
+size = Vector2(64, 96)
+floor_color = Color(0.211765, 0.235294, 0.223529, 1)
+
+[node name="WorkshopThreshold" type="Node2D" parent="Floors"]
+position = Vector2(800, 1472)
+script = ExtResource("2_floor")
+size = Vector2(96, 64)
+floor_color = Color(0.286275, 0.258824, 0.215686, 1)
+
+[node name="Workshop" type="Node2D" parent="Floors"]
+position = Vector2(896, 1376)
+script = ExtResource("2_floor")
+size = Vector2(288, 288)
+floor_color = Color(0.27451, 0.254902, 0.215686, 1)
+
+[node name="MiddleTurn" type="Node2D" parent="Floors"]
+position = Vector2(384, 1088)
+script = ExtResource("2_floor")
+size = Vector2(320, 128)
+floor_color = Color(0.168627, 0.223529, 0.243137, 1)
+
+[node name="RibPassage" type="Node2D" parent="Floors"]
+position = Vector2(352, 864)
+script = ExtResource("2_floor")
+size = Vector2(160, 288)
+floor_color = Color(0.168627, 0.223529, 0.243137, 1)
+
+[node name="UpperTurn" type="Node2D" parent="Floors"]
+position = Vector2(352, 800)
+script = ExtResource("2_floor")
+size = Vector2(352, 128)
+floor_color = Color(0.168627, 0.223529, 0.243137, 1)
+
+[node name="UpperPassage" type="Node2D" parent="Floors"]
+position = Vector2(576, 640)
+script = ExtResource("2_floor")
+size = Vector2(128, 224)
+floor_color = Color(0.168627, 0.223529, 0.243137, 1)
+
+[node name="ExitCombat" type="Node2D" parent="Floors"]
+position = Vector2(256, 256)
+script = ExtResource("2_floor")
+size = Vector2(768, 384)
+floor_color = Color(0.203922, 0.239216, 0.258824, 1)
+
+[node name="ExitThreshold" type="Node2D" parent="Floors"]
+position = Vector2(608, 192)
+script = ExtResource("2_floor")
+size = Vector2(64, 64)
+floor_color = Color(0.270588, 0.254902, 0.223529, 1)
+
+[node name="SpineLanding" type="Node2D" parent="Floors"]
+position = Vector2(544, 64)
+script = ExtResource("2_floor")
+size = Vector2(192, 128)
+floor_color = Color(0.172549, 0.243137, 0.239216, 1)
+
+[node name="Walls" type="Node2D" parent="."]
+
+[node name="Boundary01" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(512, 32)
+size = Vector2(256, 32)
+
+[node name="Boundary02" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(512, 64)
+size = Vector2(32, 128)
+
+[node name="Boundary03" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(736, 64)
+size = Vector2(32, 128)
+
+[node name="Boundary04" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(512, 192)
+size = Vector2(96, 32)
+
+[node name="Boundary05" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(672, 192)
+size = Vector2(96, 32)
+
+[node name="Boundary06" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(224, 224)
+size = Vector2(384, 32)
+
+[node name="Boundary07" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(672, 224)
+size = Vector2(384, 32)
+
+[node name="Boundary08" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(224, 256)
+size = Vector2(32, 384)
+
+[node name="Boundary09" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(1024, 256)
+size = Vector2(32, 384)
+
+[node name="Boundary10" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(224, 640)
+size = Vector2(352, 32)
+
+[node name="Boundary11" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(704, 640)
+size = Vector2(352, 32)
+
+[node name="Boundary12" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(544, 672)
+size = Vector2(32, 96)
+
+[node name="Boundary13" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(704, 672)
+size = Vector2(32, 256)
+
+[node name="Boundary14" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(320, 768)
+size = Vector2(256, 32)
+
+[node name="Boundary15" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(320, 800)
+size = Vector2(32, 352)
+
+[node name="Boundary16" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(512, 928)
+size = Vector2(224, 32)
+
+[node name="Boundary17" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(512, 960)
+size = Vector2(32, 96)
+
+[node name="Boundary18" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(512, 1056)
+size = Vector2(224, 32)
+
+[node name="Boundary19" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(704, 1088)
+size = Vector2(32, 224)
+
+[node name="Boundary20" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(320, 1152)
+size = Vector2(64, 32)
+
+[node name="Boundary21" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(352, 1184)
+size = Vector2(32, 32)
+
+[node name="Boundary22" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(352, 1216)
+size = Vector2(224, 32)
+
+[node name="Boundary23" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(544, 1248)
+size = Vector2(32, 160)
+
+[node name="Boundary24" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(704, 1312)
+size = Vector2(192, 32)
+
+[node name="Boundary25" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(864, 1344)
+size = Vector2(352, 32)
+
+[node name="Boundary26" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(864, 1376)
+size = Vector2(32, 96)
+
+[node name="Boundary27" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(1184, 1376)
+size = Vector2(32, 288)
+
+[node name="Boundary28" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(224, 1408)
+size = Vector2(352, 32)
+
+[node name="Boundary29" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(704, 1408)
+size = Vector2(96, 32)
+
+[node name="Boundary30" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(224, 1440)
+size = Vector2(32, 288)
+
+[node name="Boundary31" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(736, 1440)
+size = Vector2(64, 96)
+
+[node name="Boundary32" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(736, 1536)
+size = Vector2(160, 32)
+
+[node name="Boundary33" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(736, 1568)
+size = Vector2(32, 160)
+
+[node name="Boundary34" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(864, 1568)
+size = Vector2(32, 96)
+
+[node name="Boundary35" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(864, 1664)
+size = Vector2(352, 32)
+
+[node name="Boundary36" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(224, 1728)
+size = Vector2(320, 32)
+
+[node name="Boundary37" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(608, 1728)
+size = Vector2(160, 32)
+
+[node name="Boundary38" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(320, 1760)
+size = Vector2(224, 32)
+
+[node name="Boundary39" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(608, 1760)
+size = Vector2(288, 32)
+
+[node name="Boundary40" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(320, 1792)
+size = Vector2(32, 224)
+
+[node name="Boundary41" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(864, 1792)
+size = Vector2(32, 224)
+
+[node name="Boundary42" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(320, 2016)
+size = Vector2(224, 32)
+
+[node name="Boundary43" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(672, 2016)
+size = Vector2(224, 32)
+
+[node name="Boundary44" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(160, 2048)
+size = Vector2(384, 32)
+
+[node name="Boundary45" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(672, 2048)
+size = Vector2(384, 32)
+
+[node name="Boundary46" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(160, 2080)
+size = Vector2(32, 544)
+
+[node name="Boundary47" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(1024, 2080)
+size = Vector2(32, 544)
+
+[node name="Boundary48" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(160, 2624)
+size = Vector2(352, 32)
+
+[node name="Boundary49" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(640, 2624)
+size = Vector2(416, 32)
+
+[node name="Boundary50" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(480, 2656)
+size = Vector2(32, 32)
+
+[node name="Boundary51" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(640, 2656)
+size = Vector2(32, 32)
+
+[node name="Boundary52" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(480, 2688)
+size = Vector2(192, 32)
+
+[node name="TeachingBaffle" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(384, 2320)
+size = Vector2(256, 32)
+wall_color = Color(0.352941, 0.407843, 0.427451, 1)
+
+[node name="AssemblyBase" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(256, 2400)
+size = Vector2(128, 96)
+wall_color = Color(0.290196, 0.364706, 0.388235, 1)
+
+[node name="TeachingMachine" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(832, 2368)
+size = Vector2(128, 128)
+wall_color = Color(0.290196, 0.364706, 0.388235, 1)
+
+[node name="TeachingRib" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(800, 2144)
+size = Vector2(32, 128)
+wall_color = Color(0.34902, 0.392157, 0.419608, 1)
+
+[node name="GunRackBase" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(384, 1856)
+size = Vector2(96, 64)
+wall_color = Color(0.419608, 0.384314, 0.317647, 1)
+
+[node name="FirstCombatScreen" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(416, 1632)
+size = Vector2(160, 32)
+wall_color = Color(0.34902, 0.392157, 0.419608, 1)
+
+[node name="WorkshopBench" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(992, 1440)
+size = Vector2(128, 64)
+wall_color = Color(0.458824, 0.411765, 0.309804, 1)
+
+[node name="ExitMachine" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(608, 384)
+size = Vector2(64, 160)
+wall_color = Color(0.34902, 0.392157, 0.419608, 1)
+
+[node name="ExitSideMachine" parent="Walls" instance=ExtResource("1_wall")]
+position = Vector2(896, 288)
+size = Vector2(64, 64)
+wall_color = Color(0.290196, 0.364706, 0.388235, 1)
+
+[node name="ArrivalChamfer" parent="Walls" instance=ExtResource("5_chamfer")]
+position = Vector2(192, 2080)
+polygon = PackedVector2Array(0, 0, 96, 0, 0, 96)
+
+[node name="CombatChamfer" parent="Walls" instance=ExtResource("5_chamfer")]
+position = Vector2(256, 1632)
+polygon = PackedVector2Array(0, 0, 0, 96, 96, 96)
+
+[node name="ExitChamferWest" parent="Walls" instance=ExtResource("5_chamfer")]
+position = Vector2(256, 256)
+polygon = PackedVector2Array(0, 0, 96, 0, 0, 96)
+
+[node name="ExitChamferEast" parent="Walls" instance=ExtResource("5_chamfer")]
+position = Vector2(928, 544)
+polygon = PackedVector2Array(96, 0, 96, 96, 0, 96)
+
+[node name="Rooms" type="Node2D" parent="."]
+
+[node name="Main" type="Polygon2D" parent="Rooms"]
+polygon = PackedVector2Array(192, 2080, 544, 2080, 544, 2016, 352, 2016, 352, 1792, 544, 1792, 544, 1728, 256, 1728, 256, 1440, 576, 1440, 576, 1216, 384, 1216, 384, 1152, 352, 1152, 352, 800, 576, 800, 576, 640, 256, 640, 256, 256, 608, 256, 608, 192, 672, 192, 672, 256, 1024, 256, 1024, 640, 704, 640, 704, 928, 512, 928, 512, 1088, 704, 1088, 704, 1344, 864, 1344, 864, 1472, 896, 1472, 896, 1536, 800, 1536, 800, 1408, 704, 1408, 704, 1440, 736, 1440, 736, 1728, 608, 1728, 608, 1792, 864, 1792, 864, 2016, 672, 2016, 672, 2080, 1024, 2080, 1024, 2624, 640, 2624, 640, 2688, 512, 2688, 512, 2624, 192, 2624)
+color = Color(0, 0, 0, 0)
+metadata/room_id = "p1_manufacturing_01"
+
+[node name="Workshop" type="Polygon2D" parent="Rooms"]
+polygon = PackedVector2Array(896, 1376, 1184, 1376, 1184, 1664, 896, 1664)
+color = Color(0, 0, 0, 0)
+metadata/room_id = "p1_workshop_01"
+metadata/safe_zone = true
+metadata/no_enemy_spawn = true
+metadata/safety_requires_runtime = true
+
+[node name="Landing" type="Polygon2D" parent="Rooms"]
+polygon = PackedVector2Array(544, 64, 736, 64, 736, 192, 544, 192)
+color = Color(0, 0, 0, 0)
+metadata/room_id = "p1_landing_01"
+
+[node name="ExplorationRegions" type="Node2D" parent="."]
+
+[node name="Arrival" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(192, 2080, 1024, 2080, 1024, 2624, 192, 2624)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_01"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="EntryThreshold" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(512, 2624, 640, 2624, 640, 2688, 512, 2688)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_02"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="TeachingNeck" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(544, 2016, 672, 2016, 672, 2080, 544, 2080)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_03"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="WeaponBay" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(352, 1792, 864, 1792, 864, 2016, 352, 2016)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_04"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="GunThreshold" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(544, 1728, 608, 1728, 608, 1792, 544, 1792)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_05"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="FirstCombat" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(256, 1440, 736, 1440, 736, 1728, 256, 1728)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_06"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="LowerPassage" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(576, 1152, 704, 1152, 704, 1440, 576, 1440)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_07"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="WorkshopBranch" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(704, 1344, 864, 1344, 864, 1408, 704, 1408)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_08"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="WorkshopBend" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(800, 1408, 864, 1408, 864, 1504, 800, 1504)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_09"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="WorkshopThreshold" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(800, 1472, 896, 1472, 896, 1536, 800, 1536)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_10"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="Workshop" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(896, 1376, 1184, 1376, 1184, 1664, 896, 1664)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_workshop_01_area_11"
+metadata/room_id = "p1_workshop_01"
+metadata/requires_visibility_check = true
+
+[node name="MiddleTurn" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(384, 1088, 704, 1088, 704, 1216, 384, 1216)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_12"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="RibPassage" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(352, 864, 512, 864, 512, 1152, 352, 1152)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_13"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="UpperTurn" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(352, 800, 704, 800, 704, 928, 352, 928)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_14"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="UpperPassage" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(576, 640, 704, 640, 704, 864, 576, 864)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_15"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="ExitCombat" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(256, 256, 1024, 256, 1024, 640, 256, 640)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_16"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="ExitThreshold" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(608, 192, 672, 192, 672, 256, 608, 256)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_manufacturing_01_area_17"
+metadata/room_id = "p1_manufacturing_01"
+metadata/requires_visibility_check = true
+
+[node name="SpineLanding" type="Polygon2D" parent="ExplorationRegions"]
+polygon = PackedVector2Array(544, 64, 736, 64, 736, 192, 544, 192)
+color = Color(0, 0, 0, 0)
+metadata/area_id = "p1_landing_01_area_18"
+metadata/room_id = "p1_landing_01"
+metadata/requires_visibility_check = true
+
+[node name="Markers" type="Node2D" parent="."]
+
+[node name="PlayerSpawn" type="Marker2D" parent="Markers"]
+position = Vector2(576, 2496)
+script = ExtResource("3_marker")
+object_id = "p1_player_spawn"
+object_type = "spawn"
+room_id = "p1_manufacturing_01"
+footprint = Vector2(24, 24)
+
+[node name="PulseGun" type="Marker2D" parent="Markers"]
+position = Vector2(576, 1760)
+script = ExtResource("3_marker")
+object_id = "p1_pulse_pickup"
+object_type = "weapon"
+room_id = "p1_manufacturing_01"
+footprint = Vector2(24, 24)
+content_id = "pulse_gun"
+
+[node name="CleanerFirst" type="Marker2D" parent="Markers"]
+position = Vector2(512, 1536)
+script = ExtResource("3_marker")
+object_id = "abdomen_cleaner_01"
+object_type = "cleaner"
+room_id = "p1_manufacturing_01"
+footprint = Vector2(32, 32)
+
+[node name="CleanerExitWest" type="Marker2D" parent="Markers"]
+position = Vector2(480, 448)
+script = ExtResource("3_marker")
+object_id = "abdomen_cleaner_02"
+object_type = "cleaner"
+room_id = "p1_manufacturing_01"
+footprint = Vector2(32, 32)
+
+[node name="CleanerExitEast" type="Marker2D" parent="Markers"]
+position = Vector2(800, 448)
+script = ExtResource("3_marker")
+object_id = "abdomen_cleaner_03"
+object_type = "cleaner"
+room_id = "p1_manufacturing_01"
+footprint = Vector2(32, 32)
+
+[node name="Record" type="Marker2D" parent="Markers"]
+position = Vector2(1056, 1536)
+script = ExtResource("3_marker")
+object_id = "p1_record_01"
+object_type = "log"
+room_id = "p1_workshop_01"
+footprint = Vector2(24, 24)
+content_id = "p1_test_record"
+
+[node name="Terminal" type="Marker2D" parent="Markers"]
+position = Vector2(832, 320)
+script = ExtResource("3_marker")
+object_id = "p1_terminal_01"
+object_type = "terminal"
+room_id = "p1_manufacturing_01"
+footprint = Vector2(32, 32)
+linked_ids = Array[String](["p1_door_01", "p1_light_01", "p1_light_02"])
+
+[node name="Door" type="Marker2D" parent="Markers"]
+position = Vector2(640, 224)
+script = ExtResource("3_marker")
+object_id = "p1_door_01"
+object_type = "door"
+room_id = "p1_manufacturing_01"
+footprint = Vector2(64, 32)
+
+[node name="FixedLightWest" type="Marker2D" parent="Markers"]
+position = Vector2(384, 384)
+script = ExtResource("3_marker")
+object_id = "p1_light_01"
+object_type = "light"
+room_id = "p1_manufacturing_01"
+footprint = Vector2(24, 24)
+
+[node name="FixedLightEast" type="Marker2D" parent="Markers"]
+position = Vector2(928, 544)
+script = ExtResource("3_marker")
+object_id = "p1_light_02"
+object_type = "light"
+room_id = "p1_manufacturing_01"
+footprint = Vector2(24, 24)
+
+[node name="WorkshopLight" type="Marker2D" parent="Markers"]
+position = Vector2(1120, 1600)
+script = ExtResource("3_marker")
+object_id = "abdomen_workshop_light"
+object_type = "light"
+room_id = "p1_workshop_01"
+footprint = Vector2(24, 24)
+
+[node name="ReturnEntry" type="Marker2D" parent="Markers"]
+position = Vector2(640, 288)
+script = ExtResource("3_marker")
+object_id = "p1_return_entry"
+object_type = "spawn"
+room_id = "p1_manufacturing_01"
+footprint = Vector2(24, 24)
+
+[node name="ToLanding" type="Marker2D" parent="Markers"]
+position = Vector2(640, 208)
+script = ExtResource("3_marker")
+object_id = "p1_exit_to_landing"
+object_type = "exit"
+room_id = "p1_manufacturing_01"
+footprint = Vector2(64, 32)
+target_room_id = "p1_landing_01"
+target_entry_id = "p1_landing_entry"
+
+[node name="LandingEntry" type="Marker2D" parent="Markers"]
+position = Vector2(640, 128)
+script = ExtResource("3_marker")
+object_id = "p1_landing_entry"
+object_type = "spawn"
+room_id = "p1_landing_01"
+footprint = Vector2(24, 24)
+
+[node name="ToManufacturing" type="Marker2D" parent="Markers"]
+position = Vector2(640, 176)
+script = ExtResource("3_marker")
+object_id = "p1_exit_to_manufacturing"
+object_type = "exit"
+room_id = "p1_landing_01"
+footprint = Vector2(64, 32)
+target_room_id = "p1_manufacturing_01"
+target_entry_id = "p1_return_entry"
+
+[node name="WorkshopReturnEntry" type="Marker2D" parent="Markers"]
+position = Vector2(832, 1504)
+script = ExtResource("3_marker")
+object_id = "abdomen_workshop_return"
+object_type = "spawn"
+room_id = "p1_manufacturing_01"
+footprint = Vector2(24, 24)
+
+[node name="ToWorkshop" type="Marker2D" parent="Markers"]
+position = Vector2(880, 1504)
+script = ExtResource("3_marker")
+object_id = "abdomen_exit_to_workshop"
+object_type = "exit"
+room_id = "p1_manufacturing_01"
+footprint = Vector2(32, 64)
+target_room_id = "p1_workshop_01"
+target_entry_id = "abdomen_workshop_entry"
+
+[node name="WorkshopEntry" type="Marker2D" parent="Markers"]
+position = Vector2(960, 1568)
+script = ExtResource("3_marker")
+object_id = "abdomen_workshop_entry"
+object_type = "spawn"
+room_id = "p1_workshop_01"
+footprint = Vector2(24, 24)
+
+[node name="FromWorkshop" type="Marker2D" parent="Markers"]
+position = Vector2(912, 1504)
+script = ExtResource("3_marker")
+object_id = "abdomen_exit_from_workshop"
+object_type = "exit"
+room_id = "p1_workshop_01"
+footprint = Vector2(32, 64)
+target_room_id = "p1_manufacturing_01"
+target_entry_id = "abdomen_workshop_return"
+
+[node name="GuideLabels" type="Node2D" parent="."]
+
+[node name="Arrival" type="Marker2D" parent="GuideLabels"]
+position = Vector2(384, 2576)
+metadata/text = "01 安全教学区"
+
+[node name="Gun" type="Marker2D" parent="GuideLabels"]
+position = Vector2(384, 1808)
+metadata/text = "02 脉冲枪"
+
+[node name="First" type="Marker2D" parent="GuideLabels"]
+position = Vector2(288, 1472)
+metadata/text = "03 首战：清扫者 ×1"
+
+[node name="Workshop" type="Marker2D" parent="GuideLabels"]
+position = Vector2(912, 1608)
+metadata/text = "04 安全制造室"
+
+[node name="Final" type="Marker2D" parent="GuideLabels"]
+position = Vector2(288, 272)
+metadata/text = "05 出口：清扫者 ×2"
+
+[node name="Spine" type="Marker2D" parent="GuideLabels"]
+position = Vector2(544, 72)
+metadata/text = "06 通往脊柱"
+
+[node name="RouteWaypoints" type="Node2D" parent="."]
+
+[node name="MainRoute" type="Node2D" parent="RouteWaypoints"]
+
+[node name="Point00" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(576, 2496)
+
+[node name="Point01" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(704, 2496)
+
+[node name="Point02" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(704, 2272)
+
+[node name="Point03" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(608, 2272)
+
+[node name="Point04" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(608, 2112)
+
+[node name="Point05" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(608, 2048)
+
+[node name="Point06" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(608, 1920)
+
+[node name="Point07" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(576, 1856)
+
+[node name="Point08" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(576, 1760)
+
+[node name="Point09" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(576, 1696)
+
+[node name="Point10" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(640, 1696)
+
+[node name="Point11" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(640, 1568)
+
+[node name="Point12" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(640, 1472)
+
+[node name="Point13" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(640, 1376)
+
+[node name="Point14" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(640, 1248)
+
+[node name="Point15" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(640, 1152)
+
+[node name="Point16" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(448, 1152)
+
+[node name="Point17" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(448, 960)
+
+[node name="Point18" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(448, 864)
+
+[node name="Point19" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(640, 864)
+
+[node name="Point20" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(640, 736)
+
+[node name="Point21" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(640, 672)
+
+[node name="Point22" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(544, 608)
+
+[node name="Point23" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(480, 544)
+
+[node name="Point24" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(480, 352)
+
+[node name="Point25" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(640, 320)
+
+[node name="Point25A_Terminal" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(832, 320)
+
+[node name="Point25B_Return" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(640, 320)
+
+[node name="Point26" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(640, 288)
+
+[node name="Point27" type="Marker2D" parent="RouteWaypoints/MainRoute"]
+position = Vector2(640, 128)
+
+[node name="WorkshopRoute" type="Node2D" parent="RouteWaypoints"]
+
+[node name="Point00" type="Marker2D" parent="RouteWaypoints/WorkshopRoute"]
+position = Vector2(640, 1376)
+
+[node name="Point01" type="Marker2D" parent="RouteWaypoints/WorkshopRoute"]
+position = Vector2(832, 1376)
+
+[node name="Point02" type="Marker2D" parent="RouteWaypoints/WorkshopRoute"]
+position = Vector2(832, 1504)
+
+[node name="Point03" type="Marker2D" parent="RouteWaypoints/WorkshopRoute"]
+position = Vector2(928, 1504)
+
+[node name="Point04" type="Marker2D" parent="RouteWaypoints/WorkshopRoute"]
+position = Vector2(928, 1568)
+
+[node name="Point05" type="Marker2D" parent="RouteWaypoints/WorkshopRoute"]
+position = Vector2(1056, 1568)
+
+[node name="Point06" type="Marker2D" parent="RouteWaypoints/WorkshopRoute"]
+position = Vector2(1056, 1536)
