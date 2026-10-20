@@ -1,0 +1,520 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/title_screen/title_screen.gd" id="1_script"]
+[ext_resource type="Theme" path="res://scenes/ui/title_screen/title_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/title/title_landscape.svg" id="3_landscape"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/title/mechanical_beast.svg" id="4_beast"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/title/title_foreground.svg" id="5_foreground"]
+[ext_resource type="Texture2D" path="res://assets/sprites/title/title_robot.svg" id="6_robot"]
+[ext_resource type="FontFile" path="res://assets/fonts/noto_serif_sc_title.ttf" id="7_title_font"]
+
+[sub_resource type="Gradient" id="Gradient_lamp"]
+offsets = PackedFloat32Array(0, 0.28, 0.65, 1)
+colors = PackedColorArray(1, 0.84, 0.48, 0.34, 0.95, 0.67, 0.3, 0.13, 0.9, 0.55, 0.24, 0.035, 0.9, 0.55, 0.24, 0)
+
+[sub_resource type="GradientTexture2D" id="Texture_lamp"]
+gradient = SubResource("Gradient_lamp")
+width = 192
+height = 192
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="Gradient" id="Gradient_ground"]
+colors = PackedColorArray(0.93, 0.72, 0.38, 0.2, 0.93, 0.72, 0.38, 0)
+
+[sub_resource type="GradientTexture2D" id="Texture_ground"]
+gradient = SubResource("Gradient_ground")
+width = 256
+height = 64
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="Gradient" id="Gradient_haze"]
+colors = PackedColorArray(0.41, 0.49, 0.51, 0, 0.41, 0.49, 0.51, 0.1)
+
+[sub_resource type="GradientTexture2D" id="Texture_haze"]
+gradient = SubResource("Gradient_haze")
+width = 16
+height = 128
+fill_from = Vector2(0, 0)
+fill_to = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="Style_start_disabled"]
+content_margin_left = 22.0
+content_margin_top = 13.0
+content_margin_right = 22.0
+content_margin_bottom = 13.0
+bg_color = Color(0.24, 0.24, 0.21, 0.64)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.64, 0.58, 0.44, 0.72)
+
+[sub_resource type="StyleBoxEmpty" id="Style_invisible"]
+
+[sub_resource type="StyleBoxFlat" id="Style_archive"]
+bg_color = Color(0.055, 0.105, 0.14, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.54, 0.49, 0.35, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_left = 6
+corner_radius_bottom_right = 6
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 24
+
+[sub_resource type="StyleBoxFlat" id="Style_archive_slot"]
+bg_color = Color(0.10, 0.16, 0.19, 1)
+border_width_bottom = 1
+border_color = Color(0.34, 0.38, 0.37, 0.6)
+
+[node name="TitleScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="BackdropFill" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.04, 0.08, 0.12, 1)
+
+[node name="Presentation" type="Control" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+
+[node name="WorldLayers" type="Control" parent="Presentation"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+
+[node name="Landscape" type="TextureRect" parent="Presentation/WorldLayers"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+texture = ExtResource("3_landscape")
+expand_mode = 1
+
+[node name="MechanicalBeast" type="TextureRect" parent="Presentation/WorldLayers"]
+layout_mode = 0
+offset_left = 527.0
+offset_top = 183.0
+offset_right = 1247.0
+offset_bottom = 563.0
+mouse_filter = 2
+texture = ExtResource("4_beast")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HorizonHaze" type="TextureRect" parent="Presentation/WorldLayers"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 412.0
+offset_right = 1280.0
+offset_bottom = 558.0
+mouse_filter = 2
+texture = SubResource("Texture_haze")
+expand_mode = 1
+
+[node name="Foreground" type="TextureRect" parent="Presentation/WorldLayers"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+texture = ExtResource("5_foreground")
+expand_mode = 1
+
+[node name="RobotAnchor" type="Control" parent="Presentation/WorldLayers"]
+layout_mode = 0
+offset_left = 910.0
+offset_top = 503.0
+offset_right = 1006.0
+offset_bottom = 631.0
+mouse_filter = 2
+
+[node name="GroundGlow" type="TextureRect" parent="Presentation/WorldLayers/RobotAnchor"]
+layout_mode = 0
+offset_left = -62.0
+offset_top = 108.0
+offset_right = 158.0
+offset_bottom = 148.0
+mouse_filter = 2
+texture = SubResource("Texture_ground")
+expand_mode = 1
+
+[node name="LampGlow" type="TextureRect" parent="Presentation/WorldLayers/RobotAnchor"]
+layout_mode = 0
+offset_left = -50.0
+offset_top = -15.0
+offset_right = 146.0
+offset_bottom = 181.0
+mouse_filter = 2
+texture = SubResource("Texture_lamp")
+expand_mode = 1
+modulate = Color(1, 1, 1, 0.78)
+
+[node name="Robot" type="TextureRect" parent="Presentation/WorldLayers/RobotAnchor"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 96.0
+offset_bottom = 128.0
+pivot_offset = Vector2(48, 120)
+mouse_filter = 2
+texture = ExtResource("6_robot")
+expand_mode = 1
+texture_filter = 1
+
+[node name="SaveButton" type="Button" parent="Presentation/WorldLayers/RobotAnchor"]
+layout_mode = 0
+offset_left = -14.0
+offset_top = -8.0
+offset_right = 110.0
+offset_bottom = 142.0
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("Style_invisible")
+theme_override_styles/hover = SubResource("Style_invisible")
+theme_override_styles/pressed = SubResource("Style_invisible")
+accessibility_name = "记忆档案"
+
+[node name="SaveCaption" type="Label" parent="Presentation/WorldLayers/RobotAnchor"]
+layout_mode = 0
+offset_left = -63.0
+offset_top = 145.0
+offset_right = 159.0
+offset_bottom = 167.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.88, 0.79, 0.57, 0.85)
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+text = "记忆档案 / 01"
+
+[node name="SaveHint" type="Label" parent="Presentation/WorldLayers/RobotAnchor"]
+layout_mode = 0
+offset_left = -63.0
+offset_top = 169.0
+offset_right = 159.0
+offset_bottom = 191.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.57, 0.65, 0.66, 0.75)
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+text = "点击查看存档"
+
+[node name="Menu" type="Control" parent="Presentation"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+
+[node name="EnglishTitle" type="Label" parent="Presentation/Menu"]
+layout_mode = 0
+offset_left = 99.0
+offset_top = 673.0
+offset_right = 479.0
+offset_bottom = 695.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.58, 0.65, 0.67, 0.32)
+theme_override_font_sizes/font_size = 11
+
+text = "B O R R O W E D   L I G H T"
+
+[node name="TitleGlow" type="Label" parent="Presentation/Menu"]
+layout_mode = 0
+offset_left = 91.0
+offset_top = 153.0
+offset_right = 491.0
+offset_bottom = 311.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.73, 0.35, 0.055)
+theme_override_font_sizes/font_size = 120
+theme_override_fonts/font = ExtResource("7_title_font")
+theme_override_colors/font_outline_color = Color(1, 0.70, 0.27, 0.045)
+theme_override_constants/outline_size = 16
+theme_override_colors/font_shadow_color = Color(1, 0.7, 0.3, 0.1)
+theme_override_constants/shadow_outline_size = 20
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 0
+text = "借光"
+
+[node name="TitleDepth6" type="Label" parent="Presentation/Menu"]
+layout_mode = 0
+offset_left = 97.0
+offset_top = 159.0
+offset_right = 497.0
+offset_bottom = 317.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.35, 0.278, 0.154, 1)
+theme_override_font_sizes/font_size = 120
+theme_override_fonts/font = ExtResource("7_title_font")
+text = "借光"
+
+[node name="TitleDepth5" type="Label" parent="Presentation/Menu"]
+layout_mode = 0
+offset_left = 96.0
+offset_top = 158.0
+offset_right = 496.0
+offset_bottom = 316.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.33999999999999997, 0.27, 0.15, 1)
+theme_override_font_sizes/font_size = 120
+theme_override_fonts/font = ExtResource("7_title_font")
+text = "借光"
+
+[node name="TitleDepth4" type="Label" parent="Presentation/Menu"]
+layout_mode = 0
+offset_left = 95.0
+offset_top = 157.0
+offset_right = 495.0
+offset_bottom = 315.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.32999999999999996, 0.262, 0.14600000000000002, 1)
+theme_override_font_sizes/font_size = 120
+theme_override_fonts/font = ExtResource("7_title_font")
+text = "借光"
+
+[node name="TitleDepth3" type="Label" parent="Presentation/Menu"]
+layout_mode = 0
+offset_left = 94.0
+offset_top = 156.0
+offset_right = 494.0
+offset_bottom = 314.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.31999999999999995, 0.254, 0.14200000000000002, 1)
+theme_override_font_sizes/font_size = 120
+theme_override_fonts/font = ExtResource("7_title_font")
+text = "借光"
+
+[node name="TitleDepth2" type="Label" parent="Presentation/Menu"]
+layout_mode = 0
+offset_left = 93.0
+offset_top = 155.0
+offset_right = 493.0
+offset_bottom = 313.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.31, 0.246, 0.138, 1)
+theme_override_font_sizes/font_size = 120
+theme_override_fonts/font = ExtResource("7_title_font")
+text = "借光"
+
+[node name="TitleDepth1" type="Label" parent="Presentation/Menu"]
+layout_mode = 0
+offset_left = 92.0
+offset_top = 154.0
+offset_right = 492.0
+offset_bottom = 312.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.3, 0.23800000000000002, 0.134, 1)
+theme_override_font_sizes/font_size = 120
+theme_override_fonts/font = ExtResource("7_title_font")
+text = "借光"
+
+[node name="GameTitle" type="Label" parent="Presentation/Menu"]
+layout_mode = 0
+offset_left = 91.0
+offset_top = 153.0
+offset_right = 491.0
+offset_bottom = 311.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.99, 0.91, 0.70, 1)
+theme_override_font_sizes/font_size = 120
+theme_override_fonts/font = ExtResource("7_title_font")
+theme_override_colors/font_outline_color = Color(0.75, 0.58, 0.30, 0.9)
+theme_override_constants/outline_size = 1
+theme_override_colors/font_shadow_color = Color(0.98, 0.69, 0.29, 0.18)
+theme_override_constants/shadow_outline_size = 8
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 0
+text = "借光"
+
+[node name="Tagline" type="Label" parent="Presentation/Menu"]
+layout_mode = 0
+offset_left = 100.0
+offset_top = 329.0
+offset_right = 560.0
+offset_bottom = 387.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.78, 0.80, 0.76, 1)
+theme_override_font_sizes/font_size = 23
+theme_override_constants/line_spacing = 5
+text = "世界的意义，\n必定在世界之外。"
+
+[node name="QuoteSource" type="Label" parent="Presentation/Menu"]
+layout_mode = 0
+offset_left = 101.0
+offset_top = 398.0
+offset_right = 541.0
+offset_bottom = 422.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.56, 0.64, 0.66, 0.85)
+theme_override_font_sizes/font_size = 12
+
+text = "—— 维特根斯坦 ·《逻辑哲学论》6.41"
+
+[node name="AccentLine" type="ColorRect" parent="Presentation/Menu"]
+layout_mode = 0
+offset_left = 101.0
+offset_top = 439.0
+offset_right = 141.0
+offset_bottom = 441.0
+mouse_filter = 2
+color = Color(0.73, 0.65, 0.49, 0.75)
+
+[node name="Buttons" type="VBoxContainer" parent="Presentation/Menu"]
+layout_mode = 0
+offset_left = 99.0
+offset_top = 465.0
+offset_right = 331.0
+offset_bottom = 581.0
+theme_override_constants/separation = 12
+
+[node name="StartButton" type="Button" parent="Presentation/Menu/Buttons"]
+layout_mode = 2
+custom_minimum_size = Vector2(232, 50)
+theme_override_styles/disabled = SubResource("Style_start_disabled")
+disabled = true
+text = "开始游戏"
+alignment = 0
+
+[node name="QuitButton" type="Button" parent="Presentation/Menu/Buttons"]
+layout_mode = 2
+custom_minimum_size = Vector2(232, 46)
+text = "退出"
+alignment = 0
+
+[node name="Status" type="Label" parent="Presentation/Menu"]
+layout_mode = 0
+offset_left = 101.0
+offset_top = 596.0
+offset_right = 422.0
+offset_bottom = 621.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.52, 0.59, 0.61, 1)
+theme_override_font_sizes/font_size = 13
+text = "旅程即将启程"
+
+
+[node name="SaveOverlay" type="Control" parent="Presentation"]
+visible = false
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+
+[node name="Dim" type="ColorRect" parent="Presentation/SaveOverlay"]
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.02, 0.04, 0.06, 0.84)
+
+[node name="ArchivePanel" type="Panel" parent="Presentation/SaveOverlay"]
+layout_mode = 0
+offset_left = 330.0
+offset_top = 188.0
+offset_right = 950.0
+offset_bottom = 532.0
+theme_override_styles/panel = SubResource("Style_archive")
+
+[node name="Heading" type="Label" parent="Presentation/SaveOverlay/ArchivePanel"]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 28.0
+offset_right = 518.0
+offset_bottom = 73.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.95, 0.86, 0.65, 1)
+theme_override_font_sizes/font_size = 30
+
+text = "记忆档案"
+
+[node name="Description" type="Label" parent="Presentation/SaveOverlay/ArchivePanel"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 86.0
+offset_right = 580.0
+offset_bottom = 116.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.64, 0.71, 0.71, 1)
+theme_override_font_sizes/font_size = 16
+
+text = "旅途中留下的光，将在这里被记住。"
+
+[node name="EmptySlot" type="Panel" parent="Presentation/SaveOverlay/ArchivePanel"]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 146.0
+offset_right = 582.0
+offset_bottom = 244.0
+theme_override_styles/panel = SubResource("Style_archive_slot")
+
+[node name="SlotNumber" type="Label" parent="Presentation/SaveOverlay/ArchivePanel/EmptySlot"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 25.0
+offset_right = 79.0
+offset_bottom = 67.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.49, 0.56, 0.56, 1)
+theme_override_font_sizes/font_size = 28
+
+text = "01"
+
+[node name="EmptyTitle" type="Label" parent="Presentation/SaveOverlay/ArchivePanel/EmptySlot"]
+layout_mode = 0
+offset_left = 99.0
+offset_top = 16.0
+offset_right = 499.0
+offset_bottom = 46.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.80, 0.80, 0.71, 1)
+theme_override_font_sizes/font_size = 18
+
+text = "尚无存档"
+
+[node name="EmptyHint" type="Label" parent="Presentation/SaveOverlay/ArchivePanel/EmptySlot"]
+layout_mode = 0
+offset_left = 99.0
+offset_top = 52.0
+offset_right = 499.0
+offset_bottom = 76.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.52, 0.60, 0.61, 1)
+theme_override_font_sizes/font_size = 13
+
+text = "等待第一段旅程"
+
+[node name="CloseButton" type="Button" parent="Presentation/SaveOverlay/ArchivePanel"]
+layout_mode = 0
+offset_left = 420.0
+offset_top = 274.0
+offset_right = 582.0
+offset_bottom = 318.0
+text = "关闭"
