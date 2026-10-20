@@ -83,6 +83,21 @@ borrowed-light/
 
 不要只为符合目录树创建大量空模块。实际需要某个目录时再建立。
 
+### A 腹腔灰盒的实际路径（2026-10-20）
+
+以下文件已存在于本轮 A 地图工作分支；尚未合入时不代表 `main` 已包含。上方其余关卡目录仍为按需创建的约定，不表示五张地图已完成。
+
+| 路径 | 用途 |
+| --- | --- |
+| `scenes/levels/abdomen/abdomen_graybox.tscn` | A 编辑腹腔地形、碰撞、遮光、区域与物件标记的源场景 |
+| `scenes/levels/graybox/` | 本轮地图使用的通用地板、墙体、斜角墙、标记与临时尺寸组件 |
+| `tests/manual/a_map/abdomen_preview.tscn` | A 独立试走入口；含移动替身与测试门，不能当作正式运行场景 |
+| `tests/manual/a_map/validate_abdomen.gd` | 标记关联、净空、碰撞与路线检查脚本 |
+| `tests/manual/a_map/assets/` | 仅供预览的字体子集、来源与许可 |
+| `docs/abdomen_map.md` | 操作步骤、标记字段、迁移说明、实际验证与待接入事项 |
+
+详细交接见 [腹腔地图说明](../abdomen_map.md)。C 后续按标记接入 B/C 的真实对象；当前没有正式敌人、拾取或进度逻辑，主场景仍为标题。测试替身保留在 `tests/manual/a_map/`，不混入正式对象目录。
+
 ## 3. 场景职责
 
 | 模块 | 职责 | 边界 |

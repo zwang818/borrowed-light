@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://bas708mwfr8ft"]
+
+[ext_resource type="Script" uid="uid://cv4atakaa60f8" path="res://tests/manual/a_map/abdomen_preview.gd" id="1_uruep"]
+[ext_resource type="PackedScene" path="res://scenes/levels/abdomen/abdomen_graybox.tscn" id="2_kcthn"]
+[ext_resource type="Script" uid="uid://4acspxqfef0g" path="res://tests/manual/a_map/preview_actor.gd" id="3_866yj"]
+[ext_resource type="Script" uid="uid://l3c7bke2ars5" path="res://tests/manual/a_map/preview_door.gd" id="4_ee4v0"]
+
+[node name="AbdomenPreview" type="Node2D" unique_id=83010812]
+script = ExtResource("1_uruep")
+
+[node name="Map" parent="." unique_id=1771056035 instance=ExtResource("2_kcthn")]
+
+[node name="Darkness" type="CanvasModulate" parent="." unique_id=1998260197]
+
+[node name="Actor" type="CharacterBody2D" parent="." unique_id=216026539]
+position = Vector2(576, 2496)
+collision_layer = 2
+script = ExtResource("3_866yj")
+
+[node name="Collision" type="CollisionShape2D" parent="Actor" unique_id=1144682289]
+
+[node name="Lamp" type="PointLight2D" parent="Actor" unique_id=1002729537]
+color = Color(1, 0.86, 0.62, 1)
+energy = 1.25
+shadow_enabled = true
+
+[node name="TestDoor" type="Node2D" parent="." unique_id=1914357116]
+position = Vector2(640, 224)
+script = ExtResource("4_ee4v0")
+
+[node name="Body" type="StaticBody2D" parent="TestDoor" unique_id=661780100]
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape2D" parent="TestDoor/Body" unique_id=268020467]
+
+[node name="Occluder" type="LightOccluder2D" parent="TestDoor" unique_id=1305887650]
+
+[node name="Camera" type="Camera2D" parent="." unique_id=547947510]
+position = Vector2(576, 2496)
