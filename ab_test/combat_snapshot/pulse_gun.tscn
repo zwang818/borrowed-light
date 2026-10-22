@@ -1,0 +1,40 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://ab_test/combat_snapshot/pulse_gun.gd" id="1_gun"]
+
+[ext_resource type="Script" path="res://ab_test/combat_snapshot/pulse_audio.gd" id="2_audio"]
+[ext_resource type="AudioStream" path="res://ab_test/audio/pulse_charge.wav" id="3_charge"]
+[ext_resource type="AudioStream" path="res://ab_test/audio/pulse_biu.wav" id="4_laser"]
+
+[node name="PulseGun" type="Node2D"]
+script = ExtResource("1_gun")
+
+[node name="Barrel" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-10, -3, 0, -3, 0, 3, -10, 3)
+color = Color(0.7, 0.78, 0.85, 1)
+
+[node name="ChargeGlow" type="Polygon2D" parent="."]
+visible = false
+polygon = PackedVector2Array(-7, 0, 0, -7, 7, 0, 0, 7)
+color = Color(1, 0.85, 0.25, 0.9)
+
+[node name="Beam" type="Line2D" parent="."]
+visible = false
+width = 6.0
+default_color = Color(0.15, 0.8, 1, 0.45)
+
+[node name="BeamCore" type="Line2D" parent="."]
+visible = false
+width = 2.0
+default_color = Color(0.8, 0.98, 1, 1)
+
+[node name="Audio" type="Node" parent="."]
+script = ExtResource("2_audio")
+
+[node name="Charge" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("3_charge")
+volume_db = -6.0
+
+[node name="Laser" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("4_laser")
+volume_db = -6.0

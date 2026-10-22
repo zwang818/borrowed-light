@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/enemies/sentry/sentry.gd" id="1"]
+[sub_resource type="CircleShape2D" id="shape"]
+radius = 14.0
+
+[node name="Sentry" type="StaticBody2D"]
+collision_layer = 4
+collision_mask = 0
+process_physics_priority = 10
+script = ExtResource("1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("shape")
+
+[node name="Facing" type="Node2D" parent="."]
+
+[node name="Body" type="Polygon2D" parent="Facing"]
+polygon = PackedVector2Array(-14, -12, 14, -12, 14, 12, -14, 12)
+color = Color(0.9, 0.45, 0.25, 1)
+
+[node name="Barrel" type="Polygon2D" parent="Facing"]
+polygon = PackedVector2Array(8, -4, 22, -4, 22, 4, 8, 4)
+color = Color(0.7, 0.7, 0.7, 1)
+
+[node name="Warning" type="Line2D" parent="Facing"]
+visible = false
+points = PackedVector2Array(18, 0, 90, 0)
+width = 3.0
+default_color = Color(1, 0.8, 0.15, 1)
+
+[node name="Health" type="ProgressBar" parent="."]
+offset_left = -20.0
+offset_top = -27.0
+offset_right = 20.0
+offset_bottom = -21.0
+mouse_filter = 2
+show_percentage = false

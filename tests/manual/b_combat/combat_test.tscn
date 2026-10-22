@@ -1,0 +1,412 @@
+[gd_scene load_steps=14 format=3]
+; Independent B combat graybox. Temporary scale: 1 T = 32 px.
+; Independent full-bright test fixture: visibility adapter is test-only.
+; World collision uses layer 1; coordinate with C if the shared layer changes.
+
+[ext_resource type="Script" path="res://tests/manual/b_combat/combat_test.gd" id="1_test"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
+
+[ext_resource type="PackedScene" path="res://scenes/enemies/sentry/sentry.tscn" id="3_sentry"]
+
+[ext_resource type="PackedScene" path="res://scenes/enemies/cleaner/cleaner.tscn" id="4_cleaner"]
+
+[ext_resource type="Script" path="res://tests/manual/b_combat/combat_audio.gd" id="5_audio"]
+
+[ext_resource type="Script" path="res://tests/manual/b_combat/music/background_music.gd" id="6_music"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(960, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2"]
+size = Vector2(960, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3"]
+size = Vector2(32, 576)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4"]
+size = Vector2(32, 576)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5"]
+size = Vector2(32, 224)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6"]
+size = Vector2(128, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7"]
+size = Vector2(16, 128)
+
+[node name="CombatTest" type="Node2D"]
+script = ExtResource("1_test")
+metadata/test_only = true
+metadata/temporary_tile_size = 32
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(480, 320)
+
+[node name="Floor" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(0, 0, 960, 0, 960, 640, 0, 640)
+color = Color(0.12, 0.14, 0.16, 1)
+
+[node name="Grid" type="Node2D" parent="."]
+
+[node name="X32" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 32, 32, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X64" type="Line2D" parent="Grid"]
+points = PackedVector2Array(64, 32, 64, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X96" type="Line2D" parent="Grid"]
+points = PackedVector2Array(96, 32, 96, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X128" type="Line2D" parent="Grid"]
+points = PackedVector2Array(128, 32, 128, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X160" type="Line2D" parent="Grid"]
+points = PackedVector2Array(160, 32, 160, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X192" type="Line2D" parent="Grid"]
+points = PackedVector2Array(192, 32, 192, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X224" type="Line2D" parent="Grid"]
+points = PackedVector2Array(224, 32, 224, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X256" type="Line2D" parent="Grid"]
+points = PackedVector2Array(256, 32, 256, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X288" type="Line2D" parent="Grid"]
+points = PackedVector2Array(288, 32, 288, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X320" type="Line2D" parent="Grid"]
+points = PackedVector2Array(320, 32, 320, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X352" type="Line2D" parent="Grid"]
+points = PackedVector2Array(352, 32, 352, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X384" type="Line2D" parent="Grid"]
+points = PackedVector2Array(384, 32, 384, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X416" type="Line2D" parent="Grid"]
+points = PackedVector2Array(416, 32, 416, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X448" type="Line2D" parent="Grid"]
+points = PackedVector2Array(448, 32, 448, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X480" type="Line2D" parent="Grid"]
+points = PackedVector2Array(480, 32, 480, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X512" type="Line2D" parent="Grid"]
+points = PackedVector2Array(512, 32, 512, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X544" type="Line2D" parent="Grid"]
+points = PackedVector2Array(544, 32, 544, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X576" type="Line2D" parent="Grid"]
+points = PackedVector2Array(576, 32, 576, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X608" type="Line2D" parent="Grid"]
+points = PackedVector2Array(608, 32, 608, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X640" type="Line2D" parent="Grid"]
+points = PackedVector2Array(640, 32, 640, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X672" type="Line2D" parent="Grid"]
+points = PackedVector2Array(672, 32, 672, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X704" type="Line2D" parent="Grid"]
+points = PackedVector2Array(704, 32, 704, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X736" type="Line2D" parent="Grid"]
+points = PackedVector2Array(736, 32, 736, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X768" type="Line2D" parent="Grid"]
+points = PackedVector2Array(768, 32, 768, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X800" type="Line2D" parent="Grid"]
+points = PackedVector2Array(800, 32, 800, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X832" type="Line2D" parent="Grid"]
+points = PackedVector2Array(832, 32, 832, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X864" type="Line2D" parent="Grid"]
+points = PackedVector2Array(864, 32, 864, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X896" type="Line2D" parent="Grid"]
+points = PackedVector2Array(896, 32, 896, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="X928" type="Line2D" parent="Grid"]
+points = PackedVector2Array(928, 32, 928, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y32" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 32, 928, 32)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y64" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 64, 928, 64)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y96" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 96, 928, 96)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y128" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 128, 928, 128)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y160" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 160, 928, 160)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y192" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 192, 928, 192)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y224" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 224, 928, 224)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y256" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 256, 928, 256)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y288" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 288, 928, 288)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y320" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 320, 928, 320)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y352" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 352, 928, 352)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y384" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 384, 928, 384)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y416" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 416, 928, 416)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y448" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 448, 928, 448)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y480" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 480, 928, 480)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y512" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 512, 928, 512)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y544" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 544, 928, 544)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y576" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 576, 928, 576)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Y608" type="Line2D" parent="Grid"]
+points = PackedVector2Array(32, 608, 928, 608)
+width = 1.0
+default_color = Color(0.22, 0.25, 0.28, 0.45)
+
+[node name="Walls" type="Node2D" parent="."]
+
+[node name="NorthWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(480, 16)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Visual" type="Polygon2D" parent="Walls/NorthWall"]
+polygon = PackedVector2Array(-480.0, -16.0, 480.0, -16.0, 480.0, 16.0, -480.0, 16.0)
+color = Color(0.48, 0.52, 0.56, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/NorthWall"]
+shape = SubResource("RectangleShape2D_1")
+
+[node name="SouthWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(480, 624)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Visual" type="Polygon2D" parent="Walls/SouthWall"]
+polygon = PackedVector2Array(-480.0, -16.0, 480.0, -16.0, 480.0, 16.0, -480.0, 16.0)
+color = Color(0.48, 0.52, 0.56, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/SouthWall"]
+shape = SubResource("RectangleShape2D_2")
+
+[node name="WestWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(16, 320)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Visual" type="Polygon2D" parent="Walls/WestWall"]
+polygon = PackedVector2Array(-16.0, -288.0, 16.0, -288.0, 16.0, 288.0, -16.0, 288.0)
+color = Color(0.48, 0.52, 0.56, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/WestWall"]
+shape = SubResource("RectangleShape2D_3")
+
+[node name="EastWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(944, 320)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Visual" type="Polygon2D" parent="Walls/EastWall"]
+polygon = PackedVector2Array(-16.0, -288.0, 16.0, -288.0, 16.0, 288.0, -16.0, 288.0)
+color = Color(0.48, 0.52, 0.56, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/EastWall"]
+shape = SubResource("RectangleShape2D_4")
+
+[node name="VerticalPartition" type="StaticBody2D" parent="Walls"]
+position = Vector2(416, 240)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Visual" type="Polygon2D" parent="Walls/VerticalPartition"]
+polygon = PackedVector2Array(-16.0, -112.0, 16.0, -112.0, 16.0, 112.0, -16.0, 112.0)
+color = Color(0.48, 0.52, 0.56, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/VerticalPartition"]
+shape = SubResource("RectangleShape2D_5")
+
+[node name="CornerPartition" type="StaticBody2D" parent="Walls"]
+position = Vector2(496, 336)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Visual" type="Polygon2D" parent="Walls/CornerPartition"]
+polygon = PackedVector2Array(-64.0, -16.0, 64.0, -16.0, 64.0, 16.0, -64.0, 16.0)
+color = Color(0.48, 0.52, 0.56, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/CornerPartition"]
+shape = SubResource("RectangleShape2D_6")
+
+[node name="ThinWall" type="StaticBody2D" parent="Walls"]
+position = Vector2(704, 448)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Visual" type="Polygon2D" parent="Walls/ThinWall"]
+polygon = PackedVector2Array(-8.0, -64.0, 8.0, -64.0, 8.0, 64.0, -8.0, 64.0)
+color = Color(0.48, 0.52, 0.56, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/ThinWall"]
+shape = SubResource("RectangleShape2D_7")
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="PlayerSpawn" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(160, 320)
+
+[node name="Player" parent="SpawnPoints/PlayerSpawn" instance=ExtResource("2_player")]
+pulse_gun_equipped = true
+
+[node name="SentrySpawn" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(800, 224)
+
+[node name="Sentry" parent="SpawnPoints/SentrySpawn" instance=ExtResource("3_sentry")]
+
+[node name="EnemyProjectiles" type="Node2D" parent="."]
+
+[node name="TestOverlay" type="CanvasLayer" parent="."]
+
+[node name="WeaponStatus" type="Label" parent="TestOverlay"]
+offset_left = 40.0
+offset_top = 36.0
+mouse_filter = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+
+[node name="CleanerSpawn" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(560, 500)
+
+[node name="Cleaner" parent="SpawnPoints/CleanerSpawn" instance=ExtResource("4_cleaner")]
+
+[node name="CombatAudio" type="Node" parent="."]
+script = ExtResource("5_audio")
+
+[node name="BackgroundMusic" type="AudioStreamPlayer" parent="."]
+script = ExtResource("6_music")
