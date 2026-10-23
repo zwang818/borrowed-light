@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="Script" path="res://ab_test/ab_combat.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/levels/abdomen/abdomen_graybox.tscn" id="2"]
+[node name="ABCombat" type="Node2D"]
+script = ExtResource("1")
+[node name="Map" parent="." instance=ExtResource("2")]
+[node name="Actors" type="Node2D" parent="."]
+[node name="HUD" type="CanvasLayer" parent="."]
+[node name="Panel" type="PanelContainer" parent="HUD"]
+offset_left = 16.0
+offset_top = 16.0
+mouse_filter = 2
+[node name="Status" type="Label" parent="HUD/Panel"]
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.9, 0.96, 0.95, 1)
+theme_override_font_sizes/font_size = 17
