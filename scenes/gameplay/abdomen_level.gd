@@ -3,6 +3,9 @@ extends Node2D
 ## P1 最小可玩：出生 → 拿枪 → 打清扫者 → 终端开门 → 出口完成
 ## C 模块集成：引导 HUD、终端门禁、房间重试、场景切换、空间记忆
 
+const ROBOT_TEXTURE := preload("res://assets/sprites/title/title_robot.svg")
+const COMBAT_SKIN := preload("res://scenes/gameplay/combat_skin.gd")
+
 const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
 const CLEANER_SCENE := preload("res://scenes/enemies/cleaner/cleaner.tscn")
 const SENTRY_SCENE := preload("res://scenes/enemies/sentry/sentry.tscn")
@@ -28,11 +31,11 @@ const C := {
 	"notify_default": 2.0,
 	"level_complete_wait": 3.0,
 	"fade_duration": 0.5,
-	"t_welcome": "关卡开始！往上走拾取脉冲枪",
-	"t_weapon_get": "获得脉冲枪！按住左键射击",
+	"t_welcome": "关卡开始！靠近枪架拾取脉冲枪",
+	"t_weapon_get": "获得脉冲枪！点按左键蓄力射击",
 	"t_terminal_ok": "终端已激活，大门开启",
 	"t_all_enemies_down": "所有敌人已清除，前往终端",
-	"t_retry": "已重试，向上走拾取脉冲枪",
+	"t_retry": "已重试，沿指引前往枪架拾取脉冲枪",
 	"t_died": "你死了……2秒后重试",
 	"t_level_complete": "样板完成",
 	"t_weapon_prompt": "脉冲枪 - 靠近拾取",
@@ -45,6 +48,7 @@ const C := {
 @onready var interactables_parent := $Interactables as Node2D
 @onready var camera := $Camera2D as Camera2D
 
+var robot_visual: Sprite2D
 var player: CharacterBody2D
 var enemies: Array[Node] = []
 var interactables: Array[Node] = []
@@ -79,6 +83,11 @@ var hp_bg: ColorRect
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	print("[C-MODULE] abdomen_level.gd 已加载 - v4")
+	# Main-level rack: 2 x 2 tiles (32 px each), preserving its display center.
+	var rack = map.get_node("Walls/GunRackBase")
+	var rack_center: Vector2 = rack.position + rack.size * 0.5
+	rack.size = Vector2(64, 64)
+	rack.position = rack_center - rack.size * 0.5
 	_spawn_from_markers()
 	_configure_player()
 	_configure_enemies()
@@ -90,6 +99,9 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if get_tree().paused:
 		return
+	if is_instance_valid(robot_visual):
+		robot_visual.global_rotation = 0
+		robot_visual.global_position = player.global_position + Vector2(0, -5)
 	_update_interaction()
 	_update_hud()
 
@@ -265,7 +277,7 @@ func _setup_hud() -> void:
 func _update_objective() -> void:
 	match current_objective:
 		Objective.GET_WEAPON:
-			objective_label.text = "当前目标：拾取脉冲枪 ↑"
+			objective_label.text = "当前目标：拾取脉冲枪"
 		Objective.KILL_ENEMIES:
 			var remaining: int = total_enemies - dead_enemies
 			objective_label.text = "当前目标：击败清扫者（剩余 %d）" % remaining
@@ -337,7 +349,7 @@ func _update_guide_panel() -> void:
 		guide_text = "目标方向: %s\n距离: %.0f\n" % [dir_text, dist]
 	
 	if current_objective == Objective.GET_WEAPON:
-		guide_text += "往上走拾取脉冲枪"
+		guide_text += "靠近枪架拾取脉冲枪"
 	elif current_objective == Objective.KILL_ENEMIES:
 		guide_text += "击败清扫者"
 	elif current_objective == Objective.ACTIVATE_TERMINAL:
@@ -392,6 +404,7 @@ func _update_world_prompts() -> void:
 			show_screen_prompt = true
 			var t_prompt := nearest_interactable.get_node_or_null("PromptLabel")
 			if t_prompt != null:
+				t_prompt.text = _terminal_prompt()
 				t_prompt.visible = true
 
 	## 隐藏其他终端提示
@@ -405,7 +418,7 @@ func _update_world_prompts() -> void:
 
 	## 屏幕中央交互提示
 	if show_screen_prompt:
-		interact_label.text = C.t_terminal_prompt
+		interact_label.text = _terminal_prompt()
 		interact_label.visible = true
 		interact_bg.visible = true
 	else:
@@ -447,13 +460,21 @@ func _match_marker(marker: Marker2D) -> void:
 				add_child(player)
 		"weapon":
 			if marker.content_id == "pulse_gun":
-				weapon_pickup = _add_weapon_pickup(pos, marker.content_id)
+				marker.global_position = _weapon_display_position()
+				marker.hide()
+				weapon_pickup = _add_weapon_pickup(marker.global_position, marker.content_id)
 		"cleaner":
 			var cleaner := CLEANER_SCENE.instantiate()
 			cleaner.global_position = pos
 			cleaner.entity_id = StringName(marker.object_id)
 			cleaner.name = marker.object_id
 			add_child(cleaner)
+			cleaner.get_node("Facing/Body").hide()
+			var cleaner_model := COMBAT_SKIN.new()
+			cleaner_model.name = "CleanerModel"
+			cleaner_model.kind = "cleaner"
+			cleaner.get_node("Facing").add_child(cleaner_model)
+			marker.hide()
 			enemies.append(cleaner)
 			total_enemies += 1
 		"sentry":
@@ -476,6 +497,10 @@ func _match_marker(marker: Marker2D) -> void:
 
 ## ---------- 运行时对象工厂 ----------
 
+func _weapon_display_position() -> Vector2:
+	var rack = map.get_node("Walls/GunRackBase")
+	return rack.to_global(rack.size * 0.5)
+
 func _add_weapon_pickup(pos: Vector2, weapon_id: String) -> Node:
 	var area := Area2D.new()
 	area.name = "WeaponPickup_" + weapon_id
@@ -483,18 +508,16 @@ func _add_weapon_pickup(pos: Vector2, weapon_id: String) -> Node:
 	area.collision_layer = 64
 	area.collision_mask = 2
 	var shape := CollisionShape2D.new()
-	var circle := CircleShape2D.new()
-	circle.radius = 16.0
-	shape.shape = circle
+	# The rack remains solid. Extend pickup to its edge so the display is reachable.
+	var rectangle := RectangleShape2D.new()
+	rectangle.size = map.get_node("Walls/GunRackBase").size + Vector2(16, 16)
+	shape.shape = rectangle
 	area.add_child(shape)
-	## 蓝色方块 + 脉冲
-	var vis := Polygon2D.new()
-	vis.polygon = PackedVector2Array([-8, -8, 8, -8, 8, 8, -8, 8])
-	vis.color = Color(0.3, 0.7, 0.9, 0.6)
+	var vis := COMBAT_SKIN.new()
+	vis.name = "GunModel"
+	vis.position.x = 12
+	vis.scale = Vector2.ONE * 1.5
 	area.add_child(vis)
-	var tween := create_tween().set_loops()
-	tween.tween_property(vis, "scale", Vector2(1.3, 1.3), 0.5)
-	tween.tween_property(vis, "scale", Vector2(1.0, 1.0), 0.5)
 	## 拾取提示
 	var prompt_label := Label.new()
 	prompt_label.name = "PromptLabel"
@@ -608,6 +631,19 @@ func _configure_player() -> void:
 		push_error("AbdomenLevel: 未生成玩家")
 		return
 	var map_bounds: Rect2 = map.get_meta("map_bounds", Rect2(128, 32, 1120, 2688))
+	player.get_node("Facing/Body").hide()
+	player.get_node("Facing/DirectionIndicator").hide()
+	robot_visual = Sprite2D.new()
+	robot_visual.name = "RobotModel"
+	robot_visual.texture = ROBOT_TEXTURE
+	robot_visual.scale = Vector2.ONE * 0.30
+	robot_visual.position = Vector2(0, -5)
+	player.get_node("Facing").add_child(robot_visual)
+	player.pulse_gun.get_node("Barrel").hide()
+	var held_gun := COMBAT_SKIN.new()
+	held_gun.name = "HeldGunModel"
+	player.pulse_gun.add_child(held_gun)
+	player.pulse_gun.move_child(held_gun, 0)
 	player.pulse_gun.configure_space(map_bounds, _enemy_visible_query)
 	player.died.connect(_on_player_died)
 
@@ -648,10 +684,28 @@ func _update_interaction() -> void:
 				nearest_dist = dist
 	nearest_interactable = nearest
 
+func _remaining_cleaners() -> int:
+	var count := 0
+	for enemy in enemies:
+		if is_instance_valid(enemy) and enemy.get_script() == preload("res://scenes/enemies/cleaner/cleaner.gd"):
+			if enemy.get_combat_state().alive:
+				count += 1
+	return count
+
+func _terminal_prompt() -> String:
+	var remaining := _remaining_cleaners()
+	return "终端锁定：剩余 %d 台清扫者" % remaining if remaining > 0 else C.t_terminal_prompt
+
 func _try_interact() -> void:
+	if player.is_dead or get_tree().paused:
+		return
+	_update_interaction()
 	if nearest_interactable == null:
 		return
 	if nearest_interactable.has_meta("is_terminal") and not nearest_interactable.get_meta("activated"):
+		if _remaining_cleaners() > 0:
+			_show_notification(_terminal_prompt(), 1.5)
+			return
 		nearest_interactable.set_meta("activated", true)
 		terminal_activated = true
 		var linked: Array = nearest_interactable.get_meta("linked_ids", [])
@@ -666,6 +720,9 @@ func _try_interact() -> void:
 		_update_objective()
 
 func _play_terminal_sound() -> void:
+	# Optional existing sound is absent in this checkout; do not add a new effect.
+	if not ResourceLoader.exists("res://assets/audio/repair.wav"):
+		return
 	var audio := AudioStreamPlayer.new()
 	var stream := load("res://assets/audio/repair.wav")
 	if stream != null:
@@ -702,7 +759,7 @@ func _door_flash_animation(door: Node) -> void:
 ## ---------- 事件回调 ----------
 
 func _on_weapon_entered(body: Node, _weapon_id: String, area: Area2D) -> void:
-	if body == player:
+	if body == player and not player.is_dead and not player.pulse_gun_equipped and not area.is_queued_for_deletion():
 		player.pulse_gun_equipped = true
 		area.queue_free()
 		_show_notification(C.t_weapon_get, 2.5)
@@ -719,7 +776,19 @@ func _on_exit_entered(body: Node, exit_id: String) -> void:
 				_show_level_complete()
 			break
 
+func _return_weapon_to_rack() -> void:
+	player.pulse_gun_equipped = false
+	player.pulse_gun.cancel()
+	player.pulse_gun.hide()
+	if not is_instance_valid(weapon_pickup) or weapon_pickup.is_queued_for_deletion():
+		# Discard freed pickup references so repeated deaths do not grow the list.
+		interactables = interactables.filter(func(obj): return is_instance_valid(obj) and not obj.is_queued_for_deletion())
+		weapon_pickup = _add_weapon_pickup(_weapon_display_position(), "pulse_gun")
+	current_objective = Objective.GET_WEAPON
+	_update_objective()
+
 func _on_player_died() -> void:
+	_return_weapon_to_rack()
 	_show_notification(C.t_died, 2.0)
 	await get_tree().create_timer(2.0).timeout
 	_retry_level()
@@ -782,30 +851,22 @@ func _fade_to_black() -> ColorRect:
 func _retry_level() -> void:
 	var spawn_pos: Vector2 = _find_spawn_position()
 	
-	## 死亡前记录武器状态，确保重试后保留
-	var had_weapon: bool = player.pulse_gun_equipped
-	var retained_weapons: Array = []
-	if had_weapon:
-		retained_weapons.append("pulse_gun")
-	
-	player.restore_player(spawn_pos, player.max_health, retained_weapons)
-	
-	## 二次确保武器状态（绕过 restore_player 中可能的类型比较问题）
-	if had_weapon:
-		player.pulse_gun_equipped = true
-	
-	## 如果玩家没有武器且场上没有武器，重新生成
-	if not player.pulse_gun_equipped:
-		if weapon_pickup == null or not is_instance_valid(weapon_pickup):
-			var markers := map.get_node_or_null("Markers")
-			if markers != null:
-				for marker in markers.get_children():
-					if marker is Marker2D and marker.object_type == "weapon" and marker.content_id == "pulse_gun":
-						weapon_pickup = _add_weapon_pickup(marker.global_position, "pulse_gun")
-						break
-	
-	current_objective = Objective.GET_WEAPON if not player.pulse_gun_equipped else Objective.KILL_ENEMIES
+	player.restore_player(spawn_pos, player.max_health, [])
+	_return_weapon_to_rack()
+	current_objective = Objective.GET_WEAPON
 	terminal_activated = false
+	if is_instance_valid(terminal):
+		terminal.set_meta("activated", false)
+		for child in terminal.get_children():
+			if child is Polygon2D:
+				child.color = Color(0.2, 0.8, 0.4, 0.7)
+	for obj in interactables:
+		if is_instance_valid(obj) and obj.has_meta("is_door"):
+			obj.set_meta("is_open", false)
+			obj.collision_layer = 1
+			for child in obj.get_children():
+				if child is Polygon2D:
+					child.color = Color(0.6, 0.4, 0.2, 0.9)
 	dead_enemies = 0
 	_update_objective()
 	_show_notification(C.t_retry, 2.0)
