@@ -6,3 +6,6 @@
 .DS_Store
 /build/
 /builds/
+
+# Voice source raw assets (100MB, generated from Kenney + Madness voice packs)
+assets/audio/sources/
