@@ -1,5 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/ui/title_screen/title_screen.tscn" id="1_title_screen"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/abdomen_level.tscn" id="2_abdomen_level"]
 
 [node name="Main" instance=ExtResource("1_title_screen")]
+start_scene = ExtResource("2_abdomen_level")
