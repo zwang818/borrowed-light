@@ -67,6 +67,13 @@
 
 曲目数量、素材来源和授权待定，优先保证循环自然和关键信息可听。
 
+### 当前已落地资产
+
+| 资产 | 位置 | 说明 |
+| --- | --- | --- |
+| 标题界面 BGM | `assets/audio/title_bgm.wav` | 64s 无缝循环氛围乐，`generate_title_bgm.py` 纯数学合成，无第三方采样。播放于 `title_screen.gd` 的 `_init_bgm()`，循环由 `.import` 的 `loop_mode=1` 控制 |
+| 开场语音帧 ×5 | `assets/audio/voices/frame0*_*.wav` | 帧 03/05/06/08 神明 + 帧 04 小一，`generate_voices.py` 由 Kenney（CC0）/ Madness（CC BY 3.0）素材合成。对应清单条目 `sfx_deity_message`。原始素材目录 `assets/audio/sources/`（约 100MB）已被 `.gitignore` 排除，来源 URL 见 `voices/README.md` |
+
 ## 6. 混音与播放建议
 
 建议总线：`Master`、`Music`、`SFX`、`Ambience`、`UI`。基础设置可只开放总音量、音乐和音效；环境与 UI 内部归类仍保持清楚。
