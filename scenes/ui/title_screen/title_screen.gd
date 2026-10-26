@@ -15,6 +15,10 @@ signal archive_opened
 @export_group("Scene Navigation")
 @export var start_scene: PackedScene
 
+@export_group("Audio")
+@export var title_bgm: AudioStream = preload("res://assets/audio/title_bgm.wav")
+@export_range(0.0, 1.0, 0.05) var title_bgm_volume := 0.35
+
 @onready var presentation: Control = $Presentation
 @onready var lamp_glow: TextureRect = $Presentation/WorldLayers/RobotAnchor/LampGlow
 @onready var robot: TextureRect = $Presentation/WorldLayers/RobotAnchor/Robot
@@ -26,6 +30,7 @@ signal archive_opened
 @onready var quit_button: Button = $Presentation/Menu/Buttons/QuitButton
 @onready var status_label: Label = $Presentation/Menu/Status
 
+var _bgm_player := AudioStreamPlayer.new()
 var _elapsed := 0.0
 var _is_starting := false
 var _robot_hovered := false
@@ -44,6 +49,18 @@ func _ready() -> void:
 	start_button.disabled = start_scene == null
 	status_label.visible = start_scene == null
 	_fit_presentation()
+	_init_bgm()
+
+
+func _init_bgm() -> void:
+	add_child(_bgm_player)
+	_bgm_player.volume_db = linear_to_db(title_bgm_volume)
+	# Godot 4: loop 必须在 .import 的 edit/loop_mode 上设置，AudioStreamPlayer 本身没有 loop 属性
+	_bgm_player.stream = title_bgm
+	if title_bgm != null:
+		_bgm_player.play()
+	else:
+		push_warning("Title BGM stream not assigned;  assign in scene Inspector or script.")
 
 
 func _process(delta: float) -> void:
@@ -95,15 +112,18 @@ func _fit_presentation() -> void:
 	presentation.position = (size - design_size * fit_scale) * 0.5
 
 
+@onready var _intro_scene_path := "res://scenes/ui/intro_cutscene/intro_cutscene.tscn"
+
+
 func _on_start_pressed() -> void:
 	if start_scene == null or _is_starting or archive_overlay.visible:
 		return
 	_is_starting = true
 	start_requested.emit()
-	var error := get_tree().change_scene_to_packed(start_scene)
+	var error := get_tree().change_scene_to_file(_intro_scene_path)
 	if error != OK:
 		_is_starting = false
-		push_error("Title could not open start scene: %s" % error)
+		push_error("Title could not open intro cutscene: %s" % error)
 
 
 func _on_quit_pressed() -> void:
