@@ -7,6 +7,8 @@
 | `assets/fonts/borrowed_light_title.ttf` | IPAex Gothic 003.01 的项目裁剪版 | IPA Font License v1.0；许可与替换说明在字体目录，旧最小标题资源保留 |
 | `assets/fonts/noto_sans_sc_menu_regular.ttf` | Google Fonts / Noto Sans SC，400 字重，Google Fonts 文本子集接口 | SIL Open Font License 1.1；仅覆盖当前菜单所需字符与基本 ASCII |
 | `assets/fonts/noto_sans_sc_menu_semibold.ttf` | Google Fonts / Noto Sans SC，600 字重，同上 | 同上 |
+| `assets/fonts/noto_sans_sc_gameplay_ui.ttf` | Google Fonts / Noto Sans SC，400 字重，官方文本子集接口，2026-10-26 | SIL Open Font License 1.1，许可副本 `assets/fonts/OFL-NotoSansSC.txt`；325 个请求字符，来源 URL 与 SHA-256 见 `assets/fonts/gameplay_ui_source.json`；本轮 HUD、暂停／成就界面消费 |
+| `scenes/gameplay/game_menus.gd`、`achievement_toasts.gd` 中的界面面板和菱形符号布局 | 本项目，Codex 辅助编写的代码绘制与 Unicode 文本 | 未加入第三方图片、Steam 图标或 SDK；符号字形由上述有许可记录的字体提供 |
 | `tests/manual/a_map/assets/graybox_labels.ttf` | Google Fonts / Noto Sans SC，400 字重，按腹腔预览文案下载的文本子集 | SIL Open Font License 1.1；来源与下载记录见 [SOURCE.md](../tests/manual/a_map/assets/SOURCE.md)，[许可副本](../tests/manual/a_map/assets/OFL-NotoSansSC.txt)；仅供 A 地图测试，不作为 D 的正式 UI 字体 |
 | `scenes/levels/abdomen/`、`scenes/levels/graybox/` 中的地板、墙体与机械物件几何占位 | 本项目，Codex 辅助编写的原创几何与布局 | 腹腔灰盒占位，未使用第三方地图贴图；不是最终环境美术 |
 
