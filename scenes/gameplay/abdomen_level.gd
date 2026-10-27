@@ -9,6 +9,9 @@ const COMBAT_SKIN := preload("res://scenes/gameplay/combat_skin.gd")
 const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
 const CLEANER_SCENE := preload("res://scenes/enemies/cleaner/cleaner.tscn")
 const SENTRY_SCENE := preload("res://scenes/enemies/sentry/sentry.tscn")
+const PAUSE_INPUT_SCRIPT := preload("res://scenes/gameplay/pause_input.gd")
+const GAME_MENUS_SCRIPT := preload("res://scenes/gameplay/game_menus.gd")
+const UI_THEME := preload("res://scenes/gameplay/gameplay_ui_theme.tres")
 
 ## ---------- 常量配置 ----------
 
@@ -26,7 +29,6 @@ const C := {
 	"hp_empty": Color(0.3, 0.1, 0.1, 1),
 	"interaction_range": 48.0,
 	"weapon_prompt_range": 120.0,
-	"arrow_hide_dist": 40.0,
 	"welcome_duration": 4.0,
 	"notify_default": 2.0,
 	"level_complete_wait": 3.0,
@@ -35,12 +37,10 @@ const C := {
 	"t_weapon_get": "获得脉冲枪！点按左键蓄力射击",
 	"t_terminal_ok": "终端已激活，大门开启",
 	"t_all_enemies_down": "所有敌人已清除，前往终端",
-	"t_retry": "已重试，沿指引前往枪架拾取脉冲枪",
-	"t_died": "你死了……2秒后重试",
+	"t_retry": "已重试，靠近枪架拾取脉冲枪",
 	"t_level_complete": "样板完成",
 	"t_weapon_prompt": "脉冲枪 - 靠近拾取",
 	"t_terminal_prompt": "[E] 操作终端",
-	"t_controls": "[WASD] 移动  [鼠标] 瞄准  [左键] 射击\n[E] 交互  [Esc] 暂停",
 }
 
 @onready var map := $AbdomenGraybox as Node2D
@@ -65,14 +65,15 @@ var terminal: Node = null
 var final_exit: Node = null
 var explored_positions: Array[Vector2] = []
 var last_memory_record_time: float = 0.0
+var game_menus
+var enemy_baselines: Dictionary = {}
+var door_tweens: Array[Tween] = []
+var notification_revision := 0
 
 ## HUD 节点
 var hud_canvas: CanvasLayer
 var objective_label: Label
-var guide_bg: ColorRect      ## 中上方引导面板背景
-var guide_label: Label       ## 中上方引导文字（方向+距离+提示）
-var controls_label: Label
-var controls_bg: ColorRect
+var hp_panel: ColorRect
 var interact_label: Label
 var interact_bg: ColorRect
 var notify_label: Label
@@ -81,7 +82,13 @@ var hp_bar: ColorRect
 var hp_bg: ColorRect
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
+	process_mode = Node.PROCESS_MODE_PAUSABLE
+	var pause_input := Node.new()
+	pause_input.name = "PauseInput"
+	pause_input.set_script(PAUSE_INPUT_SCRIPT)
+	pause_input.set("target", self)
+	pause_input.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(pause_input)
 	print("[C-MODULE] abdomen_level.gd 已加载 - v4")
 	# Main-level rack: 2 x 2 tiles (32 px each), preserving its display center.
 	var rack = map.get_node("Walls/GunRackBase")
@@ -93,6 +100,11 @@ func _ready() -> void:
 	_configure_enemies()
 	_configure_camera()
 	_setup_hud()
+	game_menus = GAME_MENUS_SCRIPT.new()
+	game_menus.name = "GameMenus"
+	add_child(game_menus)
+	game_menus.retry_requested.connect(_retry_level)
+	game_menus.title_requested.connect(_return_to_title)
 	_update_objective()
 	_show_welcome()
 
@@ -116,10 +128,8 @@ func _physics_process(delta: float) -> void:
 			_record_exploration(player.global_position)
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("interact") and not get_tree().paused:
+	if event.is_action_pressed("interact") and not get_tree().paused and not is_level_complete:
 		_try_interact()
-	if event.is_action_pressed("pause"):
-		_toggle_pause()
 
 ## ---------- 空间记忆 ----------
 
@@ -153,83 +163,52 @@ func _setup_hud() -> void:
 
 	## === 顶部：任务目标 ===
 	var obj_bg := ColorRect.new()
-	obj_bg.color = C.panel_bg
-	obj_bg.position = Vector2(0, 0)
-	obj_bg.size = Vector2(1152, 48)
+	obj_bg.color = Color(0.025, 0.04, 0.055, 0.86)
+	obj_bg.position = Vector2(16, 12)
+	obj_bg.size = Vector2(520, 42)
 	hud_canvas.add_child(obj_bg)
+	var objective_accent := ColorRect.new()
+	objective_accent.color = Color(0.35, 0.82, 0.88, 0.95)
+	objective_accent.position = Vector2(16, 12)
+	objective_accent.size = Vector2(4, 42)
+	hud_canvas.add_child(objective_accent)
 
 	objective_label = Label.new()
-	objective_label.position = Vector2(0, 8)
-	objective_label.size = Vector2(1152, 36)
-	objective_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	objective_label.position = Vector2(32, 12)
+	objective_label.size = Vector2(488, 42)
+	objective_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	objective_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	objective_label.add_theme_font_size_override("font_size", 20)
-	objective_label.add_theme_color_override("font_color", C.text_gold)
+	objective_label.add_theme_font_size_override("font_size", 16)
+	objective_label.add_theme_color_override("font_color", Color(0.92, 0.94, 0.91))
 	objective_label.text = ""
 	hud_canvas.add_child(objective_label)
 
-	## === 中上方：引导面板（方向+距离+提示）===
-	guide_bg = ColorRect.new()
-	guide_bg.color = Color(0, 0, 0, 0.7)
-	guide_bg.position = Vector2(20, 180)
-	guide_bg.size = Vector2(300, 100)
-	guide_bg.visible = true
-	hud_canvas.add_child(guide_bg)
+	## === 左下角：仅保留耐久 ===
+	hp_panel = ColorRect.new()
+	hp_panel.color = Color(0.015, 0.025, 0.035, 0.78)
+	hp_panel.position = Vector2(16, 582)
+	hp_panel.size = Vector2(270, 50)
+	hud_canvas.add_child(hp_panel)
 
-	guide_label = Label.new()
-	guide_label.position = Vector2(20, 180)
-	guide_label.size = Vector2(300, 100)
-	guide_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	guide_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	guide_label.add_theme_font_size_override("font_size", 18)
-	guide_label.add_theme_color_override("font_color", Color(1, 0.85, 0.3, 1))
-	guide_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
-	guide_label.add_theme_constant_override("outline_size", 5)
-	guide_label.text = "引导加载中..."
-	guide_label.visible = true
-	hud_canvas.add_child(guide_label)
-
-	## === 左下角：操作提示 + 血条 ===
-	controls_bg = ColorRect.new()
-	controls_bg.color = Color(0, 0, 0, 0.65)
-	controls_bg.position = Vector2(8, 500)
-	controls_bg.size = Vector2(300, 140)
-	controls_bg.visible = true
-	hud_canvas.add_child(controls_bg)
-
-	controls_label = Label.new()
-	controls_label.position = Vector2(16, 510)
-	controls_label.size = Vector2(280, 70)
-	controls_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	controls_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-	controls_label.add_theme_font_size_override("font_size", 14)
-	controls_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
-	controls_label.text = C.t_controls
-	controls_label.visible = true
-	hud_canvas.add_child(controls_label)
-
-	## 血条背景
 	hp_bg = ColorRect.new()
-	hp_bg.color = C.hp_empty
-	hp_bg.position = Vector2(16, 590)
-	hp_bg.size = Vector2(184, 20)
+	hp_bg.color = Color(0.18, 0.22, 0.23, 1)
+	hp_bg.position = Vector2(28, 601)
+	hp_bg.size = Vector2(145, 12)
 	hud_canvas.add_child(hp_bg)
 
-	## 血条前景
 	hp_bar = ColorRect.new()
-	hp_bar.color = C.hp_full
-	hp_bar.position = Vector2(16, 590)
-	hp_bar.size = Vector2(184, 20)
+	hp_bar.color = Color(0.84, 0.35, 0.3, 1)
+	hp_bar.position = Vector2(28, 601)
+	hp_bar.size = Vector2(145, 12)
 	hud_canvas.add_child(hp_bar)
 
-	## 血量文字
 	var hp_text := Label.new()
-	hp_text.position = Vector2(16, 590)
-	hp_text.size = Vector2(184, 20)
+	hp_text.position = Vector2(180, 593)
+	hp_text.size = Vector2(94, 28)
 	hp_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hp_text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	hp_text.add_theme_font_size_override("font_size", 12)
-	hp_text.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	hp_text.add_theme_color_override("font_color", Color(0.93, 0.94, 0.9, 1))
 	hp_text.text = "HP 100 / 100"
 	hp_text.name = "HpText"
 	hud_canvas.add_child(hp_text)
@@ -252,25 +231,28 @@ func _setup_hud() -> void:
 	interact_label.text = ""
 	hud_canvas.add_child(interact_label)
 
-	## === 屏幕正中央：浮动通知 ===
+	## === 上沿：短暂通知，避开角色与战斗视野 ===
 	notify_bg = ColorRect.new()
 	notify_bg.color = C.panel_bg
-	notify_bg.position = Vector2(276, 300)
-	notify_bg.size = Vector2(600, 48)
+	notify_bg.position = Vector2(346, 64)
+	notify_bg.size = Vector2(460, 42)
 	notify_bg.visible = false
 	hud_canvas.add_child(notify_bg)
 
 	notify_label = Label.new()
-	notify_label.position = Vector2(276, 300)
-	notify_label.size = Vector2(600, 48)
+	notify_label.position = Vector2(356, 64)
+	notify_label.size = Vector2(440, 42)
 	notify_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	notify_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	notify_label.add_theme_font_size_override("font_size", 24)
+	notify_label.add_theme_font_size_override("font_size", 16)
 	notify_label.add_theme_color_override("font_color", C.text_notify)
 	notify_label.text = ""
 	hud_canvas.add_child(notify_label)
+	for control in hud_canvas.get_children():
+		if control is Control:
+			control.theme = UI_THEME
 
-	print("[HUD] 所有节点已创建，guide_bg.visible=", guide_bg.visible, " controls_bg.visible=", controls_bg.visible)
+	print("[HUD] 已创建当前目标、耐久与交互提示")
 
 ## ---------- HUD 更新 ----------
 
@@ -282,13 +264,12 @@ func _update_objective() -> void:
 			var remaining: int = total_enemies - dead_enemies
 			objective_label.text = "当前目标：击败清扫者（剩余 %d）" % remaining
 		Objective.ACTIVATE_TERMINAL:
-			objective_label.text = "当前目标：操作终端开启大门 ↑"
+			objective_label.text = "当前目标：操作终端开启大门"
 		Objective.REACH_EXIT:
-			objective_label.text = "当前目标：前往出口 ↑"
+			objective_label.text = "当前目标：前往出口"
 
 func _update_hud() -> void:
 	_update_hp_bar()
-	_update_guide_panel()
 	_update_world_prompts()
 
 func _update_hp_bar() -> void:
@@ -306,88 +287,10 @@ func _update_hp_bar() -> void:
 		elif "current_health" in player:
 			hp = float(player.current_health)
 	var ratio: float = clampf(hp / max_hp, 0.0, 1.0)
-	hp_bar.size.x = int(184 * ratio)
+	hp_bar.size.x = int(145 * ratio)
 	var hp_text := hud_canvas.get_node_or_null("HpText")
 	if hp_text != null:
 		hp_text.text = "HP %d / %d" % [int(hp), int(max_hp)]
-
-func _update_guide_panel() -> void:
-	## 中上方面板：始终显示，内容根据目标动态更新
-	if player == null or player.is_dead:
-		guide_label.text = "等待玩家..."
-		guide_bg.visible = true
-		guide_label.visible = true
-		return
-
-	var target := _get_current_target()
-	if target == null or not is_instance_valid(target):
-		guide_label.text = "目标未找到\n请检查地图标记"
-		guide_bg.visible = true
-		guide_label.visible = true
-		return
-
-	var diff: Vector2 = target.global_position - player.global_position
-	var dist: float = diff.length()
-
-	## 计算方向
-	var angle: float = diff.angle()
-	var dir_text := ""
-	if angle > -0.785 and angle <= 0.785:
-		dir_text = "右 →"
-	elif angle > 0.785 and angle <= 2.356:
-		dir_text = "下 ↓"
-	elif angle > 2.356 or angle <= -2.356:
-		dir_text = "左 ←"
-	else:
-		dir_text = "上 ↑"
-
-	## 组合文字：方向 + 距离 + 提示
-	var guide_text := ""
-	if dist < C.arrow_hide_dist:
-		guide_text = "目标就在附近！\n"
-	else:
-		guide_text = "目标方向: %s\n距离: %.0f\n" % [dir_text, dist]
-	
-	if current_objective == Objective.GET_WEAPON:
-		guide_text += "靠近枪架拾取脉冲枪"
-	elif current_objective == Objective.KILL_ENEMIES:
-		guide_text += "击败清扫者"
-	elif current_objective == Objective.ACTIVATE_TERMINAL:
-		guide_text += "操作终端开启大门"
-	elif current_objective == Objective.REACH_EXIT:
-		guide_text += "前往出口完成关卡"
-
-	guide_label.text = guide_text
-	guide_bg.visible = true
-	guide_label.visible = true
-
-func _get_current_target() -> Node:
-	match current_objective:
-		Objective.GET_WEAPON:
-			return weapon_pickup
-		Objective.ACTIVATE_TERMINAL:
-			return terminal
-		Objective.REACH_EXIT:
-			return final_exit
-		Objective.KILL_ENEMIES:
-			return _get_nearest_alive_enemy()
-	return null
-
-func _get_nearest_alive_enemy() -> Node:
-	var nearest: Node = null
-	var nearest_dist: float = 999999.0
-	for enemy in enemies:
-		if not is_instance_valid(enemy):
-			continue
-		if enemy.has_method("get_combat_state"):
-			var state: Dictionary = enemy.get_combat_state()
-			if not state.get("alive", true):
-				continue
-		var dist: float = player.global_position.distance_to(enemy.global_position)
-		if dist < nearest_dist:
-			nearest_dist = dist
-			nearest = enemy
-	return nearest
 
 func _update_world_prompts() -> void:
 	## 武器提示
@@ -428,10 +331,14 @@ func _update_world_prompts() -> void:
 ## ---------- 通知系统 ----------
 
 func _show_notification(text: String, duration: float = C.notify_default) -> void:
+	notification_revision += 1
+	var revision := notification_revision
 	notify_label.text = text
 	notify_label.visible = true
 	notify_bg.visible = true
-	await get_tree().create_timer(duration).timeout
+	await get_tree().create_timer(duration, false).timeout
+	if revision != notification_revision:
+		return
 	if is_instance_valid(notify_label):
 		notify_label.visible = false
 	if is_instance_valid(notify_bg):
@@ -521,6 +428,7 @@ func _add_weapon_pickup(pos: Vector2, weapon_id: String) -> Node:
 	## 拾取提示
 	var prompt_label := Label.new()
 	prompt_label.name = "PromptLabel"
+	prompt_label.theme = UI_THEME
 	prompt_label.text = C.t_weapon_prompt
 	prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -567,6 +475,7 @@ func _add_terminal(pos: Vector2, term_id: String, linked: Array) -> Node:
 	area.add_child(prompt_panel)
 	var prompt_label := Label.new()
 	prompt_label.name = "PromptLabel"
+	prompt_label.theme = UI_THEME
 	prompt_label.text = C.t_terminal_prompt
 	prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -655,6 +564,7 @@ func _configure_enemies() -> void:
 			else:
 				enemy.configure(player, _enemy_visible_query, _in_protocol_query)
 		enemy.died.connect(_on_enemy_died)
+		enemy_baselines[enemy.entity_id] = enemy.get_combat_state().duplicate(true)
 
 func _configure_camera() -> void:
 	camera.position_smoothing_enabled = true
@@ -675,7 +585,7 @@ func _update_interaction() -> void:
 	var nearest: Node = null
 	var nearest_dist: float = C.interaction_range
 	for obj in interactables:
-		if not is_instance_valid(obj):
+		if not is_instance_valid(obj) or not obj.has_meta("is_terminal") or obj.get_meta("activated", false):
 			continue
 		var dist: float = player.global_position.distance_to(obj.global_position)
 		if dist < nearest_dist:
@@ -715,6 +625,7 @@ func _try_interact() -> void:
 			if child is Polygon2D:
 				child.color = Color(0.5, 0.5, 0.5, 0.5)
 		_play_terminal_sound()
+		game_menus.unlock_achievement("first_terminal")
 		_show_notification(C.t_terminal_ok, C.notify_default)
 		current_objective = Objective.REACH_EXIT
 		_update_objective()
@@ -751,6 +662,7 @@ func _door_flash_animation(door: Node) -> void:
 		return
 	var final_color := Color(0.3, 0.8, 0.4, 0.4)
 	var tween := create_tween()
+	door_tweens.append(tween)
 	tween.tween_property(vis, "color", Color(1, 1, 1, 1), 0.1)
 	tween.tween_property(vis, "color", final_color, 0.15)
 	tween.tween_property(vis, "color", Color(1, 1, 1, 1), 0.1)
@@ -762,17 +674,19 @@ func _on_weapon_entered(body: Node, _weapon_id: String, area: Area2D) -> void:
 	if body == player and not player.is_dead and not player.pulse_gun_equipped and not area.is_queued_for_deletion():
 		player.pulse_gun_equipped = true
 		area.queue_free()
+		game_menus.unlock_achievement("first_weapon")
 		_show_notification(C.t_weapon_get, 2.5)
 		current_objective = Objective.KILL_ENEMIES
 		_update_objective()
 
 func _on_exit_entered(body: Node, exit_id: String) -> void:
-	if body != player or is_level_complete:
+	if body != player or player.is_dead or get_tree().paused or is_level_complete:
 		return
 	for obj in interactables_parent.get_children():
 		if obj.has_meta("exit_id") and obj.get_meta("exit_id") == exit_id:
 			if obj.get_meta("is_final_exit", false):
 				is_level_complete = true
+				game_menus.unlock_achievement("first_exit")
 				_show_level_complete()
 			break
 
@@ -789,15 +703,15 @@ func _return_weapon_to_rack() -> void:
 
 func _on_player_died() -> void:
 	_return_weapon_to_rack()
-	_show_notification(C.t_died, 2.0)
-	await get_tree().create_timer(2.0).timeout
-	_retry_level()
+	game_menus.show_death()
 
 func _on_enemy_died(_entity_id: StringName) -> void:
 	dead_enemies += 1
 	var remaining: int = total_enemies - dead_enemies
 	_show_notification("清扫者被击败（剩余 %d）" % remaining, 1.5)
 	_update_objective()
+	if remaining <= 0:
+		game_menus.unlock_achievement("first_clear")
 	if remaining <= 0 and current_objective == Objective.KILL_ENEMIES:
 		current_objective = Objective.ACTIVATE_TERMINAL
 		_update_objective()
@@ -849,6 +763,11 @@ func _fade_to_black() -> ColorRect:
 	return rect
 
 func _retry_level() -> void:
+	for tween in door_tweens:
+		tween.kill()
+	door_tweens.clear()
+	for bullet in bullets_parent.get_children():
+		bullet.queue_free()
 	var spawn_pos: Vector2 = _find_spawn_position()
 	
 	player.restore_player(spawn_pos, player.max_health, [])
@@ -874,10 +793,13 @@ func _retry_level() -> void:
 		if not is_instance_valid(enemy):
 			continue
 		if enemy.has_method("get_combat_state") and enemy.has_method("restore_combat_state"):
-			var snap: Dictionary = enemy.get_combat_state()
-			snap.health = enemy.max_health
-			snap.alive = true
+			var snap: Dictionary = enemy_baselines[enemy.entity_id].duplicate(true)
 			enemy.restore_combat_state(snap)
+	camera.global_position = player.global_position
+	camera.reset_smoothing()
+	nearest_interactable = null
+	game_menus.close_and_resume()
+	_update_hud()
 
 func _find_spawn_position() -> Vector2:
 	var markers := map.get_node_or_null("Markers")
@@ -889,4 +811,12 @@ func _find_spawn_position() -> Vector2:
 	return Vector2.ZERO
 
 func _toggle_pause() -> void:
-	get_tree().paused = not get_tree().paused
+	if not is_level_complete and is_instance_valid(game_menus):
+		game_menus.toggle_pause()
+
+func _return_to_title() -> void:
+	get_tree().paused = false
+	var error := get_tree().change_scene_to_file("res://scenes/main.tscn")
+	if error != OK:
+		get_tree().paused = true
+		push_error("无法返回标题：%s" % error_string(error))

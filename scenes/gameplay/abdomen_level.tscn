@@ -1,10 +1,10 @@
 [gd_scene load_steps=3 format=3 uid="uid://cn7uabqfbv1p8"]
 
 [ext_resource type="Script" path="res://scenes/gameplay/abdomen_level.gd" id="1_abdomen_level"]
-[ext_resource type="PackedScene" uid="uid://cnw2x8c2jro7a" path="res://scenes/levels/abdomen/abdomen_graybox.tscn" id="2_graybox"]
+[ext_resource type="PackedScene" path="res://scenes/levels/abdomen/abdomen_graybox.tscn" id="2_graybox"]
 
 [node name="AbdomenLevel" type="Node2D"]
-process_mode = 3
+process_mode = 1
 script = ExtResource("1_abdomen_level")
 
 [node name="AbdomenGraybox" parent="." instance=ExtResource("2_graybox")]
