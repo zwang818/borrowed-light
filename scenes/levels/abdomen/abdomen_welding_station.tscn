@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/levels/abdomen/abdomen_welding_station.gd" id="1_welder"]
+
+[node name="WeldingStation" type="Node2D"]
+texture_filter = 1
+script = ExtResource("1_welder")
+metadata/visual_only = true
+metadata/cycle_seconds = 6.4

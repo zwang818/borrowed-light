@@ -30,6 +30,16 @@
 
 未改玩家、敌人、武器的公共接口；未改 `project.godot`、Input Map、Autoload、碰撞层、公共 TileSet 或 `scenes/main.tscn`。根窗口通知层由 C 菜单按需创建，并非新增 Autoload。
 
+<a id="abdomen-environment-retry"></a>
+
+## A 环境交互的重试接点（2026-10-27）
+
+用户授权 A 增加第一关可破坏蛛网。`abdomen_level.gd::_retry_level()` 开头查找地图的 `Environment`，存在 `reset_breakable_webs()` 时调用；实现由 `scenes/levels/abdomen/abdomen_webs.gd` 提供。它恢复全部蛛网并清理逃跑蜘蛛，不恢复／重写玩家战斗、敌人快照、门禁或成就。环境节点不存在或没有该方法时跳过，保留原重试流程。
+
+蛛网和蜘蛛不加入 `combat_enemies`，不增加四项成就或清场条件；新环境动画与蜘蛛继承可暂停世界。机械循环的重试相位当前不重置，仅随暂停冻结／恢复，不能写成已完成全机关基线回滚。
+
+当天 macOS 的 `tests/manual/a_map/web_break_check.gd`（实际脉冲命中、环境恢复和计数）及原 `tests/manual/c_progress/progress_check.gd` 均通过。此为 A 增量的本机回归，不替代下方 C 原有 Windows 记录，也不代表其他 C 功能或完整 P1 已跨平台验收。完整变更及复测步骤见 [第一关当天总览](abdomen_map.md#today-scene-update)。
+
 ## 成就数据
 
 | 稳定 ID | 名称 | 完成条件 |

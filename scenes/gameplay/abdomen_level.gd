@@ -763,6 +763,9 @@ func _fade_to_black() -> ColorRect:
 	return rect
 
 func _retry_level() -> void:
+	var environment := map.get_node_or_null("Environment")
+	if environment != null and environment.has_method("reset_breakable_webs"):
+		environment.reset_breakable_webs()
 	for tween in door_tweens:
 		tween.kill()
 	door_tweens.clear()
