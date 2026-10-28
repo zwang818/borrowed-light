@@ -4,4 +4,5 @@
 
 [resource]
 shader = ExtResource("1_pixel")
-shader_parameter/texel_group = 3.0
+shader_parameter/texel_group_x = 3.0
+shader_parameter/texel_group_y = 3.0

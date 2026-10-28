@@ -2,23 +2,24 @@
 extends "res://scenes/levels/graybox/graybox_floor.gd"
 ## Visual replacement only. World units and the floor's editable Size are unchanged.
 const ATLAS = preload("res://assets/sprites/environment/abdomen/terrain_atlas.png")
-const PIXEL_MATERIAL = preload("res://scenes/levels/abdomen/abdomen_pixel.tres")
+const ART_SCALE = preload("res://scenes/levels/abdomen/abdomen_art_scale.gd")
 @export_enum("Plate", "Grate", "Workshop", "Threshold", "Hazard decal", "Hatch decal") var surface: int = 0:
 	set(value):
 		surface = value
 		queue_redraw()
 
 func _ready() -> void:
-	material = PIXEL_MATERIAL
+	material = ART_SCALE.surface_material(ART_SCALE.ATLAS_CELL_PX / ART_SCALE.FLOOR_TILE_WORLD)
 
 func _draw() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	var cell := ATLAS.get_size() / 4.0
 	if surface >= 4:
 		var index := 6 if surface == 4 else 7
+		ART_SCALE.apply_to(self, cell.x / maxf(size.x, 1.0), cell.y / maxf(size.y, 1.0))
 		draw_texture_rect_region(ATLAS, Rect2(Vector2.ZERO, size), Rect2(Vector2(index % 4, index / 4) * cell, cell), Color(0.65, 0.73, 0.68, 0.9))
 		return
-	# World-aligned texture coordinates keep adjoining floor rectangles continuous.
+	ART_SCALE.apply_to(self, cell.x / ART_SCALE.FLOOR_TILE_WORLD)	# World-aligned texture coordinates keep adjoining floor rectangles continuous.
 	var tile := 64.0
 	var origin := position.snapped(Vector2.ONE)
 	var start := (origin / tile).floor() * tile

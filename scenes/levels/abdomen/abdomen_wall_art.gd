@@ -2,10 +2,13 @@
 extends "res://scenes/levels/graybox/graybox_wall.gd"
 ## Inherits the original collision/occluder geometry without changing it.
 const ATLAS = preload("res://assets/sprites/environment/abdomen/terrain_atlas.png")
-const PIXEL_MATERIAL = preload("res://scenes/levels/abdomen/abdomen_pixel.tres")
+const ART_SCALE = preload("res://scenes/levels/abdomen/abdomen_art_scale.gd")
 
 func _ready() -> void:
-	material = PIXEL_MATERIAL
+	material = ART_SCALE.surface_material(
+		ART_SCALE.ATLAS_CELL_PX / ART_SCALE.WALL_STEP_WORLD.x,
+		ART_SCALE.ATLAS_CELL_PX / ART_SCALE.WALL_STEP_WORLD.y
+	)
 	super._ready()
 
 func _draw() -> void:

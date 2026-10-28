@@ -30,6 +30,7 @@
 | --- | --- |
 | `scenes/levels/abdomen/abdomen_graybox.tscn` | 第一关布局源场景，沿用原文件名；已挂接环境美术 |
 | `scenes/levels/abdomen/abdomen_environment.tscn` | 环境摆设、墙外管线与蛛网；设备动画脚本及独立场景位于同目录 |
+| `scenes/levels/abdomen/abdomen_art_scale.gd` | 像素颗粒基准的唯一常量与材质换算；地板、墙面、静态物件三族共用 |
 | `assets/sprites/environment/abdomen/` | 7 张环境 PNG、导入配置及来源 README；风扇共用压缩机分件 |
 | `scenes/gameplay/abdomen_level.tscn` | 正式试玩入口，可用现有脉冲武器击破蛛网；重试脚本仅接环境恢复接口 |
 | `tests/manual/a_map/abdomen_preview.tscn` | 地图及动画独立预览，不含正式攻击能力 |

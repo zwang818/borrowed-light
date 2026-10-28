@@ -243,7 +243,7 @@ godot --headless --path . --script res://tests/manual/a_map/validate_abdomen.gd
 | `scenes/levels/abdomen/abdomen_graybox.tscn` | 仍是唯一布局源场景；地板及矩形墙换为环境绘制脚本，机械基座增加美术子节点，实例化 Environment；不改位置／尺寸／碰撞／遮光／房间及对象 ID |
 | `scenes/levels/abdomen/abdomen_environment.tscn` | 可单独编辑的背景、仪表柜、管道、工具箱、蛛网、碎片、冷白灯具与地面装饰 |
 | `abdomen_floor_art.gd`、`abdomen_wall_art.gd` | 位于上述腹腔目录；继承原灰盒组件，保留 Size 编辑方式及原碰撞／遮光生成，仅替换绘制 |
-| `abdomen_prop.gd`、`abdomen_cavity.gd`、`abdomen_pixel.*` | 同目录；物件裁切、暗管线背景、环境专用像素整理；不供角色或 UI 使用 |
+| `abdomen_prop.gd`、`abdomen_cavity.gd`、`abdomen_art_scale.gd`、`abdomen_pixel.*` | 同目录；物件裁切、暗管线背景、环境专用像素基准与整理；不供角色或 UI 使用 |
 | `assets/sprites/environment/abdomen/` | 首批三张环境源图；当天后续加入设备分件、蜘蛛和补底图，共 7 张 PNG，含必要 `.import` 及来源说明 |
 | `tests/manual/a_map/abdomen_preview.tscn` | A 独立预览入口未改名；默认隐藏制作引导，G 开关、Tab 全图、P 测门仍可用 |
 | `scenes/gameplay/abdomen_level.tscn` | 正式试玩入口未改文件；同一地图实例自动显示新美术，保留队友所有玩法 |
@@ -375,6 +375,26 @@ F6 运行 `scenes/gameplay/abdomen_level.tscn`，取得脉冲枪后对准网丝�
 ### 大风扇轴心校正（2026-10-27）
 
 用户实测发现转子偏心。此前分件坐标混用了显示参考尺寸与源图像素尺寸，且固定罩使用裁切矩形中心作为轴心，导致叶片绕偏移中心旋转。现以实际 1254 像素图分别标定原方框、转子轴承和防护罩孔位，按各自轴心绘制并对齐到同一世界位置；不再将分件坐标乘 1254/1280。固定罩采用等比缩放，转速仍为 6 秒一圈。实际渲染完整一圈，检查 0°、90°、180°及其余连续帧，转子与防护罩保持同心；自动循环、暂停恢复检查通过。仅修正大风扇绘制，不改其他设备、素材 PNG 或玩法。
+
+<a id="art-pixel-baseline"></a>
+
+## 14. 像素颗粒度基准（2026-10-28，A-ART-02）
+
+用户先在正式相机 zoom 1.5 下对比三档截图，选定 **B 档：1 个美术像素 = 1 个世界单位**（等于 1.5 屏幕像素）。此基准只约束当前腹腔试做，全项目规格仍属 OPEN-01。
+
+实现集中在两处：`abdomen_art_scale.gd` 保存唯一常量与换算函数；`abdomen_pixel.gdshader` 由单值 `texel_group` 改为 `texel_group_x/y`。地板、墙面、静态物件三族在绘制时按各自源像素密度反算 group，保证世界空间里像素为正方形且大小一致。
+
+| 素材族 | 源像素 / 世界单位 | 换算后 group | 统一前（共用 group = 3） |
+| --- | --- | --- | --- |
+| 地板 `Floors/*` | 313.5 / 64 = 4.90 | 4.90 | 0.61 世界单位 |
+| 墙面 `Walls/*` | x 4.90 / y 9.80 | 4.90 / 9.80 | 0.61 × 0.31，垂直方向被压扁 |
+| 静态物件 `Decor/*` | 313.5 / `draw_size` | 逐节点反算 | 0.3–1.5 不等 |
+
+未纳入本次统一、保留原生细度的"机械特写层"：焊接机械臂（台面 4.9、臂段约 12.6）、压缩机（机身约 5.3、转子与活塞 13–14）、出口大风扇（外框 2.18、转子与防护罩约 6.1）、墙外管线背景（1.96）、蛛网（室内 4.48、背景 1.96）、逃跑蜘蛛（约 24）。这些节点在**一次绘制内**混有多种源密度，单值材质无法同时对齐；要统一必须按绘制拆成子节点，属于后续可选任务，当前不写成"全环境已统一"。
+
+调整方法：只改 `ART_PIXEL_WORLD`（调大更粗、调小更细）；若改地板或墙体尺寸，同步 `FLOOR_TILE_WORLD`、`WALL_STEP_WORLD`。不要逐节点改 `texel_group_x/y`，否则又会出现多套比例。装饰贴花（`surface >= 4`）按自身 `size` 反算，改尺寸后会自动跟随。
+
+验证（2026-10-28，macOS / Godot 4.7.2）：无界面导入无错误；`validate_abdomen`、`web_break_check`、`pulse_gun_check`、`progress_check`、`achievement_check` 全部通过，几何、碰撞、命中与重试未受影响；同一批机位在 zoom 1.5 下与选定 B 档的对比截图逐张核对，颗粒尺寸一致。对比图与截图存放在仓库外的 `borrowed-light-pixel-compare/`，不作为工程资源，也不纳入提交。观感仍待用户实机确认与非作者复测。
 
 ## 附录：改名后旧标签页保存失败的修复（2026-10-20）
 

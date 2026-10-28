@@ -2,7 +2,7 @@
 extends Node2D
 ## Editable art only: no collision, AI, interaction, IDs or progress state.
 const ATLAS = preload("res://assets/sprites/environment/abdomen/props_atlas.png")
-const PIXEL_MATERIAL = preload("res://scenes/levels/abdomen/abdomen_pixel.tres")
+const ART_SCALE = preload("res://scenes/levels/abdomen/abdomen_art_scale.gd")
 @export_range(0, 15) var atlas_cell: int = 0:
 	set(value):
 		atlas_cell = value
@@ -19,7 +19,10 @@ const PIXEL_MATERIAL = preload("res://scenes/levels/abdomen/abdomen_pixel.tres")
 var _last_size := Vector2.ZERO
 
 func _ready() -> void:
-	material = PIXEL_MATERIAL
+	material = ART_SCALE.surface_material(
+		ART_SCALE.ATLAS_CELL_PX / maxf(draw_size.x, 1.0),
+		ART_SCALE.ATLAS_CELL_PX / maxf(draw_size.y, 1.0)
+	)
 	set_process(fit_parent_wall)
 
 func _process(_delta: float) -> void:
@@ -36,6 +39,7 @@ func _draw() -> void:
 	var target := Rect2(-draw_size * 0.5, draw_size)
 	if fit_parent_wall:
 		target = Rect2(Vector2.ZERO, get_parent().get("size"))
+	ART_SCALE.apply_to(self, cell.x / maxf(absf(target.size.x), 1.0), cell.y / maxf(absf(target.size.y), 1.0))
 	if mirror_x:
 		target.position.x += draw_size.x
 		target.size.x *= -1
