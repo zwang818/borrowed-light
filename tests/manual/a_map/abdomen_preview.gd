@@ -11,7 +11,7 @@ var _mode_status: Label
 var _region_status: Label
 var _guides: Node2D
 var _dark := false
-var _show_guides := true
+var _show_guides := false
 var _overview := false
 
 func _ready() -> void:
@@ -60,6 +60,7 @@ func _label(text: String, font_size: int = 18) -> Label:
 func _build_guides() -> void:
 	_guides = Node2D.new()
 	_guides.z_index = 20
+	_guides.visible = _show_guides
 	add_child(_guides)
 	for path in map.get_node("RouteWaypoints").get_children():
 		var route := Line2D.new()

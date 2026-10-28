@@ -22,6 +22,22 @@
 
 提交源文件与必要导入配置，不提交 `.godot/` 和本机导出缓存；保留资源所需的 UID 与导入配置。单次改动聚焦一个可审查目标。用户任务已授权的必要共享文件变更可以执行并说明，不凭“需群里同步”自行向外发送消息。
 
+### 腹腔环境文件入口（2026-10-27 A-ART-01、A-ENV-02）
+
+以下文件已在任务分支落地，尚未合入时不代表 `main` 已包含。上方其余关卡目录仍为按需创建的约定，不表示五张地图已完成。
+
+| 路径 | 用途 |
+| --- | --- |
+| `scenes/levels/abdomen/abdomen_graybox.tscn` | 第一关布局源场景，沿用原文件名；已挂接环境美术 |
+| `scenes/levels/abdomen/abdomen_environment.tscn` | 环境摆设、墙外管线与蛛网；设备动画脚本及独立场景位于同目录 |
+| `scenes/levels/abdomen/abdomen_art_scale.gd` | 像素颗粒基准的唯一常量与材质换算；地板、墙面、静态物件三族共用 |
+| `assets/sprites/environment/abdomen/` | 7 张环境 PNG、导入配置及来源 README；风扇共用压缩机分件 |
+| `scenes/gameplay/abdomen_level.tscn` | 正式试玩入口，可用现有脉冲武器击破蛛网；重试脚本仅接环境恢复接口 |
+| `tests/manual/a_map/abdomen_preview.tscn` | 地图及动画独立预览，不含正式攻击能力 |
+| `tests/manual/a_map/web_break_check.gd` | 蛛网命中、单次生成、暂停、清理、重试与敌人计数检查 |
+
+蛛网和逃跑蜘蛛留在腹腔环境目录；蜘蛛不是战斗敌人。具体动画参数、碰撞接点和验收步骤统一见 [腹腔地图说明](../abdomen_map.md)，不另建一套玩法规则。
+
 ## 2. 目录约定
 
 实际工程已经初始化。下图保留现有入口，其余目录按任务需要建立；不代表对应功能已存在。
