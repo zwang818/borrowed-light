@@ -8,6 +8,7 @@ const TURN_STEP_SECONDS := 0.035
 const STRIDE_PIXELS := 16.0
 # Measured transparent row gutters in the authored 887 x 1774 atlas.
 const ROW_EDGES := [0, 213, 428, 644, 867, 1082, 1302, 1516, 1774]
+@export var display_height: float = 64.0
 var player: CharacterBody2D
 var sprite: Sprite2D
 var frames: Array[AtlasTexture] = []
@@ -71,7 +72,7 @@ func _load_frames() -> void:
 				largest_height = maxf(largest_height, bounds.size.y)
 		mode_frames[mode] = bank
 	frames = mode_frames[player.attack_mode]
-	display_scale = 64.0 / largest_height
+	display_scale = display_height / largest_height
 	sprite.scale = Vector2.ONE * display_scale
 
 

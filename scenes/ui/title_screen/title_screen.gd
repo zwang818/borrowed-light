@@ -33,12 +33,15 @@ signal archive_opened
 var _bgm_player := AudioStreamPlayer.new()
 var _elapsed := 0.0
 var _is_starting := false
+var _robot_animation
 var _robot_hovered := false
 var _robot_emphasis := 0.0
 var _previous_focus: Control
 
 
 func _ready() -> void:
+	_robot_animation = preload("res://scenes/ui/title_screen/xiaoyi_title_animation.gd").new()
+	_robot_animation.update(robot, 0.0, robot_motion_enabled)
 	resized.connect(_fit_presentation)
 	start_button.pressed.connect(_on_start_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
@@ -69,8 +72,7 @@ func _process(delta: float) -> void:
 	_robot_emphasis = move_toward(_robot_emphasis, 1.0 if emphasized else 0.0, delta * 5.0)
 	var pulse := sin(_elapsed * lamp_pulse_speed) * lamp_pulse_amount if lamp_pulse_enabled else 0.0
 	lamp_glow.modulate.a = 0.78 + pulse + _robot_emphasis * 0.12
-	robot.rotation = sin(_elapsed * 1.25) * robot_sway_amount if robot_motion_enabled else 0.0
-	robot.position.y = sin(_elapsed * 1.5) * 1.2 if robot_motion_enabled else 0.0
+	_robot_animation.update(robot, _elapsed, robot_motion_enabled)
 	robot.scale = Vector2.ONE * (1.0 + _robot_emphasis * 0.035)
 	robot.modulate = Color.WHITE.lerp(Color(1.15, 1.12, 1.04), _robot_emphasis)
 	archive_caption.modulate.a = 0.8 + _robot_emphasis * 0.2

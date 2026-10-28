@@ -29,6 +29,9 @@ func _ready() -> void:
 	visual.name = "XiaoyiCombatVisual"
 	visual.set_script(preload("res://tests/manual/b_combat/xiaoyi_combat_visual.gd"))
 	$SpawnPoints/PlayerSpawn/Player/Facing.add_child(visual)
+	var cleaner_visual := preload("res://tests/manual/b_combat/cleaner_visual.gd").new()
+	cleaner_visual.name = "CleanerVisual"
+	$SpawnPoints/CleanerSpawn/Cleaner.add_child(cleaner_visual)
 	$SpawnPoints/CleanerSpawn/Cleaner.configure($SpawnPoints/PlayerSpawn/Player, _test_enemy_readable, _test_protocol_active)
 	$SpawnPoints/PlayerSpawn/Player/Facing/PulseGun.configure_space(Rect2(0, 0, 960, 640), _test_enemy_readable)
 	$SpawnPoints/SentrySpawn/Sentry.configure($SpawnPoints/PlayerSpawn/Player, _test_enemy_readable, $EnemyProjectiles)
