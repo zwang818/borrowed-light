@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/levels/abdomen/abdomen_compressor.gd" id="1_compressor"]
+
+[node name="Compressor" type="Node2D"]
+texture_filter = 1
+script = ExtResource("1_compressor")
+metadata/visual_only = true
+metadata/cycle_seconds = 4.0

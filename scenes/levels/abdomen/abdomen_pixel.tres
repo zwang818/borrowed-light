@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://scenes/levels/abdomen/abdomen_pixel.gdshader" id="1_pixel"]
+
+[resource]
+shader = ExtResource("1_pixel")
+shader_parameter/texel_group = 3.0

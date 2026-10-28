@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/levels/graybox/graybox_wall.tscn" id="1_wall"]
 [ext_resource type="Script" path="res://scenes/levels/graybox/graybox_floor.gd" id="2_floor"]
@@ -6,10 +6,23 @@
 [ext_resource type="Script" path="res://scenes/levels/graybox/graybox_metrics.gd" id="4_metrics"]
 [ext_resource type="PackedScene" path="res://scenes/levels/graybox/graybox_polygon_wall.tscn" id="5_chamfer"]
 
+[ext_resource type="Script" path="res://scenes/levels/abdomen/abdomen_floor_art.gd" id="6_floor_art"]
+[ext_resource type="Script" path="res://scenes/levels/abdomen/abdomen_wall_art.gd" id="7_wall_art"]
+[ext_resource type="PackedScene" path="res://scenes/levels/abdomen/abdomen_environment.tscn" id="8_environment"]
+[ext_resource type="Script" path="res://scenes/levels/abdomen/abdomen_prop.gd" id="9_prop"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/abdomen/terrain_atlas.png" id="10_terrain"]
+[ext_resource type="PackedScene" path="res://scenes/levels/abdomen/abdomen_welding_station.tscn" id="11_welder"]
+[ext_resource type="PackedScene" path="res://scenes/levels/abdomen/abdomen_compressor.tscn" id="12_compressor"]
+
+[sub_resource type="AtlasTexture" id="Atlas_chamfer"]
+atlas = ExtResource("10_terrain")
+region = Rect2(0, 627, 313.5, 313.5)
+
 [node name="AbdomenGraybox" type="Node2D"]
 metadata/schema_version = 1
 metadata/layout_revision = 2
-metadata/graybox_only = true
+metadata/graybox_only = false
+metadata/environment_art_revision = 1
 metadata/map_bounds = Rect2(128, 32, 1120, 2688)
 metadata/metrics_script = ExtResource("4_metrics")
 
@@ -17,363 +30,436 @@ metadata/metrics_script = ExtResource("4_metrics")
 
 [node name="Arrival" type="Node2D" parent="Floors"]
 position = Vector2(192, 2080)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(832, 544)
 floor_color = Color(0.145098, 0.211765, 0.231373, 1)
 
 [node name="EntryThreshold" type="Node2D" parent="Floors"]
 position = Vector2(512, 2624)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(128, 64)
 floor_color = Color(0.160784, 0.231373, 0.25098, 1)
+surface = 3
 
 [node name="TeachingNeck" type="Node2D" parent="Floors"]
 position = Vector2(544, 2016)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(128, 64)
 floor_color = Color(0.160784, 0.231373, 0.25098, 1)
+surface = 3
 
 [node name="WeaponBay" type="Node2D" parent="Floors"]
 position = Vector2(352, 1792)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(512, 224)
 floor_color = Color(0.188235, 0.227451, 0.243137, 1)
 
 [node name="GunThreshold" type="Node2D" parent="Floors"]
 position = Vector2(544, 1728)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(64, 64)
 floor_color = Color(0.254902, 0.25098, 0.223529, 1)
+surface = 3
 
 [node name="FirstCombat" type="Node2D" parent="Floors"]
 position = Vector2(256, 1440)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(480, 288)
 floor_color = Color(0.2, 0.231373, 0.254902, 1)
 
 [node name="LowerPassage" type="Node2D" parent="Floors"]
 position = Vector2(576, 1152)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(128, 288)
 floor_color = Color(0.160784, 0.219608, 0.243137, 1)
+surface = 1
 
 [node name="WorkshopBranch" type="Node2D" parent="Floors"]
 position = Vector2(704, 1344)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(160, 64)
 floor_color = Color(0.211765, 0.235294, 0.223529, 1)
 
 [node name="WorkshopBend" type="Node2D" parent="Floors"]
 position = Vector2(800, 1408)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(64, 96)
 floor_color = Color(0.211765, 0.235294, 0.223529, 1)
 
 [node name="WorkshopThreshold" type="Node2D" parent="Floors"]
 position = Vector2(800, 1472)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(96, 64)
 floor_color = Color(0.286275, 0.258824, 0.215686, 1)
+surface = 3
 
 [node name="Workshop" type="Node2D" parent="Floors"]
 position = Vector2(896, 1376)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(288, 288)
 floor_color = Color(0.27451, 0.254902, 0.215686, 1)
+surface = 2
 
 [node name="MiddleTurn" type="Node2D" parent="Floors"]
 position = Vector2(384, 1088)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(320, 128)
 floor_color = Color(0.168627, 0.223529, 0.243137, 1)
+surface = 1
 
 [node name="RibPassage" type="Node2D" parent="Floors"]
 position = Vector2(352, 864)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(160, 288)
 floor_color = Color(0.168627, 0.223529, 0.243137, 1)
+surface = 1
 
 [node name="UpperTurn" type="Node2D" parent="Floors"]
 position = Vector2(352, 800)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(352, 128)
 floor_color = Color(0.168627, 0.223529, 0.243137, 1)
+surface = 1
 
 [node name="UpperPassage" type="Node2D" parent="Floors"]
 position = Vector2(576, 640)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(128, 224)
 floor_color = Color(0.168627, 0.223529, 0.243137, 1)
+surface = 1
 
 [node name="ExitCombat" type="Node2D" parent="Floors"]
 position = Vector2(256, 256)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(768, 384)
 floor_color = Color(0.203922, 0.239216, 0.258824, 1)
 
 [node name="ExitThreshold" type="Node2D" parent="Floors"]
 position = Vector2(608, 192)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(64, 64)
 floor_color = Color(0.270588, 0.254902, 0.223529, 1)
+surface = 3
 
 [node name="SpineLanding" type="Node2D" parent="Floors"]
 position = Vector2(544, 64)
-script = ExtResource("2_floor")
+script = ExtResource("6_floor_art")
 size = Vector2(192, 128)
 floor_color = Color(0.172549, 0.243137, 0.239216, 1)
+surface = 3
 
 [node name="Walls" type="Node2D" parent="."]
 
 [node name="Boundary01" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(512, 32)
 size = Vector2(256, 32)
 
 [node name="Boundary02" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(512, 64)
 size = Vector2(32, 128)
 
 [node name="Boundary03" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(736, 64)
 size = Vector2(32, 128)
 
 [node name="Boundary04" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(512, 192)
 size = Vector2(96, 32)
 
 [node name="Boundary05" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(672, 192)
 size = Vector2(96, 32)
 
 [node name="Boundary06" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(224, 224)
 size = Vector2(384, 32)
 
 [node name="Boundary07" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(672, 224)
 size = Vector2(384, 32)
 
 [node name="Boundary08" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(224, 256)
 size = Vector2(32, 384)
 
 [node name="Boundary09" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(1024, 256)
 size = Vector2(32, 384)
 
 [node name="Boundary10" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(224, 640)
 size = Vector2(352, 32)
 
 [node name="Boundary11" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(704, 640)
 size = Vector2(352, 32)
 
 [node name="Boundary12" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(544, 672)
 size = Vector2(32, 96)
 
 [node name="Boundary13" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(704, 672)
 size = Vector2(32, 256)
 
 [node name="Boundary14" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(320, 768)
 size = Vector2(256, 32)
 
 [node name="Boundary15" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(320, 800)
 size = Vector2(32, 352)
 
 [node name="Boundary16" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(512, 928)
 size = Vector2(224, 32)
 
 [node name="Boundary17" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(512, 960)
 size = Vector2(32, 96)
 
 [node name="Boundary18" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(512, 1056)
 size = Vector2(224, 32)
 
 [node name="Boundary19" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(704, 1088)
 size = Vector2(32, 224)
 
 [node name="Boundary20" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(320, 1152)
 size = Vector2(64, 32)
 
 [node name="Boundary21" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(352, 1184)
 size = Vector2(32, 32)
 
 [node name="Boundary22" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(352, 1216)
 size = Vector2(224, 32)
 
 [node name="Boundary23" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(544, 1248)
 size = Vector2(32, 160)
 
 [node name="Boundary24" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(704, 1312)
 size = Vector2(192, 32)
 
 [node name="Boundary25" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(864, 1344)
 size = Vector2(352, 32)
 
 [node name="Boundary26" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(864, 1376)
 size = Vector2(32, 96)
 
 [node name="Boundary27" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(1184, 1376)
 size = Vector2(32, 288)
 
 [node name="Boundary28" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(224, 1408)
 size = Vector2(352, 32)
 
 [node name="Boundary29" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(704, 1408)
 size = Vector2(96, 32)
 
 [node name="Boundary30" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(224, 1440)
 size = Vector2(32, 288)
 
 [node name="Boundary31" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(736, 1440)
 size = Vector2(64, 96)
 
 [node name="Boundary32" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(736, 1536)
 size = Vector2(160, 32)
 
 [node name="Boundary33" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(736, 1568)
 size = Vector2(32, 160)
 
 [node name="Boundary34" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(864, 1568)
 size = Vector2(32, 96)
 
 [node name="Boundary35" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(864, 1664)
 size = Vector2(352, 32)
 
 [node name="Boundary36" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(224, 1728)
 size = Vector2(320, 32)
 
 [node name="Boundary37" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(608, 1728)
 size = Vector2(160, 32)
 
 [node name="Boundary38" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(320, 1760)
 size = Vector2(224, 32)
 
 [node name="Boundary39" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(608, 1760)
 size = Vector2(288, 32)
 
 [node name="Boundary40" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(320, 1792)
 size = Vector2(32, 224)
 
 [node name="Boundary41" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(864, 1792)
 size = Vector2(32, 224)
 
 [node name="Boundary42" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(320, 2016)
 size = Vector2(224, 32)
 
 [node name="Boundary43" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(672, 2016)
 size = Vector2(224, 32)
 
 [node name="Boundary44" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(160, 2048)
 size = Vector2(384, 32)
 
 [node name="Boundary45" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(672, 2048)
 size = Vector2(384, 32)
 
 [node name="Boundary46" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(160, 2080)
 size = Vector2(32, 544)
 
 [node name="Boundary47" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(1024, 2080)
 size = Vector2(32, 544)
 
 [node name="Boundary48" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(160, 2624)
 size = Vector2(352, 32)
 
 [node name="Boundary49" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(640, 2624)
 size = Vector2(416, 32)
 
 [node name="Boundary50" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(480, 2656)
 size = Vector2(32, 32)
 
 [node name="Boundary51" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(640, 2656)
 size = Vector2(32, 32)
 
 [node name="Boundary52" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(480, 2688)
 size = Vector2(192, 32)
 
 [node name="TeachingBaffle" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(384, 2320)
 size = Vector2(256, 32)
 wall_color = Color(0.352941, 0.407843, 0.427451, 1)
 
 [node name="AssemblyBase" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(256, 2400)
 size = Vector2(128, 96)
 wall_color = Color(0.290196, 0.364706, 0.388235, 1)
 
 [node name="TeachingMachine" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(832, 2368)
 size = Vector2(128, 128)
 wall_color = Color(0.290196, 0.364706, 0.388235, 1)
 
 [node name="TeachingRib" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(800, 2144)
 size = Vector2(32, 128)
 wall_color = Color(0.34902, 0.392157, 0.419608, 1)
 
 [node name="GunRackBase" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(384, 1856)
 size = Vector2(96, 64)
 wall_color = Color(0.419608, 0.384314, 0.317647, 1)
 
 [node name="FirstCombatScreen" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(416, 1632)
 size = Vector2(160, 32)
 wall_color = Color(0.34902, 0.392157, 0.419608, 1)
 
 [node name="WorkshopBench" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(992, 1440)
 size = Vector2(128, 64)
 wall_color = Color(0.458824, 0.411765, 0.309804, 1)
 
 [node name="ExitMachine" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(608, 384)
 size = Vector2(64, 160)
 wall_color = Color(0.34902, 0.392157, 0.419608, 1)
 
 [node name="ExitSideMachine" parent="Walls" instance=ExtResource("1_wall")]
+script = ExtResource("7_wall_art")
 position = Vector2(896, 288)
 size = Vector2(64, 64)
 wall_color = Color(0.290196, 0.364706, 0.388235, 1)
@@ -381,18 +467,30 @@ wall_color = Color(0.290196, 0.364706, 0.388235, 1)
 [node name="ArrivalChamfer" parent="Walls" instance=ExtResource("5_chamfer")]
 position = Vector2(192, 2080)
 polygon = PackedVector2Array(0, 0, 96, 0, 0, 96)
+texture = SubResource("Atlas_chamfer")
+texture_scale = Vector2(0.3, 0.3)
+color = Color(0.61, 0.71, 0.73, 1)
 
 [node name="CombatChamfer" parent="Walls" instance=ExtResource("5_chamfer")]
 position = Vector2(256, 1632)
 polygon = PackedVector2Array(0, 0, 0, 96, 96, 96)
+texture = SubResource("Atlas_chamfer")
+texture_scale = Vector2(0.3, 0.3)
+color = Color(0.61, 0.71, 0.73, 1)
 
 [node name="ExitChamferWest" parent="Walls" instance=ExtResource("5_chamfer")]
 position = Vector2(256, 256)
 polygon = PackedVector2Array(0, 0, 96, 0, 0, 96)
+texture = SubResource("Atlas_chamfer")
+texture_scale = Vector2(0.3, 0.3)
+color = Color(0.61, 0.71, 0.73, 1)
 
 [node name="ExitChamferEast" parent="Walls" instance=ExtResource("5_chamfer")]
 position = Vector2(928, 544)
 polygon = PackedVector2Array(96, 0, 96, 96, 0, 96)
+texture = SubResource("Atlas_chamfer")
+texture_scale = Vector2(0.3, 0.3)
+color = Color(0.61, 0.71, 0.73, 1)
 
 [node name="Rooms" type="Node2D" parent="."]
 
@@ -550,6 +648,7 @@ script = ExtResource("3_marker")
 object_id = "p1_player_spawn"
 object_type = "spawn"
 room_id = "p1_manufacturing_01"
+show_guide = false
 footprint = Vector2(24, 24)
 
 [node name="PulseGun" type="Marker2D" parent="Markers"]
@@ -558,6 +657,7 @@ script = ExtResource("3_marker")
 object_id = "p1_pulse_pickup"
 object_type = "weapon"
 room_id = "p1_manufacturing_01"
+show_guide = false
 footprint = Vector2(24, 24)
 content_id = "pulse_gun"
 
@@ -567,6 +667,7 @@ script = ExtResource("3_marker")
 object_id = "abdomen_cleaner_01"
 object_type = "cleaner"
 room_id = "p1_manufacturing_01"
+show_guide = false
 footprint = Vector2(32, 32)
 
 [node name="CleanerExitWest" type="Marker2D" parent="Markers"]
@@ -575,6 +676,7 @@ script = ExtResource("3_marker")
 object_id = "abdomen_cleaner_02"
 object_type = "cleaner"
 room_id = "p1_manufacturing_01"
+show_guide = false
 footprint = Vector2(32, 32)
 
 [node name="CleanerExitEast" type="Marker2D" parent="Markers"]
@@ -583,6 +685,7 @@ script = ExtResource("3_marker")
 object_id = "abdomen_cleaner_03"
 object_type = "cleaner"
 room_id = "p1_manufacturing_01"
+show_guide = false
 footprint = Vector2(32, 32)
 
 [node name="Record" type="Marker2D" parent="Markers"]
@@ -591,6 +694,7 @@ script = ExtResource("3_marker")
 object_id = "p1_record_01"
 object_type = "log"
 room_id = "p1_workshop_01"
+show_guide = false
 footprint = Vector2(24, 24)
 content_id = "p1_test_record"
 
@@ -600,6 +704,7 @@ script = ExtResource("3_marker")
 object_id = "p1_terminal_01"
 object_type = "terminal"
 room_id = "p1_manufacturing_01"
+show_guide = false
 footprint = Vector2(32, 32)
 linked_ids = Array[String](["p1_door_01", "p1_light_01", "p1_light_02"])
 
@@ -609,6 +714,7 @@ script = ExtResource("3_marker")
 object_id = "p1_door_01"
 object_type = "door"
 room_id = "p1_manufacturing_01"
+show_guide = false
 footprint = Vector2(64, 32)
 
 [node name="FixedLightWest" type="Marker2D" parent="Markers"]
@@ -617,6 +723,7 @@ script = ExtResource("3_marker")
 object_id = "p1_light_01"
 object_type = "light"
 room_id = "p1_manufacturing_01"
+show_guide = false
 footprint = Vector2(24, 24)
 
 [node name="FixedLightEast" type="Marker2D" parent="Markers"]
@@ -625,6 +732,7 @@ script = ExtResource("3_marker")
 object_id = "p1_light_02"
 object_type = "light"
 room_id = "p1_manufacturing_01"
+show_guide = false
 footprint = Vector2(24, 24)
 
 [node name="WorkshopLight" type="Marker2D" parent="Markers"]
@@ -633,6 +741,7 @@ script = ExtResource("3_marker")
 object_id = "abdomen_workshop_light"
 object_type = "light"
 room_id = "p1_workshop_01"
+show_guide = false
 footprint = Vector2(24, 24)
 
 [node name="ReturnEntry" type="Marker2D" parent="Markers"]
@@ -641,6 +750,7 @@ script = ExtResource("3_marker")
 object_id = "p1_return_entry"
 object_type = "spawn"
 room_id = "p1_manufacturing_01"
+show_guide = false
 footprint = Vector2(24, 24)
 
 [node name="ToLanding" type="Marker2D" parent="Markers"]
@@ -649,6 +759,7 @@ script = ExtResource("3_marker")
 object_id = "p1_exit_to_landing"
 object_type = "exit"
 room_id = "p1_manufacturing_01"
+show_guide = false
 footprint = Vector2(64, 32)
 target_room_id = "p1_landing_01"
 target_entry_id = "p1_landing_entry"
@@ -659,6 +770,7 @@ script = ExtResource("3_marker")
 object_id = "p1_landing_entry"
 object_type = "spawn"
 room_id = "p1_landing_01"
+show_guide = false
 footprint = Vector2(24, 24)
 
 [node name="ToManufacturing" type="Marker2D" parent="Markers"]
@@ -667,6 +779,7 @@ script = ExtResource("3_marker")
 object_id = "p1_exit_to_manufacturing"
 object_type = "exit"
 room_id = "p1_landing_01"
+show_guide = false
 footprint = Vector2(64, 32)
 target_room_id = "p1_manufacturing_01"
 target_entry_id = "p1_return_entry"
@@ -677,6 +790,7 @@ script = ExtResource("3_marker")
 object_id = "abdomen_workshop_return"
 object_type = "spawn"
 room_id = "p1_manufacturing_01"
+show_guide = false
 footprint = Vector2(24, 24)
 
 [node name="ToWorkshop" type="Marker2D" parent="Markers"]
@@ -685,6 +799,7 @@ script = ExtResource("3_marker")
 object_id = "abdomen_exit_to_workshop"
 object_type = "exit"
 room_id = "p1_manufacturing_01"
+show_guide = false
 footprint = Vector2(32, 64)
 target_room_id = "p1_workshop_01"
 target_entry_id = "abdomen_workshop_entry"
@@ -695,6 +810,7 @@ script = ExtResource("3_marker")
 object_id = "abdomen_workshop_entry"
 object_type = "spawn"
 room_id = "p1_workshop_01"
+show_guide = false
 footprint = Vector2(24, 24)
 
 [node name="FromWorkshop" type="Marker2D" parent="Markers"]
@@ -703,6 +819,7 @@ script = ExtResource("3_marker")
 object_id = "abdomen_exit_from_workshop"
 object_type = "exit"
 room_id = "p1_workshop_01"
+show_guide = false
 footprint = Vector2(32, 64)
 target_room_id = "p1_manufacturing_01"
 target_entry_id = "abdomen_workshop_return"
@@ -849,3 +966,24 @@ position = Vector2(1056, 1568)
 
 [node name="Point06" type="Marker2D" parent="RouteWaypoints/WorkshopRoute"]
 position = Vector2(1056, 1536)
+
+[node name="EnvironmentSkin" parent="Walls/AssemblyBase" instance=ExtResource("11_welder")]
+
+[node name="EnvironmentSkin" parent="Walls/TeachingMachine" instance=ExtResource("12_compressor")]
+
+[node name="EnvironmentSkin" type="Node2D" parent="Walls/WorkshopBench"]
+script = ExtResource("9_prop")
+atlas_cell = 2
+fit_parent_wall = true
+
+[node name="EnvironmentSkin" type="Node2D" parent="Walls/ExitMachine"]
+script = ExtResource("9_prop")
+atlas_cell = 3
+fit_parent_wall = true
+
+[node name="EnvironmentSkin" type="Node2D" parent="Walls/ExitSideMachine"]
+script = ExtResource("9_prop")
+atlas_cell = 12
+fit_parent_wall = true
+
+[node name="Environment" parent="." instance=ExtResource("8_environment")]

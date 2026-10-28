@@ -1,0 +1,529 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scenes/levels/abdomen/abdomen_prop.gd" id="1_prop"]
+[ext_resource type="Script" path="res://scenes/levels/abdomen/abdomen_cavity.gd" id="2_cavity"]
+
+[ext_resource type="Script" path="res://scenes/levels/abdomen/abdomen_floor_art.gd" id="3_decal"]
+
+[ext_resource type="Script" path="res://scenes/levels/abdomen/breakable_web.gd" id="4_web"]
+[ext_resource type="Script" path="res://scenes/levels/abdomen/abdomen_webs.gd" id="5_webs"]
+[ext_resource type="Script" path="res://scenes/levels/abdomen/abdomen_exhaust_fan.gd" id="6_fan"]
+
+[sub_resource type="Gradient" id="Gradient_cold"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(0.56, 0.73, 0.7, 0.28, 0.45, 0.64, 0.62, 0.12, 0.3, 0.45, 0.45, 0)
+
+[sub_resource type="GradientTexture2D" id="Texture_cold"]
+gradient = SubResource("Gradient_cold")
+width = 64
+height = 64
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="CanvasItemMaterial" id="Material_glow"]
+blend_mode = 1
+light_mode = 1
+
+[node name="Environment" type="Node2D"]
+script = ExtResource("5_webs")
+texture_filter = 1
+metadata/art_revision = 1
+metadata/environment_breakables = true
+
+[node name="ServiceCavity" type="Node2D" parent="."]
+z_index = -20
+script = ExtResource("2_cavity")
+
+[node name="Decor" type="Node2D" parent="."]
+
+[node name="ArrivalWestInstrument" type="Node2D" parent="Decor"]
+position = Vector2(176, 2256)
+script = ExtResource("1_prop")
+atlas_cell = 4
+draw_size = Vector2(46, 110)
+
+[node name="ArrivalEastSwitchboard" type="Node2D" parent="Decor"]
+position = Vector2(1040, 2220)
+script = ExtResource("1_prop")
+atlas_cell = 12
+draw_size = Vector2(48, 92)
+
+[node name="ArrivalNorthVent" type="Node2D" parent="Decor"]
+position = Vector2(944, 2064)
+script = ExtResource("1_prop")
+atlas_cell = 6
+draw_size = Vector2(58, 32)
+
+[node name="ArrivalOldToolbox" type="Node2D" parent="Decor"]
+position = Vector2(448, 2336)
+script = ExtResource("1_prop")
+atlas_cell = 13
+draw_size = Vector2(72, 30)
+
+[node name="ArrivalWestWeb" type="Area2D" parent="Decor"]
+position = Vector2(248, 2134)
+script = ExtResource("4_web")
+draw_size = Vector2(82, 82)
+
+[node name="ArrivalSouthWeb" type="Area2D" parent="Decor"]
+position = Vector2(982, 2584)
+script = ExtResource("4_web")
+draw_size = Vector2(84, 84)
+rotation = 3.141593
+
+[node name="AssemblyOil" type="Node2D" parent="Decor"]
+position = Vector2(312, 2518)
+script = ExtResource("1_prop")
+atlas_cell = 14
+draw_size = Vector2(78, 46)
+modulate = Color(0.8, 0.85, 0.8, 0.75)
+
+[node name="EastMachineDust" type="Node2D" parent="Decor"]
+position = Vector2(958, 2520)
+script = ExtResource("1_prop")
+atlas_cell = 14
+draw_size = Vector2(76, 54)
+modulate = Color(0.8, 0.85, 0.8, 0.7)
+
+[node name="ArrivalCornerScrap" type="Node2D" parent="Decor"]
+position = Vector2(222, 2542)
+script = ExtResource("1_prop")
+atlas_cell = 11
+draw_size = Vector2(50, 66)
+
+[node name="ArrivalExteriorArm" type="Node2D" parent="Decor"]
+position = Vector2(1120, 2450)
+script = ExtResource("1_prop")
+atlas_cell = 9
+draw_size = Vector2(124, 124)
+
+[node name="ArrivalExteriorTank" type="Node2D" parent="Decor"]
+position = Vector2(40, 2300)
+script = ExtResource("1_prop")
+atlas_cell = 15
+draw_size = Vector2(196, 96)
+rotation = 1.570796
+
+[node name="WeaponWestBrokenCRT" type="Node2D" parent="Decor"]
+position = Vector2(336, 1856)
+script = ExtResource("1_prop")
+atlas_cell = 4
+draw_size = Vector2(32, 70)
+
+[node name="WeaponEastCabinet" type="Node2D" parent="Decor"]
+position = Vector2(880, 1904)
+script = ExtResource("1_prop")
+atlas_cell = 12
+draw_size = Vector2(32, 78)
+
+[node name="WeaponWeb" type="Area2D" parent="Decor"]
+position = Vector2(386, 1802)
+script = ExtResource("4_web")
+draw_size = Vector2(76, 76)
+
+[node name="WeaponScrap" type="Node2D" parent="Decor"]
+position = Vector2(820, 1970)
+script = ExtResource("1_prop")
+atlas_cell = 11
+draw_size = Vector2(44, 36)
+
+[node name="WeaponFloorDust" type="Node2D" parent="Decor"]
+position = Vector2(382, 1960)
+script = ExtResource("1_prop")
+atlas_cell = 14
+draw_size = Vector2(58, 40)
+modulate = Color(0.8, 0.85, 0.8, 0.5)
+
+[node name="FirstCombatWallInstrument" type="Node2D" parent="Decor"]
+position = Vector2(240, 1500)
+script = ExtResource("1_prop")
+atlas_cell = 4
+draw_size = Vector2(34, 74)
+
+[node name="FirstCombatScreenFan" type="Node2D" parent="Decor"]
+position = Vector2(492, 1648)
+script = ExtResource("1_prop")
+atlas_cell = 6
+draw_size = Vector2(58, 26)
+
+[node name="FirstCombatWeb" type="Area2D" parent="Decor"]
+position = Vector2(287, 1468)
+script = ExtResource("4_web")
+draw_size = Vector2(70, 70)
+
+[node name="FirstCombatScrap" type="Node2D" parent="Decor"]
+position = Vector2(295, 1580)
+script = ExtResource("1_prop")
+atlas_cell = 11
+draw_size = Vector2(36, 50)
+
+[node name="FirstCombatOil" type="Node2D" parent="Decor"]
+position = Vector2(684, 1692)
+script = ExtResource("1_prop")
+atlas_cell = 14
+draw_size = Vector2(64, 42)
+modulate = Color(0.8, 0.85, 0.8, 0.58)
+
+[node name="LowerPassagePipes" type="Node2D" parent="Decor"]
+position = Vector2(720, 1190)
+script = ExtResource("1_prop")
+atlas_cell = 7
+draw_size = Vector2(170, 54)
+rotation = 1.570796
+
+[node name="LowerExternalCompressor" type="Node2D" parent="Decor"]
+position = Vector2(872, 1120)
+script = ExtResource("1_prop")
+atlas_cell = 1
+draw_size = Vector2(232, 232)
+modulate = Color(0.67, 0.76, 0.78, 1)
+
+[node name="LowerExternalTank" type="Node2D" parent="Decor"]
+position = Vector2(412, 1328)
+script = ExtResource("1_prop")
+atlas_cell = 15
+draw_size = Vector2(208, 108)
+rotation = 1.570796
+modulate = Color(0.65, 0.74, 0.76, 1)
+
+[node name="MiddleTurnScreen" type="Node2D" parent="Decor"]
+position = Vector2(720, 996)
+script = ExtResource("1_prop")
+atlas_cell = 4
+draw_size = Vector2(42, 96)
+
+[node name="MiddleExteriorFan" type="Node2D" parent="Decor"]
+position = Vector2(642, 1006)
+script = ExtResource("6_fan")
+draw_size = Vector2(144, 144)
+modulate = Color(0.58, 0.68, 0.7, 1)
+
+[node name="MiddleTurnWeb" type="Area2D" parent="Decor"]
+position = Vector2(389, 1180)
+script = ExtResource("4_web")
+draw_size = Vector2(58, 58)
+
+[node name="UpperPassageWallPipes" type="Node2D" parent="Decor"]
+position = Vector2(560, 738)
+script = ExtResource("1_prop")
+atlas_cell = 7
+draw_size = Vector2(128, 34)
+rotation = 1.570796
+
+[node name="UpperExternalTank" type="Node2D" parent="Decor"]
+position = Vector2(850, 748)
+script = ExtResource("1_prop")
+atlas_cell = 15
+draw_size = Vector2(248, 112)
+modulate = Color(0.61, 0.71, 0.73, 1)
+
+[node name="UpperTurnWeb" type="Area2D" parent="Decor"]
+position = Vector2(375, 822)
+script = ExtResource("4_web")
+draw_size = Vector2(66, 66)
+
+[node name="WorkshopNorthInstruments" type="Node2D" parent="Decor"]
+position = Vector2(1132, 1360)
+script = ExtResource("1_prop")
+atlas_cell = 12
+draw_size = Vector2(86, 32)
+
+[node name="WorkshopEastToolbox" type="Node2D" parent="Decor"]
+position = Vector2(1200, 1540)
+script = ExtResource("1_prop")
+atlas_cell = 13
+draw_size = Vector2(28, 64)
+rotation = 1.570796
+
+[node name="WorkshopSouthCrates" type="Node2D" parent="Decor"]
+position = Vector2(1092, 1680)
+script = ExtResource("1_prop")
+atlas_cell = 5
+draw_size = Vector2(90, 32)
+
+[node name="WorkshopNorthWeb" type="Area2D" parent="Decor"]
+position = Vector2(1151, 1401)
+script = ExtResource("4_web")
+draw_size = Vector2(68, 68)
+mirror_x = true
+
+[node name="WorkshopSouthWeb" type="Area2D" parent="Decor"]
+position = Vector2(924, 1646)
+script = ExtResource("4_web")
+draw_size = Vector2(60, 60)
+rotation = -1.570796
+
+[node name="WorkshopOil" type="Node2D" parent="Decor"]
+position = Vector2(1150, 1622)
+script = ExtResource("1_prop")
+atlas_cell = 14
+draw_size = Vector2(40, 34)
+modulate = Color(0.7, 0.77, 0.7, 0.48)
+
+[node name="ExitWestCabinet" type="Node2D" parent="Decor"]
+position = Vector2(240, 466)
+script = ExtResource("1_prop")
+atlas_cell = 12
+draw_size = Vector2(34, 92)
+
+[node name="ExitEastInstrument" type="Node2D" parent="Decor"]
+position = Vector2(1040, 420)
+script = ExtResource("1_prop")
+atlas_cell = 4
+draw_size = Vector2(34, 78)
+
+[node name="ExitNorthVent" type="Node2D" parent="Decor"]
+position = Vector2(392, 240)
+script = ExtResource("1_prop")
+atlas_cell = 6
+draw_size = Vector2(64, 32)
+
+[node name="ExitSouthPipes" type="Node2D" parent="Decor"]
+position = Vector2(860, 656)
+script = ExtResource("1_prop")
+atlas_cell = 7
+draw_size = Vector2(150, 30)
+
+[node name="ExitWestWeb" type="Area2D" parent="Decor"]
+position = Vector2(310, 310)
+script = ExtResource("4_web")
+draw_size = Vector2(82, 82)
+
+[node name="ExitEastWeb" type="Area2D" parent="Decor"]
+position = Vector2(991, 289)
+script = ExtResource("4_web")
+draw_size = Vector2(68, 68)
+mirror_x = true
+
+[node name="ExitArenaOil" type="Node2D" parent="Decor"]
+position = Vector2(972, 585)
+script = ExtResource("1_prop")
+atlas_cell = 14
+draw_size = Vector2(68, 48)
+modulate = Color(0.8, 0.85, 0.8, 0.55)
+
+[node name="ExitCornerScrap" type="Node2D" parent="Decor"]
+position = Vector2(282, 594)
+script = ExtResource("1_prop")
+atlas_cell = 11
+draw_size = Vector2(44, 36)
+
+[node name="LandingWallUnit" type="Node2D" parent="Decor"]
+position = Vector2(752, 126)
+script = ExtResource("1_prop")
+atlas_cell = 4
+draw_size = Vector2(30, 72)
+
+[node name="ArrivalWestFixture" type="Node2D" parent="Decor"]
+position = Vector2(176, 2400)
+script = ExtResource("1_prop")
+atlas_cell = 8
+draw_size = Vector2(28, 68)
+
+[node name="ArrivalEastFixture" type="Node2D" parent="Decor"]
+position = Vector2(1040, 2336)
+script = ExtResource("1_prop")
+atlas_cell = 8
+draw_size = Vector2(28, 68)
+
+[node name="ArrivalNorthFixture" type="Node2D" parent="Decor"]
+position = Vector2(448, 2064)
+script = ExtResource("1_prop")
+atlas_cell = 8
+draw_size = Vector2(22, 56)
+
+[node name="WeaponLampFixture" type="Node2D" parent="Decor"]
+position = Vector2(400, 1776)
+script = ExtResource("1_prop")
+atlas_cell = 8
+draw_size = Vector2(20, 52)
+
+[node name="FirstLampFixture" type="Node2D" parent="Decor"]
+position = Vector2(240, 1664)
+script = ExtResource("1_prop")
+atlas_cell = 8
+draw_size = Vector2(22, 60)
+
+[node name="LowerLampFixture" type="Node2D" parent="Decor"]
+position = Vector2(560, 1280)
+script = ExtResource("1_prop")
+atlas_cell = 8
+draw_size = Vector2(22, 52)
+
+[node name="MiddleLampFixture" type="Node2D" parent="Decor"]
+position = Vector2(336, 1000)
+script = ExtResource("1_prop")
+atlas_cell = 8
+draw_size = Vector2(22, 52)
+
+[node name="UpperLampFixture" type="Node2D" parent="Decor"]
+position = Vector2(720, 748)
+script = ExtResource("1_prop")
+atlas_cell = 8
+draw_size = Vector2(22, 52)
+
+[node name="WorkshopLampFixture" type="Node2D" parent="Decor"]
+position = Vector2(1048, 1360)
+script = ExtResource("1_prop")
+atlas_cell = 8
+draw_size = Vector2(20, 60)
+
+[node name="ExitWestLampFixture" type="Node2D" parent="Decor"]
+position = Vector2(240, 368)
+script = ExtResource("1_prop")
+atlas_cell = 8
+draw_size = Vector2(24, 58)
+
+[node name="ExitEastLampFixture" type="Node2D" parent="Decor"]
+position = Vector2(1040, 536)
+script = ExtResource("1_prop")
+atlas_cell = 8
+draw_size = Vector2(24, 58)
+
+[node name="LandingLampFixture" type="Node2D" parent="Decor"]
+position = Vector2(528, 128)
+script = ExtResource("1_prop")
+atlas_cell = 8
+draw_size = Vector2(20, 44)
+
+[node name="ArrivalWestPool" type="Sprite2D" parent="Decor"]
+position = Vector2(240, 2400)
+scale = Vector2(2.109375, 1.640625)
+texture = SubResource("Texture_cold")
+material = SubResource("Material_glow")
+
+[node name="ArrivalEastPool" type="Sprite2D" parent="Decor"]
+position = Vector2(978, 2336)
+scale = Vector2(2.03125, 1.5625)
+texture = SubResource("Texture_cold")
+material = SubResource("Material_glow")
+
+[node name="ArrivalNorthPool" type="Sprite2D" parent="Decor"]
+position = Vector2(448, 2110)
+scale = Vector2(1.90625, 1.25)
+texture = SubResource("Texture_cold")
+material = SubResource("Material_glow")
+
+[node name="WeaponLampPool" type="Sprite2D" parent="Decor"]
+position = Vector2(430, 1825)
+scale = Vector2(1.875, 1.71875)
+texture = SubResource("Texture_cold")
+material = SubResource("Material_glow")
+
+[node name="FirstLampPool" type="Sprite2D" parent="Decor"]
+position = Vector2(300, 1664)
+scale = Vector2(1.71875, 1.875)
+texture = SubResource("Texture_cold")
+material = SubResource("Material_glow")
+
+[node name="LowerLampPool" type="Sprite2D" parent="Decor"]
+position = Vector2(617, 1280)
+scale = Vector2(1.71875, 1.875)
+texture = SubResource("Texture_cold")
+material = SubResource("Material_glow")
+
+[node name="MiddleLampPool" type="Sprite2D" parent="Decor"]
+position = Vector2(396, 1000)
+scale = Vector2(1.875, 1.875)
+texture = SubResource("Texture_cold")
+material = SubResource("Material_glow")
+
+[node name="UpperLampPool" type="Sprite2D" parent="Decor"]
+position = Vector2(666, 748)
+scale = Vector2(1.5625, 1.875)
+texture = SubResource("Texture_cold")
+material = SubResource("Material_glow")
+
+[node name="WorkshopLampPool" type="Sprite2D" parent="Decor"]
+position = Vector2(1048, 1412)
+scale = Vector2(2.265625, 1.640625)
+texture = SubResource("Texture_cold")
+material = SubResource("Material_glow")
+
+[node name="ExitWestLampPool" type="Sprite2D" parent="Decor"]
+position = Vector2(301, 368)
+scale = Vector2(1.9375, 1.71875)
+texture = SubResource("Texture_cold")
+material = SubResource("Material_glow")
+
+[node name="ExitEastLampPool" type="Sprite2D" parent="Decor"]
+position = Vector2(978, 536)
+scale = Vector2(1.9375, 1.71875)
+texture = SubResource("Texture_cold")
+material = SubResource("Material_glow")
+
+[node name="LandingLampPool" type="Sprite2D" parent="Decor"]
+position = Vector2(586, 128)
+scale = Vector2(1.46875, 1.328125)
+texture = SubResource("Texture_cold")
+material = SubResource("Material_glow")
+
+[node name="FloorDecals" type="Node2D" parent="."]
+z_index = 0
+
+[node name="EntryTread" type="Node2D" parent="FloorDecals"]
+position = Vector2(512, 2630)
+script = ExtResource("3_decal")
+size = Vector2(128, 12)
+surface = 4
+
+[node name="TeachingNeckTread" type="Node2D" parent="FloorDecals"]
+position = Vector2(544, 2050)
+script = ExtResource("3_decal")
+size = Vector2(128, 10)
+surface = 4
+
+[node name="GunNeckTread" type="Node2D" parent="FloorDecals"]
+position = Vector2(544, 1748)
+script = ExtResource("3_decal")
+size = Vector2(64, 10)
+surface = 4
+
+[node name="WorkshopTread" type="Node2D" parent="FloorDecals"]
+position = Vector2(868, 1476)
+script = ExtResource("3_decal")
+size = Vector2(16, 56)
+surface = 4
+
+[node name="ExitTread" type="Node2D" parent="FloorDecals"]
+position = Vector2(610, 248)
+script = ExtResource("3_decal")
+size = Vector2(60, 8)
+surface = 4
+
+[node name="AssemblySafety" type="Node2D" parent="FloorDecals"]
+position = Vector2(252, 2500)
+script = ExtResource("3_decal")
+size = Vector2(136, 9)
+surface = 4
+
+[node name="CompressorSafety" type="Node2D" parent="FloorDecals"]
+position = Vector2(830, 2500)
+script = ExtResource("3_decal")
+size = Vector2(132, 9)
+surface = 4
+
+[node name="ExitMachineSafety" type="Node2D" parent="FloorDecals"]
+position = Vector2(604, 548)
+script = ExtResource("3_decal")
+size = Vector2(72, 8)
+surface = 4
+
+[node name="ArrivalHatch" type="Node2D" parent="FloorDecals"]
+position = Vector2(672, 2520)
+script = ExtResource("3_decal")
+size = Vector2(64, 64)
+surface = 5
+
+[node name="WeaponHatch" type="Node2D" parent="FloorDecals"]
+position = Vector2(744, 1928)
+script = ExtResource("3_decal")
+size = Vector2(48, 48)
+surface = 5
+
+[node name="ExitHatch" type="Node2D" parent="FloorDecals"]
+position = Vector2(768, 512)
+script = ExtResource("3_decal")
+size = Vector2(48, 48)
+surface = 5
