@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 ; Independent B combat graybox. Temporary scale: 1 T = 32 px.
 ; Independent full-bright test fixture: visibility adapter is test-only.
 ; World collision uses layer 1; coordinate with C if the shared layer changes.
@@ -13,6 +13,8 @@
 [ext_resource type="Script" path="res://tests/manual/b_combat/combat_audio.gd" id="5_audio"]
 
 [ext_resource type="Script" path="res://tests/manual/b_combat/music/background_music.gd" id="6_music"]
+
+[ext_resource type="Script" path="res://tests/manual/b_combat/combat_player.gd" id="7_player_modes"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(960, 32)
@@ -381,6 +383,7 @@ shape = SubResource("RectangleShape2D_7")
 position = Vector2(160, 320)
 
 [node name="Player" parent="SpawnPoints/PlayerSpawn" instance=ExtResource("2_player")]
+script = ExtResource("7_player_modes")
 pulse_gun_equipped = true
 
 [node name="SentrySpawn" type="Marker2D" parent="SpawnPoints"]
