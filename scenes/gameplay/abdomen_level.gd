@@ -48,7 +48,7 @@ const C := {
 @onready var interactables_parent := $Interactables as Node2D
 @onready var camera := $Camera2D as Camera2D
 
-var robot_visual: Sprite2D
+var robot_visual: Node2D
 var player: CharacterBody2D
 var enemies: Array[Node] = []
 var interactables: Array[Node] = []
@@ -113,7 +113,7 @@ func _process(_delta: float) -> void:
 		return
 	if is_instance_valid(robot_visual):
 		robot_visual.global_rotation = 0
-		robot_visual.global_position = player.global_position + Vector2(0, -5)
+		robot_visual.global_position = player.global_position
 	_update_interaction()
 	_update_hud()
 
@@ -362,6 +362,7 @@ func _match_marker(marker: Marker2D) -> void:
 		"spawn":
 			if player == null:
 				player = PLAYER_SCENE.instantiate()
+				player.set_script(preload("res://scenes/player/xiaoyi_map_player.gd"))
 				player.global_position = pos
 				player.pulse_gun_equipped = false
 				add_child(player)
@@ -377,10 +378,9 @@ func _match_marker(marker: Marker2D) -> void:
 			cleaner.name = marker.object_id
 			add_child(cleaner)
 			cleaner.get_node("Facing/Body").hide()
-			var cleaner_model := COMBAT_SKIN.new()
+			var cleaner_model := preload("res://tests/manual/b_combat/cleaner_visual.gd").new()
 			cleaner_model.name = "CleanerModel"
-			cleaner_model.kind = "cleaner"
-			cleaner.get_node("Facing").add_child(cleaner_model)
+			cleaner.add_child(cleaner_model)
 			marker.hide()
 			enemies.append(cleaner)
 			total_enemies += 1
@@ -542,17 +542,10 @@ func _configure_player() -> void:
 	var map_bounds: Rect2 = map.get_meta("map_bounds", Rect2(128, 32, 1120, 2688))
 	player.get_node("Facing/Body").hide()
 	player.get_node("Facing/DirectionIndicator").hide()
-	robot_visual = Sprite2D.new()
-	robot_visual.name = "RobotModel"
-	robot_visual.texture = ROBOT_TEXTURE
-	robot_visual.scale = Vector2.ONE * 0.30
-	robot_visual.position = Vector2(0, -5)
+	robot_visual = preload("res://tests/manual/b_combat/xiaoyi_combat_visual.gd").new()
+	robot_visual.name = "XiaoyiCombatVisual"
+	robot_visual.display_height = 60.0
 	player.get_node("Facing").add_child(robot_visual)
-	player.pulse_gun.get_node("Barrel").hide()
-	var held_gun := COMBAT_SKIN.new()
-	held_gun.name = "HeldGunModel"
-	player.pulse_gun.add_child(held_gun)
-	player.pulse_gun.move_child(held_gun, 0)
 	player.pulse_gun.configure_space(map_bounds, _enemy_visible_query)
 	player.died.connect(_on_player_died)
 

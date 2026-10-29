@@ -41,6 +41,7 @@ func _run() -> void:
 	var player := room.get_node("SpawnPoints/PlayerSpawn/Player")
 	player.set_physics_process(false)
 	var gun := player.get_node("Facing/PulseGun")
+	gun.use_muzzle = false # Core beam tests supply explicit origins; muzzle integration has its own checks.
 	await physics_frame
 	var origin := Vector2(160, 500)
 	check(gun.request_fire(Vector2.RIGHT), "Click must begin charging.")

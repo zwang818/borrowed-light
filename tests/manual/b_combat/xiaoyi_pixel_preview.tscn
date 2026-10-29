@@ -1,0 +1,40 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://tests/manual/b_combat/art/xiaoyi/xiaoyi_pixel.tscn" id="1_robot"]
+
+[node name="XiaoyiPixelPreview" type="Node2D"]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(480, 320)
+
+[node name="Backdrop" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-1000, -1000, 2000, -1000, 2000, 2000, -1000, 2000)
+color = Color(0.09, 0.12, 0.14, 1)
+
+[node name="LargePreview" parent="." instance=ExtResource("1_robot")]
+position = Vector2(320, 470)
+scale = Vector2(6, 6)
+
+[node name="GameSizePreview" parent="." instance=ExtResource("1_robot")]
+position = Vector2(700, 360)
+
+[node name="Title" type="Label" parent="."]
+offset_left = 60.0
+offset_top = 35.0
+theme_override_font_sizes/font_size = 24
+text = "小一 · 02 废土维修型 · 像素风基础形态"
+
+[node name="LargeLabel" type="Label" parent="."]
+offset_left = 220.0
+offset_top = 535.0
+text = "放大外观预览（6 倍）"
+
+[node name="SmallLabel" type="Label" parent="."]
+offset_left = 590.0
+offset_top = 420.0
+text = "游戏尺寸对照（约 64 px 高）"
+
+[node name="Note" type="Label" parent="."]
+offset_left = 60.0
+offset_top = 590.0
+text = "单帧素材预览 · 尚未制作多方向、行走与手臂进化动画"

@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://tests/manual/b_combat/art/xiaoyi/xiaoyi_idle_pixel.png" id="1_sprite"]
+
+[node name="XiaoyiPixel" type="Node2D"]
+texture_filter = 1
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(0, -24)
+scale = Vector2(0.05, 0.05)
+texture = ExtResource("1_sprite")
