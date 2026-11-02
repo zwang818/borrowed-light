@@ -19,7 +19,7 @@ func run_checks() -> void:
 	var font: FontFile = load("res://scenes/gameplay/gameplay_ui_theme.tres").default_font
 	check(not font.allow_system_fallback, "Product text uses bundled font without system fallback")
 	var glyphs: Dictionary = {}
-	for source in ["abdomen_level.gd", "game_menus.gd", "achievement_toasts.gd"]:
+	for source in ["abdomen_level.gd", "game_menus.gd", "achievement_toasts.gd", "interaction_sheet.gd", "interaction_point.gd", "health_hearts.gd", "facility_visual.gd", "duct_visual.gd"]:
 		for character in FileAccess.get_file_as_string("res://scenes/gameplay/" + source):
 			var codepoint: int = character.unicode_at(0)
 			if codepoint >= 32:
@@ -52,12 +52,12 @@ func run_checks() -> void:
 	menus.toggle_pause()
 	menus._show_page(menus.Page.ACHIEVEMENTS)
 	await process_frame
-	check(paused and menus._manual_list.get_child_count() == 4, "Handbook lists locked and unlocked entries")
-	check(menus._manual_summary.text.contains("2 / 4"), "Completion summary counts actual unlocks")
+	check(paused and menus._manual_list.get_child_count() == script.DEFINITIONS.size(), "Handbook lists locked and unlocked entries")
+	check(menus._manual_summary.text.contains("2 / %d" % script.DEFINITIONS.size()), "Completion summary counts actual unlocks")
 	var filter = menus._content.find_children("*", "OptionButton", true, false)[0]
 	filter.select(1)
 	filter.item_selected.emit(1)
-	check(menus._manual_list.get_child_count() == 2, "Locked filter lists remaining achievements")
+	check(menus._manual_list.get_child_count() == script.DEFINITIONS.size() - 2, "Locked filter lists remaining achievements")
 	var search = menus._content.find_children("*", "LineEdit", true, false)[0]
 	search.text = "出口"
 	search.text_changed.emit("出口")
@@ -72,7 +72,18 @@ func run_checks() -> void:
 	filter.item_selected.emit(2)
 	check(menus._manual_list.get_child_count() == 2, "Unlocked filter lists completed achievements")
 	check(menus.unlock_achievement("first_clear"), "Unlock while handbook open")
-	check(menus._manual_list.get_child_count() == 3 and menus._manual_summary.text.contains("3 / 4"), "Handbook refreshes without resetting filters")
+	check(menus._manual_list.get_child_count() == 3 and menus._manual_summary.text.contains("3 / %d" % script.DEFINITIONS.size()), "Handbook refreshes without resetting filters")
+	filter.select(1)
+	filter.item_selected.emit(1)
+	search.text = "清高"
+	search.text_changed.emit(search.text)
+	check(menus._manual_list.get_child_count() == 1, "Funny flavor text is searchable")
+	menus.set_achievement_progress("web_sweeper", 9, 10)
+	var found_progress := false
+	for label in menus._manual_list.find_children("*", "Label", true, false):
+		if label.text.contains("9 / 10"):
+			found_progress = true
+	check(found_progress, "Locked achievement displays live room progress")
 	menus.close_and_resume()
 	menus.queue_free()
 	await process_frame

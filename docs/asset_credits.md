@@ -25,3 +25,17 @@ Noto Sans SC 的许可副本：`assets/fonts/OFL-NotoSansSC.txt`。
 第二版标题字体 `assets/fonts/noto_serif_sc_title.ttf`：Google Fonts / Noto Serif SC，600 字重，“借光”文本子集；SIL Open Font License 1.1，许可副本 `assets/fonts/OFL-NotoSerifSC.txt`。来源：https://fonts.google.com/noto/specimen/Noto+Serif+SC 。菜单 Noto Sans SC 子集已扩展至第二版全部文案。
 
 腹腔灰盒按已认可的概念图安排空间；概念图与用户提供的风格参考图未作为图片资源纳入工程。本表的原创几何说明仅指布局实现，不代表参考图的版权归本项目。2026-10-27 起实际地图使用上表单独记录的 AI 生成环境素材；概念图中的人物、标注与黄色路线未贴入地图。后续若将参考图纳入交付材料，需另记来源与许可。
+
+2026-11-02 C 第一关交互：更新游戏界面 Noto Sans SC 字体子集，覆盖八个 C 运行脚本的当前字符；准确字形请求数、原始 URL 及哈希以 `assets/fonts/gameplay_ui_source.json` 为准，继续使用 SIL OFL。新交互标记、功能面板及门禁使用 Godot 几何与控件，无新增外部图片或声音。
+
+机械心参考：用户于 2026-11-02 提供三张手机截图，仅用于满／半／空三状态示意；截图未进入工程。`health_hearts.gd` 中心形像素网格、仪表板与铆钉以及 `facility_visual.gd` 门禁／终端，均为本项目 Godot 代码绘制，无新增图片依赖或第三方图片许可。
+
+| 素材路径 | 来源 / 作者 | 许可与说明 |
+| --- | --- | --- |
+| `assets/sprites/interactables/bulkhead.png`、`access_terminal.png` | 2026-11-02 本项目内置 image_gen 按用户要求生成 | 生成素材，非下载的 CC0 资产；原始 PNG 和透明通道保留。风格参考为用户提供的本项目截图，未直接复制其截图像素。完整提示词、用途及哈希见同目录 `generation_source.json`；项目消费说明见同目录 README。 |
+
+同日后续：门禁／终端由前述原生几何表现改为上述生成贴图；管道盖复用 A 的环境地形图集井盖格，来源继续沿用该图集的既有说明。
+
+2026-11-02 C-ACH-02：趣味成就标题、短句和进度 UI 为本项目文案与原有控件，未使用蜘蛛侠图像、品牌图标、Steam SDK 或第三方图像／音频。字体子集已补齐本轮运行文案，继续使用同目录 OFL 与来源 JSON。
+
+2026-11-02 C-STORY-01：小一／神明通讯为按用户剧情示例编写的可替换短稿；不提取《绝区零》字体、图标或截图素材。取消目标栏后没有新增目标字体或图标资源，现有中文子集已补齐实际运行台词。

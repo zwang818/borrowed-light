@@ -7,6 +7,7 @@ func _initialize() -> void:
 
 func run() -> void:
 	var game = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
+	game.achievement_save_path = "user://test_a_web_achievements.cfg"
 	root.add_child(game)
 	current_scene = game
 	game.player.set_physics_process(false)
@@ -33,20 +34,22 @@ func run() -> void:
 					assert(not Geometry2D.is_point_in_polygon(web.to_global(center), floor_polygon))
 			continue
 		foreground_count += 1
-		var shot := find_shot(env, web)
+		var shot := find_shot(game, env, web)
 		assert(not shot.is_empty(), "Cannot shoot web from floor: " + str(web.name))
 		web.apply_damage(0)
 		assert(not web.broken)
 		var from: Vector2 = shot[0]
 		var to: Vector2 = shot[1]
-		var direction := (to - from).normalized()
+		var beam_origin: Vector2 = shot[2]
+		game.player.global_position = from
+		var direction := (to - beam_origin).normalized()
 		var gun = game.player.pulse_gun
 		gun.cancel()
 		assert(gun.request_fire(direction))
 		gun.advance_time(0.8, from, direction)
 		gun.advance_time(0.3, from, direction)
 		assert(web.broken, "Actual pulse must break web: " + str(web.name))
-		assert(TRACE.trace(web.get_world_2d().direct_space_state, from, direction, from.distance_to(to) + 20).target == web, "Broken web must still stop the same beam's contact window")
+		assert(TRACE.trace(web.get_world_2d().direct_space_state, beam_origin, direction, beam_origin.distance_to(to) + 20).target == web, "Broken web must still stop the same beam's contact window")
 		web.apply_damage(1)
 		await process_frame
 		await process_frame
@@ -89,23 +92,30 @@ func run() -> void:
 	game.queue_free()
 	await process_frame
 	await process_frame
+	if FileAccess.file_exists("user://test_a_web_achievements.cfg"):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_a_web_achievements.cfg"))
 	print("WEBS: 10 reachable pulse targets, 432 background patches, one spider per hit, pause, cleanup, retry, enemy counts: PASS")
 	quit()
 
-func find_shot(env: Node2D, web: Area2D) -> Array:
+func find_shot(game: Node2D, env: Node2D, web: Area2D) -> Array:
 	var polygon: PackedVector2Array = web.hit_polygon()
 	for radius in [72.0, 112.0, 160.0, 220.0]:
 		for i in range(24):
 			var from: Vector2 = web.global_position + Vector2.from_angle(float(i) * TAU / 24) * radius
 			if not env._free_floor(from):
 				continue
+			game.player.global_position = from
+			var origin: Dictionary = game.player.get_shot_origin(1)
+			if origin.blocked and origin.target != web:
+				continue
+			var beam_origin: Vector2 = origin.position
 			for x in range(-3, 4):
 				for y in range(-3, 4):
 					var local: Vector2 = Vector2(x, y) * web.draw_size / 8
 					if not Geometry2D.is_point_in_polygon(local, polygon):
 						continue
 					var to := web.to_global(local)
-					var hit := TRACE.trace(web.get_world_2d().direct_space_state, from, (to - from).normalized(), from.distance_to(to) + 2)
+					var hit := TRACE.trace(web.get_world_2d().direct_space_state, beam_origin, (to - beam_origin).normalized(), beam_origin.distance_to(to) + 2)
 					if hit.target == web:
-						return [from, to]
+						return [from, to, beam_origin]
 	return []

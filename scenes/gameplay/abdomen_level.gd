@@ -1,10 +1,16 @@
 extends Node2D
 ## 腹腔关卡运行场景：组装地图、玩家、敌人、交互对象
-## P1 最小可玩：出生 → 拿枪 → 打清扫者 → 终端开门 → 出口完成
+## First-level C flow: blueprint → workbench → combat → terminal → exit
 ## C 模块集成：引导 HUD、终端门禁、房间重试、场景切换、空间记忆
 
-const ROBOT_TEXTURE := preload("res://assets/sprites/title/title_robot.svg")
-const COMBAT_SKIN := preload("res://scenes/gameplay/combat_skin.gd")
+signal interaction_requested(content_id: StringName, payload: Dictionary, token: int)
+signal interaction_finished(token: int, completed: bool)
+## D may connect this signal and complete/cancel via finish_interaction(token, bool).
+const POINT_SCRIPT := preload("res://scenes/gameplay/interaction_point.gd")
+const SHEET_SCRIPT := preload("res://scenes/gameplay/interaction_sheet.gd")
+const FACILITY_SCRIPT := preload("res://scenes/gameplay/facility_visual.gd")
+const DUCT_VISUAL := preload("res://scenes/gameplay/duct_visual.gd")
+const HEALTH_SCRIPT := preload("res://scenes/gameplay/health_hearts.gd")
 
 const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
 const CLEANER_SCENE := preload("res://scenes/enemies/cleaner/cleaner.tscn")
@@ -33,11 +39,11 @@ const C := {
 	"notify_default": 2.0,
 	"level_complete_wait": 3.0,
 	"fade_duration": 0.5,
-	"t_welcome": "关卡开始！靠近枪架拾取脉冲枪",
-	"t_weapon_get": "获得脉冲枪！点按左键蓄力射击",
-	"t_terminal_ok": "终端已激活，大门开启",
-	"t_all_enemies_down": "所有敌人已清除，前往终端",
-	"t_retry": "已重试，靠近枪架拾取脉冲枪",
+
+	"t_weapon_get": "脉冲模块已接入",
+	"t_terminal_ok": "小一：门开了。",
+	"t_all_enemies_down": "神明：警报停了……那台终端应该能响应你了。",
+	"t_retry": "房间已重试",
 	"t_level_complete": "样板完成",
 	"t_weapon_prompt": "脉冲枪 - 靠近拾取",
 	"t_terminal_prompt": "[E] 操作终端",
@@ -55,7 +61,7 @@ var interactables: Array[Node] = []
 var is_level_complete := false
 var nearest_interactable: Node = null
 
-enum Objective { GET_WEAPON, KILL_ENEMIES, ACTIVATE_TERMINAL, REACH_EXIT }
+enum Objective { GET_WEAPON, KILL_ENEMIES, ACTIVATE_TERMINAL, REACH_EXIT, CRAFT_ARM }
 var current_objective: int = Objective.GET_WEAPON
 var total_enemies: int = 0
 var dead_enemies: int = 0
@@ -65,21 +71,32 @@ var terminal: Node = null
 var final_exit: Node = null
 var explored_positions: Array[Vector2] = []
 var last_memory_record_time: float = 0.0
+@export var achievement_save_path := "user://achievements.cfg"
 var game_menus
 var enemy_baselines: Dictionary = {}
 var door_tweens: Array[Tween] = []
 var notification_revision := 0
+var blueprint_known := false
+var pulse_learned := false
+var workshop_seen := false
+var pending_interaction: StringName = &""
+var interaction_token := 0
+var interaction_sheet
+var terminal_gate: StaticBody2D
+var health_display: Control
+var interaction_points: Dictionary = {}
+var ducts: Dictionary = {}
+var unlocked_ducts: Dictionary = {}
+var achievement_webs: Array[Node] = []
+var room_damage_taken := false
+var achievement_last_health := 0
 
 ## HUD 节点
 var hud_canvas: CanvasLayer
-var objective_label: Label
-var hp_panel: ColorRect
 var interact_label: Label
 var interact_bg: ColorRect
 var notify_label: Label
 var notify_bg: ColorRect
-var hp_bar: ColorRect
-var hp_bg: ColorRect
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
@@ -102,11 +119,18 @@ func _ready() -> void:
 	_setup_hud()
 	game_menus = GAME_MENUS_SCRIPT.new()
 	game_menus.name = "GameMenus"
+	game_menus.achievement_save_path = achievement_save_path
 	add_child(game_menus)
 	game_menus.retry_requested.connect(_retry_level)
 	game_menus.title_requested.connect(_return_to_title)
-	_update_objective()
-	_show_welcome()
+	interaction_sheet = SHEET_SCRIPT.new()
+	add_child(interaction_sheet)
+	interaction_sheet.finished.connect(finish_interaction)
+	interaction_sheet.destination_selected.connect(_travel_duct)
+	_setup_story_points()
+	_setup_terminal_gate()
+	_setup_ducts()
+	_setup_achievement_events()
 
 func _process(_delta: float) -> void:
 	if get_tree().paused:
@@ -129,7 +153,9 @@ func _physics_process(delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact") and not get_tree().paused and not is_level_complete:
-		_try_interact()
+		get_viewport().set_input_as_handled()
+		if not event.is_echo():
+			_try_interact()
 
 ## ---------- 空间记忆 ----------
 
@@ -150,183 +176,98 @@ func get_exploration_ratio() -> float:
 	var total_cells: float = (map_bounds.size.x / 64.0) * (map_bounds.size.y / 64.0)
 	return minf(explored_positions.size() / total_cells, 1.0)
 
-## ---------- 开场引导 ----------
-
-func _show_welcome() -> void:
-	_show_notification(C.t_welcome, C.welcome_duration)
-
-## ---------- HUD 系统（最简化版） ----------
+## ---------- Gameplay HUD ----------
 
 func _setup_hud() -> void:
 	hud_canvas = CanvasLayer.new()
 	add_child(hud_canvas)
-
-	## === 顶部：任务目标 ===
-	var obj_bg := ColorRect.new()
-	obj_bg.color = Color(0.025, 0.04, 0.055, 0.86)
-	obj_bg.position = Vector2(16, 12)
-	obj_bg.size = Vector2(520, 42)
-	hud_canvas.add_child(obj_bg)
-	var objective_accent := ColorRect.new()
-	objective_accent.color = Color(0.35, 0.82, 0.88, 0.95)
-	objective_accent.position = Vector2(16, 12)
-	objective_accent.size = Vector2(4, 42)
-	hud_canvas.add_child(objective_accent)
-
-	objective_label = Label.new()
-	objective_label.position = Vector2(32, 12)
-	objective_label.size = Vector2(488, 42)
-	objective_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	objective_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	objective_label.add_theme_font_size_override("font_size", 16)
-	objective_label.add_theme_color_override("font_color", Color(0.92, 0.94, 0.91))
-	objective_label.text = ""
-	hud_canvas.add_child(objective_label)
-
-	## === 左下角：仅保留耐久 ===
-	hp_panel = ColorRect.new()
-	hp_panel.color = Color(0.015, 0.025, 0.035, 0.78)
-	hp_panel.position = Vector2(16, 582)
-	hp_panel.size = Vector2(270, 50)
-	hud_canvas.add_child(hp_panel)
-
-	hp_bg = ColorRect.new()
-	hp_bg.color = Color(0.18, 0.22, 0.23, 1)
-	hp_bg.position = Vector2(28, 601)
-	hp_bg.size = Vector2(145, 12)
-	hud_canvas.add_child(hp_bg)
-
-	hp_bar = ColorRect.new()
-	hp_bar.color = Color(0.84, 0.35, 0.3, 1)
-	hp_bar.position = Vector2(28, 601)
-	hp_bar.size = Vector2(145, 12)
-	hud_canvas.add_child(hp_bar)
-
-	var hp_text := Label.new()
-	hp_text.position = Vector2(180, 593)
-	hp_text.size = Vector2(94, 28)
-	hp_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hp_text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	hp_text.add_theme_font_size_override("font_size", 12)
-	hp_text.add_theme_color_override("font_color", Color(0.93, 0.94, 0.9, 1))
-	hp_text.text = "HP 100 / 100"
-	hp_text.name = "HpText"
-	hud_canvas.add_child(hp_text)
-
-	## === 中央偏下：交互提示 ===
+	var root := Control.new()
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.theme = UI_THEME
+	hud_canvas.add_child(root)
+	health_display = HEALTH_SCRIPT.new()
+	health_display.name = "HealthDisplay"
+	health_display.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	health_display.offset_left = 16
+	health_display.offset_top = -98
+	health_display.offset_right = 268
+	health_display.offset_bottom = -16
+	root.add_child(health_display)
+	player.health_changed.connect(func(value: int, maximum: int): health_display.set_health(float(value), float(maximum)))
+	_update_hp_bar()
 	interact_bg = ColorRect.new()
-	interact_bg.color = C.panel_bg
-	interact_bg.position = Vector2(376, 450)
-	interact_bg.size = Vector2(400, 36)
-	interact_bg.visible = false
-	hud_canvas.add_child(interact_bg)
-
+	interact_bg.color = Color(0.025, 0.045, 0.055, 0.94)
+	interact_bg.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	interact_bg.offset_left = -290
+	interact_bg.offset_right = 290
+	interact_bg.offset_top = -84
+	interact_bg.offset_bottom = -36
+	root.add_child(interact_bg)
 	interact_label = Label.new()
-	interact_label.position = Vector2(376, 450)
-	interact_label.size = Vector2(400, 36)
+	interact_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	interact_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	interact_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	interact_label.add_theme_font_size_override("font_size", 18)
-	interact_label.add_theme_color_override("font_color", C.text_green)
-	interact_label.text = ""
-	hud_canvas.add_child(interact_label)
-
-	## === 上沿：短暂通知，避开角色与战斗视野 ===
+	interact_label.add_theme_color_override("font_color", Color("d4e8d8"))
+	interact_bg.add_child(interact_label)
 	notify_bg = ColorRect.new()
-	notify_bg.color = C.panel_bg
-	notify_bg.position = Vector2(346, 64)
-	notify_bg.size = Vector2(460, 42)
-	notify_bg.visible = false
-	hud_canvas.add_child(notify_bg)
-
+	notify_bg.color = Color(0.025, 0.045, 0.055, 0.94)
+	notify_bg.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	notify_bg.offset_left = -260
+	notify_bg.offset_right = 260
+	notify_bg.offset_top = 108
+	notify_bg.offset_bottom = 152
+	root.add_child(notify_bg)
 	notify_label = Label.new()
-	notify_label.position = Vector2(356, 64)
-	notify_label.size = Vector2(440, 42)
+	notify_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	notify_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	notify_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	notify_label.add_theme_font_size_override("font_size", 16)
-	notify_label.add_theme_color_override("font_color", C.text_notify)
-	notify_label.text = ""
-	hud_canvas.add_child(notify_label)
-	for control in hud_canvas.get_children():
-		if control is Control:
-			control.theme = UI_THEME
-
-	print("[HUD] 已创建当前目标、耐久与交互提示")
+	notify_label.add_theme_color_override("font_color", Color("efd49a"))
+	notify_bg.add_child(notify_label)
+	interact_bg.hide()
+	notify_bg.hide()
+	for control in root.find_children("*", "Control", true, false):
+		control.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 ## ---------- HUD 更新 ----------
-
-func _update_objective() -> void:
-	match current_objective:
-		Objective.GET_WEAPON:
-			objective_label.text = "当前目标：拾取脉冲枪"
-		Objective.KILL_ENEMIES:
-			var remaining: int = total_enemies - dead_enemies
-			objective_label.text = "当前目标：击败清扫者（剩余 %d）" % remaining
-		Objective.ACTIVATE_TERMINAL:
-			objective_label.text = "当前目标：操作终端开启大门"
-		Objective.REACH_EXIT:
-			objective_label.text = "当前目标：前往出口"
 
 func _update_hud() -> void:
 	_update_hp_bar()
 	_update_world_prompts()
 
+
 func _update_hp_bar() -> void:
-	var max_hp: float = 100.0
-	var hp: float = 100.0
-	if player != null and is_instance_valid(player):
-		if "max_health" in player:
-			max_hp = float(player.max_health)
-		elif "max_hp" in player:
-			max_hp = float(player.max_hp)
-		if "health" in player:
-			hp = float(player.health)
-		elif "hp" in player:
-			hp = float(player.hp)
-		elif "current_health" in player:
-			hp = float(player.current_health)
-	var ratio: float = clampf(hp / max_hp, 0.0, 1.0)
-	hp_bar.size.x = int(145 * ratio)
-	var hp_text := hud_canvas.get_node_or_null("HpText")
-	if hp_text != null:
-		hp_text.text = "HP %d / %d" % [int(hp), int(max_hp)]
+	health_display.set_health(float(player.health), float(player.max_health))
 
 func _update_world_prompts() -> void:
-	## 武器提示
-	if weapon_pickup != null and is_instance_valid(weapon_pickup):
-		var w_dist: float = player.global_position.distance_to(weapon_pickup.global_position)
-		var w_prompt := weapon_pickup.get_node_or_null("PromptLabel")
-		if w_prompt != null:
-			w_prompt.visible = w_dist < C.weapon_prompt_range
-
-	## 终端提示
-	var show_screen_prompt := false
-	if nearest_interactable != null and is_instance_valid(nearest_interactable):
-		if nearest_interactable.has_meta("is_terminal") and not nearest_interactable.get_meta("activated"):
-			show_screen_prompt = true
-			var t_prompt := nearest_interactable.get_node_or_null("PromptLabel")
-			if t_prompt != null:
-				t_prompt.text = _terminal_prompt()
-				t_prompt.visible = true
-
-	## 隐藏其他终端提示
+	# One contextual screen prompt. No duplicate labels above world objects.
+	terminal.get_node("FacilityVisual").set_status(terminal_gate.get_meta("is_open", false), nearest_interactable == terminal, terminal_activated)
 	for obj in interactables:
-		if not is_instance_valid(obj) or obj == nearest_interactable:
+		if not is_instance_valid(obj):
 			continue
-		if obj.has_meta("is_terminal") and not obj.get_meta("activated"):
-			var t_prompt := obj.get_node_or_null("PromptLabel")
-			if t_prompt != null:
-				t_prompt.visible = false
-
-	## 屏幕中央交互提示
-	if show_screen_prompt:
+		var label := obj.get_node_or_null("PromptLabel")
+		if label != null:
+			label.hide()
+		if obj.get_script() == POINT_SCRIPT:
+			obj.focused = obj == nearest_interactable
+			var available: bool = obj.interaction_id != &"pulse_workbench" or (blueprint_known and not pulse_learned)
+			var completed: bool = (obj.interaction_id == &"pulse_blueprint" and blueprint_known) or (obj.interaction_id == &"pulse_workbench" and pulse_learned) or (obj.interaction_id == &"workshop_origin" and workshop_seen)
+			if ducts.has(obj.interaction_id):
+				completed = unlocked_ducts.has(obj.interaction_id)
+			obj.set_status(player.global_position.distance_to(obj.global_position) < 120, available, completed)
+	if not is_instance_valid(nearest_interactable) and not terminal_gate.get_meta("is_open", false) and player.global_position.distance_to(terminal_gate.global_position) < 120:
+		interact_bg.show()
+		interact_label.show()
+		interact_label.text = "终端区域入口锁定 · 剩余 %d 台清扫者" % _remaining_cleaners()
+		return
+	interact_bg.visible = is_instance_valid(nearest_interactable)
+	interact_label.visible = interact_bg.visible
+	if not interact_bg.visible:
+		return
+	if nearest_interactable.has_meta("is_terminal"):
 		interact_label.text = _terminal_prompt()
-		interact_label.visible = true
-		interact_bg.visible = true
 	else:
-		interact_label.visible = false
-		interact_bg.visible = false
+		interact_label.text = _point_prompt(nearest_interactable.interaction_id)
 
 ## ---------- 通知系统 ----------
 
@@ -408,43 +349,9 @@ func _weapon_display_position() -> Vector2:
 	var rack = map.get_node("Walls/GunRackBase")
 	return rack.to_global(rack.size * 0.5)
 
-func _add_weapon_pickup(pos: Vector2, weapon_id: String) -> Node:
-	var area := Area2D.new()
-	area.name = "WeaponPickup_" + weapon_id
-	area.position = pos
-	area.collision_layer = 64
-	area.collision_mask = 2
-	var shape := CollisionShape2D.new()
-	# The rack remains solid. Extend pickup to its edge so the display is reachable.
-	var rectangle := RectangleShape2D.new()
-	rectangle.size = map.get_node("Walls/GunRackBase").size + Vector2(16, 16)
-	shape.shape = rectangle
-	area.add_child(shape)
-	var vis := COMBAT_SKIN.new()
-	vis.name = "GunModel"
-	vis.position.x = 12
-	vis.scale = Vector2.ONE * 1.5
-	area.add_child(vis)
-	## 拾取提示
-	var prompt_label := Label.new()
-	prompt_label.name = "PromptLabel"
-	prompt_label.theme = UI_THEME
-	prompt_label.text = C.t_weapon_prompt
-	prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	prompt_label.add_theme_font_size_override("font_size", 18)
-	prompt_label.add_theme_color_override("font_color", Color(0.3, 0.85, 1.0, 1))
-	prompt_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
-	prompt_label.add_theme_constant_override("outline_size", 5)
-	prompt_label.position = Vector2(-70, -45)
-	prompt_label.size = Vector2(140, 28)
-	prompt_label.visible = false
-	area.add_child(prompt_label)
-	area.set_meta("is_weapon", true)
-	area.body_entered.connect(func(body): _on_weapon_entered(body, weapon_id, area))
-	interactables_parent.add_child(area)
-	interactables.append(area)
-	return area
+func _add_weapon_pickup(_pos: Vector2, _weapon_id: String) -> Node:
+	var rack = map.get_node("Walls/GunRackBase")
+	return _add_story_point(&"pulse_blueprint", rack.to_global(Vector2(rack.size.x * 0.5, rack.size.y + 4)))
 
 func _add_terminal(pos: Vector2, term_id: String, linked: Array) -> Node:
 	var area := Area2D.new()
@@ -457,34 +364,10 @@ func _add_terminal(pos: Vector2, term_id: String, linked: Array) -> Node:
 	circle.radius = 20.0
 	shape.shape = circle
 	area.add_child(shape)
-	## 绿色方块 + 脉冲
-	var vis := Polygon2D.new()
-	vis.polygon = PackedVector2Array([-10, -10, 10, -10, 10, 10, -10, 10])
-	vis.color = Color(0.2, 0.8, 0.4, 0.7)
-	area.add_child(vis)
-	var tween := create_tween().set_loops()
-	tween.tween_property(vis, "scale", Vector2(1.2, 1.2), 0.6)
-	tween.tween_property(vis, "scale", Vector2(1.0, 1.0), 0.6)
-	## 黄色提示背景 + 文字
-	var prompt_panel := ColorRect.new()
-	prompt_panel.name = "PromptPanel"
-	prompt_panel.color = C.panel_yellow
-	prompt_panel.position = Vector2(-65, -52)
-	prompt_panel.size = Vector2(130, 26)
-	prompt_panel.visible = false
-	area.add_child(prompt_panel)
-	var prompt_label := Label.new()
-	prompt_label.name = "PromptLabel"
-	prompt_label.theme = UI_THEME
-	prompt_label.text = C.t_terminal_prompt
-	prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	prompt_label.add_theme_font_size_override("font_size", 14)
-	prompt_label.add_theme_color_override("font_color", Color(0, 0, 0, 1))
-	prompt_label.position = Vector2(-65, -52)
-	prompt_label.size = Vector2(130, 26)
-	prompt_label.visible = false
-	area.add_child(prompt_label)
+	var visual := FACILITY_SCRIPT.new()
+	visual.name = "FacilityVisual"
+	visual.kind = "terminal"
+	area.add_child(visual)
 	area.set_meta("terminal_id", term_id)
 	area.set_meta("linked_ids", linked)
 	area.set_meta("is_terminal", true)
@@ -504,10 +387,10 @@ func _add_door(pos: Vector2, door_id: String) -> void:
 	rect.size = Vector2(64, 32)
 	shape.shape = rect
 	body.add_child(shape)
-	var vis := Polygon2D.new()
-	vis.polygon = PackedVector2Array([-32, -16, 32, -16, 32, 16, -32, 16])
-	vis.color = Color(0.6, 0.4, 0.2, 0.9)
-	body.add_child(vis)
+	var visual := FACILITY_SCRIPT.new()
+	visual.name = "FacilityVisual"
+	visual.dimensions = rect.size
+	body.add_child(visual)
 	body.set_meta("door_id", door_id)
 	body.set_meta("is_open", false)
 	body.set_meta("is_door", true)
@@ -572,20 +455,25 @@ func _configure_camera() -> void:
 ## ---------- 交互系统 ----------
 
 func _update_interaction() -> void:
-	if player == null or player.is_dead:
-		nearest_interactable = null
+	nearest_interactable = null
+	if player == null or player.is_dead or get_tree().paused:
 		return
-	var nearest: Node = null
 	var nearest_dist: float = C.interaction_range
 	for obj in interactables:
-		if not is_instance_valid(obj) or not obj.has_meta("is_terminal") or obj.get_meta("activated", false):
+		if not is_instance_valid(obj):
+			continue
+		if not obj.has_meta("is_terminal") and obj.get_script() != POINT_SCRIPT:
+			continue
+		if obj.has_meta("is_terminal") and not terminal_gate.get_meta("is_open", false):
 			continue
 		var dist: float = player.global_position.distance_to(obj.global_position)
-		if dist < nearest_dist:
-			if obj is Area2D or obj is StaticBody2D:
-				nearest = obj
-				nearest_dist = dist
-	nearest_interactable = nearest
+		if dist >= nearest_dist:
+			continue
+		var query := PhysicsRayQueryParameters2D.create(player.global_position, obj.global_position, 1)
+		if not get_world_2d().direct_space_state.intersect_ray(query).is_empty():
+			continue
+		nearest_interactable = obj
+		nearest_dist = dist
 
 func _remaining_cleaners() -> int:
 	var count := 0
@@ -597,13 +485,21 @@ func _remaining_cleaners() -> int:
 
 func _terminal_prompt() -> String:
 	var remaining := _remaining_cleaners()
-	return "终端锁定：剩余 %d 台清扫者" % remaining if remaining > 0 else C.t_terminal_prompt
+	if terminal_activated:
+		return "终端已激活 · 出口门已开启"
+	return "终端锁定 · 剩余 %d 台清扫者" % remaining if remaining > 0 else "[E] 激活终端 · 解锁出口门"
 
 func _try_interact() -> void:
 	if player.is_dead or get_tree().paused:
 		return
 	_update_interaction()
 	if nearest_interactable == null:
+		return
+	if nearest_interactable.get_script() == POINT_SCRIPT:
+		if ducts.has(nearest_interactable.interaction_id):
+			_request_duct(nearest_interactable.interaction_id)
+		else:
+			_request_story(nearest_interactable.interaction_id)
 		return
 	if nearest_interactable.has_meta("is_terminal") and not nearest_interactable.get_meta("activated"):
 		if _remaining_cleaners() > 0:
@@ -621,7 +517,6 @@ func _try_interact() -> void:
 		game_menus.unlock_achievement("first_terminal")
 		_show_notification(C.t_terminal_ok, C.notify_default)
 		current_objective = Objective.REACH_EXIT
-		_update_objective()
 
 func _play_terminal_sound() -> void:
 	# Optional existing sound is absent in this checkout; do not add a new effect.
@@ -646,68 +541,40 @@ func _open_door(door_id: String) -> void:
 			_door_flash_animation(obj)
 
 func _door_flash_animation(door: Node) -> void:
-	var vis: Polygon2D = null
-	for child in door.get_children():
-		if child is Polygon2D:
-			vis = child
-			break
-	if vis == null:
-		return
-	var final_color := Color(0.3, 0.8, 0.4, 0.4)
+	var visual = door.get_node("FacilityVisual")
+	visual.set_status(true)
 	var tween := create_tween()
 	door_tweens.append(tween)
-	tween.tween_property(vis, "color", Color(1, 1, 1, 1), 0.1)
-	tween.tween_property(vis, "color", final_color, 0.15)
-	tween.tween_property(vis, "color", Color(1, 1, 1, 1), 0.1)
-	tween.tween_property(vis, "color", final_color, 0.15)
+	tween.tween_property(visual, "open_amount", 1.0, 0.35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 ## ---------- 事件回调 ----------
-
-func _on_weapon_entered(body: Node, _weapon_id: String, area: Area2D) -> void:
-	if body == player and not player.is_dead and not player.pulse_gun_equipped and not area.is_queued_for_deletion():
-		player.pulse_gun_equipped = true
-		area.queue_free()
-		game_menus.unlock_achievement("first_weapon")
-		_show_notification(C.t_weapon_get, 2.5)
-		current_objective = Objective.KILL_ENEMIES
-		_update_objective()
 
 func _on_exit_entered(body: Node, exit_id: String) -> void:
 	if body != player or player.is_dead or get_tree().paused or is_level_complete:
 		return
 	for obj in interactables_parent.get_children():
 		if obj.has_meta("exit_id") and obj.get_meta("exit_id") == exit_id:
-			if obj.get_meta("is_final_exit", false):
+			if obj.get_meta("is_final_exit", false) and terminal_activated:
 				is_level_complete = true
 				game_menus.unlock_achievement("first_exit")
 				_show_level_complete()
 			break
 
-func _return_weapon_to_rack() -> void:
-	player.pulse_gun_equipped = false
-	player.pulse_gun.cancel()
-	player.pulse_gun.hide()
-	if not is_instance_valid(weapon_pickup) or weapon_pickup.is_queued_for_deletion():
-		# Discard freed pickup references so repeated deaths do not grow the list.
-		interactables = interactables.filter(func(obj): return is_instance_valid(obj) and not obj.is_queued_for_deletion())
-		weapon_pickup = _add_weapon_pickup(_weapon_display_position(), "pulse_gun")
-	current_objective = Objective.GET_WEAPON
-	_update_objective()
-
 func _on_player_died() -> void:
-	_return_weapon_to_rack()
+	_update_hp_bar()
 	game_menus.show_death()
 
 func _on_enemy_died(_entity_id: StringName) -> void:
 	dead_enemies += 1
+	if _remaining_cleaners() == 0:
+		_open_door("p1_terminal_access_gate")
 	var remaining: int = total_enemies - dead_enemies
-	_show_notification("清扫者被击败（剩余 %d）" % remaining, 1.5)
-	_update_objective()
 	if remaining <= 0:
 		game_menus.unlock_achievement("first_clear")
+		if not room_damage_taken:
+			game_menus.unlock_achievement("clean_clear")
 	if remaining <= 0 and current_objective == Objective.KILL_ENEMIES:
 		current_objective = Objective.ACTIVATE_TERMINAL
-		_update_objective()
 		_show_notification(C.t_all_enemies_down, 2.5)
 
 ## ---------- 查询函数 ----------
@@ -756,6 +623,9 @@ func _fade_to_black() -> ColorRect:
 	return rect
 
 func _retry_level() -> void:
+	var retry_after_death: bool = player.is_dead
+	if not pending_interaction.is_empty():
+		finish_interaction(interaction_token, false)
 	var environment := map.get_node_or_null("Environment")
 	if environment != null and environment.has_method("reset_breakable_webs"):
 		environment.reset_breakable_webs()
@@ -765,10 +635,9 @@ func _retry_level() -> void:
 	for bullet in bullets_parent.get_children():
 		bullet.queue_free()
 	var spawn_pos: Vector2 = _find_spawn_position()
-	
-	player.restore_player(spawn_pos, player.max_health, [])
-	_return_weapon_to_rack()
-	current_objective = Objective.GET_WEAPON
+
+	player.restore_player(spawn_pos, player.max_health, ["pulse_gun"] if pulse_learned else [])
+	current_objective = Objective.KILL_ENEMIES if pulse_learned else (Objective.CRAFT_ARM if blueprint_known else Objective.GET_WEAPON)
 	terminal_activated = false
 	if is_instance_valid(terminal):
 		terminal.set_meta("activated", false)
@@ -779,11 +648,10 @@ func _retry_level() -> void:
 		if is_instance_valid(obj) and obj.has_meta("is_door"):
 			obj.set_meta("is_open", false)
 			obj.collision_layer = 1
-			for child in obj.get_children():
-				if child is Polygon2D:
-					child.color = Color(0.6, 0.4, 0.2, 0.9)
+			var visual = obj.get_node("FacilityVisual")
+			visual.set_status(false)
+			visual.open_amount = 0.0
 	dead_enemies = 0
-	_update_objective()
 	_show_notification(C.t_retry, 2.0)
 	for enemy in enemies:
 		if not is_instance_valid(enemy):
@@ -796,6 +664,11 @@ func _retry_level() -> void:
 	nearest_interactable = null
 	game_menus.close_and_resume()
 	_update_hud()
+	room_damage_taken = false
+	achievement_last_health = player.health
+	_refresh_web_achievement()
+	if retry_after_death:
+		game_menus.unlock_achievement("first_retry")
 
 func _find_spawn_position() -> Vector2:
 	var markers := map.get_node_or_null("Markers")
@@ -807,8 +680,142 @@ func _find_spawn_position() -> Vector2:
 	return Vector2.ZERO
 
 func _toggle_pause() -> void:
+	if not pending_interaction.is_empty():
+		finish_interaction(interaction_token, false)
+		return
 	if not is_level_complete and is_instance_valid(game_menus):
 		game_menus.toggle_pause()
+
+## ---------- C interaction contract for D ----------
+
+func _add_story_point(id: StringName, pos: Vector2) -> Node2D:
+	var point := POINT_SCRIPT.new()
+	point.name = String(id)
+	point.interaction_id = id
+	point.position = pos
+	interactables_parent.add_child(point)
+	interactables.append(point)
+	interaction_points[id] = point
+	return point
+
+func _setup_story_points() -> void:
+	# Attach to existing furniture without modifying A's map or its collision.
+	var base = map.get_node("Walls/AssemblyBase")
+	_add_story_point(&"pulse_workbench", base.to_global(Vector2(base.size.x * 0.5, base.size.y + 4)))
+	var bench = map.get_node("Walls/WorkshopBench")
+	_add_story_point(&"workshop_origin", bench.to_global(Vector2(bench.size.x * 0.5, bench.size.y + 4)))
+
+func _point_prompt(id: StringName) -> String:
+	if ducts.has(id):
+		return "[E] 打开管道 · " + ducts[id].title if unlocked_ducts.has(id) else "[E] 解锁管道 · " + ducts[id].title
+	match id:
+		&"pulse_blueprint":
+			return "[E] 查看图纸" if not blueprint_known else "[E] 回听通讯"
+		&"pulse_workbench":
+			if pulse_learned:
+				return "脉冲机械臂已制造完成"
+			return "[E] 接入制造台" if blueprint_known else "[E] 查看制造台"
+		&"workshop_origin":
+			return "[E] 查看操作台记录" if not workshop_seen else "[E] 重读操作台记录"
+	return ""
+
+func get_interaction_state() -> Dictionary:
+	return {"blueprint_known": blueprint_known, "pulse_learned": pulse_learned,
+		"workshop_seen": workshop_seen, "terminal_activated": terminal_activated}
+
+func _request_story(id: StringName) -> void:
+	if not pending_interaction.is_empty() or not interaction_points.has(id):
+		return
+	if id == &"pulse_workbench" and (not blueprint_known or pulse_learned):
+		_show_notification("小一：我已经装好这个模块了。" if pulse_learned else "小一：这台设备，似乎还在等一份图纸。")
+		return
+	var payloads := {
+		&"pulse_blueprint": {"title": "图纸台的通讯", "summary": "", "confirm": "结束通话", "category": "通讯", "dialogue": [
+			{"speaker": "小一", "text": "这上面画的……是我的手臂？"},
+			{"speaker": "神明", "text": "是我为你预留的战斗模块。只是，还没来得及替你装上。"},
+			{"speaker": "神明", "text": "你醒来时，左手边有一台制造设备。带着这份图纸回去，它能帮你完成装配。"},
+			{"speaker": "小一", "text": "我记得那台机器。我去试试。"}]},
+		&"pulse_workbench": {"title": "接入制造台", "summary": "", "confirm": "完成装配", "category": "通讯", "dialogue": [
+			{"speaker": "小一", "text": "图纸和接口对上了。"},
+			{"speaker": "神明", "text": "把模块接入左臂。它会先蓄力，再释放一道脉冲。"},
+			{"speaker": "神明", "text": "试着按下鼠标左键。前面有维护单元，小心些。"}]},
+		&"workshop_origin": {"title": "操作台的记录", "summary": "", "confirm": "结束通话", "category": "通讯", "dialogue": [
+			{"speaker": "小一", "text": "这里的接口，和我身上的一样。"},
+			{"speaker": "神明", "text": "这里……就是我制造你的地方。"}]},
+	}
+	pending_interaction = id
+	interaction_token += 1
+	var payload: Dictionary = payloads[id].duplicate(true)
+	payload["state"] = get_interaction_state()
+	payload["replay"] = (id == &"pulse_blueprint" and blueprint_known) or (id == &"workshop_origin" and workshop_seen)
+	get_tree().paused = true
+	# A connected presenter owns the whole display. No automatic success fallback.
+	if interaction_requested.get_connections().is_empty():
+		interaction_sheet.present(interaction_token, payload)
+	else:
+		interaction_requested.emit(id, payload, interaction_token)
+
+func finish_interaction(token: int, completed: bool) -> void:
+	if token != interaction_token or pending_interaction.is_empty():
+		return
+	var id := pending_interaction
+	pending_interaction = &""
+	interaction_sheet.dismiss()
+	if ducts.has(id):
+		ducts[id].visual.set_open(false)
+		if completed and not unlocked_ducts.has(id):
+			unlocked_ducts[id] = true
+			ducts[id].visual.set_unlocked(true)
+			game_menus.set_achievement_progress("duct_network", unlocked_ducts.size(), ducts.size())
+			if unlocked_ducts.size() == ducts.size():
+				game_menus.unlock_achievement("duct_network")
+			_show_notification("管道已解锁，可与其他已解锁管道联通")
+	if completed:
+		match id:
+			&"pulse_blueprint":
+				blueprint_known = true
+				if not pulse_learned:
+					current_objective = Objective.CRAFT_ARM
+			&"pulse_workbench":
+				pulse_learned = true
+				player.pulse_gun_equipped = true
+				game_menus.unlock_achievement("first_weapon")
+				current_objective = Objective.ACTIVATE_TERMINAL if _remaining_cleaners() == 0 else Objective.KILL_ENEMIES
+				_show_notification(C.t_weapon_get, 2.5)
+			&"workshop_origin":
+				workshop_seen = true
+				game_menus.unlock_achievement("workshop_reader")
+	# Finish this event before enabling the world again (prevents input leaking).
+	interaction_finished.emit(token, completed)
+	_resume_story.call_deferred()
+
+func _resume_story() -> void:
+	if pending_interaction.is_empty() and game_menus.page == game_menus.Page.CLOSED:
+		get_tree().paused = false
+
+func _setup_terminal_gate() -> void:
+	# Local enclosure inside C's runtime: the terminal cannot be reached sideways.
+	var origin: Vector2 = terminal.position
+	for wall in [Rect2(-80, -72, 16, 128), Rect2(64, -72, 16, 128), Rect2(-64, -80, 128, 16)]:
+		var body := StaticBody2D.new()
+		body.position = origin + wall.get_center()
+		body.collision_layer = 1
+		body.collision_mask = 0
+		var shape := CollisionShape2D.new()
+		var rectangle := RectangleShape2D.new()
+		rectangle.size = wall.size
+		shape.shape = rectangle
+		body.add_child(shape)
+		var visual := FACILITY_SCRIPT.new()
+		visual.kind = "wall"
+		visual.dimensions = wall.size
+		body.add_child(visual)
+		interactables_parent.add_child(body)
+	_add_door(origin + Vector2(0, 48), "p1_terminal_access_gate")
+	terminal_gate = interactables[-1]
+	var gate_shape: CollisionShape2D = terminal_gate.get_child(0)
+	gate_shape.shape.size = Vector2(144, 16)
+	terminal_gate.get_node("FacilityVisual").dimensions = Vector2(144, 16)
 
 func _return_to_title() -> void:
 	get_tree().paused = false
@@ -816,3 +823,124 @@ func _return_to_title() -> void:
 	if error != OK:
 		get_tree().paused = true
 		push_error("无法返回标题：%s" % error_string(error))
+
+## ---------- Discovered duct shortcuts ----------
+
+func _setup_ducts() -> void:
+	for config in [
+		[&"duct_arrival", "ArrivalHatch", "出生区管道"],
+		[&"duct_weapon", "WeaponHatch", "图纸区管道"],
+		[&"duct_exit", "ExitHatch", "终端区管道"],
+	]:
+		var decal = map.get_node("Environment/FloorDecals/" + config[1])
+		var point := POINT_SCRIPT.new()
+		point.interaction_id = config[0]
+		point.position = decal.to_global(decal.size * 0.5)
+		point.name = String(config[0])
+		interactables_parent.add_child(point)
+		interactables.append(point)
+		var visual := DUCT_VISUAL.new()
+		visual.dimensions = decal.size
+		visual.position = point.position
+		interactables_parent.add_child(visual)
+		decal.hide()
+		ducts[config[0]] = {"title": config[2], "point": point, "visual": visual}
+
+func _request_duct(id: StringName) -> void:
+	if not pending_interaction.is_empty() or not ducts.has(id):
+		return
+	interaction_token += 1
+	pending_interaction = id
+	var payload := {"title": ducts[id].title, "category": "维护管道", "location": "腹腔维护通路", "replay": false,
+		"summary": "解锁当前管道口后，可与其他已解锁的管道口互相传送。", "confirm": "解锁管道", "next_step": "每个管道口需要到达后单独解锁"}
+	if unlocked_ducts.has(id):
+		var choices: Array = []
+		for target in ducts:
+			if target != id and unlocked_ducts.has(target):
+				choices.append({"id": target, "title": "前往 · " + ducts[target].title})
+		payload["choices"] = choices
+		payload["disable_confirm"] = true
+		payload["confirm"] = "请选择目的地" if not choices.is_empty() else "暂无已联通的目的地"
+		payload["summary"] = "选择已解锁的管道口前往。" if not choices.is_empty() else "当前管道已解锁。到达其他管道口并解锁后，即可联通。"
+		payload["next_step"] = "Esc 关闭井盖并返回"
+	payload["badge"] = "已解锁" if unlocked_ducts.has(id) else "未解锁"
+	get_tree().paused = true
+	if unlocked_ducts.has(id):
+		ducts[id].visual.set_open(true)
+	interaction_sheet.present(interaction_token, payload)
+
+func _duct_landing(id: StringName) -> Variant:
+	var center: Vector2 = ducts[id].point.global_position
+	var exit_offset := Vector2(0, ducts[id].visual.dimensions.y * 0.5 + 12)
+	for offset in [exit_offset, Vector2.ZERO, Vector2(36, 0), Vector2(-36, 0), Vector2(0, -36), Vector2(36, 36), Vector2(-36, 36)]:
+		var candidate: Vector2 = center + offset
+		var on_floor := false
+		for floor_node in map.get_node("Floors").get_children():
+			if Rect2(Vector2.ZERO, floor_node.size).has_point(floor_node.to_local(candidate)):
+				on_floor = true
+				break
+		if not on_floor:
+			continue
+		var query := PhysicsShapeQueryParameters2D.new()
+		query.shape = player.get_node("CollisionShape2D").shape
+		query.transform = Transform2D(0, candidate)
+		query.collision_mask = 1 | 4
+		query.exclude = [player.get_rid()]
+		if player.get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty():
+			return candidate
+	return null
+
+func _travel_duct(token: int, target: StringName) -> void:
+	if token != interaction_token or player.is_dead or not ducts.has(pending_interaction):
+		return
+	if not ducts.has(target) or target == pending_interaction or not unlocked_ducts.has(pending_interaction) or not unlocked_ducts.has(target):
+		return
+	var destination = _duct_landing(target)
+	if destination == null:
+		_show_notification("目的地暂时被阻挡，请稍后再试")
+		return
+	player.pulse_gun.cancel()
+	player.velocity = Vector2.ZERO
+	player.global_position = destination
+	game_menus.unlock_achievement("duct_traveler")
+	camera.global_position = destination
+	camera.reset_smoothing()
+	finish_interaction(token, false)
+	ducts[target].visual.set_open(true)
+	_close_arrival_duct(target)
+	_show_notification("已抵达 · " + ducts[target].title)
+
+func _close_arrival_duct(id: StringName) -> void:
+	await get_tree().create_timer(0.6, false).timeout
+	if pending_interaction != id:
+		ducts[id].visual.set_open(false)
+
+## Achievement events consume actual game state; no rewards or enemy counters change.
+func _setup_achievement_events() -> void:
+	achievement_last_health = player.health
+	player.health_changed.connect(_achievement_health_changed)
+	for web in map.get_node("Environment").webs:
+		# Only A's reachable placed targets, not the hundreds of background patches.
+		if not web.background_region.has_area():
+			achievement_webs.append(web)
+			web.broken_once.connect(_on_achievement_web_broken)
+	_refresh_web_achievement()
+	game_menus.set_achievement_progress("duct_network", unlocked_ducts.size(), ducts.size())
+
+func _achievement_health_changed(health: int, _maximum: int) -> void:
+	if health < achievement_last_health:
+		room_damage_taken = true
+	achievement_last_health = health
+
+func _on_achievement_web_broken(_web: Area2D) -> void:
+	game_menus.unlock_achievement("first_web")
+	_refresh_web_achievement()
+
+func _refresh_web_achievement() -> void:
+	var broken_count := 0
+	for web in achievement_webs:
+		if is_instance_valid(web) and web.broken:
+			broken_count += 1
+	game_menus.set_achievement_progress("web_sweeper", broken_count, achievement_webs.size())
+	if not achievement_webs.is_empty() and broken_count == achievement_webs.size():
+		game_menus.unlock_achievement("web_sweeper")

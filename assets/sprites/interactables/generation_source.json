@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-02",
+  "tool": "built-in image_gen",
+  "purpose": "Project 2D bulkhead and access terminal sprites; original generated images retained without pixel edits.",
+  "prompts": {
+    "door": "Use case: stylized-concept. Asset type: production 2D pixel-art game sprite, a horizontal closed double sliding bulkhead door for a top-down mechanical wasteland RPG. A SINGLE isolated door only, perfectly front-aligned horizontally, orthographic top-down 3/4 view matching classic 16-bit industrial RPG environment art. Wide low slab, overall width to height ratio 4:1, centered on transparent canvas, substantial transparent margins above and below. Two symmetric door leaves meet at the exact center vertical seam; integrated slim metal frame, bolts, recessed ribs, hydraulic fittings. Gritty desaturated gray-green iron, small rusty brown chips and tarnished brass details; subdued amber indicator lamps. Readable square pixel clusters, shaded metal depth, dense hand-crafted pixel surface detail, no smooth vector outlines. No floor, no walls, no surroundings, no lettering, no labels, no numbers, no watermark, no humans, no extra objects. TRUE TRANSPARENT alpha background. Entire door uncropped, central seam unobstructed so game can split into two moving halves. Game palette approximately #35494b, #56645a, #202d32, #94764c, #6c4937. Visually belongs beside grimy steel floor plates and riveted pipes.",
+    "terminal": "Use case: stylized-concept. Asset type: production 2D pixel-art game sprite, SINGLE isolated industrial access-control terminal for a top-down mechanical wasteland RPG. Orthographic top-down 3/4 view matching classic 16-bit industrial RPG environment art, view slightly from above; compact freestanding slanted console, broad upper monitor with dark unlit glass reserved for game-drawn status graphics, small keyboard/control panel, sturdy metal pedestal and visible cabling tucked into casing. Gritty desaturated gray-green iron, rusty brown worn edges, tarnished brass bolts, dense hand-crafted square pixel clusters with rich metal depth and coherent top-left lighting. Subdued small amber indicator lamps, no vivid neon. One complete terminal centered, occupies most canvas height, transparent background. No floor, no walls, no surroundings, no text, no letters, no labels, no numbers, no humans, no extra objects, no watermark. TRUE TRANSPARENT alpha background. Palette approximately #35494b, #56645a, #202d32, #94764c, #6c4937. Game-ready sprite with clean silhouette, clearly recognizable at 40-60 world pixels. Not isometric, not vector, not photorealistic."
+  },
+  "files": {
+    "bulkhead.png": {
+      "sha256": "92610b6b65510d178675ca2e1dd0e638f34709abbc7c40d7c6943a2d5ebca6b6"
+    },
+    "access_terminal.png": {
+      "sha256": "2dae9e063d0b76359b751cc077953311e58cce10ec7335655df03fae1a089b22"
+    }
+  }
+}
