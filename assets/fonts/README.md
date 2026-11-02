@@ -5,10 +5,10 @@
 `noto_sans_sc_gameplay_ui.ttf` 是 Google Fonts 官方提供的 Noto Sans SC 400 文本子集，供 `scenes/gameplay/gameplay_ui_theme.tres` 绑定 HUD、交互、暂停、成就手册和通知。
 
 - 许可：SIL Open Font License 1.1，沿用本目录的 `OFL-NotoSansSC.txt`。
-- 来源、实际下载 URL、SHA-256 和字形请求数记录在 `gameplay_ui_source.json`；本次请求覆盖三个运行脚本中的 325 个字符及基本 ASCII。
+- 来源、实际下载 URL、SHA-256 和字形请求数记录在 `gameplay_ui_source.json`；本次请求覆盖八个运行脚本中的当前字符及基本 ASCII。
 - 原始字体来自 Google Fonts，保留其内部字体名称与版权信息；没有从用户电脑字库提取字体。
 - `.ttf.import` 随源字体提交，`allow_system_fallback=false`，不提交 `.godot/imported/` 缓存。
-- `tests/manual/c_progress/achievement_check.gd` 对当前三个运行脚本中的实际字符检查字体覆盖；新增中文或符号时需补齐子集并更新来源记录，再运行检查。
+- `tests/manual/c_progress/achievement_check.gd` 对当前八个运行脚本中的实际字符检查字体覆盖；新增中文或符号时需补齐子集并更新来源记录，再运行检查。
 
 本主题不替换标题、开场和 A 的测试字体；它们仍使用各自已有资源。
 
@@ -40,3 +40,9 @@ https://pypi.org/project/japanize-matplotlib/1.1.3/#files
 ## 金色标题字体
 
 `noto_serif_sc_title.ttf` 来自 Google Fonts 的 Noto Serif SC，600 字重，只包含“借光”。用于第二版标题的宋体正面、侧面与柔光层。许可为 SIL Open Font License 1.1，副本见 `OFL-NotoSerifSC.txt`。修改标题文字时需补齐字符。
+
+2026-11-02：新增交互点及功能面板文案，字体来源记录已更新；字形数以 gameplay_ui_source.json 为准。
+
+2026-11-02 C-ACH-02：已补齐新增趣味成就与进度文案，实际字形请求数见 gameplay_ui_source.json。
+
+2026-11-02 C-STORY-01：已补齐当前示例通讯台词；保持原有 Noto Sans SC/OFL 来源，准确请求字符数与哈希见 gameplay_ui_source.json。

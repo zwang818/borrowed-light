@@ -10,7 +10,7 @@
 
 工程根为 `borrowed-light/`，主场景为 `res://scenes/main.tscn`。README 记录 Godot `4.7.2.stable.official.ed1daf0bf`；`project.godot` 声明 4.7、Compatibility。这里只记录仓库事实，未验证所有成员实际安装版本。不得根据旧 Bible 的“版本待定”擅自升级、降级、换渲染器或另建工程。
 
-当前主入口已从标题接入腹腔 P1 关卡，但新学习／改造流程尚未落地，不能声称本次 Bible 修订已在游戏实现。不要为了匹配目录示意图，把已有主场景移成 `scenes/main/main.tscn`。
+当前主入口已从标题接入腹腔 P1 关卡；2026-11-02 的 C 增量接通图纸通讯与制造的最小流程，正式演出、受控练习及跨房间进度仍待接入，详见 [C 第一关说明](../c_level_one_interactions.md)。不要为了匹配目录示意图，把已有主场景移成 `scenes/main/main.tscn`。
 
 ### ENG-02 · 最小必要结构
 

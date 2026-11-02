@@ -55,8 +55,11 @@ func _ready() -> void:
 	var caption := _label("成就已解锁", 12, Color(0.53, 0.83, 0.79))
 	details.add_child(caption)
 	_title = _label("", 19, Color(1, 0.91, 0.7))
+	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	details.add_child(_title)
 	_description = _label("", 13, Color(0.81, 0.86, 0.86))
+	_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	details.custom_minimum_size.x = 270
 	details.add_child(_description)
 	_progress = _label("", 12, Color(0.55, 0.66, 0.68))
 	details.add_child(_progress)

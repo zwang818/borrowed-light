@@ -10,14 +10,23 @@ const UI_THEME := preload("res://scenes/gameplay/gameplay_ui_theme.tres")
 static var _toasts: CanvasLayer
 
 const DEFINITIONS := {
-	"first_weapon": {"title": "借来一束光", "description": "首次拾取脉冲枪"},
+	"first_weapon": {"title": "借来一束光", "description": "首次完成脉冲机械臂制造"},
 	"first_terminal": {"title": "重新连接", "description": "首次激活终端"},
 	"first_clear": {"title": "清理完成", "description": "首次击败房间内所有敌人"},
 	"first_exit": {"title": "继续前行", "description": "首次抵达样板出口"},
+	"first_web": {"title": "友好邻居？", "description": "首次击破一处室内蛛网", "flavor": "你的邻居可能不这么想。", "group": "探索"},
+	"web_sweeper": {"title": "接受失败的 man", "description": "在一次房间挑战中清除全部室内蛛网", "flavor": "蛛网：你清高，你了不起。", "group": "整活"},
+	"first_retry": {"title": "问题不大，重启一下", "description": "首次死亡后选择重试房间", "flavor": "不是坏了，是在更新。", "group": "整活"},
+	"workshop_reader": {"title": "我是谁？说明书呢", "description": "首次查看小房间操作台的制造记录", "flavor": "出厂设置里，会有答案吗？", "group": "探索"},
+	"duct_traveler": {"title": "这班地铁有点窄", "description": "首次通过已解锁管道传送", "flavor": "本次列车，不提供座位。", "group": "探索"},
+	"duct_network": {"title": "地下交通管理员", "description": "解锁腹腔全部三个管道口", "flavor": "路是自己一个个开出来的。", "group": "探索"},
+	"clean_clear": {"title": "保修期内", "description": "在一次房间挑战中不受伤并击败全部清扫者", "flavor": "外壳无划痕，售后很满意。", "group": "战斗"},
 }
 
 var achievement_save_path := "user://achievements.cfg"
 var achievements: Dictionary = {}
+var achievement_progress: Dictionary = {}
+
 var page: Page = Page.CLOSED
 var _content: VBoxContainer
 var _overlay: Control
@@ -27,6 +36,17 @@ var _manual_summary: Label
 var _manual_progress: ProgressBar
 var _search_text := ""
 var _filter_index := 0
+
+
+func set_achievement_progress(id: String, current: int, maximum: int) -> void:
+	if not DEFINITIONS.has(id) or maximum <= 0:
+		return
+	var snapshot := Vector2i(clampi(current, 0, maximum), maximum)
+	if achievement_progress.get(id) == snapshot:
+		return
+	achievement_progress[id] = snapshot
+	if page == Page.ACHIEVEMENTS:
+		_refresh_handbook()
 
 
 func _ready() -> void:
@@ -197,7 +217,7 @@ func _refresh_handbook() -> void:
 		var unlocked: bool = achievements.get(id, false)
 		if (_filter_index == 1 and unlocked) or (_filter_index == 2 and not unlocked):
 			continue
-		if not query.is_empty() and not (entry.title + " " + entry.description).to_lower().contains(query):
+		if not query.is_empty() and not (entry.title + " " + entry.description + " " + entry.get("flavor", "") + " " + entry.get("group", "")).to_lower().contains(query):
 			continue
 		var card := PanelContainer.new()
 		card.add_theme_stylebox_override("panel", _style(Color(0.06, 0.105, 0.12) if unlocked else Color(0.04, 0.065, 0.075), 12))
@@ -224,6 +244,19 @@ func _refresh_handbook() -> void:
 		condition.add_theme_color_override("font_color", Color(0.7, 0.77, 0.78))
 		condition.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		details.add_child(condition)
+		if entry.has("flavor"):
+			var flavor := Label.new()
+			flavor.text = entry.flavor
+			flavor.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			flavor.add_theme_font_size_override("font_size", 13)
+			flavor.add_theme_color_override("font_color", Color("91a6a3"))
+			details.add_child(flavor)
+		if not unlocked and achievement_progress.has(id):
+			var snapshot: Vector2i = achievement_progress[id]
+			var progress := Label.new()
+			progress.text = "当前进度：%d / %d" % [snapshot.x, snapshot.y]
+			progress.add_theme_font_size_override("font_size", 13)
+			details.add_child(progress)
 	if _manual_list.get_child_count() == 0:
 		var empty := Label.new()
 		empty.text = "没有符合条件的成就"

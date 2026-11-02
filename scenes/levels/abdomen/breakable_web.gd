@@ -1,5 +1,6 @@
 @tool
 extends Area2D
+signal broken_once(web: Area2D)
 ## A weapon target, not an enemy. Layer 3 is the existing weapon-target bit (4).
 const ATLAS = preload("res://assets/sprites/environment/abdomen/props_atlas.png")
 const CAVITY = preload("res://assets/sprites/environment/abdomen/service_cavity.png")
@@ -39,6 +40,7 @@ func apply_damage(amount: int) -> void:
 	if amount <= 0 or broken or Engine.is_editor_hint():
 		return
 	broken = true
+	broken_once.emit(self)
 	_age = 0.0
 	set_physics_process(true)
 	queue_redraw()

@@ -1,5 +1,7 @@
 # C 模块：暂停、房间重试与成就界面
 
+> 2026-11-02 当前交互增量见 [第一关 C 说明](c_level_one_interactions.md)。下方 2026-10-26 的枪架与死亡丢枪描述是历史验证记录，当前按 REV-14 保留已制造能力；成就稳定 ID 不变，`first_weapon` 条件变为首次完成脉冲机械臂制造。
+
 任务：P1-C-UI；负责人：C（本次提交 @lkzzzz219）；状态：待队友复测。
 本次范围由用户于 2026-10-26 明确授权，不代表完整 P1 或正式通关流程已经验收。
 
@@ -89,3 +91,5 @@ godot --headless --path . --script res://tests/manual/c_progress/achievement_che
 面板、菱形符号和布局由项目代码构建，没有第三方图片或 Steam SDK。新增中文字体为 Google Fonts 官方 Noto Sans SC 400 文本子集，原始来源、哈希和字形数量见 `assets/fonts/gameplay_ui_source.json`；许可为仓库现有 `assets/fonts/OFL-NotoSansSC.txt`。详见素材清单与字体说明。
 
 待处理：至少一位非作者成员复测；macOS／Linux 实机检查；完整 P1 的真实可见性、地图／日志、固定灯回滚和双房间成功／失败提交仍未由本次实现。现有 `_enemy_visible_query()` 只检查地图边界，不能将其算作 VISION-04 验收通过。完整流程时长、剧情结尾和四人同提交联合验收也不在本次通过范围。
+
+2026-11-02 后续：旧四项条件列表是历史范围；当前 11 项与本轮蛛网全清等条件以 [成就目录](c_achievement_catalog.md) 为准，旧 ID 与保存文件兼容。
