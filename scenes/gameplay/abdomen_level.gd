@@ -247,6 +247,9 @@ func _update_hp_bar() -> void:
 func _update_world_prompts() -> void:
 	# One contextual screen prompt. No duplicate labels above world objects.
 	terminal.get_node("FacilityVisual").set_status(terminal_gate.get_meta("is_open", false), nearest_interactable == terminal, terminal_activated)
+	var terminal_marker = terminal.get_node("InteractionMarker")
+	terminal_marker.focused = nearest_interactable == terminal and not terminal_activated
+	terminal_marker.set_status(true, terminal_gate.get_meta("is_open", false) and not terminal_activated, terminal_activated)
 	for obj in interactables:
 		if not is_instance_valid(obj):
 			continue
@@ -259,6 +262,7 @@ func _update_world_prompts() -> void:
 			var completed: bool = (obj.interaction_id == &"pulse_blueprint" and blueprint_known) or (obj.interaction_id == &"pulse_workbench" and pulse_learned) or (obj.interaction_id == &"workshop_origin" and workshop_seen)
 			if ducts.has(obj.interaction_id):
 				completed = unlocked_ducts.has(obj.interaction_id)
+				obj.visible = not completed
 			obj.set_status(player.global_position.distance_to(obj.global_position) < 120, available, completed)
 	if not is_instance_valid(nearest_interactable) and not terminal_gate.get_meta("is_open", false) and player.global_position.distance_to(terminal_gate.global_position) < 120:
 		interact_bg.show()
@@ -374,6 +378,11 @@ func _add_terminal(pos: Vector2, term_id: String, linked: Array) -> Node:
 	visual.name = "FacilityVisual"
 	visual.kind = "terminal"
 	area.add_child(visual)
+	# Presentation only: the Area2D remains the sole terminal interaction target.
+	var marker := POINT_SCRIPT.new()
+	marker.name = "InteractionMarker"
+	marker.position = Vector2(0, 26)
+	area.add_child(marker)
 	area.set_meta("terminal_id", term_id)
 	area.set_meta("linked_ids", linked)
 	area.set_meta("is_terminal", true)

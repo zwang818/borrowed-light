@@ -24,8 +24,7 @@ func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
 func _draw() -> void:
-	if not nearby:
-		return
+	# The marker stays visible; proximity only enables the focused E prompt.
 	var tint := Color("b5d6ca") if completed else (Color("f0ce8a") if available else Color("82979a"))
 	var r := 10.0 if focused else 7.0
 	draw_rect(Rect2(-r, -r, r * 2, r * 2), Color("16282e"))
