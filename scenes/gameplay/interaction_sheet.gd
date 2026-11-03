@@ -2,6 +2,7 @@ extends CanvasLayer
 ## Functional C fallback. D supplies dialogue and final presentation separately.
 signal finished(token: int, completed: bool)
 signal destination_selected(token: int, destination: StringName)
+signal code_submitted(token: int, code: String)
 const UI_THEME := preload("res://scenes/gameplay/gameplay_ui_theme.tres")
 var token := 0
 var overlay: Control
@@ -12,6 +13,8 @@ var _speaker: Label
 var _body: RichTextLabel
 var _confirm: Button
 var _last_action := ""
+var _code_input: LineEdit
+var _code_status: Label
 
 func _label(text: String, size: int, color: Color) -> Label:
 	var label := Label.new()
@@ -76,7 +79,7 @@ func present(request_token: int, payload: Dictionary) -> void:
 	panel.add_theme_stylebox_override("panel", style)
 	row.add_child(panel)
 	var content := VBoxContainer.new()
-	content.add_theme_constant_override("separation", 14)
+	content.add_theme_constant_override("separation", 8 if payload.get("input_mode", "") == "terminal_code" else 14)
 	panel.add_child(content)
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 16)
@@ -107,12 +110,16 @@ func present(request_token: int, payload: Dictionary) -> void:
 		destination.custom_minimum_size.y = 36
 		destination.pressed.connect(_select_destination.bind(request_token, StringName(choice.id)))
 		content.add_child(destination)
+	if payload.get("input_mode", "") == "terminal_code":
+		_build_keypad(content)
 	var actions := HBoxContainer.new()
 	actions.add_theme_constant_override("separation", 12)
 	content.add_child(actions)
 	var confirm := Button.new()
 	_confirm = confirm
 	confirm.text = "[E]  " + payload.confirm
+	if is_instance_valid(_code_input):
+		confirm.text = payload.confirm
 	confirm.disabled = payload.get("disable_confirm", false)
 	if confirm.disabled:
 		confirm.text = payload.confirm
@@ -137,6 +144,77 @@ func present(request_token: int, payload: Dictionary) -> void:
 		_show_line()
 	overlay.resized.connect(_layout_panel)
 	_layout_panel()
+	if is_instance_valid(_code_input):
+		_code_input.grab_focus()
+
+func _build_keypad(content: VBoxContainer) -> void:
+	_code_input = LineEdit.new()
+	_code_input.name = "TerminalCode"
+	_code_input.max_length = 4
+	_code_input.placeholder_text = "输入四位口令"
+	_code_input.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_code_input.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
+	_code_input.add_theme_font_size_override("font_size", 26)
+	_code_input.custom_minimum_size.y = 44
+	_code_input.text_changed.connect(_filter_code.bind(_code_input))
+	_code_input.text_submitted.connect(func(_text: String): _advance_or_finish())
+	content.add_child(_code_input)
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 6)
+	content.add_child(grid)
+	for key in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "清空", "0", "退格"]:
+		var button := Button.new()
+		button.text = key
+		button.custom_minimum_size.y = 32
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.pressed.connect(_type_code.bind(key))
+		grid.add_child(button)
+	_code_status = _label("", 12, Color("dfbd81"))
+	content.add_child(_code_status)
+
+func _filter_code(text: String, source: LineEdit) -> void:
+	# LineEdit batches text_changed; a valid submission may already have closed it.
+	if not is_instance_valid(overlay) or not is_instance_valid(source) or source != _code_input:
+		return
+	var digits := ""
+	for character in text:
+		if character >= "0" and character <= "9":
+			digits += character
+	if digits != text:
+		var caret := _code_input.caret_column
+		_code_input.text = digits
+		_code_input.caret_column = mini(caret, digits.length())
+	_code_status.text = ""
+
+func _type_code(key: String) -> void:
+	if not is_instance_valid(overlay) or not is_instance_valid(_code_input):
+		return
+	get_viewport().set_input_as_handled()
+	if key == "清空":
+		_code_input.clear()
+		_code_input.deselect()
+	else:
+		var had_selection := _code_input.has_selection()
+		if had_selection:
+			var start := _code_input.get_selection_from_column()
+			_code_input.delete_text(start, _code_input.get_selection_to_column())
+			_code_input.deselect()
+			_code_input.caret_column = start
+		if key == "退格":
+			if not had_selection:
+				_code_input.delete_char_at_caret()
+		else:
+			_code_input.insert_text_at_caret(key)
+	_code_input.grab_focus()
+
+func show_code_error(request_token: int) -> void:
+	if request_token != token or not is_instance_valid(overlay) or not is_instance_valid(_code_input):
+		return
+	_code_status.text = "口令不匹配，请核对原始记录。"
+	_code_input.grab_focus()
+	_code_input.select_all()
 
 func _layout_panel() -> void:
 	if not is_instance_valid(panel) or not is_instance_valid(overlay):
@@ -158,6 +236,12 @@ func _advance_or_finish() -> void:
 	if not is_instance_valid(overlay):
 		return
 	get_viewport().set_input_as_handled()
+	if is_instance_valid(_code_input):
+		if _code_input.text.length() != 4:
+			_code_status.text = "请输入完整的四位口令。"
+			return
+		code_submitted.emit(token, _code_input.text)
+		return
 	if not dialogue.is_empty() and line_index < dialogue.size() - 1:
 		line_index += 1
 		_show_line()
@@ -185,3 +269,5 @@ func dismiss() -> void:
 	overlay = null
 	panel = null
 	dialogue = []
+	_code_input = null
+	_code_status = null
