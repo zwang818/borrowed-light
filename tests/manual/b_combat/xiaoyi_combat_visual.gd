@@ -8,6 +8,11 @@ const TURN_STEP_SECONDS := 0.035
 const STRIDE_PIXELS := 16.0
 # Measured transparent row gutters in the authored 887 x 1774 atlas.
 const ROW_EDGES := [0, 213, 428, 644, 867, 1082, 1302, 1516, 1774]
+@export var enhanced_gait := false
+@export var face_firing_beam := false
+var gait_strength := 0.0
+var gait_offset := Vector2.ZERO
+var gait_material: ShaderMaterial
 @export var display_height: float = 64.0
 var player: CharacterBody2D
 var sprite: Sprite2D
@@ -31,6 +36,10 @@ func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	sprite = Sprite2D.new()
 	add_child(sprite)
+	if enhanced_gait:
+		gait_material = ShaderMaterial.new()
+		gait_material.shader = preload("res://tests/manual/b_combat/xiaoyi_gait.gdshader")
+		sprite.material = gait_material
 	muzzle_points = JSON.parse_string(FileAccess.get_file_as_string("res://tests/manual/b_combat/art/xiaoyi/muzzle_points.json"))
 	_load_frames()
 	player.get_node("Facing/Body").hide()
@@ -108,6 +117,11 @@ func update_animation(delta: float, displacement: Vector2, stopped: bool) -> voi
 		current_column = 0
 	if player.attack_mode != 2 and not stopped:
 		target_row = posmod(roundi((player.mouse_facing.angle() - PI / 2.0) / (PI / 4.0)), 8)
+	# Graybox experiment: use the assisted, locked beam direction during firing.
+	if face_firing_beam and player.attack_mode == 1 and not stopped and player.pulse_gun.state == player.pulse_gun.State.FIRING:
+		target_row = posmod(roundi((player.pulse_gun.locked_direction.angle() - PI / 2.0) / (PI / 4.0)), 8)
+		facing_row = target_row
+		turn_elapsed = 0.0
 	if stopped:
 		target_row = facing_row
 	turn_elapsed += delta
@@ -117,6 +131,16 @@ func update_animation(delta: float, displacement: Vector2, stopped: bool) -> voi
 		turn_elapsed -= TURN_STEP_SECONDS
 	if facing_row == target_row:
 		turn_elapsed = 0.0
+	if enhanced_gait:
+		gait_strength = move_toward(gait_strength, 1.0 if moving else 0.0, delta * 10.0)
+		var phase := walk_distance / (STRIDE_PIXELS * 4.0) * TAU
+		gait_offset = Vector2(sin(phase)*0.6, -absf(sin(phase))*1.8) * gait_strength
+		if stopped:
+			gait_offset = Vector2.ZERO
+			gait_strength = 0.0
+		gait_material.set_shader_parameter("phase", phase)
+		gait_material.set_shader_parameter("strength", gait_strength)
+		gait_material.set_shader_parameter("side_view", 1.0 if facing_row in [2,6] else 0.0)
 	_show_frame()
 
 
@@ -127,7 +151,7 @@ func _show_frame() -> void:
 		return
 	sprite.texture = frames[facing_row * 4 + current_column]
 	# Foot registration prevents generated frame padding from causing sliding.
-	sprite.position = Vector2(0, 7.0 - sprite.texture.get_height() * display_scale / 2.0)
+	sprite.position = Vector2(0, 7.0 - sprite.texture.get_height() * display_scale / 2.0) + gait_offset
 	sprite.rotation = 0.0
 	sprite.flip_h = false
 
@@ -177,4 +201,4 @@ func get_muzzle_world_position(mode: int) -> Vector2:
 	var foot_offset := Vector2(0, 7.0 - atlas.get_height() * display_scale / 2.0)
 	# Parent Facing rotates for combat before this visual's next update; use an
 	# explicit upright world offset so the muzzle never briefly orbits the body.
-	return player.global_position + foot_offset + local_point * display_scale
+	return player.global_position + foot_offset + local_point * display_scale + gait_offset

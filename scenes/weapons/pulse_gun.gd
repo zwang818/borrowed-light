@@ -157,7 +157,7 @@ func assisted_direction(origin: Vector2, requested: Vector2) -> Vector2:
 		query.collide_with_areas = true
 		query.hit_from_inside = true
 		var hit := get_world_2d().direct_space_state.intersect_ray(query)
-		if hit.is_empty() or hit.collider != enemy:
+		if hit.is_empty() or LASER_TRACE.damage_receiver(hit.collider) != enemy:
 			continue
 		chosen = offset.normalized()
 		best_angle = angle

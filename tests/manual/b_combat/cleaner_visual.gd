@@ -1,6 +1,9 @@
 extends Node2D
 ## Presentation only: attack timings and hit rectangle belong to the shared cleaner.
 @export var animation_sheet: Texture2D = preload("res://tests/manual/b_combat/art/cleaner/side_animation.png")
+@export var match_hurtbox := false
+var hit_polygons: Array[PackedVector2Array] = []
+var hurt_shape: CollisionPolygon2D
 const P = preload("res://scenes/weapons/combat_parameters.gd")
 var enemy: CharacterBody2D
 var pieces: Array[AtlasTexture] = []
@@ -26,6 +29,17 @@ func _ready() -> void:
 		tex.atlas = ImageTexture.create_from_image(section)
 		tex.region = Rect2(section.get_used_rect())
 		pieces.append(tex)
+		if match_hurtbox:
+			var bitmap := BitMap.new()
+			bitmap.create_from_image_alpha(section, 0.5)
+			var vertices := PackedVector2Array()
+			for polygon in bitmap.opaque_to_polygons(Rect2i(Vector2i.ZERO, section.get_size()), 1.0):
+				for point in polygon:
+					vertices.append(point-tex.region.position)
+			var hull := Geometry2D.convex_hull(vertices)
+			if hull.size() > 1 and hull[0] == hull[hull.size()-1]:
+				hull.remove_at(hull.size()-1)
+			hit_polygons.append(hull)
 		# Register the body by its red eye, not the changing silhouette of stepping feet.
 		var center := Vector2.ZERO
 		var count := 0
@@ -51,6 +65,14 @@ func _ready() -> void:
 	enemy.get_node("Facing/Body").hide()
 	# Shared code can toggle visibility; transparent self modulation keeps its old fill hidden.
 	enemy.get_node("Facing/AttackZone").self_modulate.a = 0.0
+	if match_hurtbox:
+		var hurtbox := Area2D.new()
+		hurtbox.name = "ModelHurtbox"
+		hurtbox.set_script(preload("res://scenes/enemies/cleaner/cleaner_hurtbox.gd"))
+		hurt_shape = CollisionPolygon2D.new()
+		hurtbox.add_child(hurt_shape)
+		enemy.add_child(hurtbox)
+		_update_hurtbox()
 
 func _physics_process(_delta: float) -> void:
 	var distance := enemy.position.distance_to(previous)
@@ -65,7 +87,43 @@ func _physics_process(_delta: float) -> void:
 	if absf(direction.x) > 0.3:
 		face_left = direction.x < 0
 	modulate = enemy.get_node("Facing").modulate
+	_update_hurtbox()
 	queue_redraw()
+
+func _update_hurtbox() -> void:
+	if hurt_shape == null:
+		return
+	var pose := sprite_pose()
+	var points := PackedVector2Array()
+	for point in hit_polygons[pose.index]:
+		var local: Vector2 = pose.origin+point*frame_scale
+		local.x *= -1.0 if face_left else 1.0
+		points.append(local)
+	hurt_shape.polygon = points
+
+func sprite_pose() -> Dictionary:
+	var warning: bool = enemy.state == enemy.State.WARNING
+	var attack: bool = enemy.state == enemy.State.ATTACK
+	var recovery: bool = enemy.state == enemy.State.RECOVERY
+	var charge := clampf(1.0-enemy.remaining/P.CLEANER_WARNING,0,1) if warning else 0.0
+	var walking: bool = walked_this_tick and enemy.state in [enemy.State.PATROL, enemy.State.CHASE]
+	var index := 15
+	if walking:
+		index = WALK_CYCLE[int(stride)]
+	elif warning:
+		index = 4+mini(3,int(charge*4))
+	elif attack:
+		index = 8+mini(3,int(clampf(1.0-enemy.remaining/P.CLEANER_ACTIVE,0,1)*4))
+	elif recovery:
+		index = 12+mini(3,int(clampf(1.0-enemy.remaining/P.CLEANER_RECOVERY,0,1)*4))
+	var size := pieces[index].get_size()*frame_scale
+	var origin := Vector2(-size.x/2,9-size.y)
+	if walking:
+		var base_size := pieces[15].get_size()*frame_scale
+		var reference_eye := Vector2(-base_size.x/2,9-base_size.y)+eye_anchors[15]*frame_scale
+		origin = reference_eye-eye_anchors[index]*frame_scale
+		origin.y -= sin(stride*TAU/3.0)*0.5
+	return {"index": index, "origin": origin, "size": size}
 
 func _draw() -> void:
 	if pieces.is_empty():
@@ -89,23 +147,7 @@ func _draw() -> void:
 		else:
 			for y in [-14.0,0.0,14.0]:
 				draw_line(Vector2(17,y),Vector2(35+strike*18,y*0.7),Color(1,0.8,0.55,0.9),2)
-	var walking: bool = walked_this_tick and enemy.state in [enemy.State.PATROL, enemy.State.CHASE]
-	var index := 15
-	if walking:
-		index = WALK_CYCLE[int(stride)]
-	elif warning:
-		index = 4 + mini(3, int(charge*4))
-	elif attack:
-		index = 8 + mini(3, int(clampf(1.0-enemy.remaining/P.CLEANER_ACTIVE,0,1)*4))
-	elif recovery:
-		index = 12 + mini(3, int(clampf(1.0-enemy.remaining/P.CLEANER_RECOVERY,0,1)*4))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1 if face_left else 1, 0.75 if dead else 1.0))
-	var size := pieces[index].get_size() * frame_scale
-	var origin := Vector2(-size.x/2, 9-size.y)
-	if walking:
-		var base_size := pieces[15].get_size()*frame_scale
-		var reference_eye := Vector2(-base_size.x/2,9-base_size.y)+eye_anchors[15]*frame_scale
-		origin = reference_eye-eye_anchors[index]*frame_scale
-		origin.y -= sin(stride*TAU/3.0)*0.5
-	draw_texture_rect(pieces[index],Rect2(origin,size),false)
+	var pose := sprite_pose()
+	draw_texture_rect(pieces[pose.index],Rect2(pose.origin,pose.size),false)
 	draw_set_transform(Vector2.ZERO)

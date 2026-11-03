@@ -1,5 +1,8 @@
 extends RefCounted
 
+static func damage_receiver(collider: Object) -> Object:
+	return collider.get_damage_receiver() if collider != null and collider.has_method("get_damage_receiver") else collider
+
 static func distance_to_boundary(origin: Vector2, direction: Vector2, bounds: Rect2) -> float:
 	if bounds.size.x <= 0.0 or bounds.size.y <= 0.0:
 		return 0.0
@@ -32,6 +35,6 @@ static func trace(space: PhysicsDirectSpaceState2D, origin: Vector2, direction: 
 		points.append(hit.position)
 		var collider := hit.collider as CollisionObject2D
 		if collider != null and (collider.collision_layer & 1) == 0:
-			result.target = collider
+			result.target = damage_receiver(collider)
 	result.points = points
 	return result

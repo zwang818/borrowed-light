@@ -19,6 +19,8 @@ func key(player: Node, code: Key) -> void:
 	player._unhandled_input(event)
 func _run() -> void:
 	var room = load("res://tests/manual/b_combat/combat_test.tscn").instantiate()
+	# Isolate low-level manual pose checks from production automatic holstering.
+	room.get_node("SpawnPoints/PlayerSpawn/Player").set_script(preload("res://tests/manual/b_combat/manual_modes_fixture.gd"))
 	root.add_child(room)
 	var player = room.get_node("SpawnPoints/PlayerSpawn/Player")
 	var visual = player.get_node("Facing/XiaoyiCombatVisual")
