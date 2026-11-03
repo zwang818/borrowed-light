@@ -11,6 +11,9 @@ const SHEET_SCRIPT := preload("res://scenes/gameplay/interaction_sheet.gd")
 const FACILITY_SCRIPT := preload("res://scenes/gameplay/facility_visual.gd")
 const DUCT_VISUAL := preload("res://scenes/gameplay/duct_visual.gd")
 const HEALTH_SCRIPT := preload("res://scenes/gameplay/health_hearts.gd")
+const TERMINAL_REQUEST := &"terminal_access"
+const TERMINAL_CODE := "0417"
+const TERMINAL_CLUES := {&"pulse_blueprint": "04", &"workshop_origin": "17"}
 
 const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
 const CLEANER_SCENE := preload("res://scenes/enemies/cleaner/cleaner.tscn")
@@ -79,6 +82,7 @@ var notification_revision := 0
 var blueprint_known := false
 var pulse_learned := false
 var workshop_seen := false
+var terminal_clues: Dictionary = {}
 var pending_interaction: StringName = &""
 var interaction_token := 0
 var interaction_sheet
@@ -127,6 +131,7 @@ func _ready() -> void:
 	add_child(interaction_sheet)
 	interaction_sheet.finished.connect(finish_interaction)
 	interaction_sheet.destination_selected.connect(_travel_duct)
+	interaction_sheet.code_submitted.connect(_submit_terminal_code)
 	_setup_story_points()
 	_setup_terminal_gate()
 	_setup_ducts()
@@ -487,7 +492,7 @@ func _terminal_prompt() -> String:
 	var remaining := _remaining_cleaners()
 	if terminal_activated:
 		return "终端已激活 · 出口门已开启"
-	return "终端锁定 · 剩余 %d 台清扫者" % remaining if remaining > 0 else "[E] 激活终端 · 解锁出口门"
+	return "终端锁定 · 剩余 %d 台清扫者" % remaining if remaining > 0 else "[E] 接入终端"
 
 func _try_interact() -> void:
 	if player.is_dead or get_tree().paused:
@@ -505,18 +510,49 @@ func _try_interact() -> void:
 		if _remaining_cleaners() > 0:
 			_show_notification(_terminal_prompt(), 1.5)
 			return
-		nearest_interactable.set_meta("activated", true)
-		terminal_activated = true
-		var linked: Array = nearest_interactable.get_meta("linked_ids", [])
-		for door_id in linked:
-			_open_door(door_id)
-		for child in nearest_interactable.get_children():
-			if child is Polygon2D:
-				child.color = Color(0.5, 0.5, 0.5, 0.5)
-		_play_terminal_sound()
-		game_menus.unlock_achievement("first_terminal")
-		_show_notification(C.t_terminal_ok, C.notify_default)
-		current_objective = Objective.REACH_EXIT
+		_request_terminal_code()
+
+func _can_use_terminal() -> bool:
+	if player.is_dead or terminal_activated or _remaining_cleaners() > 0 or not terminal_gate.get_meta("is_open", false):
+		return false
+	if player.global_position.distance_to(terminal.global_position) >= C.interaction_range:
+		return false
+	var query := PhysicsRayQueryParameters2D.create(player.global_position, terminal.global_position, 1)
+	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
+
+func _request_terminal_code() -> void:
+	if not pending_interaction.is_empty() or not _can_use_terminal():
+		return
+	interaction_token += 1
+	pending_interaction = TERMINAL_REQUEST
+	get_tree().paused = true
+	# Functional input belongs to C; D's story presenter never grants authorization.
+	interaction_sheet.present(interaction_token, {
+		"title": "出口维护终端", "category": "访问验证", "badge": "等待口令",
+		"summary": "请输入四位维护口令。\n原始口令分段保存在图纸与制造室记录中。",
+		"confirm": "验证口令", "input_mode": "terminal_code"})
+
+func _submit_terminal_code(token: int, code: String) -> void:
+	if token != interaction_token or pending_interaction != TERMINAL_REQUEST:
+		return
+	if not _can_use_terminal():
+		finish_interaction(token, false)
+		return
+	if code.length() != 4 or not code.is_valid_int() or code != TERMINAL_CODE:
+		interaction_sheet.show_code_error(token)
+		return
+	terminal.set_meta("activated", true)
+	terminal_activated = true
+	for door_id in terminal.get_meta("linked_ids", []):
+		_open_door(door_id)
+	for child in terminal.get_children():
+		if child is Polygon2D:
+			child.color = Color(0.5, 0.5, 0.5, 0.5)
+	_play_terminal_sound()
+	game_menus.unlock_achievement("first_terminal")
+	_show_notification(C.t_terminal_ok, C.notify_default)
+	current_objective = Objective.REACH_EXIT
+	finish_interaction(token, true)
 
 func _play_terminal_sound() -> void:
 	# Optional existing sound is absent in this checkout; do not add a new effect.
@@ -721,7 +757,8 @@ func _point_prompt(id: StringName) -> String:
 
 func get_interaction_state() -> Dictionary:
 	return {"blueprint_known": blueprint_known, "pulse_learned": pulse_learned,
-		"workshop_seen": workshop_seen, "terminal_activated": terminal_activated}
+		"workshop_seen": workshop_seen, "terminal_activated": terminal_activated,
+		"terminal_clues": terminal_clues.duplicate()}
 
 func _request_story(id: StringName) -> void:
 	if not pending_interaction.is_empty() or not interaction_points.has(id):
@@ -734,14 +771,17 @@ func _request_story(id: StringName) -> void:
 			{"speaker": "小一", "text": "这上面画的……是我的手臂？"},
 			{"speaker": "神明", "text": "是我为你预留的战斗模块。只是，还没来得及替你装上。"},
 			{"speaker": "神明", "text": "你醒来时，左手边有一台制造设备。带着这份图纸回去，它能帮你完成装配。"},
-			{"speaker": "小一", "text": "我记得那台机器。我去试试。"}]},
+			{"speaker": "小一", "text": "我记得那台机器。我去试试。"},
+			{"speaker": "小一", "text": "图纸页脚还有一行字：维护口令前段，04。"},
+			{"speaker": "神明", "text": "我把它拆开留在了不同的记录里。那些旧设备，仍然认得这个口令。"}]},
 		&"pulse_workbench": {"title": "接入制造台", "summary": "", "confirm": "完成装配", "category": "通讯", "dialogue": [
 			{"speaker": "小一", "text": "图纸和接口对上了。"},
 			{"speaker": "神明", "text": "把模块接入左臂。它会先蓄力，再释放一道脉冲。"},
 			{"speaker": "神明", "text": "试着按下鼠标左键。前面有维护单元，小心些。"}]},
 		&"workshop_origin": {"title": "操作台的记录", "summary": "", "confirm": "结束通话", "category": "通讯", "dialogue": [
 			{"speaker": "小一", "text": "这里的接口，和我身上的一样。"},
-			{"speaker": "神明", "text": "这里……就是我制造你的地方。"}]},
+			{"speaker": "神明", "text": "这里……就是我制造你的地方。"},
+			{"speaker": "小一", "text": "记录末尾写着：维护口令后段，17。原来，这些记录也是留给我的。"}]},
 	}
 	pending_interaction = id
 	interaction_token += 1
@@ -759,6 +799,9 @@ func finish_interaction(token: int, completed: bool) -> void:
 	if token != interaction_token or pending_interaction.is_empty():
 		return
 	var id := pending_interaction
+	# A generic story-completed callback must never bypass the password check.
+	if id == TERMINAL_REQUEST:
+		completed = completed and terminal_activated
 	pending_interaction = &""
 	interaction_sheet.dismiss()
 	if ducts.has(id):
@@ -771,6 +814,8 @@ func finish_interaction(token: int, completed: bool) -> void:
 				game_menus.unlock_achievement("duct_network")
 			_show_notification("管道已解锁，可与其他已解锁管道联通")
 	if completed:
+		if TERMINAL_CLUES.has(id):
+			terminal_clues[id] = TERMINAL_CLUES[id]
 		match id:
 			&"pulse_blueprint":
 				blueprint_known = true

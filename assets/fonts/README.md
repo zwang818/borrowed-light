@@ -46,3 +46,5 @@ https://pypi.org/project/japanize-matplotlib/1.1.3/#files
 2026-11-02 C-ACH-02：已补齐新增趣味成就与进度文案，实际字形请求数见 gameplay_ui_source.json。
 
 2026-11-02 C-STORY-01：已补齐当前示例通讯台词；保持原有 Noto Sans SC/OFL 来源，准确请求字符数与哈希见 gameplay_ui_source.json。
+
+2026-11-03 C-TERMINAL-01：补齐维护口令、两房间线索与数字键盘反馈文案，仍使用原 Noto Sans SC 400／SIL OFL；来源 URL、467 个请求字符与 SHA-256 见 gameplay_ui_source.json。

@@ -22,6 +22,11 @@ func run() -> void:
 		enemy.apply_damage(100)
 	assert(scene._remaining_cleaners() == 0)
 	scene._input(press)
+	assert(not scene.terminal_activated and paused)
+	for digit in scene.TERMINAL_CODE:
+		scene.interaction_sheet._type_code(digit)
+	scene.interaction_sheet._advance_or_finish()
+	await process_frame
 	assert(scene.terminal_activated)
 	assert(scene.terminal.get_meta("activated"))
 	var door = scene.interactables_parent.get_node("Door_p1_door_01")

@@ -7,7 +7,7 @@
 
 F5 主入口 `scenes/main.tscn` → 标题 → 开场 → 腹腔；可用 F6 单独运行 `scenes/gameplay/abdomen_level.tscn`。
 
-玩家探索到图纸台按 E → 小一／神明逐句通讯 → 回制造台装配机械臂 → 战斗 → 清场开放终端区域 → E 激活终端 → 原出口门开启。小房间故事交互独立，不新增门禁条件。
+玩家探索到图纸台按 E → 小一／神明逐句通讯 → 回制造台装配机械臂 → 战斗 → 清场开放终端区域 → E 输入维护口令 → 原出口门开启。2026-11-03 增量：图纸室和小房间分别藏有前／后两段口令，玩家通过交互记录获知；不检查已读数量，也不增加常驻指引。
 
 常驻仅有机械心耐久；靠近有效物件才给局部 E 提示。没有目标栏、方向／距离、WASD、开场指路，也不显示“下一步”和“阅读时世界暂停”说明。对话和暂停菜单仍冻结世界，Esc 取消或关闭当前窗口，完成本句／本段不能同时攻击。
 
@@ -37,12 +37,29 @@ level.interaction_finished.connect(presenter.close_request)
 - payload 包含 `title`、`summary`、`confirm`、`category`、`state`、`replay`；通讯另提供 `dialogue: Array[Dictionary]`，每句为 `{speaker, text}`。
 - 没有展示方时，C 的面板按 E／点击逐句推进，最后确认才提交完成。连接 D 展示方后仅由其展示，不自动判定完成；D 应在整段结束后回调。
 - C 发请求前暂停世界，维护唯一有效 token；旧 token、取消后回调、重复回调都不推进。D 展示方需 `PROCESS_MODE_ALWAYS`，接收结束信号清理窗口与声音，消费关闭输入。
-- `get_interaction_state()` 提供图纸、已学能力、故事已读与终端状态快照；D 不直接改世界字段。
+- `get_interaction_state()` 提供图纸、已学能力、故事已读与终端状态快照，以及独立复制的 `terminal_clues` 字典；D 不直接改世界字段。
 - 当前短稿按用户的“预留战斗模块、带图纸回醒来处左侧制造台”例子接入，并点出既定的小一制造与接口信息；正式对白、美术、配音和音效仍由 D 润色替换。
 
 ## 门禁与房间重试
 
 新增 `p1_terminal_access_gate`，在终端下方 48 单位，宽 144、厚 16，配侧面与上沿实体围挡。清场前不能穿门、绕侧面或隔门 E；清场只开放区域入口，终端再开原 `p1_door_01`。最终出口也校验终端状态。
+
+### 维护口令（2026-11-03，C-TERMINAL-01）
+
+以下密码仅供开发和复测，正式游戏不自动显示完整答案：
+
+| 线索内容 ID | 所在房间与载体 | 对白中的线索 |
+| --- | --- | --- |
+| `pulse_blueprint` | 图纸室，原图纸台 | 图纸页脚：维护口令前段 `04` |
+| `workshop_origin` | 小房间，制造室操作台 | 记录末尾：维护口令后段 `17` |
+
+按前后顺序组成 `0417`。沿用原有局部 E 点与逐句对白，图纸和小房间都可再次交互重读，不新增地图节点或方向提示。完整结束对应交互才向 `terminal_clues` 记录该片段；死亡重试保留已读记忆，新关卡实例清空。D 替换对白时应保留两段线索及其顺序，仍调用原 `finish_interaction` 接口。
+
+终端 E 打开数字键盘：支持键盘数字、Enter、鼠标数字键、退格、清空与 Esc 返回。保留开头的零，空／不足四位提示补齐，错误四位提示核对记录，可不限次数重试；无伤害或锁死惩罚。终端只说明原始记录在图纸与制造室中，不显示已拼出的答案或添加任务 HUD。已知密码可直接验证，不把读过故事／日志当作强制收集条件。
+
+功能面板由 C 直接展示，不送入 D 的 `interaction_requested` 演出接口。`interaction_sheet.code_submitted(token, code)` 交由 `_submit_terminal_code` 检查唯一请求 `terminal_access`、当前 token、玩家存活、距离／遮挡、清场和入口状态、准确口令，全部满足才激活、开出口和解锁原 `first_terminal` 成就。通用 `finish_interaction(token, true)` 不授予终端权限；取消、过期或重复提交无效。输入期间沿用长交互暂停，结束后延迟恢复输入。
+
+重试使终端及两道门恢复锁定；清场后可使用记住的口令重新验证，无需重读线索。没有新增跨程序存档、随机密码、收集奖励或外部素材。
 
 重试恢复敌人基线、两道门、终端、环境蛛网，清旧弹丸和门动画；按 REV-14 保留本关已完成的能力学习，不重播已完成教学、不生成实体枪。图纸与已读记录在关卡实例内保留；未读完的交互不授予进度。复活位置与恢复耐久沿用当前实现，没有新增复活点，也未将原满耐久默认值当作 OPEN-05 已裁定。
 
@@ -75,6 +92,7 @@ Windows / Godot 4.7.2 / Compatibility：
 ```sh
 godot --headless --editor --import --path .
 godot --headless --path . --script res://tests/manual/c_progress/interaction_check.gd
+godot --headless --path . --script res://tests/manual/c_progress/terminal_password_check.gd
 godot --headless --path . --script res://tests/manual/c_progress/progress_check.gd
 godot --headless --path . --script res://tests/manual/c_progress/duct_check.gd
 godot --headless --path . --script res://tests/manual/c_progress/achievement_check.gd
@@ -86,7 +104,9 @@ godot --headless --path . --script res://tests/manual/a_map/web_break_check.gd
 
 覆盖真实 E 打开且不跳首句、完整推进／取消、D 展示替换、墙体与门的真实碰撞、管道双向／阻挡／旧回调、死亡保留学习与世界回滚、机械心、成就与真实脉冲破网。配置主场景由命令行启动；没有人工按键 F5 验收。实际窗口 1152×648 检查了场景设施、无目标 HUD、逐句通讯、管道菜单与成就；截图使用镜头定位和驱动事件，不作为完整徒步通关证明。
 
-人工复测：F5 进入腹腔，探索图纸台按 E 阅读神明通讯，回制造台装配，进入小房间交互；清三台清扫者观察门禁，再激活终端；逐点解锁管道往返；破室内网观察成就；死亡后确认能力保留、世界恢复。
+人工复测：F5 进入腹腔，探索图纸台按 E 阅读神明通讯及口令前段，回制造台装配，进入小房间阅读后段；清三台清扫者观察入口开放，终端先输入错误口令再输入正确口令，确认只有验证成功才开出口；逐点解锁管道往返；破室内网观察成就；死亡后确认能力／已读线索保留、世界恢复。
+
+2026-11-03 C-TERMINAL-01：Windows / Godot 4.7.2 下资源导入、`terminal_password_check`、`interaction_check`、`progress_check`、`duct_check`、`achievement_check`、`achievement_events_check` 与旧 `terminal_gate_check` 全部通过；实际 OpenGL 窗口再次运行密码检查通过，并核对字体与数字键盘布局。密码检查覆盖取消／旧回调、数字与前导零、错误反馈、重试／新局以及不依赖已读数量的正确验证。仍需非作者从 F5 徒步完成路线；命令行验证不等于人工按键验收。
 
 ## 待完成
 

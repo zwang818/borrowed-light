@@ -27,3 +27,9 @@ godot --headless --path . --script res://tests/manual/c_progress/achievement_che
 成就事件检查：`godot --headless --path . --script res://tests/manual/c_progress/achievement_events_check.gd`。使用独立测试成就文件，覆盖真实击破信号、计数／重试、无伤成功失败及首次通知保存；其他管道与记录成就在各自检查中验证。
 
 C-STORY-01：interaction_check 现通过真实 E 输入打开通讯，验证第一句未跳过、推进中不提前授予图纸、Esc 取消、读完提交，以及没有目标栏／开场导航／“阅读时世界暂停”说明。
+
+## 终端密码检查（2026-11-03）
+
+`godot --headless --path . --script res://tests/manual/c_progress/terminal_password_check.gd`
+
+覆盖两房间线索、取消不记录、重复查看、知识快照隔离、真实 E 打开键盘、键盘／鼠标输入、开头零、清空／退格、空／短／错误密码、正确验证、取消与过期回调、通用完成接口不能绕过、清场与出口门分离、原终端成就、重试知识保留与新关卡清空。另检查 1152×648 和 960×540 布局。使用隔离成就文件 `test_terminal_password.cfg` 并清理，不覆盖玩家存档。非无界面运行时可通过环境变量 `C_TERMINAL_PREVIEW_PATH` 将预览保存到仓库外。

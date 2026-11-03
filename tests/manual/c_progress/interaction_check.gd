@@ -110,7 +110,12 @@ func run_checks() -> void:
 	player.global_position = level.terminal.global_position + Vector2(0, 24)
 	await physics_frame
 	level._try_interact()
-	check(level.terminal_activated, "E activates reachable terminal")
+	check(paused and level.pending_interaction == level.TERMINAL_REQUEST and not level.terminal_activated, "E opens terminal password entry")
+	for digit in level.TERMINAL_CODE:
+		level.interaction_sheet._type_code(digit)
+	level.interaction_sheet._advance_or_finish()
+	await process_frame
+	check(level.terminal_activated, "Correct password activates reachable terminal")
 	var exit_door = level.interactables_parent.get_node("Door_p1_door_01")
 	check(exit_door.collision_layer == 0, "Terminal opens exit separately")
 	player.invulnerability_remaining = 0
