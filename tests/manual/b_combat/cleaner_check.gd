@@ -96,6 +96,9 @@ func run_checks() -> void:
 	cleaner.global_position = Vector2(640, 500)
 	await physics_frame
 	await physics_frame
+	# This shared-enemy check fires from the body at its original foot collider.
+	# Independent-arm muzzle offsets are covered by muzzle_check/hurtbox_check.
+	player.pulse_gun.use_muzzle = false
 	player.pulse_gun.request_fire(Vector2.RIGHT)
 	player.pulse_gun.advance_time(1.1, player.global_position, Vector2.RIGHT)
 	check(cleaner.health == 2, "Laser damages real cleaner.")

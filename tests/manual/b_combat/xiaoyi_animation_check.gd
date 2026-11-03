@@ -12,6 +12,8 @@ func check(ok: bool, message: String) -> void:
 
 func _run() -> void:
 	var room = load("res://tests/manual/b_combat/combat_test.tscn").instantiate()
+	# Isolate low-level manual pose checks from production automatic holstering.
+	room.get_node("SpawnPoints/PlayerSpawn/Player").set_script(preload("res://tests/manual/b_combat/manual_modes_fixture.gd"))
 	root.add_child(room)
 	var player = room.get_node("SpawnPoints/PlayerSpawn/Player")
 	var visual = player.get_node("Facing/XiaoyiCombatVisual")
@@ -53,6 +55,20 @@ func _run() -> void:
 	check(visual.facing_row == 2, "Reverse turn finishes facing movement.")
 	visual.update_animation(0.2, Vector2.DOWN, true)
 	check(visual.facing_row == 2 and visual.current_column == 0, "Death/disabled input freezes locomotion.")
+	player.set_attack_mode(1)
+	player.mouse_facing = Vector2.LEFT
+	player.pulse_gun.state = player.pulse_gun.State.FIRING
+	player.pulse_gun.locked_direction = Vector2.RIGHT
+	visual.update_animation(1.0/60.0, Vector2.DOWN, false)
+	check(visual.facing_row == 6, "Firing must immediately face the actual beam despite mouse and movement.")
+	player.pulse_gun.state = player.pulse_gun.State.IDLE
+	visual.update_animation(0.3, Vector2.ZERO, false)
+	check(visual.facing_row == 2, "After firing the body follows the mouse again.")
+	visual.face_firing_beam = false
+	player.pulse_gun.state = player.pulse_gun.State.FIRING
+	visual.update_animation(0.3, Vector2.ZERO, false)
+	check(visual.facing_row == 2, "Production defaults preserve the existing mouse-facing behavior.")
+	player.pulse_gun.cancel()
 	room.queue_free()
 	await process_frame
 	print("Xiaoyi animation checks: %s" % ("PASS" if failures == 0 else "FAIL"))

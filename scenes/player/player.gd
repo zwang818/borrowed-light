@@ -57,7 +57,7 @@ func _physics_process(delta: float) -> void:
 	velocity = direction * move_speed
 	move_and_slide()
 	aim_at(get_global_mouse_position())
-	if pulse_gun_equipped and not has_protocol:
+	if can_fire_pulse() and not has_protocol:
 		pulse_gun.advance_time(delta, global_position, aim_direction)
 		if pulse_gun.state == pulse_gun.State.FIRING:
 			aim_direction = pulse_gun.locked_direction
@@ -68,10 +68,14 @@ func _physics_process(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	# An edge-triggered event catches short clicks and never repeats while held.
-	if controls_enabled and not has_protocol and pulse_gun_equipped and event.is_action_pressed(shoot_action):
+	if controls_enabled and not has_protocol and can_fire_pulse() and event.is_action_pressed(shoot_action):
 		aim_at(get_global_mouse_position())
 		pulse_gun.request_fire(aim_direction)
 		get_viewport().set_input_as_handled()
+
+
+func can_fire_pulse() -> bool:
+	return pulse_gun_equipped
 
 
 func aim_at(world_position: Vector2) -> void:

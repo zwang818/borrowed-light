@@ -8,6 +8,8 @@ func check(ok: bool, message: String) -> void:
 		push_error(message)
 func _run() -> void:
 	var room = load("res://tests/manual/b_combat/combat_test.tscn").instantiate()
+	# Use deterministic manual aim for wall/muzzle geometry assertions.
+	room.get_node("SpawnPoints/PlayerSpawn/Player").set_script(preload("res://tests/manual/b_combat/manual_modes_fixture.gd"))
 	root.add_child(room)
 	var player = room.get_node("SpawnPoints/PlayerSpawn/Player")
 	var visual = player.get_node("Facing/XiaoyiCombatVisual")
@@ -37,7 +39,7 @@ func _run() -> void:
 	gun.request_fire(Vector2.RIGHT)
 	gun.advance_time(0.8, player.global_position, Vector2.RIGHT)
 	gun.advance_time(0.03, player.global_position, Vector2.RIGHT)
-	check(gun.beam_points.size() >= 2 and gun.beam_points[0].is_equal_approx(muzzle), "Laser begins at animated left-arm lens.")
+	check(gun.beam_points.size() >= 2 and gun.beam_points[0].is_equal_approx(visual.get_muzzle_world_position(1)), "Laser begins at animated left-arm lens.")
 	var before: Vector2 = gun.beam_points[0]
 	player.global_position += Vector2(8, 4)
 	gun.advance_time(0.01, player.global_position)

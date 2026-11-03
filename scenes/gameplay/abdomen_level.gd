@@ -326,6 +326,7 @@ func _match_marker(marker: Marker2D) -> void:
 			cleaner.get_node("Facing/Body").hide()
 			var cleaner_model := preload("res://tests/manual/b_combat/cleaner_visual.gd").new()
 			cleaner_model.name = "CleanerModel"
+			cleaner_model.match_hurtbox = true
 			cleaner.add_child(cleaner_model)
 			marker.hide()
 			enemies.append(cleaner)
@@ -430,9 +431,11 @@ func _configure_player() -> void:
 	var map_bounds: Rect2 = map.get_meta("map_bounds", Rect2(128, 32, 1120, 2688))
 	player.get_node("Facing/Body").hide()
 	player.get_node("Facing/DirectionIndicator").hide()
-	robot_visual = preload("res://tests/manual/b_combat/xiaoyi_combat_visual.gd").new()
+	robot_visual = preload("res://tests/manual/b_combat/xiaoyi_aim_visual.gd").new()
 	robot_visual.name = "XiaoyiCombatVisual"
 	robot_visual.display_height = 60.0
+	robot_visual.enhanced_gait = true
+	robot_visual.face_firing_beam = true
 	player.get_node("Facing").add_child(robot_visual)
 	player.pulse_gun.configure_space(map_bounds, _enemy_visible_query)
 	player.died.connect(_on_player_died)
@@ -823,7 +826,7 @@ func finish_interaction(token: int, completed: bool) -> void:
 					current_objective = Objective.CRAFT_ARM
 			&"pulse_workbench":
 				pulse_learned = true
-				player.pulse_gun_equipped = true
+				player.learn_pulse()
 				game_menus.unlock_achievement("first_weapon")
 				current_objective = Objective.ACTIVATE_TERMINAL if _remaining_cleaners() == 0 else Objective.KILL_ENEMIES
 				_show_notification(C.t_weapon_get, 2.5)

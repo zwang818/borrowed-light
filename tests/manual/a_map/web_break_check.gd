@@ -115,6 +115,17 @@ func find_shot(game: Node2D, env: Node2D, web: Area2D) -> Array:
 					if not Geometry2D.is_point_in_polygon(local, polygon):
 						continue
 					var to := web.to_global(local)
+					# The independent arm moves its muzzle when its aim changes.
+					# Solve the candidate with the firing pose instead of a stale mouse pose.
+					var gun = game.player.pulse_gun
+					gun.state = gun.State.FIRING
+					for iteration in range(8):
+						gun.locked_direction = (to-beam_origin).normalized()
+						origin = game.player.get_shot_origin(1)
+						beam_origin = origin.position
+					gun.state = gun.State.IDLE
+					if origin.blocked and origin.target != web:
+						continue
 					var hit := TRACE.trace(web.get_world_2d().direct_space_state, beam_origin, (to - beam_origin).normalized(), beam_origin.distance_to(to) + 2)
 					if hit.target == web:
 						return [from, to, beam_origin]
