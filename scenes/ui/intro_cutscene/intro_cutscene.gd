@@ -26,13 +26,9 @@ signal intro_finished
 @export var font_size_button: int = 15
 
 @export_group("Background Asset")
-@export var landscape_texture: Texture2D = preload("res://assets/backgrounds/title/title_landscape.svg")
-@export var beast_texture: Texture2D = preload("res://assets/backgrounds/title/mechanical_beast.svg")
-@export var robot_texture: Texture2D = preload("res://assets/sprites/title/title_robot.svg")
-
-@export_group("Deity Position (Inspector 可拖动)")
-@export var deity_pos: Vector2 = Vector2(240, 220)
-@export var deity_size: Vector2 = Vector2(80, 80)
+@export var landscape_texture: Texture2D = preload("res://assets/backgrounds/title/wasteland_intro_pixel.png")
+@export var beast_texture: Texture2D = preload("res://assets/backgrounds/title/mechanical_deity_pixel.png")
+@export var robot_texture: Texture2D = preload("res://tests/manual/b_combat/art/xiaoyi/xiaoyi_idle_pixel.png")
 
 @export_group("Audio")
 @export var intro_bgm: AudioStream = preload("res://assets/audio/title_bgm.wav")
@@ -43,7 +39,7 @@ signal intro_finished
 # duration     auto 帧秒数
 # text         对话框正文
 # dialog_style "warm" | "warm_dim" | "cold" | "hidden"
-# show_deity   是否显示神明光球（跟对话同步亮起）
+# show_deity   旧兼容字段；核心光效已绘入神明贴图
 # robot_action "idle" | "pulse" | "walk_to_beast"
 # show_hud     是否显示进入按钮
 # show_hint    是否显示 WASD 玩法说明（仅前几帧用）
@@ -128,15 +124,26 @@ var _elapsed: float = 0.0
 
 var _landscape: TextureRect
 var _beast: TextureRect
-var _beast_chest: Control
-var _deity_orb: TextureRect
-var _deity_floor: Panel
 var _robot_anchor: Control
 var _robot: TextureRect
 var _lamp_glow: TextureRect
+var _grass_foreground: TextureRect
+var _grass_material: ShaderMaterial
+var _wind_player: AudioStreamPlayer
+var _walk_frames: Array[AtlasTexture] = []
+var _walk_frame_elapsed := 0.0
+var _walk_frame_index := 0
+const DESIGN_SIZE := Vector2(1280.0, 720.0)
+var _scene_scale := 1.0
+var _scene_offset := Vector2.ZERO
+const WALK_SHEET: Texture2D = preload("res://tests/manual/b_combat/art/xiaoyi/xiaoyi_walk_8dir.png")
+const WALK_ROW_RIGHT := 6
+const WALK_ROW_EDGES := [0, 213, 428, 644, 867, 1082, 1302, 1516, 1774]
 
 var _dialog_container: Control
 var _dialog_panel: Panel
+var _dialog_glint_top: ColorRect
+var _dialog_glint_side: ColorRect
 var _text_label: Label
 var _click_prompt: Label
 var _next_arrow: Label
@@ -160,6 +167,8 @@ var _tween: Tween
 # ---------- 生命周期 ----------
 func _ready() -> void:
 	_build_scene()
+	resized.connect(_fit_scene_art)
+	_fit_scene_art()
 	_setup_audio()
 	# 自动绑定关卡（兜底，即使 Inspector 没配也能走通）
 	if crossfade_to_scene == null:
@@ -275,6 +284,10 @@ func _setup_audio() -> void:
 	add_child(_page_sfx)
 	_footstep_sfx = AudioStreamPlayer.new()
 	add_child(_footstep_sfx)
+	_wind_player = AudioStreamPlayer.new()
+	_wind_player.stream = _make_wind_stream()
+	_wind_player.volume_db = -1.5
+	add_child(_wind_player)
 
 func _play_page_click() -> void:
 	var s := _make_tick_sound()
@@ -302,7 +315,7 @@ func _make_tick_sound() -> AudioStreamWAV:
 		buf[i*2] = val & 0xff; buf[i*2+1] = (val>>8) & 0xff
 	var stream := AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_16_BITS; stream.mix_rate = sr
-	stream.stereo = false; stream.data = buf; stream.loop_mode = 0
+	stream.stereo = false; stream.data = buf
 	return stream
 
 func _make_footstep_sound() -> AudioStreamWAV:
@@ -316,11 +329,64 @@ func _make_footstep_sound() -> AudioStreamWAV:
 		buf[i*2] = val & 0xff; buf[i*2+1] = (val>>8) & 0xff
 	var stream := AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_16_BITS; stream.mix_rate = sr
-	stream.stereo = false; stream.data = buf; stream.loop_mode = 0
+	stream.stereo = false; stream.data = buf
 	return stream
 
+func _make_wind_stream() -> AudioStreamWAV:
+	var sr := 22050
+	var duration := 6.0
+	var count := int(sr * duration)
+	var buf := PackedByteArray()
+	buf.resize(count * 2)
+	var low := 0.0
+	var mid := 0.0
+	for i in range(count):
+		var t := float(i) / float(sr)
+		low = low * 0.992 + randf_range(-1.0, 1.0) * 0.008
+		mid = mid * 0.94 + randf_range(-1.0, 1.0) * 0.06
+		var gust := 0.72 + 0.28 * pow(0.5 + 0.5 * sin(TAU * 2.0 * t / duration), 2.0)
+		var edge_fade := smoothstep(0.0, 0.08, minf(t, duration - t))
+		var sample := clampf((low * 4.5 + mid * 0.52 + randf_range(-1.0, 1.0) * 0.035) * gust * edge_fade * 0.72, -0.98, 0.98)
+		var pcm := int(sample * 32767.0)
+		buf[i * 2] = pcm & 0xff
+		buf[i * 2 + 1] = (pcm >> 8) & 0xff
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = sr
+	stream.stereo = false
+	stream.data = buf
+	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	stream.loop_end = count
+	return stream
+
+func _prepare_walk_frames() -> void:
+	_walk_frames.clear()
+	var sheet_width := WALK_SHEET.get_width()
+	var column_width := float(sheet_width) / 4.0
+	for column in range(4):
+		var x0 := roundi(column * column_width)
+		var x1 := roundi((column + 1) * column_width)
+		var frame := AtlasTexture.new()
+		frame.atlas = WALK_SHEET
+		frame.region = Rect2(x0, WALK_ROW_EDGES[WALK_ROW_RIGHT], x1 - x0, WALK_ROW_EDGES[WALK_ROW_RIGHT + 1] - WALK_ROW_EDGES[WALK_ROW_RIGHT])
+		frame.filter_clip = true
+		_walk_frames.append(frame)
+
+func _fit_scene_art() -> void:
+	var viewport_size := get_viewport_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0 or _beast == null:
+		return
+	_scene_scale = minf(viewport_size.x / DESIGN_SIZE.x, viewport_size.y / DESIGN_SIZE.y)
+	_scene_offset = (viewport_size - DESIGN_SIZE * _scene_scale) * 0.5
+	_beast.position = _scene_offset + Vector2(380.0, 145.0) * _scene_scale
+	_beast.size = Vector2(880.0, 440.0) * _scene_scale
+	_robot_anchor.position = _scene_offset + Vector2(200.0, 430.0) * _scene_scale
+	_robot_anchor.scale = Vector2.ONE * _scene_scale
+	_grass_foreground.position = _scene_offset + Vector2(0.0, 470.0) * _scene_scale
+	_grass_foreground.size = Vector2(1280.0, 250.0) * _scene_scale
+
 # ---------- 翻页动画 ----------
-func _play_page_tween(frame: Dictionary) -> void:
+func _play_page_tween(_frame: Dictionary) -> void:
 	if _tween != null and _tween.is_valid():
 		_tween.kill()
 	_tween = create_tween()
@@ -349,17 +415,19 @@ func _apply_frame_visuals(frame: Dictionary) -> void:
 		match style:
 			"warm":
 				_text_label.add_theme_color_override("font_color", color_text_on_warm)
-				_dialog_panel.add_theme_stylebox_override("panel", _make_dialog_panel(Color(0.05, 0.04, 0.03, 0.88), Color(1.0, 0.70, 0.30, 0.55)))
+				var warm_fill := Color(0.05, 0.04, 0.03, 0.88)
+				_dialog_panel.add_theme_stylebox_override("panel", _make_dialog_panel(warm_fill, Color(1.0, 0.70, 0.30, 0.55)))
+				_set_dialog_reflection(warm_fill)
 			"warm_dim":
 				_text_label.add_theme_color_override("font_color", color_text_on_warm)
-				_dialog_panel.add_theme_stylebox_override("panel", _make_dialog_panel(Color(0.12, 0.04, 0.0, 0.9), Color(0.75, 0.35, 0.12, 0.45)))
+				var warm_dim_fill := Color(0.12, 0.04, 0.0, 0.9)
+				_dialog_panel.add_theme_stylebox_override("panel", _make_dialog_panel(warm_dim_fill, Color(0.75, 0.35, 0.12, 0.45)))
+				_set_dialog_reflection(warm_dim_fill)
 			"cold":
 				_text_label.add_theme_color_override("font_color", color_text_on_cold)
-				_dialog_panel.add_theme_stylebox_override("panel", _make_dialog_panel(Color(0.0, 0.06, 0.08, 0.9), Color(0.35, 0.82, 0.88, 0.45)))
-	# 神明视觉球（纯粹光球，不带文字）
-	var show_deity: bool = bool(frame.get("show_deity", false))
-	_deity_orb.modulate.a = 0.9 if show_deity else 0.0
-	_deity_floor.modulate.a = 0.55 if show_deity else 0.0
+				var cold_fill := Color(0.0, 0.06, 0.08, 0.9)
+				_dialog_panel.add_theme_stylebox_override("panel", _make_dialog_panel(cold_fill, Color(0.35, 0.82, 0.88, 0.45)))
+				_set_dialog_reflection(cold_fill)
 	# 系统警告弹窗
 	var sys_lines: Array = frame.get("system_lines", [])
 	if sys_lines.size() > 0:
@@ -385,41 +453,71 @@ func _apply_frame_visuals(frame: Dictionary) -> void:
 func _make_dialog_panel(bg: Color, border: Color) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	s.bg_color = bg
-	s.border_width_left = 1; s.border_width_right = 1
-	s.border_width_top = 1; s.border_width_bottom = 1
-	s.border_color = border
-	s.corner_radius_top_left = 6; s.corner_radius_top_right = 6
-	s.corner_radius_bottom_left = 6; s.corner_radius_bottom_right = 6
+	var metal := bg.lerp(border, 0.72).lightened(0.1)
+	metal.a = 1.0
+	s.border_color = metal
+	s.border_width_left = 4; s.border_width_right = 4
+	s.border_width_top = 7; s.border_width_bottom = 4
+	s.corner_radius_top_left = 4; s.corner_radius_top_right = 4
+	s.corner_radius_bottom_left = 4; s.corner_radius_bottom_right = 4
 	s.content_margin_left = 16; s.content_margin_right = 16
 	s.content_margin_top = 6; s.content_margin_bottom = 6
+	s.shadow_color = Color(0, 0, 0, 0.62)
+	s.shadow_size = 8
+	s.shadow_offset = Vector2(0, 4)
 	return s
+
+func _set_dialog_reflection(fill: Color) -> void:
+	if not is_instance_valid(_dialog_glint_top) or not is_instance_valid(_dialog_glint_side):
+		return
+	var metal := fill.lerp(Color("e6e7d7"), 0.78)
+	metal.a = 0.58
+	_dialog_glint_top.color = metal
+	metal.a = 0.28
+	_dialog_glint_side.color = metal
 
 # ---------- 动态每帧 ----------
 func _apply_frame_dynamic(delta: float, frame: Dictionary) -> void:
 	var action: String = str(frame.get("robot_action", "idle"))
+	var walking := action == "walk_to_beast"
+	if _wind_player != null:
+		if walking and not _wind_player.playing:
+			_wind_player.play()
+		elif not walking and _wind_player.playing:
+			_wind_player.stop()
+	if _grass_material != null:
+		_grass_material.set_shader_parameter("sway_amount", (9.0 if walking else 1.6) * _scene_scale)
 	match action:
 		"pulse":
 			_lamp_glow.modulate.a = 0.85 + sin(_elapsed * 8.0) * 0.15
 			_robot.rotation = sin(_elapsed * 6.0) * 0.04
 		"walk_to_beast":
-			_robot_anchor.position.x = move_toward(_robot_anchor.position.x, 780.0, delta * 140.0)
-			_robot_anchor.position.y = move_toward(_robot_anchor.position.y, 450.0, delta * 15.0)
+			_robot_anchor.position.x = move_toward(_robot_anchor.position.x, _scene_offset.x + 629.0 * _scene_scale, delta * 140.0 * _scene_scale)
+			_robot_anchor.position.y = move_toward(_robot_anchor.position.y, _scene_offset.y + 398.0 * _scene_scale, delta * 15.0 * _scene_scale)
+			_walk_frame_elapsed += delta
+			if _walk_frame_elapsed >= 0.13:
+				_walk_frame_elapsed = fposmod(_walk_frame_elapsed, 0.13)
+				_walk_frame_index = (_walk_frame_index + 1) % _walk_frames.size()
+				_robot.texture = _walk_frames[_walk_frame_index]
+			# 抵达腹腔入口后继续向内走，并在暗部中渐隐。
+			var robot_design_x := (_robot_anchor.position.x - _scene_offset.x) / _scene_scale
+			var enter_fade := clampf((robot_design_x - 559.0) / 70.0, 0.0, 1.0)
+			_robot_anchor.modulate.a = 1.0 - enter_fade
 			_robot.rotation = sin(_elapsed * 10.0) * 0.03
-			_lamp_glow.modulate.a = 0.75 + sin(_elapsed * 14.0) * 0.08
+			_lamp_glow.modulate.a = (0.76 + sin(_elapsed * 14.0) * 0.08) * (1.0 - enter_fade)
 			# 走路脚步声：每 0.45s 一次
 			_footstep_timer += delta
 			if _footstep_timer >= 0.45:
 				_footstep_timer = 0.0
 				_play_footstep()
 		_:  # idle
+			_robot_anchor.modulate.a = 1.0
+			_robot.texture = robot_texture
+			_walk_frame_elapsed = 0.0
+			_walk_frame_index = 0
 			_robot.rotation = sin(_elapsed * 1.25) * 0.025
-			_robot_anchor.position.y = 430.0 + sin(_elapsed * 1.5) * 1.5
+			_robot_anchor.position.y = _scene_offset.y + (430.0 + sin(_elapsed * 1.5) * 1.5) * _scene_scale
 			_lamp_glow.modulate.a = 0.78 + sin(_elapsed * 1.0) * 0.05
-	# 神明光球：呼吸式缩放+alpha
-	if _deity_orb.modulate.a > 0.01:
-		_deity_orb.scale = Vector2.ONE * (1.0 + sin(_elapsed * 3.2) * 0.10)
-		_deity_orb.modulate.a = 0.88 + sin(_elapsed * 3.2 + 1.0) * 0.12
-		_deity_floor.modulate.a = 0.55 + sin(_elapsed * 3.2 + 1.0) * 0.15
 
 # ---------- 场景构建 ----------
 func _build_scene() -> void:
@@ -439,49 +537,19 @@ func _build_scene() -> void:
 	_landscape.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_landscape)
 
-	# 神兽剪影
+	# 神明遗体：透明像素贴图叠在荒原远景前
 	_beast = TextureRect.new()
 	_beast.texture = beast_texture
 	_beast.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_beast.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
-	_beast.position = Vector2(500, 200)
-	_beast.size = Vector2(780, 380)
+	_beast.position = Vector2(380, 145)
+	_beast.size = Vector2(880, 440)
+	_beast.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_beast.modulate.a = 0.0
 	_beast.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_beast)
 
-	# 神明锚点（Inspector 可调整位置/大小）
-	_beast_chest = Control.new()
-	_beast_chest.position = deity_pos
-	_beast_chest.size = deity_size
-	_beast_chest.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_beast_chest)
-	# 柔光底座
-	_deity_floor = Panel.new()
-	var floor_style := StyleBoxFlat.new()
-	floor_style.bg_color = Color(1.0, 0.80, 0.40, 0.60)
-	floor_style.corner_radius_top_left = 40; floor_style.corner_radius_top_right = 40
-	floor_style.corner_radius_bottom_left = 40; floor_style.corner_radius_bottom_right = 40
-	floor_style.content_margin_left = 30; floor_style.content_margin_right = 30
-	floor_style.content_margin_top = 30; floor_style.content_margin_bottom = 30
-	_deity_floor.add_theme_stylebox_override("panel", floor_style)
-	_deity_floor.position = Vector2(-40, -40)
-	_deity_floor.size = Vector2(180, 180)
-	_deity_floor.modulate.a = 0.0
-	_deity_floor.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_beast_chest.add_child(_deity_floor)
-	# 核心光球（径向渐变，带光的能量感）
-	_deity_orb = TextureRect.new()
-	_deity_orb.texture = _make_deity_gradient()
-	_deity_orb.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_deity_orb.stretch_mode = TextureRect.STRETCH_KEEP
-	_deity_orb.position = Vector2(0, 0)
-	_deity_orb.size = Vector2(80, 80)
-	_deity_orb.modulate.a = 0.0
-	_deity_orb.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_beast_chest.add_child(_deity_orb)
-
-	# 机器人锚点 — 上移到 y=430，图片底=578，和对话框顶(662)空 84px
+	# 小一锚点 — 开场从左侧荒原走向腹腔入口
 	_robot_anchor = Control.new()
 	_robot_anchor.position = Vector2(200, 430)
 	_robot_anchor.size = Vector2(120, 160)
@@ -492,16 +560,32 @@ func _build_scene() -> void:
 	_lamp_glow.texture = _make_lamp_gradient()
 	_lamp_glow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_lamp_glow.stretch_mode = TextureRect.STRETCH_KEEP
-	_lamp_glow.position = Vector2(-30, -20)
-	_lamp_glow.size = Vector2(180, 180)
+	_lamp_glow.position = Vector2(16, 28)
+	_lamp_glow.size = Vector2(88, 88)
 	_robot_anchor.add_child(_lamp_glow)
 	_robot = TextureRect.new()
 	_robot.texture = robot_texture
 	_robot.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_robot.position = Vector2(12, 20)
-	_robot.size = Vector2(96, 128)
-	_robot.pivot_offset = Vector2(48, 120)
+	_robot.position = Vector2(-1, 20)
+	_robot.size = Vector2(122, 128)
+	_robot.pivot_offset = Vector2(61, 120)
+	_robot.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_robot_anchor.add_child(_robot)
+	_prepare_walk_frames()
+
+	# 前景荒草单独覆盖在角色脚前，走路时受更强阵风推动。
+	_grass_foreground = TextureRect.new()
+	_grass_foreground.texture = preload("res://assets/backgrounds/title/wasteland_grass_foreground.png")
+	_grass_foreground.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_grass_foreground.stretch_mode = TextureRect.STRETCH_SCALE
+	_grass_foreground.position = Vector2(0, 470)
+	_grass_foreground.size = Vector2(1280, 250)
+	_grass_foreground.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_grass_foreground.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_grass_material = ShaderMaterial.new()
+	_grass_material.shader = preload("res://scenes/ui/intro_cutscene/wasteland_grass.gdshader")
+	_grass_foreground.material = _grass_material
+	add_child(_grass_foreground)
 
 	# 对话框 — 最小化 (92%-98.5%)，y=662-709，高度 47px，绝无可能挡任何主体
 	_dialog_container = Control.new()
@@ -514,6 +598,19 @@ func _build_scene() -> void:
 	_dialog_panel.anchor_right = 1.0; _dialog_panel.anchor_bottom = 1.0
 	_dialog_panel.add_theme_stylebox_override("panel", _make_dialog_panel(Color(0.05, 0.04, 0.03, 0.88), Color(1.0, 0.70, 0.30, 0.55)))
 	_dialog_container.add_child(_dialog_panel)
+	_dialog_glint_top = ColorRect.new()
+	_dialog_glint_top.anchor_right = 1.0
+	_dialog_glint_top.offset_left = 8; _dialog_glint_top.offset_right = -12
+	_dialog_glint_top.offset_top = 3; _dialog_glint_top.offset_bottom = 5
+	_dialog_glint_top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_dialog_panel.add_child(_dialog_glint_top)
+	_dialog_glint_side = ColorRect.new()
+	_dialog_glint_side.anchor_bottom = 1.0
+	_dialog_glint_side.offset_left = 4; _dialog_glint_side.offset_right = 6
+	_dialog_glint_side.offset_top = 10; _dialog_glint_side.offset_bottom = -12
+	_dialog_glint_side.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_dialog_panel.add_child(_dialog_glint_side)
+	_set_dialog_reflection(Color(0.05, 0.04, 0.03, 0.88))
 	# 正文（居中 + 阴影 + 描边。全靠 anchor，不写死 size）
 	_text_label = Label.new()
 	_text_label.anchor_left = 0.0; _text_label.anchor_right = 1.0
@@ -567,14 +664,14 @@ func _build_scene() -> void:
 	_system_container.modulate.a = 0.0
 	_system_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_system_container)
-	var sys_floor := ColorRect.new()
+	var sys_floor := Panel.new()
 	sys_floor.anchor_right = 1.0; sys_floor.anchor_bottom = 1.0
-	sys_floor.color = Color(0.02, 0.05, 0.08, 0.88)
+	sys_floor.add_theme_stylebox_override("panel", _make_dialog_panel(Color(0.02, 0.05, 0.08, 0.88), Color(0.35, 0.82, 0.88, 0.45)))
 	_system_container.add_child(sys_floor)
 	var sys_border := ColorRect.new()
 	sys_border.anchor_right = 1.0; sys_border.anchor_top = 0.0; sys_border.anchor_bottom = 0.0
 	sys_border.custom_minimum_size = Vector2(0, 2)
-	sys_border.color = color_cold
+	sys_border.color = Color(0.66, 0.91, 0.91, 0.72)
 	_system_container.add_child(sys_border)
 
 	# HUD 层（WASD 提示 + 目标 + 进入按钮）
@@ -593,7 +690,7 @@ func _build_scene() -> void:
 	_hud_goal.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.6))
 	_hud_goal.add_theme_constant_override("shadow_offset_x", 1)
 	_hud_goal.add_theme_constant_override("shadow_offset_y", 1)
-	_hud_goal.text = "当前目标：进入机械神兽体内"
+	_hud_goal.text = "当前目标：进入神明遗体"
 	_hud_layer.add_child(_hud_goal)
 	# WASD 玩法说明 — 顶部区 (5%-10%)，和系统警告同一带
 	_hud_hint = Label.new()
@@ -681,20 +778,6 @@ func _make_lamp_gradient() -> GradientTexture2D:
 	])
 	var gt := GradientTexture2D.new()
 	gt.gradient = g; gt.width = 192; gt.height = 192
-	gt.fill = GradientTexture2D.FILL_RADIAL; gt.fill_from = Vector2(0.5, 0.5)
-	return gt
-
-func _make_deity_gradient() -> GradientTexture2D:
-	var g := Gradient.new()
-	g.offsets = PackedFloat32Array([0.0, 0.3, 0.7, 1.0])
-	g.colors = PackedColorArray([
-		Color(1.0, 0.97, 0.82, 1.0),
-		Color(1.0, 0.80, 0.45, 0.7),
-		Color(1.0, 0.60, 0.20, 0.25),
-		Color(1.0, 0.50, 0.10, 0.0),
-	])
-	var gt := GradientTexture2D.new()
-	gt.gradient = g; gt.width = 100; gt.height = 100
 	gt.fill = GradientTexture2D.FILL_RADIAL; gt.fill_from = Vector2(0.5, 0.5)
 	return gt
 
