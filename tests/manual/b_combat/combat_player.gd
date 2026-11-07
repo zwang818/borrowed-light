@@ -1,5 +1,5 @@
-extends "res://scenes/player/xiaoyi_map_player.gd"
-## Graybox grants both modules for testing; all combat/pose rules come from main.
+extends "res://scenes/player/xiaoyi_field_player.gd"
+## Only the independent graybox grants scatter before its story evolution.
 func _ready() -> void:
 	scatter_unlocked = true
 	super._ready()

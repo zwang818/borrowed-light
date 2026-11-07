@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 ; Independent B combat graybox. Temporary scale: 1 T = 32 px.
 ; Independent full-bright test fixture: visibility adapter is test-only.
 ; World collision uses layer 1; coordinate with C if the shared layer changes.
@@ -15,6 +15,8 @@
 [ext_resource type="Script" path="res://tests/manual/b_combat/music/background_music.gd" id="6_music"]
 
 [ext_resource type="Script" path="res://tests/manual/b_combat/combat_player.gd" id="7_player_modes"]
+
+[ext_resource type="Script" path="res://tests/manual/b_combat/web_cleaner.gd" id="8_web_cleaner"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(960, 32)
@@ -407,6 +409,7 @@ theme_override_constants/shadow_offset_y = 1
 position = Vector2(560, 500)
 
 [node name="Cleaner" parent="SpawnPoints/CleanerSpawn" instance=ExtResource("4_cleaner")]
+script = ExtResource("8_web_cleaner")
 
 [node name="CombatAudio" type="Node" parent="."]
 script = ExtResource("5_audio")
