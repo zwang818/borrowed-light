@@ -9,7 +9,7 @@ func _init() -> void:
 	var source := SHEET.get_image()
 	var cell := Vector2i(source.get_width()/4, source.get_height()/2)
 	for i in range(8):
-		var image := CLEANUP.clean_frame(source.get_region(Rect2i(Vector2i(i%4,i/4)*cell,cell)))
+		var image := CLEANUP.clean_frame(source.get_region(Rect2i(Vector2i(i%4,floori(float(i)/4.0))*cell,cell)))
 		var frame := AtlasTexture.new()
 		frame.atlas = ImageTexture.create_from_image(image)
 		frame.region = Rect2(image.get_used_rect())

@@ -35,7 +35,7 @@ func _process(_delta: float) -> void:
 func _draw() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	var cell := ATLAS.get_size() / 4.0
-	var source := Rect2(Vector2(atlas_cell % 4, atlas_cell / 4) * cell, cell)
+	var source := Rect2(Vector2(atlas_cell % 4, floori(float(atlas_cell) / 4.0)) * cell, cell)
 	var target := Rect2(-draw_size * 0.5, draw_size)
 	if fit_parent_wall:
 		target = Rect2(Vector2.ZERO, get_parent().get("size"))

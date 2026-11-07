@@ -26,11 +26,11 @@ func _draw() -> void:
 					var alpha := sin(t * PI) * 0.15
 					_cloud(center, 2.0 + t * 10.0, Color(0.56, 0.67, 0.67, alpha), puff)
 
-func _cloud(center: Vector2, radius: float, color: Color, seed: int) -> void:
+func _cloud(center: Vector2, radius: float, color: Color, puff_index: int) -> void:
 	# Stepped silhouettes keep vapor soft without smooth high-resolution blobs.
 	var r := maxf(2.0, floor(radius / 2.0) * 2.0)
 	var c := center.snapped(Vector2(2, 2))
-	var lean := 2.0 if seed % 2 == 0 else -2.0
+	var lean := 2.0 if puff_index % 2 == 0 else -2.0
 	draw_rect(Rect2(c + Vector2(-r * 0.5 + lean, -r), Vector2(r, r * 0.5)), color)
 	draw_rect(Rect2(c + Vector2(-r, -r * 0.5), Vector2(r * 2, r)), color)
 	draw_rect(Rect2(c + Vector2(-r * 0.5 - lean, r * 0.5), Vector2(r, r * 0.5)), color)
