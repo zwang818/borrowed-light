@@ -1,0 +1,9 @@
+# 上下步态
+
+2026-11-07，内置 image_gen 参考 `xiaoyi_body_rig.png` 生成透明素材 `xiaoyi_vertical_walk_v1.png`，8列×2行：向下正面、向上背面。仅 B 灰盒使用髋部以下部分，保留原头部、躯干、武器臂。
+
+每行采用前四帧构成半步，再水平对称腿部作为另半步，确保左右脚交替；上下方向不互相翻转。周期80世界像素，起伏同步。其他方向的素材与步频保持原样。
+
+生成提示词：
+
+Production sprite sheet for the existing robot in reference. Transparent PNG, precisely 8 equal columns x 2 equal rows. Row 1 FRONT view facing DOWN toward viewer, matching reference row 1. Row 2 BACK view facing UP away from viewer, matching reference row 5. Eight sequential WALK poses in each row, seamless looping cycle. NO ARMS, shoulder sockets only, no weapons, same reference character proportions armor style color boots. Upper body antenna head torso identical size and placement within each row; ONLY legs animate. Genuine alternating left and right foot steps with bent knees and clear passing/contact positions: 1 left foot forward contact/right behind, 2 left support/right toe off, 3 right knee lifted and passing, 4 right foot approaching ground in front, 5 right foot forward contact/left behind, 6 right support/left toe off, 7 left knee passing, 8 left approaching ground. Front view: forward foot appears slightly lower and foreshortened shin, retreating foot higher and partly occluded. Back view: accurate heel/back-of-boot silhouettes, lifted back foot reveals sole, forward leg partly occluded naturally. Do NOT duplicate the same leading foot across cycle. No sideways skating, no both feet jumping, no huge kicks, no stretching boots. Feet progress in depth, not broad side-to-side spreading. Symmetric leg proportions and readable weight transfer. Keep robot in same cell location with fixed ground baseline, generous transparent gutters. No text labels shadows background or grid lines. Keep distinct front and back art, do not vertically flip front to get back. Match supplied pixel-art rendering.

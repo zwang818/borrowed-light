@@ -118,7 +118,7 @@ func _physics_process(delta: float) -> void:
 	previous_position = player.global_position
 	# Actual displacement, not held keys: no footsteps when pushing a wall.
 	if distance > 0.05 and distance < player.move_speed * delta * 2 and player.controls_enabled:
-		step_distance += distance
+		step_distance += player.gait_displacement(Vector2(distance,0)).length() if player.has_method("gait_displacement") else distance
 		if step_distance >= 26:
 			step_distance = fmod(step_distance, 26)
 			play_sound(&"player_step")
