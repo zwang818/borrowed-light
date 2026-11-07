@@ -1,0 +1,3101 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/levels/spine/spine_graybox.gd" id="1_map"]
+[ext_resource type="Script" path="res://scenes/levels/graybox/map_marker.gd" id="3_marker"]
+[ext_resource type="Script" path="res://scenes/levels/spine/spine_reservation.gd" id="4_zone"]
+[ext_resource type="Script" path="res://scenes/levels/spine/spine_machinery.gd" id="5_machine"]
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_vrc40"]
+polygon = PackedVector2Array(3458.857, 1313.8036, 3516.8608, 1286.7556, 3550.67, 1359.2606, 3492.667, 1386.3076)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_s06fw"]
+polygon = PackedVector2Array(8757.558, -1368.8698, 8815.561, -1395.9167, 8842.608, -1337.9138, 8784.6045, -1310.8658)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_uwiny"]
+polygon = PackedVector2Array(9077.477, -1288.5479, 9135.48, -1315.5958, 9162.527, -1257.5918, 9104.524, -1230.5438)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_7eaqt"]
+polygon = PackedVector2Array(9221.587, -1585.2498, 9279.591, -1612.2979, 9306.638, -1554.2938, 9248.635, -1527.2468)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_hvphp"]
+polygon = PackedVector2Array(9541.507, -1504.9288, 9599.51, -1531.9758, 9626.558, -1473.9728, 9568.554, -1446.9248)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_p0fxd"]
+polygon = PackedVector2Array(5036.937, 931.0138, 5065.939, 917.4898, 5126.7964, 1047.9978, 5097.7944, 1061.5219)
+
+[node name="SpineGraybox" type="Node2D" unique_id=6396382]
+script = ExtResource("1_map")
+metadata/layout_revision = 4
+metadata/graybox_only = true
+metadata/map_bounds = Rect2(-256, -3328, 11776, 6656)
+metadata/unit = 32
+metadata/follow_zoom = 0.55
+metadata/structure = "diagonal_2d_spine"
+metadata/preview_only = true
+
+[node name="DeepStructure" type="Node2D" parent="." unique_id=1964632638]
+z_index = -40
+
+[node name="Void" type="Polygon2D" parent="DeepStructure" unique_id=1949279158]
+color = Color(0.063, 0.11, 0.141, 1)
+polygon = PackedVector2Array(-256, -3328, 11520, -3328, 11520, 3328, -256, 3328)
+
+[node name="Trunk-1_0" type="Line2D" parent="DeepStructure" unique_id=1239616258]
+points = PackedVector2Array(-3.776, 2292.91, 112.231, 2238.815, 228.239, 2184.72, 344.246, 2130.625, 460.253, 2076.53, 576.261, 2022.435, 1504.3198, 1589.673, 1620.3268, 1535.578, 1736.3348, 1481.483, 1852.3418, 1427.388, 1968.3499, 1373.293, 2838.4048, 967.5796, 2954.4119, 913.4846, 3070.42, 859.3886, 3186.427, 805.2936, 3302.4348, 751.1986, 4114.4863, 372.5328, 4230.493, 318.4378, 4346.501, 264.3428, 4462.5083, 210.2478, 5361.5664, -208.9904, 5477.573, -263.0854, 5593.58, -317.1804, 5709.5884, -371.2754, 5825.595, -425.3704, 5941.603, -479.4654, 6057.6104, -533.5604, 6173.617, -587.6554, 6289.625, -641.7514, 6405.6323, -695.8464, 6521.64, -749.9414, 7333.6914, -1128.6072, 7449.6987, -1182.7021, 7565.7065, -1236.7972, 7681.7134, -1290.8922, 8522.768, -1683.0828, 8638.774, -1737.1779, 8754.782, -1791.2728, 8870.79, -1845.3678, 8986.797, -1899.4628, 9102.805, -1953.5577, 9218.812, -2007.6528, 9334.818, -2061.7488, 10146.871, -2440.4146, 10262.878, -2494.5095, 10378.886, -2548.6045, 10494.894, -2602.6997, 10610.9, -2656.7947, 10726.908, -2710.8896)
+width = 22.0
+default_color = Color(0.125, 0.2, 0.235, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Trunk-1_1" type="Line2D" parent="DeepStructure" unique_id=840836926]
+points = PackedVector2Array(-46.038, 2202.279, 69.969, 2148.184, 185.977, 2094.089, 301.984, 2039.994, 417.991, 1985.899, 533.999, 1931.804, 1462.0577, 1499.043, 1578.0658, 1444.947, 1694.0728, 1390.852, 1810.0798, 1336.757, 1926.0878, 1282.662, 2796.1428, 876.9486, 2912.151, 822.8536, 3028.158, 768.7586, 3144.1648, 714.6636, 3260.1729, 660.5676, 4072.224, 281.9018, 4188.2324, 227.8068, 4304.2393, 173.7118, 4420.246, 119.6168, 5319.304, -299.6204, 5435.311, -353.7154, 5551.3193, -407.8114, 5667.326, -461.9064, 5783.333, -516.0014, 5899.3413, -570.0964, 6015.348, -624.1914, 6131.356, -678.2864, 6247.3633, -732.3814, 6363.37, -786.4774, 6479.3784, -840.5724, 7291.4297, -1219.2382, 7407.4375, -1273.3333, 7523.4443, -1327.4282, 7639.4517, -1381.5232, 8480.506, -1773.7128, 8596.513, -1827.8088, 8712.5205, -1881.9038, 8828.527, -1935.9988, 8944.535, -1990.0938, 9060.543, -2044.1888, 9176.55, -2098.2837, 9292.558, -2152.379, 10104.609, -2531.0447, 10220.616, -2585.1406, 10336.624, -2639.2356, 10452.631, -2693.3306, 10568.64, -2747.4255, 10684.646, -2801.5205)
+width = 22.0
+default_color = Color(0.125, 0.2, 0.235, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Trunk-1_2" type="Line2D" parent="DeepStructure" unique_id=1354648561]
+points = PackedVector2Array(-88.3, 2111.649, 27.707, 2057.554, 143.715, 2003.458, 259.722, 1949.363, 375.73, 1895.268, 491.737, 1841.173, 1419.7958, 1408.412, 1535.8038, 1354.317, 1651.8108, 1300.222, 1767.8188, 1246.126, 1883.8258, 1192.031, 2753.8809, 786.3176, 2869.889, 732.2226, 2985.896, 678.1276, 3101.9038, 624.0326, 3217.911, 569.9376, 4029.9622, 191.2708, 4145.97, 137.1758, 4261.977, 83.0808, 5161.035, -336.1564, 5277.042, -390.2514, 5393.0493, -444.3464, 5509.057, -498.4414, 5625.064, -552.5364, 5741.0723, -606.6324, 5857.079, -660.7274, 5973.0864, -714.8224, 6089.094, -768.9174, 6205.101, -823.0124, 6321.1094, -877.1074, 6437.116, -931.2024, 7249.1675, -1309.8691, 7365.1753, -1363.9642, 7481.1826, -1418.0592, 7597.1904, -1472.1542, 8438.244, -1864.3438, 8554.251, -1918.4388, 8670.259, -1972.5338, 8786.266, -2026.6298, 8902.273, -2080.7249, 9018.281, -2134.8198, 9134.288, -2188.9148, 9250.296, -2243.0098, 10062.348, -2621.6755, 10178.355, -2675.7705, 10294.362, -2729.8667, 10410.369, -2783.9617, 10526.377, -2838.0566, 10642.384, -2892.1516)
+width = 22.0
+default_color = Color(0.125, 0.2, 0.235, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Trunk-1_3" type="Line2D" parent="DeepStructure" unique_id=27800513]
+points = PackedVector2Array(-130.562, 2021.018, -14.554, 1966.923, 101.453, 1912.828, 217.46, 1858.732, 333.468, 1804.637, 449.475, 1750.542, 1377.5348, 1317.781, 1493.5417, 1263.686, 1609.5488, 1209.591, 1725.5568, 1155.496, 1841.5638, 1101.401, 2711.6199, 695.6866, 2827.627, 641.5916, 2943.6338, 587.4966, 3059.6418, 533.4016, 3175.649, 479.3066, 3987.7012, 100.6408, 4103.708, 46.5458, 4219.7153, -7.5502, 5118.7734, -426.7874, 5234.7803, -480.8824, 5350.788, -534.9774, 5466.7954, -589.0724, 5582.8022, -643.1674, 5698.81, -697.2624, 5814.8174, -751.3584, 5930.825, -805.4534, 6046.832, -859.5484, 6162.8394, -913.6434, 6278.847, -967.7384, 6394.854, -1021.8334, 7206.9067, -1400.4991, 7322.9136, -1454.5952, 7438.9204, -1508.6902, 7554.9287, -1562.7852, 8395.981, -1954.9749, 8511.99, -2009.0698, 8627.997, -2063.1648, 8744.004, -2117.2598, 8860.012, -2171.3547, 8976.019, -2225.4507, 9092.025, -2279.546, 9208.034, -2333.6409, 10020.085, -2712.3066, 10136.093, -2766.4016, 10252.101, -2820.4966, 10368.107, -2874.5916, 10484.115, -2928.6875, 10600.122, -2982.7827)
+width = 22.0
+default_color = Color(0.125, 0.2, 0.235, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib-1_0" type="Line2D" parent="DeepStructure" unique_id=240901350]
+points = PackedVector2Array(1166.1469, 1129.474, 1361.7928, 1435.459, 1546.5038, 1945.151)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge-1_0" type="Line2D" parent="DeepStructure" unique_id=1826749209]
+points = PackedVector2Array(1158.8969, 1132.855, 1354.5417, 1438.84, 1539.2528, 1948.532)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib-1_1" type="Line2D" parent="DeepStructure" unique_id=1092428905]
+points = PackedVector2Array(1572.1729, 940.141, 1767.8188, 1246.126, 1952.5298, 1755.818)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge-1_1" type="Line2D" parent="DeepStructure" unique_id=644033079]
+points = PackedVector2Array(1564.9229, 943.522, 1760.5677, 1249.507, 1945.2788, 1759.199)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib-1_2" type="Line2D" parent="DeepStructure" unique_id=423088428]
+points = PackedVector2Array(2732.2468, 399.1896, 2927.8928, 705.1746, 3112.604, 1214.8666)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge-1_2" type="Line2D" parent="DeepStructure" unique_id=1649567375]
+points = PackedVector2Array(2724.9968, 402.5706, 2920.6418, 708.5556, 3105.3528, 1218.2476)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib-1_3" type="Line2D" parent="DeepStructure" unique_id=1901763303]
+points = PackedVector2Array(3834.3171, -114.7142, 4029.9622, 191.2708, 4214.6733, 700.9628)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge-1_3" type="Line2D" parent="DeepStructure" unique_id=598811151]
+points = PackedVector2Array(3131.023, 213.2376, 3326.668, 519.2226, 3511.379, 1028.9146)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib-1_4" type="Line2D" parent="DeepStructure" unique_id=1358954938]
+points = PackedVector2Array(5023.393, -669.1894, 5219.038, -363.2044, 5403.749, 146.4876)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge-1_4" type="Line2D" parent="DeepStructure" unique_id=999740751]
+points = PackedVector2Array(5016.142, -665.8084, 5211.788, -359.8234, 5396.499, 149.8686)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib-1_5" type="Line2D" parent="DeepStructure" unique_id=1104699068]
+points = PackedVector2Array(5429.4194, -858.5224, 5625.064, -552.5364, 5809.7754, -42.8454)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge-1_5" type="Line2D" parent="DeepStructure" unique_id=1034542663]
+points = PackedVector2Array(5422.168, -855.1414, 5617.814, -549.1564, 5802.5254, -39.4644)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib-1_6" type="Line2D" parent="DeepStructure" unique_id=1274101589]
+points = PackedVector2Array(5835.4453, -1047.8553, 6031.0903, -741.8694, 6215.8013, -232.1784)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge-1_6" type="Line2D" parent="DeepStructure" unique_id=662083654]
+points = PackedVector2Array(5828.1943, -1044.4744, 6023.8403, -738.4894, 6208.5513, -228.7974)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib-1_7" type="Line2D" parent="DeepStructure" unique_id=416821140]
+points = PackedVector2Array(6241.471, -1237.1884, 6437.116, -931.2024, 6621.827, -421.5114)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge-1_7" type="Line2D" parent="DeepStructure" unique_id=1094640722]
+points = PackedVector2Array(6234.22, -1233.8074, 6429.865, -927.8224, 6614.577, -418.1304)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib-1_8" type="Line2D" parent="DeepStructure" unique_id=761007387]
+points = PackedVector2Array(7343.5415, -1751.0922, 7539.1865, -1445.1062, 7723.8975, -935.4152)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge-1_8" type="Line2D" parent="DeepStructure" unique_id=1238488791]
+points = PackedVector2Array(7336.2905, -1747.7112, 7531.9355, -1441.7252, 7716.6465, -932.0342)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib-1_9" type="Line2D" parent="DeepStructure" unique_id=1393204094]
+points = PackedVector2Array(8474.613, -2278.5198, 8670.259, -1972.5338, 8854.97, -1462.8428)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge-1_9" type="Line2D" parent="DeepStructure" unique_id=921555786]
+points = PackedVector2Array(8467.363, -2275.139, 8663.008, -1969.1528, 8847.719, -1459.4618)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib-1_10" type="Line2D" parent="DeepStructure" unique_id=1828681437]
+points = PackedVector2Array(8880.639, -2467.8528, 9076.285, -2161.8667, 9260.996, -1652.1758)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge-1_10" type="Line2D" parent="DeepStructure" unique_id=1424772299]
+points = PackedVector2Array(8873.389, -2464.4717, 9069.034, -2158.4858, 9253.745, -1648.7948)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib-1_11" type="Line2D" parent="DeepStructure" unique_id=2062178693]
+points = PackedVector2Array(9982.709, -2981.7566, 10178.355, -2675.7705, 10363.066, -2166.0796)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge-1_11" type="Line2D" parent="DeepStructure" unique_id=2119657055]
+points = PackedVector2Array(9975.459, -2978.3755, 10171.1045, -2672.3896, 10355.815, -2162.6985)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Trunk1_0" type="Line2D" parent="DeepStructure" unique_id=1480155109]
+points = PackedVector2Array(435.747, 3235.47, 551.754, 3181.375, 667.761, 3127.28, 783.769, 3073.185, 899.776, 3019.09, 1015.784, 2964.995, 1943.8428, 2532.233, 2059.8499, 2478.138, 2175.858, 2424.043, 2291.8647, 2369.948, 2407.8728, 2315.853, 3277.928, 1910.1396, 3393.9348, 1856.0446, 3509.9429, 1801.9496, 3625.95, 1747.8536, 3741.958, 1693.7585, 4554.0093, 1315.0928, 4670.016, 1260.9978, 4786.0244, 1206.9028, 4902.0313, 1152.8077, 5801.0894, 733.5706, 5917.096, 679.4746, 6033.103, 625.3796, 6149.1113, 571.2846, 6265.118, 517.1896, 6381.126, 463.0946, 6497.1333, 408.9996, 6613.14, 354.9046, 6729.1484, 300.8086, 6845.1553, 246.7136, 6961.163, 192.6186, 7773.2144, -186.0472, 7889.2217, -240.1422, 8005.2295, -294.2372, 8121.2363, -348.3322, 8962.291, -740.5218, 9078.298, -794.6178, 9194.305, -848.7128, 9310.3125, -902.8078, 9426.319, -956.9028, 9542.328, -1010.9978, 9658.335, -1065.0928, 9774.342, -1119.1877, 10586.395, -1497.8546, 10702.401, -1551.9496, 10818.409, -1606.0446, 10934.416, -1660.1396, 11050.423, -1714.2346, 11166.432, -1768.3296)
+width = 22.0
+default_color = Color(0.125, 0.2, 0.235, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Trunk1_1" type="Line2D" parent="DeepStructure" unique_id=1432686231]
+points = PackedVector2Array(478.009, 3326.101, 594.016, 3272.006, 710.023, 3217.911, 826.031, 3163.816, 942.038, 3109.721, 1058.046, 3055.625, 1986.1049, 2622.864, 2102.1118, 2568.769, 2218.1199, 2514.674, 2334.1267, 2460.579, 2450.1338, 2406.484, 3320.19, 2000.7706, 3436.197, 1946.6746, 3552.2048, 1892.5796, 3668.212, 1838.4846, 3784.219, 1784.3896, 4596.271, 1405.7238, 4712.2783, 1351.6288, 4828.286, 1297.5338, 5727.3433, 878.2956, 5843.35, 824.2006, 5959.3584, 770.1056, 6075.365, 716.0106, 6191.373, 661.9156, 6307.3804, 607.8206, 6423.387, 553.7256, 6539.395, 499.6306, 6655.4023, 445.5346, 6771.41, 391.4396, 6887.417, 337.3446, 7003.4243, 283.2496, 7815.4766, -95.4162, 7931.4834, -149.5112, 8047.4917, -203.6062, 8163.4985, -257.7022, 9004.552, -649.8918, 9120.56, -703.9868, 9236.566, -758.0818, 9352.575, -812.1768, 9468.582, -866.2718, 9584.589, -920.3668, 9700.597, -974.4628, 9816.604, -1028.5577, 10628.656, -1407.2236, 10744.663, -1461.3186, 10860.67, -1515.4136, 10976.678, -1569.5085, 11092.686, -1623.6036, 11208.693, -1677.6986)
+width = 22.0
+default_color = Color(0.125, 0.2, 0.235, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Trunk1_2" type="Line2D" parent="DeepStructure" unique_id=2098403175]
+points = PackedVector2Array(520.27, 3416.732, 636.278, 3362.637, 752.285, 3308.542, 868.293, 3254.446, 984.3, 3200.351, 1100.307, 3146.256, 2028.3668, 2713.495, 2144.3738, 2659.4, 2260.3818, 2605.305, 2376.389, 2551.21, 2492.3958, 2497.115, 3362.452, 2091.4006, 3478.459, 2037.3055, 3594.4668, 1983.2106, 3710.4739, 1929.1156, 3826.481, 1875.0206, 4638.533, 1496.3549, 4754.54, 1442.2598, 4870.5474, 1388.1638, 5769.605, 968.9266, 5885.6123, 914.8316, 6001.62, 860.7366, 6117.6274, 806.6416, 6233.6343, 752.5466, 6349.642, 698.4516, 6465.6494, 644.3556, 6581.657, 590.2606, 6697.664, 536.1656, 6813.6714, 482.0706, 6929.679, 427.9756, 7045.686, 373.8806, 7857.7383, -4.7852, 7973.7456, -58.8812, 8089.7524, -112.9762, 8205.761, -167.0712, 9046.813, -559.2608, 9162.822, -613.3558, 9278.829, -667.4508, 9394.836, -721.5458, 9510.844, -775.6408, 9626.851, -829.7368, 9742.858, -883.8318, 9858.866, -937.9268, 10670.917, -1316.5927, 10786.925, -1370.6876, 10902.933, -1424.7826, 11018.94, -1478.8776, 11134.947, -1532.9736, 11250.954, -1587.0686)
+width = 22.0
+default_color = Color(0.125, 0.2, 0.235, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Trunk1_3" type="Line2D" parent="DeepStructure" unique_id=1537151333]
+points = PackedVector2Array(562.532, 3507.363, 678.54, 3453.268, 794.547, 3399.172, 910.554, 3345.077, 1026.562, 3290.982, 1142.569, 3236.887, 2070.629, 2804.126, 2186.6357, 2750.031, 2302.6428, 2695.936, 2418.651, 2641.84, 2534.6577, 2587.745, 3404.7139, 2182.0315, 3520.721, 2127.9365, 3636.7278, 2073.8416, 3752.7358, 2019.7466, 3868.743, 1965.6516, 4680.7954, 1586.9847, 4796.8022, 1532.8898, 4912.809, 1478.7948, 5811.867, 1059.5576, 5927.874, 1005.4626, 6043.8823, 951.3676, 6159.889, 897.2726, 6275.896, 843.1766, 6391.9043, 789.0816, 6507.911, 734.9866, 6623.918, 680.8916, 6739.9263, 626.7966, 6855.933, 572.7016, 6971.9414, 518.6066, 7087.948, 464.5116, 7899.9995, 85.8448, 8016.0073, 31.7498, 8132.0146, -22.3452, 8248.022, -76.4402, 9089.076, -468.6298, 9205.083, -522.7248, 9321.091, -576.8198, 9437.098, -630.9158, 9553.105, -685.0108, 9669.113, -739.1058, 9785.12, -793.2008, 9901.128, -847.2958, 10713.18, -1225.9615, 10829.1875, -1280.0566, 10945.194, -1334.1526, 11061.201, -1388.2476, 11177.209, -1442.3427, 11293.216, -1496.4376)
+width = 22.0
+default_color = Color(0.125, 0.2, 0.235, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib1_0" type="Line2D" parent="DeepStructure" unique_id=1142563024]
+points = PackedVector2Array(2079.0027, 3087.099, 1970.3628, 2740.543, 1698.6458, 2271.422)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge1_0" type="Line2D" parent="DeepStructure" unique_id=1398616032]
+points = PackedVector2Array(1259.7, 3469.146, 1151.061, 3122.59, 879.344, 2653.469)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib1_1" type="Line2D" parent="DeepStructure" unique_id=966621530]
+points = PackedVector2Array(2485.0288, 2897.766, 2376.389, 2551.21, 2104.6719, 2082.089)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge1_1" type="Line2D" parent="DeepStructure" unique_id=812029782]
+points = PackedVector2Array(2477.7778, 2901.147, 2369.1377, 2554.591, 2097.4219, 2085.47)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib1_2" type="Line2D" parent="DeepStructure" unique_id=1512189636]
+points = PackedVector2Array(3645.1028, 2356.8147, 3536.463, 2010.2585, 3264.7458, 1541.1376)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge1_2" type="Line2D" parent="DeepStructure" unique_id=986037131]
+points = PackedVector2Array(3637.8518, 2360.1956, 3529.212, 2013.6396, 3257.4958, 1544.5186)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib1_3" type="Line2D" parent="DeepStructure" unique_id=1234553603]
+points = PackedVector2Array(4747.1733, 1842.9108, 4638.533, 1496.3549, 4366.8164, 1027.2338)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge1_3" type="Line2D" parent="DeepStructure" unique_id=159932507]
+points = PackedVector2Array(4043.878, 2170.8625, 3935.2378, 1824.3066, 3663.522, 1355.1855)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib1_4" type="Line2D" parent="DeepStructure" unique_id=1406773816]
+points = PackedVector2Array(5936.248, 1288.4355, 5827.6094, 941.8796, 5555.892, 472.7586)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge1_4" type="Line2D" parent="DeepStructure" unique_id=1284693498]
+points = PackedVector2Array(5928.998, 1291.8167, 5820.3584, 945.2606, 5548.641, 476.1396)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib1_5" type="Line2D" parent="DeepStructure" unique_id=1625344487]
+points = PackedVector2Array(6342.2744, 1099.1025, 6233.6343, 752.5466, 5961.918, 283.4256)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge1_5" type="Line2D" parent="DeepStructure" unique_id=1235306281]
+points = PackedVector2Array(6335.0244, 1102.4836, 6226.3843, 755.9276, 5954.667, 286.8066)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib1_6" type="Line2D" parent="DeepStructure" unique_id=772740744]
+points = PackedVector2Array(6748.3003, 909.7696, 6639.66, 563.2136, 6367.9443, 94.0926)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge1_6" type="Line2D" parent="DeepStructure" unique_id=1821505907]
+points = PackedVector2Array(6741.0503, 913.1506, 6632.41, 566.5946, 6360.6934, 97.4736)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib1_7" type="Line2D" parent="DeepStructure" unique_id=2028974180]
+points = PackedVector2Array(7154.326, 720.4366, 7045.686, 373.8806, 6773.97, -95.2404)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge1_7" type="Line2D" parent="DeepStructure" unique_id=831812579]
+points = PackedVector2Array(7147.076, 723.8176, 7038.436, 377.2616, 6766.719, -91.8594)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib1_8" type="Line2D" parent="DeepStructure" unique_id=1253653715]
+points = PackedVector2Array(8256.396, 206.5328, 8147.7563, -140.0232, 7876.0405, -609.1442)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge1_8" type="Line2D" parent="DeepStructure" unique_id=312016391]
+points = PackedVector2Array(8249.1455, 209.9138, 8140.5063, -136.6422, 7868.7896, -605.7632)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib1_9" type="Line2D" parent="DeepStructure" unique_id=378210868]
+points = PackedVector2Array(9387.469, -320.8948, 9278.829, -667.4508, 9007.111, -1136.5718)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge1_9" type="Line2D" parent="DeepStructure" unique_id=2023431027]
+points = PackedVector2Array(9380.218, -317.5138, 9271.579, -664.0698, 8999.861, -1133.1908)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib1_10" type="Line2D" parent="DeepStructure" unique_id=1258453971]
+points = PackedVector2Array(9793.495, -510.2278, 9684.8545, -856.7838, 9413.138, -1325.9048)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge1_10" type="Line2D" parent="DeepStructure" unique_id=409365665]
+points = PackedVector2Array(9786.244, -506.8468, 9677.604, -853.4028, 9405.888, -1322.5238)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Rib1_11" type="Line2D" parent="DeepStructure" unique_id=1320887025]
+points = PackedVector2Array(10895.565, -1024.1316, 10786.925, -1370.6876, 10515.208, -1839.8086)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RibEdge1_11" type="Line2D" parent="DeepStructure" unique_id=1168826230]
+points = PackedVector2Array(10888.314, -1020.7506, 10779.674, -1367.3066, 10507.958, -1836.4276)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib0_0_-1" type="Line2D" parent="DeepStructure" unique_id=1797818379]
+points = PackedVector2Array(557.1082, 1413.4734, 752.7542, 1719.4584, 937.4652, 2229.1504)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge0_0_-1" type="Line2D" parent="DeepStructure" unique_id=408297138]
+points = PackedVector2Array(557.1083, 1413.4736, 752.7533, 1719.4586, 937.4643, 2229.1506)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib0_0_1" type="Line2D" parent="DeepStructure" unique_id=1790062941]
+points = PackedVector2Array(1469.9637, 3371.0986, 1361.3239, 3024.5425, 1089.6068, 2555.4216)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge0_0_1" type="Line2D" parent="DeepStructure" unique_id=1460112525]
+points = PackedVector2Array(1469.9637, 3371.0984, 1361.3247, 3024.5425, 1089.6077, 2555.4214)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib0_1_-1" type="Line2D" parent="DeepStructure" unique_id=261400764]
+points = PackedVector2Array(963.134, 1224.1404, 1158.78, 1530.1254, 1343.491, 2039.8174)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge0_1_-1" type="Line2D" parent="DeepStructure" unique_id=1442319682]
+points = PackedVector2Array(963.1341, 1224.1407, 1158.779, 1530.1257, 1343.4901, 2039.8177)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib0_1_1" type="Line2D" parent="DeepStructure" unique_id=393135884]
+points = PackedVector2Array(1875.9897, 3181.7656, 1767.3497, 2835.2097, 1495.6327, 2366.0886)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge0_1_1" type="Line2D" parent="DeepStructure" unique_id=1902738848]
+points = PackedVector2Array(1875.9896, 3181.7654, 1767.3506, 2835.2095, 1495.6335, 2366.0884)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib1_0_-1" type="Line2D" parent="DeepStructure" unique_id=1349073068]
+points = PackedVector2Array(1978.1989, 750.808, 2173.8447, 1056.793, 2358.556, 1566.485)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge1_0_-1" type="Line2D" parent="DeepStructure" unique_id=858363102]
+points = PackedVector2Array(1978.1989, 750.8082, 2173.844, 1056.7932, 2358.555, 1566.4852)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib1_0_1" type="Line2D" parent="DeepStructure" unique_id=409339440]
+points = PackedVector2Array(2891.0544, 2708.433, 2782.4143, 2361.8772, 2510.6975, 1892.7562)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge1_0_1" type="Line2D" parent="DeepStructure" unique_id=780092697]
+points = PackedVector2Array(2891.0542, 2708.433, 2782.4153, 2361.877, 2510.6982, 1892.756)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib1_1_-1" type="Line2D" parent="DeepStructure" unique_id=1408853984]
+points = PackedVector2Array(2355.223, 574.9988, 2550.869, 880.9838, 2735.5798, 1390.6758)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge1_1_-1" type="Line2D" parent="DeepStructure" unique_id=2128296436]
+points = PackedVector2Array(2355.223, 574.999, 2550.868, 880.984, 2735.5789, 1390.676)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib1_1_1" type="Line2D" parent="DeepStructure" unique_id=431893757]
+points = PackedVector2Array(3268.0784, 2532.624, 3159.4385, 2186.068, 2887.7214, 1716.947)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge1_1_1" type="Line2D" parent="DeepStructure" unique_id=1050105562]
+points = PackedVector2Array(3268.0784, 2532.6238, 3159.4392, 2186.0679, 2887.7224, 1716.9468)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib2_0_-1" type="Line2D" parent="DeepStructure" unique_id=1852960078]
+points = PackedVector2Array(3317.7217, 126.1782, 3513.3677, 432.1632, 3698.0786, 941.8552)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge2_0_-1" type="Line2D" parent="DeepStructure" unique_id=1576682887]
+points = PackedVector2Array(3317.7217, 126.1784, 3513.3667, 432.1634, 3698.078, 941.8554)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib2_0_1" type="Line2D" parent="DeepStructure" unique_id=2015315190]
+points = PackedVector2Array(4230.577, 2083.8035, 4121.9375, 1737.2474, 3850.2202, 1268.1263)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge2_0_1" type="Line2D" parent="DeepStructure" unique_id=1734058154]
+points = PackedVector2Array(4230.577, 2083.8032, 4121.938, 1737.2472, 3850.2212, 1268.1262)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib2_1_-1" type="Line2D" parent="DeepStructure" unique_id=241157226]
+points = PackedVector2Array(3665.744, -36.1072, 3861.39, 269.8778, 4046.1008, 779.5698)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge2_1_-1" type="Line2D" parent="DeepStructure" unique_id=635018416]
+points = PackedVector2Array(3665.744, -36.107, 3861.389, 269.878, 4046.1, 779.57)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib2_1_1" type="Line2D" parent="DeepStructure" unique_id=1285445649]
+points = PackedVector2Array(4578.5996, 1921.518, 4469.9595, 1574.962, 4198.2427, 1105.841)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge2_1_1" type="Line2D" parent="DeepStructure" unique_id=1786914320]
+points = PackedVector2Array(4578.5996, 1921.5178, 4469.9604, 1574.9618, 4198.243, 1105.8408)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib3_0_-1" type="Line2D" parent="DeepStructure" unique_id=1657317910]
+points = PackedVector2Array(4421.6045, -388.5709, 4617.2505, -82.5859, 4801.9614, 427.1061)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge3_0_-1" type="Line2D" parent="DeepStructure" unique_id=507252261]
+points = PackedVector2Array(4421.6045, -388.5706, 4617.2495, -82.5856, 4801.961, 427.1064)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib3_0_1" type="Line2D" parent="DeepStructure" unique_id=472593537]
+points = PackedVector2Array(5334.46, 1569.0543, 5225.8203, 1222.4983, 4954.103, 753.3773)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge3_0_1" type="Line2D" parent="DeepStructure" unique_id=1953339346]
+points = PackedVector2Array(5334.46, 1569.0542, 5225.8213, 1222.4982, 4954.104, 753.3772)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib3_1_-1" type="Line2D" parent="DeepStructure" unique_id=1564202515]
+points = PackedVector2Array(4813.1294, -571.1419, 5008.7754, -265.1569, 5193.4863, 244.5351)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge3_1_-1" type="Line2D" parent="DeepStructure" unique_id=804659237]
+points = PackedVector2Array(4813.1294, -571.1417, 5008.7744, -265.1567, 5193.486, 244.5353)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib3_1_1" type="Line2D" parent="DeepStructure" unique_id=1116603091]
+points = PackedVector2Array(5725.985, 1386.4832, 5617.345, 1039.9272, 5345.628, 570.8062)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge3_1_1" type="Line2D" parent="DeepStructure" unique_id=2055021808]
+points = PackedVector2Array(5725.985, 1386.4832, 5617.346, 1039.9271, 5345.629, 570.8061)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib4_0_-1" type="Line2D" parent="DeepStructure" unique_id=370761330]
+points = PackedVector2Array(6502.4873, -1358.9023, 6698.1333, -1052.9174, 6882.844, -543.2254)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge4_0_-1" type="Line2D" parent="DeepStructure" unique_id=2123024182]
+points = PackedVector2Array(6502.4873, -1358.9022, 6698.1323, -1052.9172, 6882.8433, -543.2252)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib4_0_1" type="Line2D" parent="DeepStructure" unique_id=209900822]
+points = PackedVector2Array(7415.343, 598.7228, 7306.703, 252.1668, 7034.986, -216.9542)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge4_0_1" type="Line2D" parent="DeepStructure" unique_id=699122670]
+points = PackedVector2Array(7415.343, 598.7226, 7306.7036, 252.1666, 7034.987, -216.9544)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib4_1_-1" type="Line2D" parent="DeepStructure" unique_id=651455895]
+points = PackedVector2Array(6850.5093, -1521.1877, 7046.1553, -1215.2028, 7230.866, -705.5108)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge4_1_-1" type="Line2D" parent="DeepStructure" unique_id=1557675642]
+points = PackedVector2Array(6850.5093, -1521.1876, 7046.1543, -1215.2026, 7230.8657, -705.5106)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib4_1_1" type="Line2D" parent="DeepStructure" unique_id=1249745136]
+points = PackedVector2Array(7763.365, 436.4374, 7654.725, 89.8814, 7383.008, -379.2396)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge4_1_1" type="Line2D" parent="DeepStructure" unique_id=1570722737]
+points = PackedVector2Array(7763.365, 436.4372, 7654.726, 89.8812, 7383.009, -379.2398)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib5_0_-1" type="Line2D" parent="DeepStructure" unique_id=1442016025]
+points = PackedVector2Array(7666.1865, -1901.5442, 7861.8325, -1595.5592, 8046.5435, -1085.8672)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge5_0_-1" type="Line2D" parent="DeepStructure" unique_id=1234538758]
+points = PackedVector2Array(7666.1865, -1901.544, 7861.8315, -1595.559, 8046.5425, -1085.867)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib5_0_1" type="Line2D" parent="DeepStructure" unique_id=1917969653]
+points = PackedVector2Array(8579.042, 56.0809, 8470.402, -290.4751, 8198.686, -759.5961)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge5_0_1" type="Line2D" parent="DeepStructure" unique_id=242064082]
+points = PackedVector2Array(8579.042, 56.0808, 8470.403, -290.4752, 8198.686, -759.5962)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib5_1_-1" type="Line2D" parent="DeepStructure" unique_id=484740150]
+points = PackedVector2Array(8028.7095, -2070.5916, 8224.355, -1764.6064, 8409.066, -1254.9146)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge5_1_-1" type="Line2D" parent="DeepStructure" unique_id=57042876]
+points = PackedVector2Array(8028.7095, -2070.5913, 8224.3545, -1764.6063, 8409.065, -1254.9143)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib5_1_1" type="Line2D" parent="DeepStructure" unique_id=928930069]
+points = PackedVector2Array(8941.565, -112.9664, 8832.925, -459.5224, 8561.208, -928.6434)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge5_1_1" type="Line2D" parent="DeepStructure" unique_id=1475870368]
+points = PackedVector2Array(8941.565, -112.9665, 8832.926, -459.5225, 8561.209, -928.6435)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib6_0_-1" type="Line2D" parent="DeepStructure" unique_id=932755729]
+points = PackedVector2Array(9335.605, -2680.007, 9531.251, -2374.0222, 9715.962, -1864.3301)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge6_0_-1" type="Line2D" parent="DeepStructure" unique_id=944212710]
+points = PackedVector2Array(9335.605, -2680.0068, 9531.251, -2374.022, 9715.962, -1864.33)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib6_0_1" type="Line2D" parent="DeepStructure" unique_id=84685119]
+points = PackedVector2Array(10248.461, -722.3819, 10139.821, -1068.9379, 9868.104, -1538.059)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge6_0_1" type="Line2D" parent="DeepStructure" unique_id=317525169]
+points = PackedVector2Array(10248.461, -722.3821, 10139.822, -1068.9381, 9868.1045, -1538.0591)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib6_1_-1" type="Line2D" parent="DeepStructure" unique_id=1801722877]
+points = PackedVector2Array(9683.628, -2842.2925, 9879.273, -2536.3076, 10063.984, -2026.6155)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge6_1_-1" type="Line2D" parent="DeepStructure" unique_id=1846805830]
+points = PackedVector2Array(9683.628, -2842.2922, 9879.272, -2536.3074, 10063.983, -2026.6154)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRib6_1_1" type="Line2D" parent="DeepStructure" unique_id=1033371040]
+points = PackedVector2Array(10596.483, -884.6673, 10487.843, -1231.2233, 10216.126, -1700.3444)
+width = 28.0
+default_color = Color(0.188, 0.271, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="WalkRibEdge6_1_1" type="Line2D" parent="DeepStructure" unique_id=720458318]
+points = PackedVector2Array(10596.483, -884.6675, 10487.844, -1231.2235, 10216.127, -1700.3445)
+width = 3.0
+default_color = Color(0.325, 0.4, 0.424, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="CoreBundles" type="Node2D" parent="." unique_id=1301971184]
+z_index = -20
+
+[node name="Core0Outer" type="Line2D" parent="CoreBundles" unique_id=591845894]
+points = PackedVector2Array(387.143, 2525.492, 445.147, 2498.444, 503.15, 2471.397, 561.154, 2444.349, 619.158, 2417.301, 677.161, 2390.254, 735.165, 2363.206, 1605.2208, 1957.493, 1663.2249, 1930.445, 1721.2278, 1903.398, 1779.2318, 1876.35, 1837.2358, 1849.302, 1895.2388, 1822.255, 1953.2428, 1795.207, 2011.2468, 1768.16, 2069.2498, 1741.112, 2127.254, 1714.065, 2939.306, 1335.3986, 2997.3098, 1308.3506, 3055.313, 1281.3036, 3113.317, 1254.2556, 3171.3208, 1227.2086, 3229.324, 1200.1606, 3287.328, 1173.1136, 3345.3318, 1146.0656, 3403.335, 1119.0176, 3461.3389, 1091.9706, 3519.343, 1064.9226, 4273.391, 713.3048, 4331.394, 686.2568, 4389.3984, 659.2098, 4447.4023, 632.1618, 4505.4053, 605.1138, 4563.409, 578.0668, 5404.4634, 185.8766, 5462.4663, 158.8296, 5520.47, 131.7816, 5578.474, 104.7346, 5636.478, 77.6866, 5694.481, 50.6386, 5752.4854, 23.5916, 5810.4893, -3.4564, 5868.492, -30.5034, 5926.496, -57.5514, 5984.5, -84.5984, 6042.5034, -111.6464, 6100.5073, -138.6934, 6158.511, -165.7414, 6216.514, -192.7894, 6274.518, -219.8364, 6332.522, -246.8844, 6390.5264, -273.9314, 6448.5293, -300.9794, 6506.533, -328.0264, 6564.537, -355.0744, 6622.54, -382.1224, 6680.5444, -409.1694, 7434.5923, -760.7882, 7492.5957, -787.8352, 7550.5996, -814.8832, 7608.6035, -841.9302, 7666.6074, -868.9782, 7724.6104, -896.0262, 7782.6143, -923.0732, 7840.6187, -950.1212, 8623.668, -1315.2628, 8681.672, -1342.3108, 8739.676, -1369.3578, 8797.679, -1396.4058, 8855.683, -1423.4539, 8913.687, -1450.5009, 8971.69, -1477.5488, 9029.693, -1504.5958, 9087.698, -1531.6438, 9145.702, -1558.6908, 9203.705, -1585.7388, 9261.709, -1612.7867, 9319.713, -1639.8337, 9377.716, -1666.8818, 9435.72, -1693.9288, 9493.724, -1720.9768, 9551.728, -1748.0238, 10305.775, -2099.6426, 10363.779, -2126.6907, 10421.783, -2153.7375, 10479.786, -2180.7856, 10537.79, -2207.8325, 10595.794, -2234.8806)
+width = 48.0
+default_color = Color(0.188, 0.153, 0.176, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core0Body" type="Line2D" parent="CoreBundles" unique_id=1289040623]
+points = PackedVector2Array(387.143, 2525.492, 445.147, 2498.444, 503.15, 2471.397, 561.154, 2444.349, 619.158, 2417.301, 677.161, 2390.254, 735.165, 2363.206, 1605.2208, 1957.493, 1663.2249, 1930.445, 1721.2278, 1903.398, 1779.2318, 1876.35, 1837.2358, 1849.302, 1895.2388, 1822.255, 1953.2428, 1795.207, 2011.2468, 1768.16, 2069.2498, 1741.112, 2127.254, 1714.065, 2939.306, 1335.3986, 2997.3098, 1308.3506, 3055.313, 1281.3036, 3113.317, 1254.2556, 3171.3208, 1227.2086, 3229.324, 1200.1606, 3287.328, 1173.1136, 3345.3318, 1146.0656, 3403.335, 1119.0176, 3461.3389, 1091.9706, 3519.343, 1064.9226, 4273.391, 713.3048, 4331.394, 686.2568, 4389.3984, 659.2098, 4447.4023, 632.1618, 4505.4053, 605.1138, 4563.409, 578.0668, 5404.4634, 185.8766, 5462.4663, 158.8296, 5520.47, 131.7816, 5578.474, 104.7346, 5636.478, 77.6866, 5694.481, 50.6386, 5752.4854, 23.5916, 5810.4893, -3.4564, 5868.492, -30.5034, 5926.496, -57.5514, 5984.5, -84.5984, 6042.5034, -111.6464, 6100.5073, -138.6934, 6158.511, -165.7414, 6216.514, -192.7894, 6274.518, -219.8364, 6332.522, -246.8844, 6390.5264, -273.9314, 6448.5293, -300.9794, 6506.533, -328.0264, 6564.537, -355.0744, 6622.54, -382.1224, 6680.5444, -409.1694, 7434.5923, -760.7882, 7492.5957, -787.8352, 7550.5996, -814.8832, 7608.6035, -841.9302, 7666.6074, -868.9782, 7724.6104, -896.0262, 7782.6143, -923.0732, 7840.6187, -950.1212, 8623.668, -1315.2628, 8681.672, -1342.3108, 8739.676, -1369.3578, 8797.679, -1396.4058, 8855.683, -1423.4539, 8913.687, -1450.5009, 8971.69, -1477.5488, 9029.693, -1504.5958, 9087.698, -1531.6438, 9145.702, -1558.6908, 9203.705, -1585.7388, 9261.709, -1612.7867, 9319.713, -1639.8337, 9377.716, -1666.8818, 9435.72, -1693.9288, 9493.724, -1720.9768, 9551.728, -1748.0238, 10305.775, -2099.6426, 10363.779, -2126.6907, 10421.783, -2153.7375, 10479.786, -2180.7856, 10537.79, -2207.8325, 10595.794, -2234.8806)
+width = 36.0
+default_color = Color(0.451, 0.325, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core0Highlight" type="Line2D" parent="CoreBundles" unique_id=532653013]
+points = PackedVector2Array(384.185, 2519.148, 442.188, 2492.1, 500.192, 2465.052, 558.196, 2438.005, 616.199, 2410.957, 674.203, 2383.91, 732.207, 2356.862, 1602.2628, 1951.149, 1660.2657, 1924.101, 1718.2698, 1897.053, 1776.2738, 1870.006, 1834.2769, 1842.958, 1892.2808, 1815.911, 1950.2848, 1788.863, 2008.2878, 1761.816, 2066.2917, 1734.768, 2124.296, 1707.72, 2936.348, 1329.0546, 2994.3508, 1302.0066, 3052.355, 1274.9596, 3110.359, 1247.9116, 3168.3618, 1220.8646, 3226.366, 1193.8167, 3284.3699, 1166.7686, 3342.3728, 1139.7216, 3400.377, 1112.6736, 3458.3809, 1085.6266, 3516.3838, 1058.5786, 4270.432, 706.9608, 4328.436, 679.9128, 4386.4404, 652.8648, 4444.4434, 625.8178, 4502.4473, 598.7698, 4560.451, 571.7228, 4618.454, 544.6748, 5459.5083, 152.4856, 5517.512, 125.4376, 5575.515, 98.3896, 5633.519, 71.3426, 5691.5234, 44.2946, 5749.5273, 17.2476, 5807.5303, -9.8004, 5865.534, -36.8474, 5923.538, -63.8954, 5981.541, -90.9434, 6039.5454, -117.9904, 6097.5493, -145.0384, 6155.5522, -172.0854, 6213.556, -199.1334, 6271.56, -226.1804, 6329.564, -253.2284, 6387.5674, -280.2754, 6445.5713, -307.3234, 6503.575, -334.3714, 6561.578, -361.4184, 6619.582, -388.4664, 6677.5864, -415.5134, 7431.6333, -767.1322, 7489.6377, -794.1792, 7547.6416, -821.2272, 7605.6455, -848.2752, 7663.6484, -875.3222, 7721.6523, -902.3702, 7779.6567, -929.4172, 7837.6597, -956.4652, 8620.71, -1321.6068, 8678.714, -1348.6548, 8736.717, -1375.7028, 8794.721, -1402.7498, 8852.725, -1429.7979, 8910.729, -1456.8448, 8968.731, -1483.8928, 9026.735, -1510.9398, 9084.74, -1537.9878, 9142.743, -1565.0358, 9200.747, -1592.0828, 9258.751, -1619.1309, 9316.754, -1646.1779, 9374.758, -1673.2258, 9432.762, -1700.2728, 9490.766, -1727.3208, 9548.769, -1754.3688, 10302.817, -2105.9866, 10360.821, -2133.0347, 10418.824, -2160.0815, 10476.828, -2187.1296, 10534.832, -2214.1765, 10592.835, -2241.2246)
+width = 7.0
+default_color = Color(0.553, 0.424, 0.38, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core1Outer" type="Line2D" parent="CoreBundles" unique_id=706022652]
+points = PackedVector2Array(407.429, 2568.994, 465.432, 2541.947, 523.436, 2514.899, 581.44, 2487.852, 639.443, 2460.804, 697.447, 2433.757, 755.451, 2406.709, 1625.5068, 2000.995, 1683.5098, 1973.948, 1741.5138, 1946.9, 1799.5178, 1919.853, 1857.5208, 1892.805, 1915.5248, 1865.758, 1973.5288, 1838.71, 2031.5319, 1811.662, 2089.536, 1784.615, 2147.5398, 1757.567, 2959.5918, 1378.9016, 3017.595, 1351.8536, 3075.5989, 1324.8066, 3133.6028, 1297.7585, 3191.606, 1270.7115, 3249.6099, 1243.6636, 3307.614, 1216.6156, 3365.617, 1189.5686, 3423.6208, 1162.5206, 3481.625, 1135.4736, 3539.629, 1108.4257, 4293.6763, 756.8078, 4351.68, 729.7598, 4409.684, 702.7118, 4467.687, 675.6648, 4525.6914, 648.6168, 4583.6953, 621.5698, 4641.698, 594.5218, 5482.7524, 202.3326, 5540.7563, 175.2846, 5598.7593, 148.2366, 5656.763, 121.1896, 5714.767, 94.1416, 5772.771, 67.0946, 5830.7744, 40.0466, 5888.7783, 12.9996, 5946.782, -14.0484, 6004.785, -41.0964, 6062.789, -68.1434, 6120.793, -95.1914, 6178.7964, -122.2384, 6236.8003, -149.2864, 6294.804, -176.3334, 6352.808, -203.3814, 6410.811, -230.4294, 6468.8154, -257.4764, 6526.8193, -284.5244, 6584.8223, -311.5714, 6642.826, -338.6194, 6700.83, -365.6664, 7454.8774, -717.2852, 7512.8813, -744.3332, 7570.8857, -771.3802, 7628.8896, -798.4282, 7686.8926, -825.4752, 7744.8965, -852.5232, 7802.9004, -879.5702, 7860.9033, -906.6182, 8643.954, -1271.7607, 8701.958, -1298.8077, 8759.961, -1325.8558, 8817.965, -1352.9028, 8875.969, -1379.9508, 8933.973, -1406.9978, 8991.976, -1434.0458, 9049.9795, -1461.0928, 9107.983, -1488.1407, 9165.986, -1515.1888, 9223.991, -1542.2358, 9281.995, -1569.2838, 9339.998, -1596.3308, 9398.002, -1623.3788, 9456.006, -1650.4258, 9514.01, -1677.4738, 9572.013, -1704.5219, 10326.062, -2056.1396, 10384.065, -2083.1875, 10442.068, -2110.2346, 10500.072, -2137.2827, 10558.076, -2164.3296, 10616.079, -2191.3777)
+width = 48.0
+default_color = Color(0.188, 0.153, 0.176, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core1Body" type="Line2D" parent="CoreBundles" unique_id=2115311578]
+points = PackedVector2Array(407.429, 2568.994, 465.432, 2541.947, 523.436, 2514.899, 581.44, 2487.852, 639.443, 2460.804, 697.447, 2433.757, 755.451, 2406.709, 1625.5068, 2000.995, 1683.5098, 1973.948, 1741.5138, 1946.9, 1799.5178, 1919.853, 1857.5208, 1892.805, 1915.5248, 1865.758, 1973.5288, 1838.71, 2031.5319, 1811.662, 2089.536, 1784.615, 2147.5398, 1757.567, 2959.5918, 1378.9016, 3017.595, 1351.8536, 3075.5989, 1324.8066, 3133.6028, 1297.7585, 3191.606, 1270.7115, 3249.6099, 1243.6636, 3307.614, 1216.6156, 3365.617, 1189.5686, 3423.6208, 1162.5206, 3481.625, 1135.4736, 3539.629, 1108.4257, 4293.6763, 756.8078, 4351.68, 729.7598, 4409.684, 702.7118, 4467.687, 675.6648, 4525.6914, 648.6168, 4583.6953, 621.5698, 4641.698, 594.5218, 5482.7524, 202.3326, 5540.7563, 175.2846, 5598.7593, 148.2366, 5656.763, 121.1896, 5714.767, 94.1416, 5772.771, 67.0946, 5830.7744, 40.0466, 5888.7783, 12.9996, 5946.782, -14.0484, 6004.785, -41.0964, 6062.789, -68.1434, 6120.793, -95.1914, 6178.7964, -122.2384, 6236.8003, -149.2864, 6294.804, -176.3334, 6352.808, -203.3814, 6410.811, -230.4294, 6468.8154, -257.4764, 6526.8193, -284.5244, 6584.8223, -311.5714, 6642.826, -338.6194, 6700.83, -365.6664, 7454.8774, -717.2852, 7512.8813, -744.3332, 7570.8857, -771.3802, 7628.8896, -798.4282, 7686.8926, -825.4752, 7744.8965, -852.5232, 7802.9004, -879.5702, 7860.9033, -906.6182, 8643.954, -1271.7607, 8701.958, -1298.8077, 8759.961, -1325.8558, 8817.965, -1352.9028, 8875.969, -1379.9508, 8933.973, -1406.9978, 8991.976, -1434.0458, 9049.9795, -1461.0928, 9107.983, -1488.1407, 9165.986, -1515.1888, 9223.991, -1542.2358, 9281.995, -1569.2838, 9339.998, -1596.3308, 9398.002, -1623.3788, 9456.006, -1650.4258, 9514.01, -1677.4738, 9572.013, -1704.5219, 10326.062, -2056.1396, 10384.065, -2083.1875, 10442.068, -2110.2346, 10500.072, -2137.2827, 10558.076, -2164.3296, 10616.079, -2191.3777)
+width = 36.0
+default_color = Color(0.451, 0.325, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core1Highlight" type="Line2D" parent="CoreBundles" unique_id=1252794955]
+points = PackedVector2Array(404.47, 2562.65, 462.474, 2535.603, 520.478, 2508.555, 578.481, 2481.508, 636.485, 2454.46, 694.489, 2427.412, 752.493, 2400.365, 1622.5479, 1994.651, 1680.5518, 1967.604, 1738.5558, 1940.556, 1796.5588, 1913.509, 1854.5627, 1886.461, 1912.5668, 1859.413, 1970.5698, 1832.366, 2028.5739, 1805.318, 2086.578, 1778.271, 2144.5808, 1751.223, 2202.5847, 1724.176, 3014.637, 1345.5096, 3072.6409, 1318.4615, 3130.6438, 1291.4146, 3188.648, 1264.3666, 3246.6519, 1237.3196, 3304.6548, 1210.2716, 3362.659, 1183.2246, 3420.6628, 1156.1766, 3478.666, 1129.1296, 3536.67, 1102.0815, 4290.7183, 750.4628, 4348.722, 723.4158, 4406.725, 696.3678, 4464.729, 669.3208, 4522.7334, 642.2728, 4580.7363, 615.2258, 4638.74, 588.1778, 5479.7944, 195.9876, 5537.7974, 168.9406, 5595.8013, 141.8926, 5653.805, 114.8456, 5711.809, 87.7976, 5769.812, 60.7506, 5827.8164, 33.7026, 5885.8203, 6.6546, 5943.823, -20.3924, 6001.827, -47.4404, 6059.831, -74.4874, 6117.834, -101.5354, 6175.8384, -128.5824, 6233.8423, -155.6304, 6291.846, -182.6784, 6349.849, -209.7254, 6407.853, -236.7734, 6465.8574, -263.8204, 6523.8604, -290.8684, 6581.8643, -317.9154, 6639.868, -344.9634, 6697.871, -372.0114, 7451.9194, -723.6292, 7509.9233, -750.6772, 7567.9277, -777.7242, 7625.9307, -804.7722, 7683.9346, -831.8192, 7741.9385, -858.8672, 7799.9414, -885.9152, 7857.9453, -912.9622, 8640.996, -1278.1049, 8698.999, -1305.1519, 8757.003, -1332.1998, 8815.007, -1359.2468, 8873.011, -1386.2948, 8931.014, -1413.3428, 8989.018, -1440.3898, 9047.021, -1467.4377, 9105.024, -1494.4847, 9163.028, -1521.5328, 9221.033, -1548.5798, 9279.036, -1575.6278, 9337.04, -1602.6748, 9395.044, -1629.7228, 9453.047, -1656.7708, 9511.051, -1683.8177, 9569.055, -1710.8658, 10323.104, -2062.4836, 10381.106, -2089.5315, 10439.11, -2116.5786, 10497.114, -2143.6267, 10555.117, -2170.6746, 10613.121, -2197.7217)
+width = 7.0
+default_color = Color(0.553, 0.424, 0.38, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core2Outer" type="Line2D" parent="CoreBundles" unique_id=1040070688]
+points = PackedVector2Array(427.714, 2612.497, 485.718, 2585.45, 543.722, 2558.402, 601.725, 2531.355, 659.729, 2504.307, 717.733, 2477.259, 775.737, 2450.212, 1645.7917, 2044.498, 1703.7958, 2017.451, 1761.7998, 1990.403, 1819.8029, 1963.356, 1877.8068, 1936.308, 1935.8108, 1909.26, 1993.8138, 1882.213, 2051.8179, 1855.165, 2109.8218, 1828.118, 2167.8247, 1801.07, 2225.8289, 1774.023, 3037.8809, 1395.3566, 3095.885, 1368.3086, 3153.888, 1341.2616, 3211.8918, 1314.2136, 3269.896, 1287.1666, 3327.899, 1260.1187, 3385.9028, 1233.0717, 3443.907, 1206.0236, 3501.91, 1178.9756, 3559.9138, 1151.9286, 4313.9624, 800.3098, 4371.9663, 773.2628, 4429.969, 746.2148, 4487.973, 719.1678, 4545.977, 692.1198, 4603.98, 665.0718, 4661.9844, 638.0248, 5503.038, 245.8346, 5561.041, 218.7876, 5619.0454, 191.7396, 5677.0493, 164.6926, 5735.053, 137.6446, 5793.056, 110.5966, 5851.06, 83.5496, 5909.064, 56.5016, 5967.0674, 29.4546, 6025.0713, 2.4066, 6083.075, -24.6404, 6141.078, -51.6884, 6199.082, -78.7364, 6257.0864, -105.7834, 6315.0903, -132.8314, 6373.0933, -159.8784, 6431.097, -186.9264, 6489.101, -213.9734, 6547.104, -241.0214, 6605.1084, -268.0684, 6663.1123, -295.1164, 6721.115, -322.1644, 7475.1636, -673.7822, 7533.1675, -700.8302, 7591.1714, -727.8772, 7649.1743, -754.9252, 7707.1787, -781.9722, 7765.1826, -809.0202, 7823.1855, -836.0682, 7881.1895, -863.1152, 8664.24, -1228.2578, 8722.243, -1255.3048, 8780.247, -1282.3528, 8838.251, -1309.3998, 8896.255, -1336.4478, 8954.258, -1363.4958, 9012.262, -1390.5428, 9070.266, -1417.5908, 9128.269, -1444.6378, 9186.272, -1471.6858, 9244.276, -1498.7328, 9302.28, -1525.7808, 9360.284, -1552.8289, 9418.288, -1579.8759, 9476.291, -1606.9238, 9534.295, -1633.9708, 9592.299, -1661.0188, 10346.348, -2012.6366, 10404.351, -2039.6846, 10462.3545, -2066.7327, 10520.358, -2093.7795, 10578.361, -2120.8276, 10636.365, -2147.8745)
+width = 48.0
+default_color = Color(0.188, 0.153, 0.176, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core2Body" type="Line2D" parent="CoreBundles" unique_id=993164277]
+points = PackedVector2Array(427.714, 2612.497, 485.718, 2585.45, 543.722, 2558.402, 601.725, 2531.355, 659.729, 2504.307, 717.733, 2477.259, 775.737, 2450.212, 1645.7917, 2044.498, 1703.7958, 2017.451, 1761.7998, 1990.403, 1819.8029, 1963.356, 1877.8068, 1936.308, 1935.8108, 1909.26, 1993.8138, 1882.213, 2051.8179, 1855.165, 2109.8218, 1828.118, 2167.8247, 1801.07, 2225.8289, 1774.023, 3037.8809, 1395.3566, 3095.885, 1368.3086, 3153.888, 1341.2616, 3211.8918, 1314.2136, 3269.896, 1287.1666, 3327.899, 1260.1187, 3385.9028, 1233.0717, 3443.907, 1206.0236, 3501.91, 1178.9756, 3559.9138, 1151.9286, 4313.9624, 800.3098, 4371.9663, 773.2628, 4429.969, 746.2148, 4487.973, 719.1678, 4545.977, 692.1198, 4603.98, 665.0718, 4661.9844, 638.0248, 5503.038, 245.8346, 5561.041, 218.7876, 5619.0454, 191.7396, 5677.0493, 164.6926, 5735.053, 137.6446, 5793.056, 110.5966, 5851.06, 83.5496, 5909.064, 56.5016, 5967.0674, 29.4546, 6025.0713, 2.4066, 6083.075, -24.6404, 6141.078, -51.6884, 6199.082, -78.7364, 6257.0864, -105.7834, 6315.0903, -132.8314, 6373.0933, -159.8784, 6431.097, -186.9264, 6489.101, -213.9734, 6547.104, -241.0214, 6605.1084, -268.0684, 6663.1123, -295.1164, 6721.115, -322.1644, 7475.1636, -673.7822, 7533.1675, -700.8302, 7591.1714, -727.8772, 7649.1743, -754.9252, 7707.1787, -781.9722, 7765.1826, -809.0202, 7823.1855, -836.0682, 7881.1895, -863.1152, 8664.24, -1228.2578, 8722.243, -1255.3048, 8780.247, -1282.3528, 8838.251, -1309.3998, 8896.255, -1336.4478, 8954.258, -1363.4958, 9012.262, -1390.5428, 9070.266, -1417.5908, 9128.269, -1444.6378, 9186.272, -1471.6858, 9244.276, -1498.7328, 9302.28, -1525.7808, 9360.284, -1552.8289, 9418.288, -1579.8759, 9476.291, -1606.9238, 9534.295, -1633.9708, 9592.299, -1661.0188, 10346.348, -2012.6366, 10404.351, -2039.6846, 10462.3545, -2066.7327, 10520.358, -2093.7795, 10578.361, -2120.8276, 10636.365, -2147.8745)
+width = 36.0
+default_color = Color(0.451, 0.325, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core2Highlight" type="Line2D" parent="CoreBundles" unique_id=1649299370]
+points = PackedVector2Array(424.756, 2606.153, 482.76, 2579.106, 540.763, 2552.058, 598.767, 2525.01, 656.771, 2497.963, 714.774, 2470.915, 772.778, 2443.868, 1642.8337, 2038.154, 1700.8378, 2011.107, 1758.8408, 1984.059, 1816.8448, 1957.011, 1874.8488, 1929.964, 1932.8518, 1902.916, 1990.8558, 1875.869, 2048.8599, 1848.821, 2106.8628, 1821.774, 2164.8667, 1794.726, 2976.919, 1416.0596, 3034.9229, 1389.0126, 3092.9258, 1361.9646, 3150.93, 1334.9176, 3208.9338, 1307.8696, 3266.937, 1280.8226, 3324.941, 1253.7747, 3382.9448, 1226.7266, 3440.948, 1199.6796, 3498.952, 1172.6316, 3556.9558, 1145.5846, 4311.0044, 793.9658, 4369.0073, 766.9188, 4427.011, 739.8708, 4485.015, 712.8228, 4543.018, 685.7758, 4601.022, 658.7278, 5442.076, 266.5386, 5500.079, 239.4906, 5558.083, 212.4436, 5616.0874, 185.3956, 5674.0913, 158.3476, 5732.094, 131.3006, 5790.098, 104.2526, 5848.102, 77.2056, 5906.105, 50.1576, 5964.1094, 23.1106, 6022.1133, -3.9374, 6080.116, -30.9854, 6138.12, -58.0324, 6196.124, -85.0804, 6254.1284, -112.1274, 6312.1313, -139.1754, 6370.1353, -166.2224, 6428.139, -193.2704, 6486.142, -220.3184, 6544.146, -247.3654, 6602.1504, -274.4134, 6660.1533, -301.4604, 6718.157, -328.5084, 7472.2056, -680.1262, 7530.2095, -707.1742, 7588.2124, -734.2212, 7646.2163, -761.2692, 7704.2207, -788.3172, 7762.2236, -815.3642, 7820.2275, -842.4122, 7878.2314, -869.4592, 8661.281, -1234.6018, 8719.285, -1261.6488, 8777.289, -1288.6968, 8835.292, -1315.7448, 8893.296, -1342.7917, 8951.3, -1369.8398, 9009.304, -1396.8868, 9067.307, -1423.9348, 9125.311, -1450.9818, 9183.314, -1478.0298, 9241.317, -1505.0778, 9299.322, -1532.1248, 9357.326, -1559.1729, 9415.329, -1586.2198, 9473.333, -1613.2678, 9531.337, -1640.3148, 9589.341, -1667.3628, 10343.389, -2018.9816, 10401.393, -2046.0286, 10459.396, -2073.0767, 10517.399, -2100.1235, 10575.403, -2127.1716, 10633.407, -2154.2185)
+width = 7.0
+default_color = Color(0.553, 0.424, 0.38, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core3Outer" type="Line2D" parent="CoreBundles" unique_id=856600730]
+points = PackedVector2Array(448, 2656, 506.004, 2628.952, 564.007, 2601.905, 622.011, 2574.857, 680.015, 2547.81, 738.018, 2520.762, 796.022, 2493.715, 1666.0778, 2088.001, 1724.0818, 2060.953, 1782.0848, 2033.906, 1840.0887, 2006.858, 1898.0928, 1979.811, 1956.0958, 1952.763, 2014.0999, 1925.716, 2072.1038, 1898.668, 2130.1067, 1871.62, 2188.1108, 1844.573, 3000.1628, 1465.9066, 3058.167, 1438.8596, 3116.17, 1411.8116, 3174.1738, 1384.7646, 3232.178, 1357.7166, 3290.181, 1330.6686, 3348.1848, 1303.6216, 3406.189, 1276.5736, 3464.192, 1249.5266, 3522.1958, 1222.4786, 3580.2, 1195.4316, 4334.248, 843.8128, 4392.251, 816.7658, 4450.2554, 789.7178, 4508.2593, 762.6698, 4566.262, 735.6228, 4624.266, 708.5748, 5465.3203, 316.3856, 5523.323, 289.3376, 5581.327, 262.2906, 5639.331, 235.2426, 5697.335, 208.1946, 5755.3384, 181.1476, 5813.3423, 154.0996, 5871.346, 127.0526, 5929.349, 100.0046, 5987.353, 72.9576, 6045.3574, 45.9096, 6103.3604, 18.8616, 6161.3643, -8.1854, 6219.368, -35.2334, 6277.372, -62.2804, 6335.375, -89.3284, 6393.3794, -116.3754, 6451.3833, -143.4234, 6509.386, -170.4714, 6567.39, -197.5184, 6625.394, -224.5664, 6683.397, -251.6134, 6741.4014, -278.6614, 7495.4497, -630.2792, 7553.4536, -657.3272, 7611.4565, -684.3752, 7669.4604, -711.4222, 7727.4644, -738.4702, 7785.4673, -765.5172, 7843.4717, -792.5652, 7901.4756, -819.6122, 8684.524, -1184.7548, 8742.528, -1211.8029, 8800.533, -1238.8499, 8858.536, -1265.8978, 8916.54, -1292.9448, 8974.544, -1319.9928, 9032.548, -1347.0398, 9090.551, -1374.0878, 9148.555, -1401.1357, 9206.559, -1428.1827, 9264.562, -1455.2308, 9322.565, -1482.2778, 9380.569, -1509.3258, 9438.573, -1536.3728, 9496.577, -1563.4208, 9554.581, -1590.4688, 9612.585, -1617.5157, 10366.632, -1969.1346, 10424.636, -1996.1816, 10482.641, -2023.2296, 10540.644, -2050.2766, 10598.647, -2077.3247, 10656.651, -2104.3716)
+width = 48.0
+default_color = Color(0.188, 0.153, 0.176, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core3Body" type="Line2D" parent="CoreBundles" unique_id=575212245]
+points = PackedVector2Array(448, 2656, 506.004, 2628.952, 564.007, 2601.905, 622.011, 2574.857, 680.015, 2547.81, 738.018, 2520.762, 796.022, 2493.715, 1666.0778, 2088.001, 1724.0818, 2060.953, 1782.0848, 2033.906, 1840.0887, 2006.858, 1898.0928, 1979.811, 1956.0958, 1952.763, 2014.0999, 1925.716, 2072.1038, 1898.668, 2130.1067, 1871.62, 2188.1108, 1844.573, 3000.1628, 1465.9066, 3058.167, 1438.8596, 3116.17, 1411.8116, 3174.1738, 1384.7646, 3232.178, 1357.7166, 3290.181, 1330.6686, 3348.1848, 1303.6216, 3406.189, 1276.5736, 3464.192, 1249.5266, 3522.1958, 1222.4786, 3580.2, 1195.4316, 4334.248, 843.8128, 4392.251, 816.7658, 4450.2554, 789.7178, 4508.2593, 762.6698, 4566.262, 735.6228, 4624.266, 708.5748, 5465.3203, 316.3856, 5523.323, 289.3376, 5581.327, 262.2906, 5639.331, 235.2426, 5697.335, 208.1946, 5755.3384, 181.1476, 5813.3423, 154.0996, 5871.346, 127.0526, 5929.349, 100.0046, 5987.353, 72.9576, 6045.3574, 45.9096, 6103.3604, 18.8616, 6161.3643, -8.1854, 6219.368, -35.2334, 6277.372, -62.2804, 6335.375, -89.3284, 6393.3794, -116.3754, 6451.3833, -143.4234, 6509.386, -170.4714, 6567.39, -197.5184, 6625.394, -224.5664, 6683.397, -251.6134, 6741.4014, -278.6614, 7495.4497, -630.2792, 7553.4536, -657.3272, 7611.4565, -684.3752, 7669.4604, -711.4222, 7727.4644, -738.4702, 7785.4673, -765.5172, 7843.4717, -792.5652, 7901.4756, -819.6122, 8684.524, -1184.7548, 8742.528, -1211.8029, 8800.533, -1238.8499, 8858.536, -1265.8978, 8916.54, -1292.9448, 8974.544, -1319.9928, 9032.548, -1347.0398, 9090.551, -1374.0878, 9148.555, -1401.1357, 9206.559, -1428.1827, 9264.562, -1455.2308, 9322.565, -1482.2778, 9380.569, -1509.3258, 9438.573, -1536.3728, 9496.577, -1563.4208, 9554.581, -1590.4688, 9612.585, -1617.5157, 10366.632, -1969.1346, 10424.636, -1996.1816, 10482.641, -2023.2296, 10540.644, -2050.2766, 10598.647, -2077.3247, 10656.651, -2104.3716)
+width = 36.0
+default_color = Color(0.451, 0.325, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core3Highlight" type="Line2D" parent="CoreBundles" unique_id=1551871910]
+points = PackedVector2Array(445.042, 2649.656, 503.045, 2622.608, 561.049, 2595.561, 619.053, 2568.513, 677.056, 2541.466, 735.06, 2514.418, 793.064, 2487.37, 1663.1198, 2081.657, 1721.1228, 2054.609, 1779.1268, 2027.562, 1837.1309, 2000.514, 1895.1338, 1973.467, 1953.1378, 1946.419, 2011.1418, 1919.371, 2069.1448, 1892.324, 2127.1487, 1865.276, 2185.1528, 1838.229, 2997.2048, 1459.5626, 3055.208, 1432.5156, 3113.212, 1405.4677, 3171.2158, 1378.4196, 3229.219, 1351.3726, 3287.223, 1324.3246, 3345.2268, 1297.2776, 3403.23, 1270.2296, 3461.234, 1243.1826, 3519.2378, 1216.1346, 3577.242, 1189.0865, 4331.289, 837.4688, 4389.293, 810.4208, 4447.2974, 783.3738, 4505.3003, 756.3258, 4563.304, 729.2788, 4621.308, 702.2308, 4679.311, 675.1838, 5520.365, 282.9936, 5578.369, 255.9456, 5636.373, 228.8986, 5694.376, 201.8506, 5752.3804, 174.8036, 5810.3843, 147.7556, 5868.387, 120.7086, 5926.391, 93.6606, 5984.395, 66.6126, 6042.3984, 39.5656, 6100.4023, 12.5176, 6158.4063, -14.5294, 6216.409, -41.5774, 6274.413, -68.6244, 6332.417, -95.6724, 6390.4214, -122.7204, 6448.4243, -149.7674, 6506.428, -176.8154, 6564.432, -203.8624, 6622.435, -230.9104, 6680.439, -257.9574, 6738.4434, -285.0054, 7492.4907, -636.6242, 7550.4946, -663.6712, 7608.4985, -690.7192, 7666.5024, -717.7662, 7724.5054, -744.8142, 7782.5093, -771.8612, 7840.5137, -798.9092, 7898.5166, -825.9572, 8681.566, -1191.0988, 8739.57, -1218.1469, 8797.574, -1245.1938, 8855.578, -1272.2418, 8913.582, -1299.2888, 8971.586, -1326.3368, 9029.589, -1353.3848, 9087.593, -1380.4318, 9145.597, -1407.4799, 9203.6, -1434.5269, 9261.604, -1461.5748, 9319.607, -1488.6218, 9377.61, -1515.6698, 9435.615, -1542.7178, 9493.619, -1569.7648, 9551.623, -1596.8127, 9609.626, -1623.8597, 10363.674, -1975.4786, 10421.678, -2002.5256, 10479.682, -2029.5736, 10537.686, -2056.6206, 10595.689, -2083.6687, 10653.692, -2110.7166)
+width = 7.0
+default_color = Color(0.553, 0.424, 0.38, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core4Outer" type="Line2D" parent="CoreBundles" unique_id=5649729]
+points = PackedVector2Array(468.286, 2699.503, 526.289, 2672.455, 584.293, 2645.408, 642.297, 2618.36, 700.3, 2591.312, 758.304, 2564.265, 816.308, 2537.217, 1686.3638, 2131.504, 1744.3668, 2104.456, 1802.3708, 2077.409, 1860.3748, 2050.361, 1918.3778, 2023.314, 1976.3818, 1996.266, 2034.3857, 1969.218, 2092.389, 1942.171, 2150.3928, 1915.123, 2208.3967, 1888.076, 3020.449, 1509.4095, 3078.452, 1482.3625, 3136.4558, 1455.3146, 3194.46, 1428.2666, 3252.463, 1401.2196, 3310.4668, 1374.1716, 3368.471, 1347.1246, 3426.4739, 1320.0767, 3484.4778, 1293.0295, 3542.482, 1265.9816, 3600.4858, 1238.9336, 4354.533, 887.3158, 4412.537, 860.2678, 4470.541, 833.2208, 4528.5444, 806.1728, 4586.5483, 779.1258, 4644.5522, 752.0778, 4702.555, 725.0298, 5543.6094, 332.8406, 5601.6133, 305.7926, 5659.617, 278.7456, 5717.62, 251.6976, 5775.624, 224.6506, 5833.6284, 197.6026, 5891.6313, 170.5546, 5949.6353, 143.5076, 6007.639, 116.4596, 6065.642, 89.4126, 6123.646, 62.3646, 6181.6504, 35.3176, 6239.6533, 8.2696, 6297.657, -18.7784, 6355.661, -45.8254, 6413.665, -72.8734, 6471.668, -99.9204, 6529.6724, -126.9684, 6587.6763, -154.0154, 6645.679, -181.0634, 6703.683, -208.1114, 6761.687, -235.1584, 7515.7344, -586.7772, 7573.7383, -613.8242, 7631.7427, -640.8722, 7689.7466, -667.9192, 7747.7495, -694.9672, 7805.7534, -722.0142, 7863.7573, -749.0622, 7921.7607, -776.1102, 8704.811, -1141.2518, 8762.814, -1168.2998, 8820.817, -1195.3468, 8878.822, -1222.3948, 8936.826, -1249.4418, 8994.83, -1276.4897, 9052.833, -1303.5378, 9110.837, -1330.5848, 9168.841, -1357.6328, 9226.844, -1384.6798, 9284.848, -1411.7278, 9342.852, -1438.7748, 9400.8545, -1465.8228, 9458.858, -1492.8708, 9516.863, -1519.9178, 9574.867, -1546.9658, 9632.87, -1574.0128, 10386.918, -1925.6316, 10444.922, -1952.6786, 10502.925, -1979.7266, 10560.93, -2006.7747, 10618.934, -2033.8217, 10676.937, -2060.8696)
+width = 48.0
+default_color = Color(0.188, 0.153, 0.176, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core4Body" type="Line2D" parent="CoreBundles" unique_id=187604209]
+points = PackedVector2Array(468.286, 2699.503, 526.289, 2672.455, 584.293, 2645.408, 642.297, 2618.36, 700.3, 2591.312, 758.304, 2564.265, 816.308, 2537.217, 1686.3638, 2131.504, 1744.3668, 2104.456, 1802.3708, 2077.409, 1860.3748, 2050.361, 1918.3778, 2023.314, 1976.3818, 1996.266, 2034.3857, 1969.218, 2092.389, 1942.171, 2150.3928, 1915.123, 2208.3967, 1888.076, 3020.449, 1509.4095, 3078.452, 1482.3625, 3136.4558, 1455.3146, 3194.46, 1428.2666, 3252.463, 1401.2196, 3310.4668, 1374.1716, 3368.471, 1347.1246, 3426.4739, 1320.0767, 3484.4778, 1293.0295, 3542.482, 1265.9816, 3600.4858, 1238.9336, 4354.533, 887.3158, 4412.537, 860.2678, 4470.541, 833.2208, 4528.5444, 806.1728, 4586.5483, 779.1258, 4644.5522, 752.0778, 4702.555, 725.0298, 5543.6094, 332.8406, 5601.6133, 305.7926, 5659.617, 278.7456, 5717.62, 251.6976, 5775.624, 224.6506, 5833.6284, 197.6026, 5891.6313, 170.5546, 5949.6353, 143.5076, 6007.639, 116.4596, 6065.642, 89.4126, 6123.646, 62.3646, 6181.6504, 35.3176, 6239.6533, 8.2696, 6297.657, -18.7784, 6355.661, -45.8254, 6413.665, -72.8734, 6471.668, -99.9204, 6529.6724, -126.9684, 6587.6763, -154.0154, 6645.679, -181.0634, 6703.683, -208.1114, 6761.687, -235.1584, 7515.7344, -586.7772, 7573.7383, -613.8242, 7631.7427, -640.8722, 7689.7466, -667.9192, 7747.7495, -694.9672, 7805.7534, -722.0142, 7863.7573, -749.0622, 7921.7607, -776.1102, 8704.811, -1141.2518, 8762.814, -1168.2998, 8820.817, -1195.3468, 8878.822, -1222.3948, 8936.826, -1249.4418, 8994.83, -1276.4897, 9052.833, -1303.5378, 9110.837, -1330.5848, 9168.841, -1357.6328, 9226.844, -1384.6798, 9284.848, -1411.7278, 9342.852, -1438.7748, 9400.8545, -1465.8228, 9458.858, -1492.8708, 9516.863, -1519.9178, 9574.867, -1546.9658, 9632.87, -1574.0128, 10386.918, -1925.6316, 10444.922, -1952.6786, 10502.925, -1979.7266, 10560.93, -2006.7747, 10618.934, -2033.8217, 10676.937, -2060.8696)
+width = 36.0
+default_color = Color(0.451, 0.325, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core4Highlight" type="Line2D" parent="CoreBundles" unique_id=506286542]
+points = PackedVector2Array(465.327, 2693.159, 523.331, 2666.111, 581.335, 2639.063, 639.338, 2612.016, 697.342, 2584.968, 755.346, 2557.921, 813.35, 2530.873, 1683.4048, 2125.16, 1741.4088, 2098.112, 1799.4128, 2071.065, 1857.4158, 2044.017, 1915.4198, 2016.969, 1973.4238, 1989.922, 2031.4268, 1962.874, 2089.431, 1935.827, 2147.4348, 1908.779, 2205.4387, 1881.732, 2263.442, 1854.684, 3075.494, 1476.0176, 3133.4978, 1448.9706, 3191.501, 1421.9226, 3249.505, 1394.8756, 3307.5088, 1367.8276, 3365.512, 1340.7806, 3423.5159, 1313.7325, 3481.52, 1286.6846, 3539.524, 1259.6376, 3597.5269, 1232.5896, 4351.575, 880.9718, 4409.579, 853.9238, 4467.582, 826.8768, 4525.5864, 799.8288, 4583.5903, 772.7808, 4641.5933, 745.7338, 5482.647, 353.5436, 5540.6514, 326.4966, 5598.6543, 299.4486, 5656.658, 272.4016, 5714.662, 245.3536, 5772.666, 218.3056, 5830.6694, 191.2586, 5888.6733, 164.2106, 5946.6772, 137.1636, 6004.68, 110.1156, 6062.684, 83.0686, 6120.688, 56.0206, 6178.6914, 28.9726, 6236.6953, 1.9256, 6294.699, -25.1224, 6352.703, -52.1694, 6410.706, -79.2174, 6468.71, -106.2644, 6526.7144, -133.3124, 6584.7173, -160.3604, 6642.721, -187.4074, 6700.725, -214.4554, 6758.728, -241.5024, 7512.7764, -593.1212, 7570.7803, -620.1682, 7628.7847, -647.2162, 7686.7876, -674.2642, 7744.7915, -701.3112, 7802.7954, -728.3592, 7860.7983, -755.4062, 7918.8027, -782.4542, 8701.853, -1147.5958, 8759.855, -1174.6438, 8817.859, -1201.6908, 8875.864, -1228.7388, 8933.868, -1255.7867, 8991.871, -1282.8337, 9049.875, -1309.8818, 9107.879, -1336.9288, 9165.882, -1363.9768, 9223.886, -1391.0238, 9281.89, -1418.0718, 9339.893, -1445.1198, 9397.896, -1472.1667, 9455.9, -1499.2148, 9513.905, -1526.2618, 9571.908, -1553.3098, 9629.912, -1580.3568, 10383.96, -1931.9756, 10441.963, -1959.0236, 10499.967, -1986.0706, 10557.972, -2013.1187, 10615.975, -2040.1656, 10673.979, -2067.2136)
+width = 7.0
+default_color = Color(0.553, 0.424, 0.38, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core5Outer" type="Line2D" parent="CoreBundles" unique_id=1477498105]
+points = PackedVector2Array(488.571, 2743.006, 546.575, 2715.958, 604.579, 2688.91, 662.582, 2661.863, 720.586, 2634.815, 778.59, 2607.768, 836.594, 2580.72, 1706.6488, 2175.007, 1764.6528, 2147.959, 1822.6569, 2120.911, 1880.6598, 2093.864, 1938.6638, 2066.816, 1996.6678, 2039.769, 2054.671, 2012.721, 2112.6748, 1985.674, 2170.6787, 1958.626, 2228.6829, 1931.578, 2286.6858, 1904.531, 3098.7378, 1525.8646, 3156.742, 1498.8176, 3214.7449, 1471.7697, 3272.7488, 1444.7227, 3330.753, 1417.6746, 3388.7559, 1390.6266, 3446.76, 1363.5796, 3504.764, 1336.5316, 3562.7678, 1309.4846, 3620.771, 1282.4366, 4374.8193, 930.8188, 4432.823, 903.7708, 4490.826, 876.7228, 4548.83, 849.6758, 4606.834, 822.6278, 4664.8374, 795.5808, 5505.891, 403.3906, 5563.895, 376.3436, 5621.8984, 349.2956, 5679.9023, 322.2486, 5737.9063, 295.2006, 5795.91, 268.1526, 5853.913, 241.1056, 5911.917, 214.0576, 5969.9214, 187.0106, 6027.9243, 159.9626, 6085.928, 132.9156, 6143.932, 105.8676, 6201.935, 78.8196, 6259.939, 51.7726, 6317.9434, 24.7246, 6375.9473, -2.3224, 6433.95, -29.3704, 6491.954, -56.4174, 6549.958, -83.4654, 6607.9614, -110.5134, 6665.9653, -137.5604, 6723.969, -164.6084, 6781.972, -191.6554, 7536.0205, -543.2742, 7594.0244, -570.3212, 7652.0283, -597.3692, 7710.0317, -624.4172, 7768.0356, -651.4642, 7826.0396, -678.5122, 7884.0425, -705.5592, 7942.0464, -732.6072, 8725.097, -1097.7488, 8783.1, -1124.7968, 8841.104, -1151.8448, 8899.107, -1178.8918, 8957.111, -1205.9398, 9015.115, -1232.9868, 9073.119, -1260.0348, 9131.123, -1287.0818, 9189.126, -1314.1298, 9247.13, -1341.1779, 9305.134, -1368.2249, 9363.137, -1395.2728, 9421.141, -1422.3198, 9479.145, -1449.3678, 9537.148, -1476.4148, 9595.151, -1503.4628, 9653.156, -1530.5107, 10407.204, -1882.1285, 10465.207, -1909.1766, 10523.211, -1936.2236, 10581.215, -1963.2716, 10639.218, -1990.3186, 10697.223, -2017.3666)
+width = 48.0
+default_color = Color(0.188, 0.153, 0.176, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core5Body" type="Line2D" parent="CoreBundles" unique_id=1056688061]
+points = PackedVector2Array(488.571, 2743.006, 546.575, 2715.958, 604.579, 2688.91, 662.582, 2661.863, 720.586, 2634.815, 778.59, 2607.768, 836.594, 2580.72, 1706.6488, 2175.007, 1764.6528, 2147.959, 1822.6569, 2120.911, 1880.6598, 2093.864, 1938.6638, 2066.816, 1996.6678, 2039.769, 2054.671, 2012.721, 2112.6748, 1985.674, 2170.6787, 1958.626, 2228.6829, 1931.578, 2286.6858, 1904.531, 3098.7378, 1525.8646, 3156.742, 1498.8176, 3214.7449, 1471.7697, 3272.7488, 1444.7227, 3330.753, 1417.6746, 3388.7559, 1390.6266, 3446.76, 1363.5796, 3504.764, 1336.5316, 3562.7678, 1309.4846, 3620.771, 1282.4366, 4374.8193, 930.8188, 4432.823, 903.7708, 4490.826, 876.7228, 4548.83, 849.6758, 4606.834, 822.6278, 4664.8374, 795.5808, 5505.891, 403.3906, 5563.895, 376.3436, 5621.8984, 349.2956, 5679.9023, 322.2486, 5737.9063, 295.2006, 5795.91, 268.1526, 5853.913, 241.1056, 5911.917, 214.0576, 5969.9214, 187.0106, 6027.9243, 159.9626, 6085.928, 132.9156, 6143.932, 105.8676, 6201.935, 78.8196, 6259.939, 51.7726, 6317.9434, 24.7246, 6375.9473, -2.3224, 6433.95, -29.3704, 6491.954, -56.4174, 6549.958, -83.4654, 6607.9614, -110.5134, 6665.9653, -137.5604, 6723.969, -164.6084, 6781.972, -191.6554, 7536.0205, -543.2742, 7594.0244, -570.3212, 7652.0283, -597.3692, 7710.0317, -624.4172, 7768.0356, -651.4642, 7826.0396, -678.5122, 7884.0425, -705.5592, 7942.0464, -732.6072, 8725.097, -1097.7488, 8783.1, -1124.7968, 8841.104, -1151.8448, 8899.107, -1178.8918, 8957.111, -1205.9398, 9015.115, -1232.9868, 9073.119, -1260.0348, 9131.123, -1287.0818, 9189.126, -1314.1298, 9247.13, -1341.1779, 9305.134, -1368.2249, 9363.137, -1395.2728, 9421.141, -1422.3198, 9479.145, -1449.3678, 9537.148, -1476.4148, 9595.151, -1503.4628, 9653.156, -1530.5107, 10407.204, -1882.1285, 10465.207, -1909.1766, 10523.211, -1936.2236, 10581.215, -1963.2716, 10639.218, -1990.3186, 10697.223, -2017.3666)
+width = 36.0
+default_color = Color(0.451, 0.325, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core5Highlight" type="Line2D" parent="CoreBundles" unique_id=1354462923]
+points = PackedVector2Array(485.613, 2736.661, 543.617, 2709.614, 601.62, 2682.566, 659.624, 2655.519, 717.628, 2628.471, 775.632, 2601.424, 833.635, 2574.376, 1703.6908, 2168.662, 1761.6948, 2141.615, 1819.6978, 2114.567, 1877.7018, 2087.52, 1935.7058, 2060.472, 1993.7087, 2033.425, 2051.713, 2006.377, 2109.7168, 1979.329, 2167.7207, 1952.282, 2225.7239, 1925.234, 2283.7278, 1898.187, 3095.7798, 1519.5206, 3153.783, 1492.4736, 3211.7869, 1465.4257, 3269.791, 1438.3776, 3327.794, 1411.3306, 3385.7979, 1384.2826, 3443.802, 1357.2356, 3501.805, 1330.1876, 3559.8088, 1303.1406, 3617.813, 1276.0927, 4371.8613, 924.4738, 4429.8643, 897.4268, 4487.868, 870.3788, 4545.872, 843.3318, 4603.875, 816.2838, 4661.8794, 789.2368, 5502.933, 397.0466, 5560.936, 369.9986, 5618.9404, 342.9516, 5676.9443, 315.9036, 5734.948, 288.8566, 5792.951, 261.8086, 5850.955, 234.7616, 5908.959, 207.7136, 5966.9624, 180.6666, 6024.9663, 153.6186, 6082.97, 126.5706, 6140.973, 99.5236, 6198.977, 72.4756, 6256.981, 45.4286, 6314.9854, 18.3806, 6372.9883, -8.6664, 6430.992, -35.7144, 6488.996, -62.7624, 6546.999, -89.8094, 6605.0034, -116.8574, 6663.0073, -143.9044, 6721.0103, -170.9524, 6779.014, -197.9994, 7533.0625, -549.6182, 7591.0664, -576.6662, 7649.0693, -603.7132, 7707.0737, -630.7612, 7765.0776, -657.8082, 7823.0806, -684.8562, 7881.0845, -711.9032, 7939.0884, -738.9512, 8722.138, -1104.0938, 8780.142, -1131.1407, 8838.1455, -1158.1888, 8896.149, -1185.2358, 8954.152, -1212.2838, 9012.157, -1239.3308, 9070.161, -1266.3788, 9128.164, -1293.4268, 9186.168, -1320.4738, 9244.172, -1347.5219, 9302.175, -1374.5688, 9360.179, -1401.6168, 9418.183, -1428.6638, 9476.186, -1455.7118, 9534.189, -1482.7598, 9592.193, -1509.8068, 9650.198, -1536.8549, 10404.245, -1888.4727, 10462.249, -1915.5206, 10520.253, -1942.5676, 10578.256, -1969.6156, 10636.26, -1996.6636, 10694.265, -2023.7106)
+width = 7.0
+default_color = Color(0.553, 0.424, 0.38, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core6Outer" type="Line2D" parent="CoreBundles" unique_id=372477359]
+points = PackedVector2Array(508.857, 2786.508, 566.861, 2759.461, 624.864, 2732.413, 682.868, 2705.366, 740.872, 2678.318, 798.876, 2651.27, 856.879, 2624.223, 1726.9348, 2218.509, 1784.9388, 2191.462, 1842.9418, 2164.414, 1900.9458, 2137.367, 1958.9498, 2110.319, 2016.9528, 2083.271, 2074.9568, 2056.224, 2132.9607, 2029.176, 2190.9648, 2002.129, 2248.9678, 1975.081, 2306.9717, 1948.034, 3119.024, 1569.3676, 3177.0269, 1542.3206, 3235.031, 1515.2726, 3293.035, 1488.2246, 3351.0378, 1461.1776, 3409.042, 1434.1296, 3467.046, 1407.0826, 3525.0488, 1380.0345, 3583.053, 1352.9875, 3641.057, 1325.9396, 4395.105, 974.3208, 4453.1084, 947.2738, 4511.1123, 920.2258, 4569.116, 893.1788, 4627.119, 866.1308, 4685.123, 839.0838, 5526.1772, 446.8936, 5584.18, 419.8456, 5642.184, 392.7986, 5700.188, 365.7506, 5758.1924, 338.7036, 5816.1953, 311.6556, 5874.199, 284.6086, 5932.203, 257.5606, 5990.206, 230.5126, 6048.21, 203.4656, 6106.2144, 176.4176, 6164.2173, 149.3706, 6222.221, 122.3226, 6280.225, 95.2756, 6338.229, 68.2276, 6396.2324, 41.1796, 6454.2363, 14.1326, 6512.24, -12.9154, 6570.243, -39.9624, 6628.247, -67.0104, 6686.251, -94.0574, 6744.2544, -121.1054, 6802.2583, -148.1534, 7556.3066, -499.7712, 7614.3105, -526.8192, 7672.3135, -553.8662, 7730.3174, -580.9142, 7788.3213, -607.9612, 7846.3247, -635.0092, 7904.3286, -662.0572, 7962.3325, -689.1042, 8745.382, -1054.2468, 8803.386, -1081.2938, 8861.39, -1108.3418, 8919.394, -1135.3888, 8977.396, -1162.4368, 9035.4, -1189.4838, 9093.405, -1216.5319, 9151.408, -1243.5798, 9209.412, -1270.6268, 9267.416, -1297.6748, 9325.419, -1324.7218, 9383.423, -1351.7698, 9441.427, -1378.8168, 9499.431, -1405.8647, 9557.434, -1432.9128, 9615.4375, -1459.9598, 9673.441, -1487.0078, 10427.489, -1838.6256, 10485.493, -1865.6736, 10543.497, -1892.7206, 10601.5, -1919.7686, 10659.504, -1946.8167, 10717.508, -1973.8636)
+width = 48.0
+default_color = Color(0.188, 0.153, 0.176, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core6Body" type="Line2D" parent="CoreBundles" unique_id=1666229152]
+points = PackedVector2Array(508.857, 2786.508, 566.861, 2759.461, 624.864, 2732.413, 682.868, 2705.366, 740.872, 2678.318, 798.876, 2651.27, 856.879, 2624.223, 1726.9348, 2218.509, 1784.9388, 2191.462, 1842.9418, 2164.414, 1900.9458, 2137.367, 1958.9498, 2110.319, 2016.9528, 2083.271, 2074.9568, 2056.224, 2132.9607, 2029.176, 2190.9648, 2002.129, 2248.9678, 1975.081, 2306.9717, 1948.034, 3119.024, 1569.3676, 3177.0269, 1542.3206, 3235.031, 1515.2726, 3293.035, 1488.2246, 3351.0378, 1461.1776, 3409.042, 1434.1296, 3467.046, 1407.0826, 3525.0488, 1380.0345, 3583.053, 1352.9875, 3641.057, 1325.9396, 4395.105, 974.3208, 4453.1084, 947.2738, 4511.1123, 920.2258, 4569.116, 893.1788, 4627.119, 866.1308, 4685.123, 839.0838, 5526.1772, 446.8936, 5584.18, 419.8456, 5642.184, 392.7986, 5700.188, 365.7506, 5758.1924, 338.7036, 5816.1953, 311.6556, 5874.199, 284.6086, 5932.203, 257.5606, 5990.206, 230.5126, 6048.21, 203.4656, 6106.2144, 176.4176, 6164.2173, 149.3706, 6222.221, 122.3226, 6280.225, 95.2756, 6338.229, 68.2276, 6396.2324, 41.1796, 6454.2363, 14.1326, 6512.24, -12.9154, 6570.243, -39.9624, 6628.247, -67.0104, 6686.251, -94.0574, 6744.2544, -121.1054, 6802.2583, -148.1534, 7556.3066, -499.7712, 7614.3105, -526.8192, 7672.3135, -553.8662, 7730.3174, -580.9142, 7788.3213, -607.9612, 7846.3247, -635.0092, 7904.3286, -662.0572, 7962.3325, -689.1042, 8745.382, -1054.2468, 8803.386, -1081.2938, 8861.39, -1108.3418, 8919.394, -1135.3888, 8977.396, -1162.4368, 9035.4, -1189.4838, 9093.405, -1216.5319, 9151.408, -1243.5798, 9209.412, -1270.6268, 9267.416, -1297.6748, 9325.419, -1324.7218, 9383.423, -1351.7698, 9441.427, -1378.8168, 9499.431, -1405.8647, 9557.434, -1432.9128, 9615.4375, -1459.9598, 9673.441, -1487.0078, 10427.489, -1838.6256, 10485.493, -1865.6736, 10543.497, -1892.7206, 10601.5, -1919.7686, 10659.504, -1946.8167, 10717.508, -1973.8636)
+width = 36.0
+default_color = Color(0.451, 0.325, 0.31, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Core6Highlight" type="Line2D" parent="CoreBundles" unique_id=336231854]
+points = PackedVector2Array(505.899, 2780.164, 563.902, 2753.117, 621.906, 2726.069, 679.91, 2699.021, 737.913, 2671.974, 795.917, 2644.926, 853.921, 2617.879, 1723.9768, 2212.165, 1781.9799, 2185.118, 1839.9838, 2158.07, 1897.9878, 2131.022, 1955.9908, 2103.975, 2013.9948, 2076.927, 2071.9988, 2049.88, 2130.0017, 2022.832, 2188.0059, 1995.785, 2246.0098, 1968.737, 3058.062, 1590.0706, 3116.065, 1563.0236, 3174.0688, 1535.9756, 3232.073, 1508.9286, 3290.076, 1481.8806, 3348.0798, 1454.8336, 3406.084, 1427.7856, 3464.087, 1400.7386, 3522.0908, 1373.6906, 3580.095, 1346.6426, 3638.0989, 1319.5956, 4392.146, 967.9768, 4450.1504, 940.9298, 4508.1543, 913.8818, 4566.157, 886.8348, 4624.161, 859.7868, 4682.165, 832.7388, 4740.168, 805.6918, 5581.222, 413.5016, 5639.226, 386.4546, 5697.23, 359.4066, 5755.2334, 332.3596, 5813.2373, 305.3116, 5871.241, 278.2636, 5929.244, 251.2166, 5987.248, 224.1686, 6045.2524, 197.1216, 6103.2554, 170.0736, 6161.2593, 143.0266, 6219.263, 115.9786, 6277.267, 88.9306, 6335.27, 61.8836, 6393.2744, 34.8356, 6451.2783, 7.7886, 6509.2813, -19.2594, 6567.285, -46.3064, 6625.289, -73.3544, 6683.292, -100.4024, 6741.2964, -127.4494, 6799.3003, -154.4974, 7553.3486, -506.1152, 7611.3516, -533.1632, 7669.3555, -560.2102, 7727.3594, -587.2582, 7785.3623, -614.3062, 7843.3667, -641.3532, 7901.3706, -668.4012, 7959.3735, -695.4482, 8742.424, -1060.5908, 8800.428, -1087.6378, 8858.431, -1114.6858, 8916.435, -1141.7338, 8974.438, -1168.7808, 9032.442, -1195.8289, 9090.445, -1222.8759, 9148.45, -1249.9238, 9206.454, -1276.9708, 9264.457, -1304.0188, 9322.461, -1331.0658, 9380.465, -1358.1138, 9438.468, -1385.1617, 9496.472, -1412.2087, 9554.476, -1439.2568, 9612.4795, -1466.3038, 9670.482, -1493.3518, 10424.531, -1844.9696, 10482.535, -1872.0176, 10540.538, -1899.0656, 10598.542, -1926.1125, 10656.546, -1953.1606, 10714.549, -1980.2076)
+width = 7.0
+default_color = Color(0.553, 0.424, 0.38, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="BackgroundMachines" type="Node2D" parent="." unique_id=1139338202]
+z_index = -18
+
+[node name="Machine-1_0_0" type="Node2D" parent="BackgroundMachines" unique_id=1522377173]
+position = Vector2(484.448, 1976.977)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="Machine-1_0_1" type="Node2D" parent="BackgroundMachines" unique_id=635270241]
+position = Vector2(376.257, 1744.963)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="Machine-1_1_0" type="Node2D" parent="BackgroundMachines" unique_id=2071794418]
+position = Vector2(1702.5248, 1408.979)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="Machine-1_1_1" type="Node2D" parent="BackgroundMachines" unique_id=1032045202]
+position = Vector2(1594.3348, 1176.964)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="Machine-1_2_0" type="Node2D" parent="BackgroundMachines" unique_id=1275688347]
+position = Vector2(2862.5989, 868.0276)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.4
+
+[node name="Machine-1_2_1" type="Node2D" parent="BackgroundMachines" unique_id=455229170]
+position = Vector2(2754.409, 636.0126)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 2.6
+
+[node name="Machine-1_3_0" type="Node2D" parent="BackgroundMachines" unique_id=1227287328]
+position = Vector2(3268.625, 678.6946)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 2.1
+
+[node name="Machine-1_3_1" type="Node2D" parent="BackgroundMachines" unique_id=1856549054]
+position = Vector2(3160.4348, 446.6796)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 3.3
+
+[node name="Machine-1_4_0" type="Node2D" parent="BackgroundMachines" unique_id=465729908]
+position = Vector2(4370.6953, 164.7908)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 2.8
+
+[node name="Machine-1_4_1" type="Node2D" parent="BackgroundMachines" unique_id=1282480928]
+position = Vector2(4262.5054, -67.2242)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 4.0
+
+[node name="Machine-1_5_0" type="Node2D" parent="BackgroundMachines" unique_id=568006885]
+position = Vector2(5559.771, -389.6844)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 3.5
+
+[node name="Machine-1_5_1" type="Node2D" parent="BackgroundMachines" unique_id=507255078]
+position = Vector2(5451.581, -621.6994)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 4.7
+
+[node name="Machine-1_6_0" type="Node2D" parent="BackgroundMachines" unique_id=761365085]
+position = Vector2(5965.7974, -579.0174)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 4.2
+
+[node name="Machine-1_6_1" type="Node2D" parent="BackgroundMachines" unique_id=456240387]
+position = Vector2(5857.6074, -811.0324)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 5.4
+
+[node name="Machine-1_7_0" type="Node2D" parent="BackgroundMachines" unique_id=1579636185]
+position = Vector2(6371.823, -768.3504)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 4.9
+
+[node name="Machine-1_7_1" type="Node2D" parent="BackgroundMachines" unique_id=275491705]
+position = Vector2(6263.6323, -1000.3654)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 6.1
+
+[node name="Machine-1_8_0" type="Node2D" parent="BackgroundMachines" unique_id=989787733]
+position = Vector2(7473.8936, -1282.2542)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 5.6
+
+[node name="Machine-1_8_1" type="Node2D" parent="BackgroundMachines" unique_id=626578523]
+position = Vector2(7365.7026, -1514.2692)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 6.8
+
+[node name="Machine-1_9_0" type="Node2D" parent="BackgroundMachines" unique_id=130972120]
+position = Vector2(8604.966, -1809.6818)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 6.3
+
+[node name="Machine-1_9_1" type="Node2D" parent="BackgroundMachines" unique_id=1183893546]
+position = Vector2(8496.774, -2041.6968)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 7.5
+
+[node name="Machine-1_10_0" type="Node2D" parent="BackgroundMachines" unique_id=1818028966]
+position = Vector2(9010.991, -1999.0148)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 7.0
+
+[node name="Machine-1_10_1" type="Node2D" parent="BackgroundMachines" unique_id=1418527235]
+position = Vector2(8902.801, -2231.0298)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 8.2
+
+[node name="Machine-1_11_0" type="Node2D" parent="BackgroundMachines" unique_id=1547899078]
+position = Vector2(10113.062, -2512.9187)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 7.7
+
+[node name="Machine-1_11_1" type="Node2D" parent="BackgroundMachines" unique_id=1120215427]
+position = Vector2(10004.871, -2744.9336)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 8.9
+
+[node name="Machine1_0_0" type="Node2D" parent="BackgroundMachines" unique_id=505020687]
+position = Vector2(991.589, 3064.547)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="Machine1_0_1" type="Node2D" parent="BackgroundMachines" unique_id=283261623]
+position = Vector2(1099.78, 3296.562)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="Machine1_1_0" type="Node2D" parent="BackgroundMachines" unique_id=182877882]
+position = Vector2(2209.6667, 2496.548)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="Machine1_1_1" type="Node2D" parent="BackgroundMachines" unique_id=22000681]
+position = Vector2(2317.858, 2728.563)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="Machine1_2_0" type="Node2D" parent="BackgroundMachines" unique_id=220782761]
+position = Vector2(3369.741, 1955.5966)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.4
+
+[node name="Machine1_2_1" type="Node2D" parent="BackgroundMachines" unique_id=330723817]
+position = Vector2(3477.932, 2187.6116)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 2.6
+
+[node name="Machine1_3_0" type="Node2D" parent="BackgroundMachines" unique_id=229125270]
+position = Vector2(3775.7668, 1766.2635)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 2.1
+
+[node name="Machine1_3_1" type="Node2D" parent="BackgroundMachines" unique_id=160609262]
+position = Vector2(3883.9568, 1998.2786)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 3.3
+
+[node name="Machine1_4_0" type="Node2D" parent="BackgroundMachines" unique_id=1579532729]
+position = Vector2(4877.8374, 1252.3597)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 2.8
+
+[node name="Machine1_4_1" type="Node2D" parent="BackgroundMachines" unique_id=1215897604]
+position = Vector2(4986.0273, 1484.3748)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 4.0
+
+[node name="Machine1_5_0" type="Node2D" parent="BackgroundMachines" unique_id=317473525]
+position = Vector2(6066.913, 697.8846)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 3.5
+
+[node name="Machine1_5_1" type="Node2D" parent="BackgroundMachines" unique_id=2088568029]
+position = Vector2(6175.103, 929.8996)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 4.7
+
+[node name="Machine1_6_0" type="Node2D" parent="BackgroundMachines" unique_id=1225080378]
+position = Vector2(6472.939, 508.5516)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 4.2
+
+[node name="Machine1_6_1" type="Node2D" parent="BackgroundMachines" unique_id=656080841]
+position = Vector2(6581.1294, 740.5666)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 5.4
+
+[node name="Machine1_7_0" type="Node2D" parent="BackgroundMachines" unique_id=236330429]
+position = Vector2(6878.9653, 319.2186)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 4.9
+
+[node name="Machine1_7_1" type="Node2D" parent="BackgroundMachines" unique_id=774772378]
+position = Vector2(6987.1553, 551.2336)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 6.1
+
+[node name="Machine1_8_0" type="Node2D" parent="BackgroundMachines" unique_id=1440280580]
+position = Vector2(7981.0356, -194.6852)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 5.6
+
+[node name="Machine1_8_1" type="Node2D" parent="BackgroundMachines" unique_id=1127785472]
+position = Vector2(8089.2256, 37.3298)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 6.8
+
+[node name="Machine1_9_0" type="Node2D" parent="BackgroundMachines" unique_id=273603374]
+position = Vector2(9112.106, -722.1128)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 6.3
+
+[node name="Machine1_9_1" type="Node2D" parent="BackgroundMachines" unique_id=356930541]
+position = Vector2(9220.298, -490.0978)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 7.5
+
+[node name="Machine1_10_0" type="Node2D" parent="BackgroundMachines" unique_id=1961192989]
+position = Vector2(9518.133, -911.4458)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 7.0
+
+[node name="Machine1_10_1" type="Node2D" parent="BackgroundMachines" unique_id=828102959]
+position = Vector2(9626.324, -679.4308)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 8.2
+
+[node name="Machine1_11_0" type="Node2D" parent="BackgroundMachines" unique_id=708931016]
+position = Vector2(10620.203, -1425.3496)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 7.7
+
+[node name="Machine1_11_1" type="Node2D" parent="BackgroundMachines" unique_id=190178617]
+position = Vector2(10728.394, -1193.3346)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 8.9
+
+[node name="WalkMachine0_0_-1_0" type="Node2D" parent="BackgroundMachines" unique_id=1256293443]
+position = Vector2(759.965, 1848.5013)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="WalkMachine0_0_-1_1" type="Node2D" parent="BackgroundMachines" unique_id=830211617]
+position = Vector2(651.7749, 1616.4869)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="WalkMachine0_0_1_0" type="Node2D" parent="BackgroundMachines" unique_id=595323852]
+position = Vector2(1267.107, 2936.0708)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="WalkMachine0_0_1_1" type="Node2D" parent="BackgroundMachines" unique_id=1433620829]
+position = Vector2(1375.2975, 3168.0862)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="WalkMachine0_1_-1_0" type="Node2D" parent="BackgroundMachines" unique_id=1048136909]
+position = Vector2(1165.9911, 1659.1688)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="WalkMachine0_1_-1_1" type="Node2D" parent="BackgroundMachines" unique_id=1086475831]
+position = Vector2(1057.8008, 1427.1539)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="WalkMachine0_1_1_0" type="Node2D" parent="BackgroundMachines" unique_id=1294497952]
+position = Vector2(1673.1329, 2746.7378)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="WalkMachine0_1_1_1" type="Node2D" parent="BackgroundMachines" unique_id=1684089973]
+position = Vector2(1781.3234, 2978.7532)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="WalkMachine1_0_-1_0" type="Node2D" parent="BackgroundMachines" unique_id=501375154]
+position = Vector2(2181.0557, 1185.8359)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="WalkMachine1_0_-1_1" type="Node2D" parent="BackgroundMachines" unique_id=812096461]
+position = Vector2(2072.8655, 953.8215)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="WalkMachine1_0_1_0" type="Node2D" parent="BackgroundMachines" unique_id=898818002]
+position = Vector2(2688.1975, 2273.4055)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="WalkMachine1_0_1_1" type="Node2D" parent="BackgroundMachines" unique_id=807045298]
+position = Vector2(2796.3882, 2505.4207)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="WalkMachine1_1_-1_0" type="Node2D" parent="BackgroundMachines" unique_id=351184318]
+position = Vector2(2558.0798, 1010.0271)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="WalkMachine1_1_-1_1" type="Node2D" parent="BackgroundMachines" unique_id=908633305]
+position = Vector2(2449.8896, 778.0123)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="WalkMachine1_1_1_0" type="Node2D" parent="BackgroundMachines" unique_id=836263690]
+position = Vector2(3065.2217, 2097.5962)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="WalkMachine1_1_1_1" type="Node2D" parent="BackgroundMachines" unique_id=160469000]
+position = Vector2(3173.412, 2329.6116)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="WalkMachine2_0_-1_0" type="Node2D" parent="BackgroundMachines" unique_id=508063074]
+position = Vector2(3520.5786, 561.2061)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="WalkMachine2_0_-1_1" type="Node2D" parent="BackgroundMachines" unique_id=1072851576]
+position = Vector2(3412.3884, 329.1917)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="WalkMachine2_0_1_0" type="Node2D" parent="BackgroundMachines" unique_id=1817317570]
+position = Vector2(4027.7205, 1648.7756)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="WalkMachine2_0_1_1" type="Node2D" parent="BackgroundMachines" unique_id=1441350805]
+position = Vector2(4135.911, 1880.7909)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="WalkMachine2_1_-1_0" type="Node2D" parent="BackgroundMachines" unique_id=374136893]
+position = Vector2(3868.6008, 398.9211)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="WalkMachine2_1_-1_1" type="Node2D" parent="BackgroundMachines" unique_id=729808045]
+position = Vector2(3760.4106, 166.9063)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="WalkMachine2_1_1_0" type="Node2D" parent="BackgroundMachines" unique_id=1784665717]
+position = Vector2(4375.7427, 1486.4902)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="WalkMachine2_1_1_1" type="Node2D" parent="BackgroundMachines" unique_id=947258091]
+position = Vector2(4483.933, 1718.5055)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="WalkMachine3_0_-1_0" type="Node2D" parent="BackgroundMachines" unique_id=964001779]
+position = Vector2(4624.4614, 46.457)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="WalkMachine3_0_-1_1" type="Node2D" parent="BackgroundMachines" unique_id=1897007838]
+position = Vector2(4516.2715, -185.5574)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="WalkMachine3_0_1_0" type="Node2D" parent="BackgroundMachines" unique_id=58085124]
+position = Vector2(5131.6035, 1134.0266)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="WalkMachine3_0_1_1" type="Node2D" parent="BackgroundMachines" unique_id=1351370297]
+position = Vector2(5239.794, 1366.0417)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="WalkMachine3_1_-1_0" type="Node2D" parent="BackgroundMachines" unique_id=1813102048]
+position = Vector2(5015.987, -136.1136)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="WalkMachine3_1_-1_1" type="Node2D" parent="BackgroundMachines" unique_id=1556921458]
+position = Vector2(4907.7964, -368.1284)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="WalkMachine3_1_1_0" type="Node2D" parent="BackgroundMachines" unique_id=793827100]
+position = Vector2(5523.1284, 951.4555)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="WalkMachine3_1_1_1" type="Node2D" parent="BackgroundMachines" unique_id=638376049]
+position = Vector2(5631.319, 1183.4708)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="WalkMachine4_0_-1_0" type="Node2D" parent="BackgroundMachines" unique_id=151235107]
+position = Vector2(6705.344, -923.8745)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="WalkMachine4_0_-1_1" type="Node2D" parent="BackgroundMachines" unique_id=150312612]
+position = Vector2(6597.154, -1155.8889)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="WalkMachine4_0_1_0" type="Node2D" parent="BackgroundMachines" unique_id=223123075]
+position = Vector2(7212.4863, 163.695)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="WalkMachine4_0_1_1" type="Node2D" parent="BackgroundMachines" unique_id=1331842534]
+position = Vector2(7320.677, 395.7103)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="WalkMachine4_1_-1_0" type="Node2D" parent="BackgroundMachines" unique_id=561353334]
+position = Vector2(7053.3667, -1086.1594)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="WalkMachine4_1_-1_1" type="Node2D" parent="BackgroundMachines" unique_id=730142046]
+position = Vector2(6945.1763, -1318.1743)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="WalkMachine4_1_1_0" type="Node2D" parent="BackgroundMachines" unique_id=1778849431]
+position = Vector2(7560.5083, 1.4097)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="WalkMachine4_1_1_1" type="Node2D" parent="BackgroundMachines" unique_id=1689504519]
+position = Vector2(7668.6987, 233.4249)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="WalkMachine5_0_-1_0" type="Node2D" parent="BackgroundMachines" unique_id=887084611]
+position = Vector2(7869.0435, -1466.5164)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="WalkMachine5_0_-1_1" type="Node2D" parent="BackgroundMachines" unique_id=971194717]
+position = Vector2(7760.853, -1698.5308)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="WalkMachine5_0_1_0" type="Node2D" parent="BackgroundMachines" unique_id=102139300]
+position = Vector2(8376.186, -378.9468)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="WalkMachine5_0_1_1" type="Node2D" parent="BackgroundMachines" unique_id=2041823134]
+position = Vector2(8484.376, -146.9316)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="WalkMachine5_1_-1_0" type="Node2D" parent="BackgroundMachines" unique_id=896110196]
+position = Vector2(8231.566, -1635.5632)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="WalkMachine5_1_-1_1" type="Node2D" parent="BackgroundMachines" unique_id=1415960546]
+position = Vector2(8123.3765, -1867.578)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="WalkMachine5_1_1_0" type="Node2D" parent="BackgroundMachines" unique_id=888654831]
+position = Vector2(8738.708, -547.9941)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="WalkMachine5_1_1_1" type="Node2D" parent="BackgroundMachines" unique_id=599444480]
+position = Vector2(8846.898, -315.9788)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="WalkMachine6_0_-1_0" type="Node2D" parent="BackgroundMachines" unique_id=475508859]
+position = Vector2(9538.462, -2244.9792)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="WalkMachine6_0_-1_1" type="Node2D" parent="BackgroundMachines" unique_id=1082681432]
+position = Vector2(9430.272, -2476.9937)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="WalkMachine6_0_1_0" type="Node2D" parent="BackgroundMachines" unique_id=694257548]
+position = Vector2(10045.6045, -1157.4095)
+rotation = -0.436
+script = ExtResource("5_machine")
+
+[node name="WalkMachine6_0_1_1" type="Node2D" parent="BackgroundMachines" unique_id=1840113695]
+position = Vector2(10153.795, -925.3944)
+rotation = -0.436
+script = ExtResource("5_machine")
+phase = 1.2
+
+[node name="WalkMachine6_1_-1_0" type="Node2D" parent="BackgroundMachines" unique_id=1629549199]
+position = Vector2(9886.484, -2407.2642)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="WalkMachine6_1_-1_1" type="Node2D" parent="BackgroundMachines" unique_id=206693822]
+position = Vector2(9778.294, -2639.279)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="WalkMachine6_1_1_0" type="Node2D" parent="BackgroundMachines" unique_id=1142229801]
+position = Vector2(10393.626, -1319.695)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 0.7
+
+[node name="WalkMachine6_1_1_1" type="Node2D" parent="BackgroundMachines" unique_id=1457640736]
+position = Vector2(10501.817, -1087.6798)
+rotation = -0.436
+script = ExtResource("5_machine")
+kind = "piston"
+phase = 1.9
+
+[node name="Floors" type="Node2D" parent="." unique_id=907613064]
+
+[node name="SpineSegment00" type="Node2D" parent="Floors" unique_id=1473238137]
+metadata/surface_kind = "shell"
+
+[node name="Volume" type="Node2D" parent="Floors/SpineSegment00" unique_id=1641552673]
+z_index = -5
+
+[node name="Underside" type="Polygon2D" parent="Floors/SpineSegment00/Volume" unique_id=1746624137]
+color = Color(0.161, 0.239, 0.282, 1)
+polygon = PackedVector2Array(390.28, 2561.683, 1789.6188, 1909.16, 1897.8088, 2141.175, 498.47, 2793.698)
+
+[node name="Top" type="Polygon2D" parent="Floors/SpineSegment00" unique_id=1743296409]
+color = Color(0.537, 0.596, 0.608, 1)
+polygon = PackedVector2Array(390.28, 2541.683, 1789.6188, 1889.16, 1897.8088, 2121.175, 498.47, 2773.698)
+
+[node name="Rim" type="Line2D" parent="Floors/SpineSegment00/Top" unique_id=366155922]
+points = PackedVector2Array(390.28, 2541.683, 1789.6188, 1889.16, 1897.8088, 2121.175, 498.47, 2773.698, 390.28, 2541.683)
+width = 3.0
+default_color = Color(0.741, 0.78, 0.765, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Ribs" type="Node2D" parent="Floors/SpineSegment00/Top" unique_id=1414719272]
+
+[node name="Seam0_32" type="Line2D" parent="Floors/SpineSegment00/Top/Ribs" unique_id=1971210190]
+points = PackedVector2Array(426.288, 2533.719, 527.716, 2751.233)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam0_128" type="Line2D" parent="Floors/SpineSegment00/Top/Ribs" unique_id=350463471]
+points = PackedVector2Array(513.293, 2493.148, 614.722, 2710.662)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam0_224" type="Line2D" parent="Floors/SpineSegment00/Top/Ribs" unique_id=779226566]
+points = PackedVector2Array(600.299, 2452.577, 701.727, 2670.09)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam0_320" type="Line2D" parent="Floors/SpineSegment00/Top/Ribs" unique_id=295098558]
+points = PackedVector2Array(687.304, 2412.005, 788.733, 2629.519)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam0_416" type="Line2D" parent="Floors/SpineSegment00/Top/Ribs" unique_id=2090109133]
+points = PackedVector2Array(1586.3618, 1992.768, 1687.7898, 2210.282)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam0_512" type="Line2D" parent="Floors/SpineSegment00/Top/Ribs" unique_id=1430275261]
+points = PackedVector2Array(1673.3668, 1952.197, 1774.7958, 2169.71)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam0_608" type="Line2D" parent="Floors/SpineSegment00/Top/Ribs" unique_id=1004565636]
+points = PackedVector2Array(1760.3728, 1911.625, 1861.8008, 2129.139)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="SpineSegment01" type="Node2D" parent="Floors" unique_id=413609094]
+metadata/surface_kind = "shell"
+
+[node name="Volume" type="Node2D" parent="Floors/SpineSegment01" unique_id=344688736]
+z_index = -5
+
+[node name="Underside" type="Polygon2D" parent="Floors/SpineSegment01/Volume" unique_id=1984409791]
+color = Color(0.161, 0.239, 0.282, 1)
+polygon = PackedVector2Array(1809.4158, 1970.545, 2106.6848, 1831.926, 2160.7798, 1947.934, 1863.5107, 2086.552)
+
+[node name="Top" type="Polygon2D" parent="Floors/SpineSegment01" unique_id=1328115088]
+color = Color(0.537, 0.596, 0.608, 1)
+polygon = PackedVector2Array(1809.4158, 1950.545, 2106.6848, 1811.926, 2160.7798, 1927.934, 1863.5107, 2066.552)
+
+[node name="Rim" type="Line2D" parent="Floors/SpineSegment01/Top" unique_id=1661112112]
+points = PackedVector2Array(1809.4158, 1950.545, 2106.6848, 1811.926, 2160.7798, 1927.934, 1863.5107, 2066.552, 1809.4158, 1950.545)
+width = 3.0
+default_color = Color(0.741, 0.78, 0.765, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Ribs" type="Node2D" parent="Floors/SpineSegment01/Top" unique_id=424250636]
+
+[node name="Seam1_672" type="Line2D" parent="Floors/SpineSegment01/Top/Ribs" unique_id=388145390]
+points = PackedVector2Array(1845.4238, 1942.581, 1892.7568, 2044.088)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam1_768" type="Line2D" parent="Floors/SpineSegment01/Top/Ribs" unique_id=2053743292]
+points = PackedVector2Array(1932.4298, 1902.01, 1979.7628, 2003.516)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam1_864" type="Line2D" parent="Floors/SpineSegment01/Top/Ribs" unique_id=568435080]
+points = PackedVector2Array(2019.4348, 1861.439, 2066.7688, 1962.945)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="SpineSegment02" type="Node2D" parent="Floors" unique_id=2136256695]
+metadata/surface_kind = "shell"
+
+[node name="Volume" type="Node2D" parent="Floors/SpineSegment02" unique_id=1871898237]
+z_index = -5
+
+[node name="Underside" type="Polygon2D" parent="Floors/SpineSegment02/Volume" unique_id=1436669295]
+color = Color(0.161, 0.239, 0.282, 1)
+polygon = PackedVector2Array(2058.8628, 1748.302, 5517.333, 135.5906, 5652.5713, 425.6086, 2194.1008, 2038.32)
+
+[node name="Top" type="Polygon2D" parent="Floors/SpineSegment02" unique_id=420091935]
+color = Color(0.537, 0.596, 0.608, 1)
+polygon = PackedVector2Array(2058.8628, 1728.302, 5517.333, 115.5906, 5652.5713, 405.6086, 2194.1008, 2018.32)
+
+[node name="Rim" type="Line2D" parent="Floors/SpineSegment02/Top" unique_id=275834903]
+points = PackedVector2Array(2058.8628, 1728.302, 5517.333, 115.5906, 5652.5713, 405.6086, 2194.1008, 2018.32, 2058.8628, 1728.302)
+width = 3.0
+default_color = Color(0.741, 0.78, 0.765, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Ribs" type="Node2D" parent="Floors/SpineSegment02/Top" unique_id=2146892504]
+
+[node name="Seam2_992" type="Line2D" parent="Floors/SpineSegment02/Top/Ribs" unique_id=1258282728]
+points = PackedVector2Array(2094.8708, 1720.338, 2223.3467, 1995.855)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam2_1088" type="Line2D" parent="Floors/SpineSegment02/Top/Ribs" unique_id=1649978971]
+points = PackedVector2Array(2181.8767, 1679.767, 3064.401, 1603.6656)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam2_1184" type="Line2D" parent="Floors/SpineSegment02/Top/Ribs" unique_id=981434204]
+points = PackedVector2Array(3022.93, 1287.5767, 3151.406, 1563.0946)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam2_1280" type="Line2D" parent="Floors/SpineSegment02/Top/Ribs" unique_id=716789124]
+points = PackedVector2Array(3109.9358, 1247.0056, 3238.4119, 1522.5226)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam2_1376" type="Line2D" parent="Floors/SpineSegment02/Top/Ribs" unique_id=569467893]
+points = PackedVector2Array(3196.942, 1206.4336, 3325.417, 1481.9517)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam2_1472" type="Line2D" parent="Floors/SpineSegment02/Top/Ribs" unique_id=378267988]
+points = PackedVector2Array(3283.947, 1165.8625, 3412.4229, 1441.3806)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam2_1568" type="Line2D" parent="Floors/SpineSegment02/Top/Ribs" unique_id=243278751]
+points = PackedVector2Array(3370.953, 1125.2916, 3499.429, 1400.8086)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam2_1664" type="Line2D" parent="Floors/SpineSegment02/Top/Ribs" unique_id=2115514471]
+points = PackedVector2Array(3457.958, 1084.7196, 3586.4338, 1360.2375)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam2_1760" type="Line2D" parent="Floors/SpineSegment02/Top/Ribs" unique_id=1929970148]
+points = PackedVector2Array(4241.0083, 719.5778, 4369.4844, 995.0958)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam2_1856" type="Line2D" parent="Floors/SpineSegment02/Top/Ribs" unique_id=111354006]
+points = PackedVector2Array(4328.013, 679.0068, 4456.4893, 954.5238)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam2_1952" type="Line2D" parent="Floors/SpineSegment02/Top/Ribs" unique_id=1292698517]
+points = PackedVector2Array(4415.019, 638.4348, 4543.495, 913.9528)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam2_2048" type="Line2D" parent="Floors/SpineSegment02/Top/Ribs" unique_id=344118047]
+points = PackedVector2Array(4502.0244, 597.8638, 4630.5, 873.3818)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam2_2144" type="Line2D" parent="Floors/SpineSegment02/Top/Ribs" unique_id=518139289]
+points = PackedVector2Array(4589.0303, 557.2928, 4717.5063, 832.8098)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam2_2240" type="Line2D" parent="Floors/SpineSegment02/Top/Ribs" unique_id=1308357432]
+points = PackedVector2Array(5459.085, 151.5786, 5587.561, 427.0966)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="SpineSegment03" type="Node2D" parent="Floors" unique_id=1983795321]
+metadata/surface_kind = "shell"
+
+[node name="Volume" type="Node2D" parent="Floors/SpineSegment03" unique_id=558199543]
+z_index = -5
+
+[node name="Underside" type="Polygon2D" parent="Floors/SpineSegment03/Volume" unique_id=2112897750]
+color = Color(0.161, 0.239, 0.282, 1)
+polygon = PackedVector2Array(5516.845, 153.4726, 6684.1694, -390.8604, 6805.8833, -129.8434, 5638.559, 414.4886)
+
+[node name="Top" type="Polygon2D" parent="Floors/SpineSegment03" unique_id=951509125]
+color = Color(0.537, 0.596, 0.608, 1)
+polygon = PackedVector2Array(5516.845, 133.4726, 6684.1694, -410.8604, 6805.8833, -149.8434, 5638.559, 394.4886)
+
+[node name="Rim" type="Line2D" parent="Floors/SpineSegment03/Top" unique_id=1075810632]
+points = PackedVector2Array(5516.845, 133.4726, 6684.1694, -410.8604, 6805.8833, -149.8434, 5638.559, 394.4886, 5516.845, 133.4726)
+width = 3.0
+default_color = Color(0.741, 0.78, 0.765, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Ribs" type="Node2D" parent="Floors/SpineSegment03/Top" unique_id=1356272582]
+
+[node name="Seam3_2336" type="Line2D" parent="Floors/SpineSegment03/Top/Ribs" unique_id=819196074]
+points = PackedVector2Array(5552.853, 125.5086, 5667.805, 372.0246)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam3_2432" type="Line2D" parent="Floors/SpineSegment03/Top/Ribs" unique_id=682238342]
+points = PackedVector2Array(5639.8584, 84.9376, 5754.811, 331.4526)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam3_2528" type="Line2D" parent="Floors/SpineSegment03/Top/Ribs" unique_id=1265953176]
+points = PackedVector2Array(5726.8643, 44.3656, 5841.8164, 290.8816)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam3_2624" type="Line2D" parent="Floors/SpineSegment03/Top/Ribs" unique_id=640432994]
+points = PackedVector2Array(5813.87, 3.7946, 5928.8223, 250.3106)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam3_2720" type="Line2D" parent="Floors/SpineSegment03/Top/Ribs" unique_id=1627330990]
+points = PackedVector2Array(5900.875, -36.7774, 6015.827, 209.7386)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam3_2816" type="Line2D" parent="Floors/SpineSegment03/Top/Ribs" unique_id=337010035]
+points = PackedVector2Array(5987.8813, -77.3484, 6102.833, 169.1676)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam3_2912" type="Line2D" parent="Floors/SpineSegment03/Top/Ribs" unique_id=1673189283]
+points = PackedVector2Array(6074.886, -117.9194, 6189.8384, 128.5956)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam3_3008" type="Line2D" parent="Floors/SpineSegment03/Top/Ribs" unique_id=1418666174]
+points = PackedVector2Array(6161.892, -158.4914, 6276.844, 88.0246)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam3_3104" type="Line2D" parent="Floors/SpineSegment03/Top/Ribs" unique_id=705684188]
+points = PackedVector2Array(6248.897, -199.0624, 6363.849, 47.4536)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam3_3200" type="Line2D" parent="Floors/SpineSegment03/Top/Ribs" unique_id=838981898]
+points = PackedVector2Array(6335.9033, -239.6334, 6450.855, 6.8816)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam3_3296" type="Line2D" parent="Floors/SpineSegment03/Top/Ribs" unique_id=528251324]
+points = PackedVector2Array(6422.908, -280.2054, 6537.8613, -33.6894)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam3_3392" type="Line2D" parent="Floors/SpineSegment03/Top/Ribs" unique_id=1182312727]
+points = PackedVector2Array(6509.914, -320.7764, 6624.866, -74.2604)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam3_3488" type="Line2D" parent="Floors/SpineSegment03/Top/Ribs" unique_id=857142838]
+points = PackedVector2Array(6596.9194, -361.3474, 6711.872, -114.8324)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="SpineSegment04" type="Node2D" parent="Floors" unique_id=499514069]
+metadata/surface_kind = "shell"
+
+[node name="Volume" type="Node2D" parent="Floors/SpineSegment04" unique_id=634150089]
+z_index = -5
+
+[node name="Underside" type="Polygon2D" parent="Floors/SpineSegment04/Volume" unique_id=1057588182]
+color = Color(0.161, 0.239, 0.282, 1)
+polygon = PackedVector2Array(6670.157, -401.9804, 7837.4814, -946.3122, 7972.7197, -656.2942, 6805.395, -111.9614)
+
+[node name="Top" type="Polygon2D" parent="Floors/SpineSegment04" unique_id=351545423]
+color = Color(0.537, 0.596, 0.608, 1)
+polygon = PackedVector2Array(6670.157, -421.9804, 7837.4814, -966.3122, 7972.7197, -676.2942, 6805.395, -131.9614)
+
+[node name="Rim" type="Line2D" parent="Floors/SpineSegment04/Top" unique_id=520610727]
+points = PackedVector2Array(6670.157, -421.9804, 7837.4814, -966.3122, 7972.7197, -676.2942, 6805.395, -131.9614, 6670.157, -421.9804)
+width = 3.0
+default_color = Color(0.741, 0.78, 0.765, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Ribs" type="Node2D" parent="Floors/SpineSegment04/Top" unique_id=126040807]
+
+[node name="Seam4_3616" type="Line2D" parent="Floors/SpineSegment04/Top/Ribs" unique_id=1325186699]
+points = PackedVector2Array(6706.165, -429.9434, 6834.641, -154.4264)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam4_3712" type="Line2D" parent="Floors/SpineSegment04/Top/Ribs" unique_id=995487925]
+points = PackedVector2Array(7489.2153, -795.0862, 7617.6904, -519.5682)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam4_3808" type="Line2D" parent="Floors/SpineSegment04/Top/Ribs" unique_id=208253665]
+points = PackedVector2Array(7576.2207, -835.6572, 7704.6963, -560.1402)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam4_3904" type="Line2D" parent="Floors/SpineSegment04/Top/Ribs" unique_id=614690196]
+points = PackedVector2Array(7663.2266, -876.2282, 7791.7026, -600.7112)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam4_4000" type="Line2D" parent="Floors/SpineSegment04/Top/Ribs" unique_id=829115953]
+points = PackedVector2Array(7750.2314, -916.8002, 7878.7075, -641.2822)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="SpineSegment05" type="Node2D" parent="Floors" unique_id=1965348232]
+metadata/surface_kind = "shell"
+
+[node name="Volume" type="Node2D" parent="Floors/SpineSegment05" unique_id=1649789596]
+z_index = -5
+
+[node name="Underside" type="Polygon2D" parent="Floors/SpineSegment05/Volume" unique_id=1182035506]
+color = Color(0.161, 0.239, 0.282, 1)
+polygon = PackedVector2Array(7823.4697, -957.4322, 10353.88, -2137.3826, 10502.643, -1818.3625, 7972.2305, -638.4122)
+
+[node name="Top" type="Polygon2D" parent="Floors/SpineSegment05" unique_id=1167520682]
+color = Color(0.537, 0.596, 0.608, 1)
+polygon = PackedVector2Array(7823.4697, -977.4322, 10353.88, -2157.3826, 10502.643, -1838.3625, 7972.2305, -658.4122)
+
+[node name="Rim" type="Line2D" parent="Floors/SpineSegment05/Top" unique_id=1990204021]
+points = PackedVector2Array(7823.4697, -977.4322, 10353.88, -2157.3826, 10502.643, -1838.3625, 7972.2305, -658.4122, 7823.4697, -977.4322)
+width = 3.0
+default_color = Color(0.741, 0.78, 0.765, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Ribs" type="Node2D" parent="Floors/SpineSegment05/Top" unique_id=429176444]
+
+[node name="Seam5_4128" type="Line2D" parent="Floors/SpineSegment05/Top/Ribs" unique_id=1685672616]
+points = PackedVector2Array(7859.4775, -985.3962, 8001.4766, -680.8762)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam5_4224" type="Line2D" parent="Floors/SpineSegment05/Top/Ribs" unique_id=996433385]
+points = PackedVector2Array(8671.528, -1364.0618, 8813.528, -1059.5428)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam5_4320" type="Line2D" parent="Floors/SpineSegment05/Top/Ribs" unique_id=1501760556]
+points = PackedVector2Array(8758.535, -1404.6338, 8900.535, -1100.1138)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam5_4416" type="Line2D" parent="Floors/SpineSegment05/Top/Ribs" unique_id=844188439]
+points = PackedVector2Array(8845.54, -1445.2048, 8987.54, -1140.6858)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam5_4512" type="Line2D" parent="Floors/SpineSegment05/Top/Ribs" unique_id=1526901289]
+points = PackedVector2Array(8932.546, -1485.7758, 9074.546, -1181.2568)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam5_4608" type="Line2D" parent="Floors/SpineSegment05/Top/Ribs" unique_id=921057765]
+points = PackedVector2Array(9019.551, -1526.3478, 9161.551, -1221.8278)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam5_4704" type="Line2D" parent="Floors/SpineSegment05/Top/Ribs" unique_id=1777136093]
+points = PackedVector2Array(9106.557, -1566.9188, 9248.557, -1262.3998)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam5_4800" type="Line2D" parent="Floors/SpineSegment05/Top/Ribs" unique_id=1626104689]
+points = PackedVector2Array(9193.5625, -1607.4897, 9335.562, -1302.9708)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam5_4896" type="Line2D" parent="Floors/SpineSegment05/Top/Ribs" unique_id=2037992646]
+points = PackedVector2Array(9280.567, -1648.0618, 9422.567, -1343.5417)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam5_4992" type="Line2D" parent="Floors/SpineSegment05/Top/Ribs" unique_id=1245631285]
+points = PackedVector2Array(9367.574, -1688.6328, 9509.573, -1384.1138)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam5_5088" type="Line2D" parent="Floors/SpineSegment05/Top/Ribs" unique_id=1917453446]
+points = PackedVector2Array(9454.579, -1729.2039, 9596.579, -1424.6848)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam5_5184" type="Line2D" parent="Floors/SpineSegment05/Top/Ribs" unique_id=73650514]
+points = PackedVector2Array(9541.585, -1769.7758, 9683.584, -1465.2559)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam5_5280" type="Line2D" parent="Floors/SpineSegment05/Top/Ribs" unique_id=102582609]
+points = PackedVector2Array(10324.634, -2134.9175, 10466.634, -1830.3986)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="SpineSegment06" type="Node2D" parent="Floors" unique_id=560266761]
+metadata/surface_kind = "shell"
+
+[node name="Volume" type="Node2D" parent="Floors/SpineSegment06" unique_id=2090238683]
+z_index = -5
+
+[node name="Underside" type="Polygon2D" parent="Floors/SpineSegment06/Volume" unique_id=331203031]
+color = Color(0.161, 0.239, 0.282, 1)
+polygon = PackedVector2Array(10366.916, -2090.4985, 10577.18, -2188.5466, 10685.369, -1956.5316, 10475.106, -1858.4836)
+
+[node name="Top" type="Polygon2D" parent="Floors/SpineSegment06" unique_id=2024541129]
+color = Color(0.537, 0.596, 0.608, 1)
+polygon = PackedVector2Array(10366.916, -2110.4985, 10577.18, -2208.5466, 10685.369, -1976.5316, 10475.106, -1878.4836)
+
+[node name="Rim" type="Line2D" parent="Floors/SpineSegment06/Top" unique_id=1613113038]
+points = PackedVector2Array(10366.916, -2110.4985, 10577.18, -2208.5466, 10685.369, -1976.5316, 10475.106, -1878.4836, 10366.916, -2110.4985)
+width = 3.0
+default_color = Color(0.741, 0.78, 0.765, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Ribs" type="Node2D" parent="Floors/SpineSegment06/Top" unique_id=809706136]
+
+[node name="Seam6_5344" type="Line2D" parent="Floors/SpineSegment06/Top/Ribs" unique_id=1669984854]
+points = PackedVector2Array(10402.924, -2118.4626, 10504.353, -1900.9486)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Seam6_5440" type="Line2D" parent="Floors/SpineSegment06/Top/Ribs" unique_id=336859655]
+points = PackedVector2Array(10489.93, -2159.0337, 10591.358, -1941.5197)
+width = 1.0
+default_color = Color(0.396, 0.482, 0.51, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RecordBranch" type="Node2D" parent="Floors" unique_id=476739871]
+metadata/surface_kind = "shell"
+
+[node name="Volume" type="Node2D" parent="Floors/RecordBranch" unique_id=280063800]
+z_index = -5
+
+[node name="Underside" type="Polygon2D" parent="Floors/RecordBranch/Volume" unique_id=1427919561]
+color = Color(0.161, 0.239, 0.282, 1)
+polygon = PackedVector2Array(4396.082, 958.5578, 4460.248, 1088.7228, 4701.4614, 1236.5398, 5109.4023, 1049.6278, 5068.831, 962.6218, 4693.722, 1140.8518, 4527.1113, 1019.8358, 4483.0874, 917.9858)
+
+[node name="Top" type="Polygon2D" parent="Floors/RecordBranch" unique_id=47948166]
+color = Color(0.537, 0.596, 0.608, 1)
+polygon = PackedVector2Array(4396.082, 938.5578, 4460.248, 1068.7228, 4701.4614, 1216.5398, 5109.4023, 1029.6278, 5068.831, 942.6218, 4693.722, 1120.8518, 4527.1113, 999.8358, 4483.0874, 897.9858)
+
+[node name="Rim" type="Line2D" parent="Floors/RecordBranch/Top" unique_id=352568983]
+points = PackedVector2Array(4396.082, 938.5578, 4460.248, 1068.7228, 4701.4614, 1216.5398, 5109.4023, 1029.6278, 5068.831, 942.6218, 4693.722, 1120.8518, 4527.1113, 999.8358, 4483.0874, 897.9858, 4396.082, 938.5578)
+width = 3.0
+default_color = Color(0.741, 0.78, 0.765, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Ribs" type="Node2D" parent="Floors/RecordBranch/Top" unique_id=972229674]
+
+[node name="RecordLanding" type="Node2D" parent="Floors" unique_id=261298448]
+metadata/surface_kind = "shell"
+
+[node name="Volume" type="Node2D" parent="Floors/RecordLanding" unique_id=692338332]
+z_index = -5
+
+[node name="Underside" type="Polygon2D" parent="Floors/RecordLanding/Volume" unique_id=107743987]
+color = Color(0.161, 0.239, 0.282, 1)
+polygon = PackedVector2Array(4866.7954, 1021.5248, 5040.806, 940.3818, 5108.4253, 1085.3918, 4934.414, 1166.5338)
+
+[node name="Top" type="Polygon2D" parent="Floors/RecordLanding" unique_id=981135590]
+color = Color(0.537, 0.596, 0.608, 1)
+polygon = PackedVector2Array(4866.7954, 1001.5248, 5040.806, 920.3818, 5108.4253, 1065.3918, 4934.414, 1146.5338)
+
+[node name="Rim" type="Line2D" parent="Floors/RecordLanding/Top" unique_id=559789433]
+points = PackedVector2Array(4866.7954, 1001.5248, 5040.806, 920.3818, 5108.4253, 1065.3918, 4934.414, 1146.5338, 4866.7954, 1001.5248)
+width = 3.0
+default_color = Color(0.741, 0.78, 0.765, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Ribs" type="Node2D" parent="Floors/RecordLanding/Top" unique_id=1618812576]
+
+[node name="BlueprintWing" type="Node2D" parent="Floors" unique_id=955026044]
+metadata/surface_kind = "shell"
+
+[node name="Volume" type="Node2D" parent="Floors/BlueprintWing" unique_id=1950192800]
+z_index = -5
+
+[node name="Underside" type="Polygon2D" parent="Floors/BlueprintWing/Volume" unique_id=299970730]
+color = Color(0.161, 0.239, 0.282, 1)
+polygon = PackedVector2Array(7473.7363, -732.5602, 7461.7173, -947.6312, 7636.7065, -1064.5382, 7764.2837, -1018.1032, 7796.1387, -874.0712)
+
+[node name="Top" type="Polygon2D" parent="Floors/BlueprintWing" unique_id=1872562942]
+color = Color(0.537, 0.596, 0.608, 1)
+polygon = PackedVector2Array(7473.7363, -752.5602, 7461.7173, -967.6312, 7636.7065, -1084.5382, 7764.2837, -1038.1031, 7796.1387, -894.0712)
+
+[node name="Rim" type="Line2D" parent="Floors/BlueprintWing/Top" unique_id=1406155268]
+points = PackedVector2Array(7473.7363, -752.5602, 7461.7173, -967.6312, 7636.7065, -1084.5382, 7764.2837, -1038.1031, 7796.1387, -894.0712, 7473.7363, -752.5602)
+width = 3.0
+default_color = Color(0.741, 0.78, 0.765, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Ribs" type="Node2D" parent="Floors/BlueprintWing/Top" unique_id=1075790977]
+
+[node name="SleeveRoofs" type="Node2D" parent="." unique_id=1434297048]
+
+[node name="FrontLips" type="Node2D" parent="." unique_id=2067377811]
+z_index = 4
+
+[node name="Covers" type="Node2D" parent="." unique_id=1107496631]
+
+[node name="Valve0" type="Node2D" parent="Covers" unique_id=1912743494]
+metadata/depth_anchor_y = 2066.816
+
+[node name="Volume" type="Node2D" parent="Covers/Valve0" unique_id=22935790]
+
+[node name="Side" type="Polygon2D" parent="Covers/Valve0/Volume" unique_id=766174409]
+color = Color(0.204, 0.294, 0.341, 1)
+polygon = PackedVector2Array(3458.857, 1333.8036, 3516.8608, 1306.7556, 3550.67, 1379.2606, 3492.667, 1406.3076)
+
+[node name="Top" type="Polygon2D" parent="Covers/Valve0/Volume" unique_id=255037980]
+color = Color(0.376, 0.475, 0.51, 1)
+polygon = PackedVector2Array(3458.857, 1313.8036, 3516.8608, 1286.7556, 3550.67, 1359.2606, 3492.667, 1386.3076)
+
+[node name="Edge" type="Line2D" parent="Covers/Valve0/Volume" unique_id=255269146]
+points = PackedVector2Array(3458.857, 1313.8036, 3516.8608, 1286.7556, 3550.67, 1359.2606, 3492.667, 1386.3076, 3458.857, 1313.8036)
+width = 3.0
+default_color = Color(0.69, 0.741, 0.725, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Body" type="StaticBody2D" parent="Covers/Valve0" unique_id=1291708927]
+collision_mask = 0
+
+[node name="Collision" type="CollisionPolygon2D" parent="Covers/Valve0/Body" unique_id=2027663012]
+polygon = PackedVector2Array(3458.857, 1313.8036, 3516.8608, 1286.7556, 3550.67, 1359.2606, 3492.667, 1386.3076)
+
+[node name="Occluder" type="LightOccluder2D" parent="Covers/Valve0" unique_id=1087008189]
+occluder = SubResource("OccluderPolygon2D_vrc40")
+
+[node name="Valve1" type="Node2D" parent="Covers" unique_id=1928312926]
+metadata/depth_anchor_y = 729.271
+
+[node name="Volume" type="Node2D" parent="Covers/Valve1" unique_id=1174455773]
+
+[node name="Side" type="Polygon2D" parent="Covers/Valve1/Volume" unique_id=772422981]
+color = Color(0.204, 0.294, 0.341, 1)
+polygon = PackedVector2Array(8757.558, -1348.8698, 8815.561, -1375.9167, 8842.608, -1317.9138, 8784.6045, -1290.8658)
+
+[node name="Top" type="Polygon2D" parent="Covers/Valve1/Volume" unique_id=1463197018]
+color = Color(0.376, 0.475, 0.51, 1)
+polygon = PackedVector2Array(8757.558, -1368.8698, 8815.561, -1395.9167, 8842.608, -1337.9138, 8784.6045, -1310.8658)
+
+[node name="Edge" type="Line2D" parent="Covers/Valve1/Volume" unique_id=1569141946]
+points = PackedVector2Array(8757.558, -1368.8698, 8815.561, -1395.9167, 8842.608, -1337.9138, 8784.6045, -1310.8658, 8757.558, -1368.8698)
+width = 3.0
+default_color = Color(0.69, 0.741, 0.725, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Body" type="StaticBody2D" parent="Covers/Valve1" unique_id=1302601661]
+collision_mask = 0
+
+[node name="Collision" type="CollisionPolygon2D" parent="Covers/Valve1/Body" unique_id=880594421]
+polygon = PackedVector2Array(8757.558, -1368.8698, 8815.561, -1395.9167, 8842.608, -1337.9138, 8784.6045, -1310.8658)
+
+[node name="Occluder" type="LightOccluder2D" parent="Covers/Valve1" unique_id=1968265435]
+occluder = SubResource("OccluderPolygon2D_s06fw")
+
+[node name="Valve2" type="Node2D" parent="Covers" unique_id=1027199174]
+metadata/depth_anchor_y = 809.593
+
+[node name="Volume" type="Node2D" parent="Covers/Valve2" unique_id=1869262519]
+
+[node name="Side" type="Polygon2D" parent="Covers/Valve2/Volume" unique_id=819502879]
+color = Color(0.204, 0.294, 0.341, 1)
+polygon = PackedVector2Array(9077.477, -1268.5479, 9135.48, -1295.5958, 9162.527, -1237.5918, 9104.524, -1210.5438)
+
+[node name="Top" type="Polygon2D" parent="Covers/Valve2/Volume" unique_id=737751858]
+color = Color(0.376, 0.475, 0.51, 1)
+polygon = PackedVector2Array(9077.477, -1288.5479, 9135.48, -1315.5958, 9162.527, -1257.5918, 9104.524, -1230.5438)
+
+[node name="Edge" type="Line2D" parent="Covers/Valve2/Volume" unique_id=1995470106]
+points = PackedVector2Array(9077.477, -1288.5479, 9135.48, -1315.5958, 9162.527, -1257.5918, 9104.524, -1230.5438, 9077.477, -1288.5479)
+width = 3.0
+default_color = Color(0.69, 0.741, 0.725, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Body" type="StaticBody2D" parent="Covers/Valve2" unique_id=1499698023]
+collision_mask = 0
+
+[node name="Collision" type="CollisionPolygon2D" parent="Covers/Valve2/Body" unique_id=17580384]
+polygon = PackedVector2Array(9077.477, -1288.5479, 9135.48, -1315.5958, 9162.527, -1257.5918, 9104.524, -1230.5438)
+
+[node name="Occluder" type="LightOccluder2D" parent="Covers/Valve2" unique_id=91029624]
+occluder = SubResource("OccluderPolygon2D_uwiny")
+
+[node name="Valve3" type="Node2D" parent="Covers" unique_id=238724554]
+metadata/depth_anchor_y = 512.891
+
+[node name="Volume" type="Node2D" parent="Covers/Valve3" unique_id=1686444295]
+
+[node name="Side" type="Polygon2D" parent="Covers/Valve3/Volume" unique_id=842469102]
+color = Color(0.204, 0.294, 0.341, 1)
+polygon = PackedVector2Array(9221.587, -1565.2498, 9279.591, -1592.2979, 9306.638, -1534.2938, 9248.635, -1507.2468)
+
+[node name="Top" type="Polygon2D" parent="Covers/Valve3/Volume" unique_id=937508575]
+color = Color(0.376, 0.475, 0.51, 1)
+polygon = PackedVector2Array(9221.587, -1585.2498, 9279.591, -1612.2979, 9306.638, -1554.2938, 9248.635, -1527.2468)
+
+[node name="Edge" type="Line2D" parent="Covers/Valve3/Volume" unique_id=457695991]
+points = PackedVector2Array(9221.587, -1585.2498, 9279.591, -1612.2979, 9306.638, -1554.2938, 9248.635, -1527.2468, 9221.587, -1585.2498)
+width = 3.0
+default_color = Color(0.69, 0.741, 0.725, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Body" type="StaticBody2D" parent="Covers/Valve3" unique_id=164889803]
+collision_mask = 0
+
+[node name="Collision" type="CollisionPolygon2D" parent="Covers/Valve3/Body" unique_id=1023017614]
+polygon = PackedVector2Array(9221.587, -1585.2498, 9279.591, -1612.2979, 9306.638, -1554.2938, 9248.635, -1527.2468)
+
+[node name="Occluder" type="LightOccluder2D" parent="Covers/Valve3" unique_id=2017614295]
+occluder = SubResource("OccluderPolygon2D_7eaqt")
+
+[node name="Valve4" type="Node2D" parent="Covers" unique_id=933482016]
+metadata/depth_anchor_y = 593.212
+
+[node name="Volume" type="Node2D" parent="Covers/Valve4" unique_id=1235473348]
+
+[node name="Side" type="Polygon2D" parent="Covers/Valve4/Volume" unique_id=1376930086]
+color = Color(0.204, 0.294, 0.341, 1)
+polygon = PackedVector2Array(9541.507, -1484.9288, 9599.51, -1511.9758, 9626.558, -1453.9728, 9568.554, -1426.9248)
+
+[node name="Top" type="Polygon2D" parent="Covers/Valve4/Volume" unique_id=1946201948]
+color = Color(0.376, 0.475, 0.51, 1)
+polygon = PackedVector2Array(9541.507, -1504.9288, 9599.51, -1531.9758, 9626.558, -1473.9728, 9568.554, -1446.9248)
+
+[node name="Edge" type="Line2D" parent="Covers/Valve4/Volume" unique_id=1225664156]
+points = PackedVector2Array(9541.507, -1504.9288, 9599.51, -1531.9758, 9626.558, -1473.9728, 9568.554, -1446.9248, 9541.507, -1504.9288)
+width = 3.0
+default_color = Color(0.69, 0.741, 0.725, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Body" type="StaticBody2D" parent="Covers/Valve4" unique_id=1357887874]
+collision_mask = 0
+
+[node name="Collision" type="CollisionPolygon2D" parent="Covers/Valve4/Body" unique_id=1216959514]
+polygon = PackedVector2Array(9541.507, -1504.9288, 9599.51, -1531.9758, 9626.558, -1473.9728, 9568.554, -1446.9248)
+
+[node name="Occluder" type="LightOccluder2D" parent="Covers/Valve4" unique_id=1247219532]
+occluder = SubResource("OccluderPolygon2D_hvphp")
+
+[node name="BlockedRecordEnd" type="Node2D" parent="Covers" unique_id=266400609]
+metadata/depth_anchor_y = 2044.361
+
+[node name="Volume" type="Node2D" parent="Covers/BlockedRecordEnd" unique_id=98213817]
+
+[node name="Side" type="Polygon2D" parent="Covers/BlockedRecordEnd/Volume" unique_id=1129696301]
+color = Color(0.204, 0.294, 0.341, 1)
+polygon = PackedVector2Array(5036.937, 951.0138, 5065.939, 937.4898, 5126.7964, 1067.9978, 5097.7944, 1081.5219)
+
+[node name="Top" type="Polygon2D" parent="Covers/BlockedRecordEnd/Volume" unique_id=1356378831]
+color = Color(0.376, 0.475, 0.51, 1)
+polygon = PackedVector2Array(5036.937, 931.0138, 5065.939, 917.4898, 5126.7964, 1047.9978, 5097.7944, 1061.5219)
+
+[node name="Edge" type="Line2D" parent="Covers/BlockedRecordEnd/Volume" unique_id=1710135707]
+points = PackedVector2Array(5036.937, 931.0138, 5065.939, 917.4898, 5126.7964, 1047.9978, 5097.7944, 1061.5219, 5036.937, 931.0138)
+width = 3.0
+default_color = Color(0.69, 0.741, 0.725, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Body" type="StaticBody2D" parent="Covers/BlockedRecordEnd" unique_id=810967641]
+collision_mask = 0
+
+[node name="Collision" type="CollisionPolygon2D" parent="Covers/BlockedRecordEnd/Body" unique_id=495157792]
+polygon = PackedVector2Array(5036.937, 931.0138, 5065.939, 917.4898, 5126.7964, 1047.9978, 5097.7944, 1061.5219)
+
+[node name="Occluder" type="LightOccluder2D" parent="Covers/BlockedRecordEnd" unique_id=1866953501]
+occluder = SubResource("OccluderPolygon2D_p0fxd")
+
+[node name="Reservations" type="Node2D" parent="." unique_id=26290402]
+z_index = 1
+
+[node name="ElectricFloor" type="Node2D" parent="Reservations" unique_id=1353397383]
+position = Vector2(1914.5479, 1901.521)
+rotation = -0.436
+script = ExtResource("4_zone")
+size = Vector2(96, 128)
+kind = "electric_floor"
+metadata/logic_implemented = false
+
+[node name="ProtocolZone" type="Node2D" parent="Reservations" unique_id=1256905660]
+position = Vector2(5679.98, 57.4006)
+rotation = -0.436
+script = ExtResource("4_zone")
+size = Vector2(960, 288)
+kind = "protocol"
+metadata/logic_implemented = false
+
+[node name="Rooms" type="Node2D" parent="." unique_id=1364118929]
+
+[node name="Lower" type="Polygon2D" parent="Rooms" unique_id=2076632577]
+visible = false
+polygon = PackedVector2Array(366.857, 2481.989, 5500.184, 88.2786, 5662.47, 436.3016, 529.143, 2830.011)
+metadata/room_id = "p2_spine_lower"
+metadata/candidate_only = true
+
+[node name="Middle" type="Polygon2D" parent="Rooms" unique_id=714241628]
+visible = false
+polygon = PackedVector2Array(5500.184, 88.2786, 7820.3325, -993.6232, 7982.6177, -645.6012, 5662.47, 436.3016)
+metadata/room_id = "p2_spine_middle"
+metadata/candidate_only = true
+
+[node name="Upper" type="Polygon2D" parent="Rooms" unique_id=653005430]
+visible = false
+polygon = PackedVector2Array(7820.3325, -993.6232, 10343.493, -2170.1926, 10505.779, -1822.1707, 7982.6177, -645.6012)
+metadata/room_id = "p2_spine_upper"
+metadata/candidate_only = true
+
+[node name="Landing" type="Polygon2D" parent="Rooms" unique_id=815881267]
+visible = false
+polygon = PackedVector2Array(10343.493, -2170.1926, 10546.506, -2264.8596, 10708.792, -1916.8376, 10505.779, -1822.1707)
+metadata/room_id = "p2_thorax_landing"
+metadata/candidate_only = true
+
+[node name="Markers" type="Node2D" parent="." unique_id=1802410421]
+z_index = 16
+
+[node name="PlayerSpawn" type="Marker2D" parent="Markers" unique_id=2079780201]
+position = Vector2(535.006, 2615.429)
+script = ExtResource("3_marker")
+object_id = "p2_spine_entry"
+room_id = "p2_spine_lower"
+
+[node name="FirstSentry" type="Marker2D" parent="Markers" unique_id=1615054973]
+position = Vector2(3262.645, 1290.5476)
+script = ExtResource("3_marker")
+object_id = "p2_sentry_01"
+object_type = "sentry"
+room_id = "p2_spine_lower"
+
+[node name="ProtocolTerminal" type="Marker2D" parent="Markers" unique_id=1572971727]
+position = Vector2(5721.5293, 108.6426)
+script = ExtResource("3_marker")
+object_id = "p2_protocol_terminal"
+object_type = "terminal"
+room_id = "p2_spine_middle"
+linked_ids = Array[String](["p2_authorized_door"])
+metadata/role = "protocol"
+metadata/region_id = "p2_protocol_region"
+
+[node name="ProtocolCleaner" type="Marker2D" parent="Markers" unique_id=1660689094]
+position = Vector2(5989.307, 1.4296)
+script = ExtResource("3_marker")
+object_id = "p2_cleaner_01"
+object_type = "cleaner"
+room_id = "p2_spine_middle"
+metadata/protocol_region_id = "p2_protocol_region"
+
+[node name="AuthorizedDoor" type="Marker2D" parent="Markers" unique_id=885078437]
+position = Vector2(6668.896, -244.8514)
+rotation = -0.436
+script = ExtResource("3_marker")
+object_id = "p2_authorized_door"
+object_type = "door"
+room_id = "p2_spine_middle"
+footprint = Vector2(32, 288)
+metadata/role = "authorized_gate"
+
+[node name="ScatterEvolution" type="Marker2D" parent="Markers" unique_id=65214806]
+position = Vector2(7532.2686, -929.9132)
+script = ExtResource("3_marker")
+object_id = "p2_scatter_evolution"
+object_type = "terminal"
+room_id = "p2_spine_middle"
+content_id = "p2_scatter_blueprint"
+metadata/role = "blueprint"
+metadata/grants_ability = false
+metadata/ability_id = "scatter_tool"
+
+[node name="Checkpoint" type="Marker2D" parent="Markers" unique_id=2032253188]
+position = Vector2(7602.7407, -627.3482)
+script = ExtResource("3_marker")
+object_id = "p2_scatter_checkpoint"
+room_id = "p2_spine_middle"
+metadata/role = "checkpoint_candidate"
+metadata/requires_ability_id = "scatter_tool"
+metadata/activation_confirmed = false
+
+[node name="ShortcutDoor" type="Marker2D" parent="Markers" unique_id=1474663460]
+position = Vector2(5081.866, 989.5058)
+rotation = -0.436332
+script = ExtResource("3_marker")
+object_id = "p2_shortcut_door"
+object_type = "door"
+room_id = "p2_spine_lower"
+footprint = Vector2(32, 144)
+metadata/role = "blocked_maintenance_end"
+metadata/deprecated_shortcut = true
+
+[node name="OptionalRecord" type="Marker2D" parent="Markers" unique_id=1867151697]
+position = Vector2(4987.6104, 1033.4578)
+script = ExtResource("3_marker")
+object_id = "p2_maintenance_record"
+object_type = "log"
+room_id = "p2_spine_lower"
+content_id = "p2_arc_maintenance_placeholder"
+metadata/optional = true
+
+[node name="ExitCleaner" type="Marker2D" parent="Markers" unique_id=716038637]
+position = Vector2(6159.41, 63.3416)
+script = ExtResource("3_marker")
+object_id = "p2_cleaner_02"
+object_type = "cleaner"
+room_id = "p2_spine_upper"
+
+[node name="ExitSentry" type="Marker2D" parent="Markers" unique_id=1053690742]
+position = Vector2(8827.58, -1180.8458)
+script = ExtResource("3_marker")
+object_id = "p2_sentry_02"
+object_type = "sentry"
+room_id = "p2_spine_upper"
+
+[node name="ExitTerminal" type="Marker2D" parent="Markers" unique_id=745772887]
+position = Vector2(10347.324, -2048.4006)
+script = ExtResource("3_marker")
+object_id = "p2_exit_terminal"
+object_type = "terminal"
+room_id = "p2_spine_upper"
+linked_ids = Array[String](["p2_exit_door", "p2_exit_light"])
+metadata/kill_gate_confirmed = false
+
+[node name="Door" type="Marker2D" parent="Markers" unique_id=1652175473]
+position = Vector2(10468.14, -2016.4677)
+rotation = -0.436
+script = ExtResource("3_marker")
+object_id = "p2_exit_door"
+object_type = "door"
+room_id = "p2_thorax_landing"
+footprint = Vector2(32, 256)
+metadata/role = "exit_gate"
+
+[node name="ExitLight" type="Marker2D" parent="Markers" unique_id=159176966]
+position = Vector2(10392.703, -1875.3666)
+script = ExtResource("3_marker")
+object_id = "p2_exit_light"
+object_type = "light"
+room_id = "p2_spine_upper"
+
+[node name="LandingEntry" type="Marker2D" parent="Markers" unique_id=1535799586]
+position = Vector2(10540.644, -2050.2766)
+script = ExtResource("3_marker")
+object_id = "p2_thorax_entry"
+room_id = "p2_thorax_landing"
+
+[node name="ToThorax" type="Marker2D" parent="Markers" unique_id=1546839863]
+position = Vector2(10598.647, -2077.3247)
+script = ExtResource("3_marker")
+object_id = "p2_exit_to_thorax"
+object_type = "exit"
+room_id = "p2_thorax_landing"
+target_room_id = "p2_thorax_landing"
+target_entry_id = "p2_thorax_entry"
+metadata/preview_target = true
+
+[node name="BlueprintDuct" type="Marker2D" parent="Markers" unique_id=1874975790]
+position = Vector2(7690.8013, -968.5302)
+script = ExtResource("3_marker")
+object_id = "duct_spine_blueprint"
+object_type = "terminal"
+room_id = "p2_spine_middle"
+target_room_id = "p1_manufacturing_01"
+target_entry_id = "duct_arrival"
+footprint = Vector2(64, 64)
+metadata/role = "duct"
+metadata/cross_level = true
+metadata/return_entry_id = "p2_scatter_return_entry"
+metadata/logic_implemented = false
+
+[node name="ScatterReturnEntry" type="Marker2D" parent="Markers" unique_id=1820455866]
+position = Vector2(7665.6294, -833.2142)
+script = ExtResource("3_marker")
+object_id = "p2_scatter_return_entry"
+room_id = "p2_spine_middle"
+metadata/role = "duct_arrival"
+metadata/logic_implemented = false
+
+[node name="Cleaner03" type="Marker2D" parent="Markers" unique_id=314145713]
+position = Vector2(6129.958, -37.6764)
+script = ExtResource("3_marker")
+object_id = "p2_cleaner_03"
+object_type = "cleaner"
+room_id = "p2_spine_middle"
+
+[node name="Cleaner04" type="Marker2D" parent="Markers" unique_id=1586784409]
+position = Vector2(6294.2764, -26.0284)
+script = ExtResource("3_marker")
+object_id = "p2_cleaner_04"
+object_type = "cleaner"
+room_id = "p2_spine_middle"
+
+[node name="Cleaner05" type="Marker2D" parent="Markers" unique_id=1842658175]
+position = Vector2(6390.975, -159.3904)
+script = ExtResource("3_marker")
+object_id = "p2_cleaner_05"
+object_type = "cleaner"
+room_id = "p2_spine_middle"
+
+[node name="Cleaner06" type="Marker2D" parent="Markers" unique_id=215598029]
+position = Vector2(6555.293, -147.7424)
+script = ExtResource("3_marker")
+object_id = "p2_cleaner_06"
+object_type = "cleaner"
+room_id = "p2_spine_middle"
+
+[node name="Sentry03" type="Marker2D" parent="Markers" unique_id=296806594]
+position = Vector2(8957.639, -1356.2448)
+script = ExtResource("3_marker")
+object_id = "p2_sentry_03"
+object_type = "sentry"
+room_id = "p2_spine_upper"
+
+[node name="Sentry04" type="Marker2D" parent="Markers" unique_id=1167983801]
+position = Vector2(9165.46, -1364.8828)
+script = ExtResource("3_marker")
+object_id = "p2_sentry_04"
+object_type = "sentry"
+room_id = "p2_spine_upper"
+
+[node name="Sentry05" type="Marker2D" parent="Markers" unique_id=822336719]
+position = Vector2(9305.661, -1518.5308)
+script = ExtResource("3_marker")
+object_id = "p2_sentry_05"
+object_type = "sentry"
+room_id = "p2_spine_upper"
+
+[node name="Sentry06" type="Marker2D" parent="Markers" unique_id=1438964600]
+position = Vector2(9513.481, -1527.1688)
+script = ExtResource("3_marker")
+object_id = "p2_sentry_06"
+object_type = "sentry"
+room_id = "p2_spine_upper"
+
+[node name="GuideLabels" type="Node2D" parent="." unique_id=471268435]
+
+[node name="Entry" type="Marker2D" parent="GuideLabels" unique_id=1110938109]
+position = Vector2(629.672, 2818.442)
+metadata/text = "01 安全入口"
+
+[node name="Electric" type="Marker2D" parent="GuideLabels" unique_id=715237003]
+position = Vector2(1875.2168, 1703.599)
+metadata/text = "02 通电接缝"
+
+[node name="Sentry" type="Marker2D" parent="GuideLabels" unique_id=1150739292]
+position = Vector2(3173.0498, 1098.4095)
+metadata/text = "03 首台哨机"
+
+[node name="Record" type="Marker2D" parent="GuideLabels" unique_id=1916261721]
+position = Vector2(4974.497, 1251.4218)
+metadata/text = "04 记录支路·尽头折返"
+
+[node name="Protocol" type="Marker2D" parent="GuideLabels" unique_id=2106911633]
+position = Vector2(5895.618, -237.3474)
+metadata/text = "05 清扫者群·协议检修"
+
+[node name="Blueprint" type="Marker2D" parent="GuideLabels" unique_id=1992673859]
+position = Vector2(7430.3516, -1129.5452)
+metadata/text = "06 散射图纸＋返程管道"
+
+[node name="Blockade" type="Marker2D" parent="GuideLabels" unique_id=1128119500]
+position = Vector2(8902.748, -1639.5948)
+metadata/text = "07 哨机封锁段"
+
+[node name="Exit" type="Marker2D" parent="GuideLabels" unique_id=1812456895]
+position = Vector2(10349.195, -2247.8816)
+metadata/text = "08 通往胸腔"
+
+[node name="RouteWaypoints" type="Node2D" parent="." unique_id=1737549333]
+
+[node name="MainRoute" type="Node2D" parent="RouteWaypoints" unique_id=798452490]
+
+[node name="Point00" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=1507408523]
+position = Vector2(535.006, 2615.429)
+
+[node name="Point01" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=1745077952]
+position = Vector2(1724.0818, 2060.953)
+
+[node name="Point02" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=1106911777]
+position = Vector2(1985.0978, 1939.239)
+
+[node name="Point03" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=1804280644]
+position = Vector2(3058.167, 1438.8596)
+
+[node name="Point04" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=540497063]
+position = Vector2(3282.931, 1334.0496)
+
+[node name="Point05" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=1146927061]
+position = Vector2(4392.251, 816.7658)
+
+[node name="Point06" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=312847492]
+position = Vector2(5581.327, 262.2906)
+
+[node name="Point07" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=1565222347]
+position = Vector2(5784.3403, 167.6236)
+
+[node name="Point08" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=1179385017]
+position = Vector2(6030.856, 52.6716)
+
+[node name="Point09" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=897704046]
+position = Vector2(6302.748, -74.1144)
+
+[node name="Point10" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=1217559865]
+position = Vector2(6567.39, -197.5184)
+
+[node name="Point11" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=1282093240]
+position = Vector2(6741.4014, -278.6614)
+
+[node name="Point12" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=430723601]
+position = Vector2(7669.4604, -711.4222)
+
+[node name="Point13" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=1833156922]
+position = Vector2(7901.4756, -819.6122)
+
+[node name="Point14" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=894573724]
+position = Vector2(8858.536, -1265.8978)
+
+[node name="Point15" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=2055742479]
+position = Vector2(9119.553, -1387.6118)
+
+[node name="Point16" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=1157838303]
+position = Vector2(9380.569, -1509.3258)
+
+[node name="Point17" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=2108781880]
+position = Vector2(10323.129, -1948.8486)
+
+[node name="Point18" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=1339773186]
+position = Vector2(10540.644, -2050.2766)
+
+[node name="Point19" type="Marker2D" parent="RouteWaypoints/MainRoute" unique_id=1911463613]
+position = Vector2(10598.647, -2077.3247)
+
+[node name="RecordRoute" type="Node2D" parent="RouteWaypoints" unique_id=536251540]
+
+[node name="Point00" type="Marker2D" parent="RouteWaypoints/RecordRoute" unique_id=696546019]
+position = Vector2(4392.251, 816.7658)
+
+[node name="Point01" type="Marker2D" parent="RouteWaypoints/RecordRoute" unique_id=1861773922]
+position = Vector2(4493.68, 1034.2788)
+
+[node name="Point02" type="Marker2D" parent="RouteWaypoints/RecordRoute" unique_id=659577148]
+position = Vector2(4697.5923, 1168.6958)
+
+[node name="Point03" type="Marker2D" parent="RouteWaypoints/RecordRoute" unique_id=821398468]
+position = Vector2(4987.6104, 1033.4578)
+
+[node name="DuctRoute" type="Node2D" parent="RouteWaypoints" unique_id=474050368]
+
+[node name="Point00" type="Marker2D" parent="RouteWaypoints/DuctRoute" unique_id=1521527266]
+position = Vector2(7669.4604, -711.4222)
+
+[node name="Point01" type="Marker2D" parent="RouteWaypoints/DuctRoute" unique_id=70921741]
+position = Vector2(7665.6294, -833.2142)
+
+[node name="Point02" type="Marker2D" parent="RouteWaypoints/DuctRoute" unique_id=726143197]
+position = Vector2(7690.8013, -968.5302)
+
+[node name="Point03" type="Marker2D" parent="RouteWaypoints/DuctRoute" unique_id=202931796]
+position = Vector2(7532.2686, -929.9132)
+
+[node name="Boundaries" type="Node2D" parent="." unique_id=1373317688]
+
+[node name="Perimeter00" type="StaticBody2D" parent="Boundaries" unique_id=1134970792]
+collision_mask = 0
+
+[node name="Collision" type="CollisionPolygon2D" parent="Boundaries/Perimeter00" unique_id=398023776]
+build_mode = 1
+polygon = PackedVector2Array(10685.369, -1976.5316, 10482.357, -1881.8646, 10502.643, -1838.3625, 7972.2305, -658.4122, 7965.4688, -672.91296, 6805.395, -131.9614, 6798.633, -146.46254, 5645.8096, 391.10773, 5652.5713, 405.6086, 4502.1396, 942.06366, 4527.1113, 999.8358, 4693.722, 1120.8518, 4880.9546, 1031.8898, 4866.7954, 1001.5248, 5040.806, 920.3818, 5054.379, 949.48865, 5068.831, 942.6218, 5109.4023, 1029.6278, 5094.856, 1036.2926, 5108.4253, 1065.3918, 4934.414, 1146.5338, 4920.3022, 1116.2705, 4701.4614, 1216.5398, 4460.248, 1068.7228, 4417.31, 981.62036, 2194.1008, 2018.32, 2153.5295, 1931.3148, 1870.7612, 2063.1711, 1897.8088, 2121.175, 498.47, 2773.698, 390.28, 2541.683, 1789.6188, 1889.16, 1816.6664, 1947.1641, 2099.434, 1815.3071, 2058.8628, 1728.302, 5517.333, 115.5906, 5524.095, 130.0919, 6676.919, -407.47952, 6670.157, -421.9804, 7471.3325, -795.5743, 7461.7173, -967.6312, 7636.7065, -1084.5382, 7764.2837, -1038.1031, 7785.52, -942.0823, 7830.2314, -962.93146, 7823.4697, -977.4322, 10353.88, -2157.3826, 10374.166, -2113.8792, 10577.18, -2208.5466)
+
+[node name="BoundaryDebug" type="Node2D" parent="." unique_id=1536948802]
+visible = false
+z_index = 25
+
+[node name="Perimeter00" type="Line2D" parent="BoundaryDebug" unique_id=1667540045]
+points = PackedVector2Array(10685.369, -1976.5316, 10482.357, -1881.8646, 10502.643, -1838.3625, 7972.2305, -658.4122, 7965.4688, -672.91296, 6805.395, -131.9614, 6798.633, -146.46254, 5645.8096, 391.10773, 5652.5713, 405.6086, 4502.1396, 942.06366, 4527.1113, 999.8358, 4693.722, 1120.8518, 4880.9546, 1031.8898, 4866.7954, 1001.5248, 5040.806, 920.3818, 5054.379, 949.48865, 5068.831, 942.6218, 5109.4023, 1029.6278, 5094.856, 1036.2926, 5108.4253, 1065.3918, 4934.414, 1146.5338, 4920.3022, 1116.2705, 4701.4614, 1216.5398, 4460.248, 1068.7228, 4417.31, 981.62036, 2194.1008, 2018.32, 2153.5295, 1931.3148, 1870.7612, 2063.1711, 1897.8088, 2121.175, 498.47, 2773.698, 390.28, 2541.683, 1789.6188, 1889.16, 1816.6664, 1947.1641, 2099.434, 1815.3071, 2058.8628, 1728.302, 5517.333, 115.5906, 5524.095, 130.0919, 6676.919, -407.47952, 6670.157, -421.9804, 7471.3325, -795.5743, 7461.7173, -967.6312, 7636.7065, -1084.5382, 7764.2837, -1038.1031, 7785.52, -942.0823, 7830.2314, -962.93146, 7823.4697, -977.4322, 10353.88, -2157.3826, 10374.166, -2113.8792, 10577.18, -2208.5466, 10685.369, -1976.5316)
+width = 3.0
+default_color = Color(0.45882353, 0.8862745, 0.77254903, 1)
+
+[node name="Valve0" type="Line2D" parent="BoundaryDebug" unique_id=1075711909]
+points = PackedVector2Array(3458.857, 1313.8036, 3516.8608, 1286.7556, 3550.67, 1359.2606, 3492.667, 1386.3076, 3458.857, 1313.8036)
+width = 3.0
+default_color = Color(0.8862745, 0.7176471, 0.45882353, 1)
+
+[node name="Valve1" type="Line2D" parent="BoundaryDebug" unique_id=1046535251]
+points = PackedVector2Array(8757.558, -1368.8698, 8815.561, -1395.9167, 8842.608, -1337.9138, 8784.6045, -1310.8658, 8757.558, -1368.8698)
+width = 3.0
+default_color = Color(0.8862745, 0.7176471, 0.45882353, 1)
+
+[node name="Valve2" type="Line2D" parent="BoundaryDebug" unique_id=1796098318]
+points = PackedVector2Array(9077.477, -1288.5479, 9135.48, -1315.5958, 9162.527, -1257.5918, 9104.524, -1230.5438, 9077.477, -1288.5479)
+width = 3.0
+default_color = Color(0.8862745, 0.7176471, 0.45882353, 1)
+
+[node name="Valve3" type="Line2D" parent="BoundaryDebug" unique_id=1746899117]
+points = PackedVector2Array(9221.587, -1585.2498, 9279.591, -1612.2979, 9306.638, -1554.2938, 9248.635, -1527.2468, 9221.587, -1585.2498)
+width = 3.0
+default_color = Color(0.8862745, 0.7176471, 0.45882353, 1)
+
+[node name="Valve4" type="Line2D" parent="BoundaryDebug" unique_id=53664571]
+points = PackedVector2Array(9541.507, -1504.9288, 9599.51, -1531.9758, 9626.558, -1473.9728, 9568.554, -1446.9248, 9541.507, -1504.9288)
+width = 3.0
+default_color = Color(0.8862745, 0.7176471, 0.45882353, 1)
+
+[node name="BlockedRecordEnd" type="Line2D" parent="BoundaryDebug" unique_id=2120972443]
+points = PackedVector2Array(5036.937, 931.0138, 5065.939, 917.4898, 5126.7964, 1047.9978, 5097.7944, 1061.5219, 5036.937, 931.0138)
+width = 3.0
+default_color = Color(0.8862745, 0.7176471, 0.45882353, 1)
