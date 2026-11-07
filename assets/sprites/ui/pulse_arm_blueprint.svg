@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" viewBox="0 0 900 560">
+  <defs>
+    <linearGradient id="sheet" x2="0" y2="1"><stop stop-color="#142b35" stop-opacity=".96"/><stop offset="1" stop-color="#08141b" stop-opacity=".97"/></linearGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d6ddd0"/><stop offset=".38" stop-color="#718994"/><stop offset="1" stop-color="#354e5c"/></linearGradient>
+    <linearGradient id="armor" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f1c86c"/><stop offset=".45" stop-color="#d68539"/><stop offset="1" stop-color="#884529"/></linearGradient>
+    <linearGradient id="core" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e8fbef"/><stop offset=".24" stop-color="#57eff0"/><stop offset=".72" stop-color="#1d9bac"/><stop offset="1" stop-color="#17536b"/></linearGradient>
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect x="4" y="4" width="892" height="552" rx="5" fill="url(#sheet)" stroke="#dfa34f" stroke-width="4"/>
+  <path d="M22 68H878M22 484H878" stroke="#56d3d9" stroke-opacity=".55" stroke-width="2"/>
+  <path d="M27 22h24M27 22v24M873 22h-24M873 22v24M27 538h24M27 538v-24M873 538h-24M873 538v-24" fill="none" stroke="#f1c56c" stroke-width="4"/>
+  <g font-family="sans-serif" font-weight="700">
+    <text x="38" y="49" fill="#f3c96e" font-size="23" letter-spacing="2">PULSE ARM / EXPLODED ASSEMBLY</text>
+    <text x="844" y="47" text-anchor="end" fill="#66e5e7" font-size="15">LEFT ARM MODULE · 04</text>
+    <text x="38" y="522" fill="#a6c4c4" font-size="14" letter-spacing="1.5">ASSEMBLY AXIS</text>
+    <text x="844" y="522" text-anchor="end" fill="#e8b765" font-size="14" letter-spacing="1.2">FIELD SERVICE SCHEMATIC</text>
+  </g>
+  <!-- exploded alignment rail -->
+  <g stroke="#59dce2" stroke-width="2" fill="none" opacity=".75">
+    <path d="M86 268H812" stroke-dasharray="10 8"/>
+    <path d="M170 258l12 10-12 10M337 258l12 10-12 10M523 258l12 10-12 10M704 258l12 10-12 10"/>
+    <path d="M117 205v126M286 203v128M454 204v127M628 204v127M789 205v126" stroke-dasharray="4 7" stroke-opacity=".42"/>
+  </g>
+  <!-- 01. Focus emitter and armored muzzle -->
+  <g stroke="#18282e" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M75 232l24-23h48l22 22v74l-21 21h-48l-25-22z" fill="url(#armor)"/>
+    <path d="M87 240l17-14h40l14 15v56l-14 14h-41l-16-14z" fill="#283c47" stroke="#e5bd70" stroke-width="4"/>
+    <ellipse cx="104" cy="269" rx="11" ry="27" fill="#7d9296" stroke="#dbe1d0" stroke-width="4"/>
+    <ellipse cx="99" cy="269" rx="7" ry="18" fill="url(#core)" stroke="#e0fff0" stroke-width="3" filter="url(#glow)"/>
+    <path d="M151 240l22 8v42l-22 9z" fill="#d9d7c4"/>
+    <path d="M165 247l16 8v29l-16 7z" fill="#263f4a" stroke="#f0c467" stroke-width="3"/>
+  </g>
+  <!-- 02. Reinforced focusing barrel -->
+  <g stroke="#192a31" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M195 227l25-12h110l25 13v82l-25 13H220l-25-13z" fill="url(#steel)"/>
+    <path d="M217 239h112v59H217z" fill="#425d69" stroke="#d9c17f" stroke-width="4"/>
+    <path d="M229 237v63M246 235v67M313 235v67M330 237v63" stroke="#e6ab55" stroke-width="5"/>
+    <path d="M255 246h43v44h-43z" fill="#172d38" stroke="#48dce2" stroke-width="3"/>
+    <path d="M264 253h25v30h-25z" fill="#244b58" stroke="#b3faf0" stroke-width="2"/>
+  </g>
+  <!-- 03. Pulse capacitor core -->
+  <g stroke="#192930" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M382 231l19-16h84l20 16v75l-20 16h-84l-19-16z" fill="#d7833b"/>
+    <path d="M399 238l13-10h55l13 10v61l-13 10h-55l-13-10z" fill="#253e49" stroke="#f1c36b" stroke-width="4"/>
+    <rect x="418" y="238" width="43" height="61" rx="12" fill="url(#core)" stroke="#dcfff0" stroke-width="4" filter="url(#glow)"/>
+    <path d="M423 248h33M423 259h33M423 279h33M423 290h33" stroke="#d8ffed" stroke-width="3"/>
+    <circle cx="406" cy="269" r="5" fill="#52e8e7" stroke="#ecffed" stroke-width="2"/>
+    <circle cx="474" cy="269" r="5" fill="#52e8e7" stroke="#ecffed" stroke-width="2"/>
+  </g>
+  <!-- 04. Detachable angular armor shroud -->
+  <g stroke="#192a30" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M543 226l32-20 103 12 31 27v52l-29 27-103 12-34-20z" fill="url(#armor)"/>
+    <path d="M559 239l24-15 79 9 26 19v31l-25 20-79 8-25-15z" fill="#455d68" stroke="#e6c46f" stroke-width="4"/>
+    <path d="M574 244l23 7 7 38-24 11M642 234l-7 16v34l27 13" fill="none" stroke="#d4e0d0" stroke-width="4"/>
+    <path d="M597 251h34v31h-34z" fill="#172d37" stroke="#50dce1" stroke-width="3"/>
+    <path d="M604 258h20v17h-20z" fill="#42d1d9" stroke="#ddfff0" stroke-width="2" filter="url(#glow)"/>
+    <path d="M559 232l-11 18v37l12 15M686 241l17 17v22l-17 16" fill="none" stroke="#273c45" stroke-width="7"/>
+  </g>
+  <!-- 05. Left-arm interface and recoil brace -->
+  <g stroke="#192930" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M738 230l24-15h47l22 20v70l-21 19h-49l-23-19z" fill="url(#steel)"/>
+    <path d="M752 237l14-9h39l14 12v59l-15 12h-39l-13-12z" fill="#324d59" stroke="#d9b764" stroke-width="4"/>
+    <path d="M762 246h39v43h-39z" fill="#172c35" stroke="#d9e1d0" stroke-width="3"/>
+    <path d="M769 253h25v29h-25z" fill="url(#armor)"/>
+    <path d="M747 244l-12 12v38l12 12" fill="none" stroke="#e4a94f" stroke-width="5"/>
+    <circle cx="823" cy="247" r="6" fill="#52e2df" stroke="#e7fff0" stroke-width="2"/>
+    <circle cx="823" cy="288" r="6" fill="#52e2df" stroke="#e7fff0" stroke-width="2"/>
+  </g>
+  <!-- Part labels with color-coded leader lines -->
+  <g font-family="sans-serif" font-weight="700" font-size="17">
+    <g fill="none" stroke="#f3c66d" stroke-width="2.5"><path d="M111 209v-49h82M282 214v-54h46M443 214v-54h40M623 205v-45h84M789 210v-51h-1"/></g>
+    <g fill="#f4d18a" stroke="#10212a" stroke-width="4" paint-order="stroke">
+      <text x="71" y="145">聚焦发射口</text><text x="228" y="145">磁轨聚焦筒</text><text x="391" y="145">脉冲蓄能芯</text><text x="584" y="145">分体装甲罩</text><text x="720" y="145">左臂锁定座</text>
+    </g>
+    <g fill="#58e3e7" stroke="#10212a" stroke-width="4" paint-order="stroke"><text x="252" y="368">冷却鳍片</text><text x="566" y="368">供能耦合点</text></g>
+    <g fill="none" stroke="#52dbe0" stroke-width="2"><path d="M300 325v30h-18M628 326v29h-14"/></g>
+  </g>
+  <!-- lower exploded power link and status marks -->
+  <g fill="none" stroke="#efb65d" stroke-width="3">
+    <path d="M382 397h119M382 390v14M501 390v14"/>
+    <path d="M541 399h184" stroke="#54dce1" stroke-dasharray="5 7"/>
+  </g>
+  <g fill="#f5c66e"><circle cx="195" cy="268" r="5"/><circle cx="362" cy="268" r="5"/><circle cx="509" cy="268" r="5"/><circle cx="717" cy="268" r="5"/></g>
+  <!-- compact assembled silhouette: unmistakably an arm-mounted combat tool -->
+  <g transform="translate(258 427) scale(.55)" stroke="#17272e" stroke-width="7" stroke-linejoin="round">
+    <path d="M0 16l17-10h179l22 12v35l-22 13H17L0 54z" fill="url(#steel)"/>
+    <path d="M220 18l27-10h86l28 17v31l-27 17h-87l-27-15z" fill="url(#armor)"/>
+    <rect x="24" y="24" width="165" height="27" fill="#425d69" stroke="#e2bd6f" stroke-width="3"/>
+    <path d="M3 17l-29 8v29l29 8z" fill="#d7ddd0"/>
+    <ellipse cx="-28" cy="39" rx="7" ry="15" fill="url(#core)" stroke="#ecfff0" stroke-width="3" filter="url(#glow)"/>
+    <rect x="268" y="24" width="40" height="25" rx="8" fill="url(#core)" stroke="#effff0" stroke-width="3"/>
+    <path d="M327 22h39v34h-39z" fill="#354f5c" stroke="#e9c269" stroke-width="3"/>
+  </g>
+  <text x="450" y="475" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#e7c57c">整体装配侧视 / 左臂固定式战斗模块</text>
+</svg>
