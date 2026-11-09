@@ -21,6 +21,7 @@ const SENTRY_SCENE := preload("res://scenes/enemies/sentry/sentry.tscn")
 const PAUSE_INPUT_SCRIPT := preload("res://scenes/gameplay/pause_input.gd")
 const GAME_MENUS_SCRIPT := preload("res://scenes/gameplay/game_menus.gd")
 const UI_THEME := preload("res://scenes/gameplay/gameplay_ui_theme.tres")
+const PULSE_BLUEPRINT_TEXTURE := preload("res://assets/sprites/ui/pulse_arm_blueprint.svg")
 
 ## ---------- 常量配置 ----------
 
@@ -98,9 +99,11 @@ var achievement_last_health := 0
 ## HUD 节点
 var hud_canvas: CanvasLayer
 var interact_label: Label
-var interact_bg: ColorRect
+var interact_bg: Panel
 var notify_label: Label
-var notify_bg: ColorRect
+var notify_bg: Panel
+var blueprint_hint: TextureRect
+var blueprint_hint_tween: Tween
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
@@ -201,38 +204,124 @@ func _setup_hud() -> void:
 	root.add_child(health_display)
 	player.health_changed.connect(func(value: int, maximum: int): health_display.set_health(float(value), float(maximum)))
 	_update_hp_bar()
-	interact_bg = ColorRect.new()
-	interact_bg.color = Color(0.025, 0.045, 0.055, 0.94)
+	interact_bg = Panel.new()
 	interact_bg.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	interact_bg.offset_left = -290
-	interact_bg.offset_right = 290
-	interact_bg.offset_top = -84
-	interact_bg.offset_bottom = -36
+	interact_bg.offset_left = -330
+	interact_bg.offset_right = 330
+	interact_bg.offset_top = -96
+	interact_bg.offset_bottom = -34
+	interact_bg.add_theme_stylebox_override("panel", _make_hud_panel_style(Color("78a7aa"), Color("101d25", 0.96)))
 	root.add_child(interact_bg)
 	interact_label = Label.new()
 	interact_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	interact_label.offset_left = 18
+	interact_label.offset_right = -18
 	interact_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	interact_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	interact_label.add_theme_color_override("font_color", Color("d4e8d8"))
+	interact_label.add_theme_color_override("font_color", Color("d8e7e2"))
+	interact_label.add_theme_color_override("font_outline_color", Color("071117", 0.95))
+	interact_label.add_theme_constant_override("outline_size", 1)
+	interact_label.add_theme_color_override("font_shadow_color", Color("02070a", 0.9))
+	interact_label.add_theme_constant_override("shadow_offset_x", 1)
+	interact_label.add_theme_constant_override("shadow_offset_y", 2)
+	interact_label.add_theme_font_size_override("font_size", 19)
 	interact_bg.add_child(interact_label)
-	notify_bg = ColorRect.new()
-	notify_bg.color = Color(0.025, 0.045, 0.055, 0.94)
+	_add_hud_panel_reflection(interact_bg, Color("101d25", 0.96))
+	notify_bg = Panel.new()
 	notify_bg.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	notify_bg.offset_left = -260
-	notify_bg.offset_right = 260
-	notify_bg.offset_top = 108
-	notify_bg.offset_bottom = 152
+	notify_bg.offset_left = -390
+	notify_bg.offset_right = 390
+	notify_bg.offset_top = 72
+	notify_bg.offset_bottom = 134
+	notify_bg.add_theme_stylebox_override("panel", _make_hud_panel_style(Color("c59a55"), Color("100f0d", 0.94)))
 	root.add_child(notify_bg)
 	notify_label = Label.new()
 	notify_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	notify_label.offset_left = 24
+	notify_label.offset_right = -24
 	notify_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	notify_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	notify_label.add_theme_color_override("font_color", Color("efd49a"))
+	notify_label.add_theme_color_override("font_color", Color("f0d7a0"))
+	notify_label.add_theme_color_override("font_outline_color", Color("070909", 0.95))
+	notify_label.add_theme_constant_override("outline_size", 1)
+	notify_label.add_theme_color_override("font_shadow_color", Color("000000", 0.95))
+	notify_label.add_theme_constant_override("shadow_offset_x", 1)
+	notify_label.add_theme_constant_override("shadow_offset_y", 2)
+	notify_label.add_theme_font_size_override("font_size", 23)
 	notify_bg.add_child(notify_label)
+	_add_hud_panel_reflection(notify_bg, Color("100f0d", 0.94))
+	blueprint_hint = TextureRect.new()
+	blueprint_hint.name = "PulseArmBlueprintHint"
+	blueprint_hint.texture = PULSE_BLUEPRINT_TEXTURE
+	blueprint_hint.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	blueprint_hint.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	blueprint_hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	blueprint_hint.offset_left = 100
+	blueprint_hint.offset_right = 500
+	blueprint_hint.offset_top = -150
+	blueprint_hint.offset_bottom = 100
+	blueprint_hint.modulate = Color(1, 1, 1, 0.78)
+	blueprint_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(blueprint_hint)
+	blueprint_hint.hide()
 	interact_bg.hide()
 	notify_bg.hide()
 	for control in root.find_children("*", "Control", true, false):
 		control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+func _make_hud_panel_style(accent: Color, fill: Color) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = fill
+	style.border_color = fill.lerp(accent, 0.62).lightened(0.12)
+	style.set_border_width_all(5)
+	style.border_width_top = 7
+	style.set_corner_radius_all(5)
+	style.content_margin_left = 14
+	style.content_margin_right = 14
+	style.content_margin_top = 6
+	style.content_margin_bottom = 6
+	style.shadow_color = Color(0, 0, 0, 0.65)
+	style.shadow_size = 11
+	style.shadow_offset = Vector2(0, 5)
+	return style
+
+func _add_hud_panel_reflection(panel: Panel, fill: Color) -> void:
+	var bright_metal := fill.lerp(Color("e7e7d7"), 0.72)
+	var top_glint_color := bright_metal
+	top_glint_color.a = 0.52
+	var side_glint_color := bright_metal
+	side_glint_color.a = 0.24
+	var top_glint := ColorRect.new()
+	top_glint.anchor_left = 0.0
+	top_glint.anchor_right = 1.0
+	top_glint.offset_left = 8
+	top_glint.offset_right = -12
+	top_glint.offset_top = 3
+	top_glint.offset_bottom = 5
+	top_glint.color = top_glint_color
+	top_glint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(top_glint)
+	var left_glint := ColorRect.new()
+	left_glint.anchor_bottom = 1.0
+	left_glint.offset_left = 4
+	left_glint.offset_right = 6
+	left_glint.offset_top = 8
+	left_glint.offset_bottom = -12
+	left_glint.color = side_glint_color
+	left_glint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(left_glint)
+	var lower_shadow := ColorRect.new()
+	lower_shadow.anchor_left = 0.0
+	lower_shadow.anchor_right = 1.0
+	lower_shadow.anchor_top = 1.0
+	lower_shadow.anchor_bottom = 1.0
+	lower_shadow.offset_left = 9
+	lower_shadow.offset_right = -13
+	lower_shadow.offset_top = -5
+	lower_shadow.offset_bottom = -3
+	lower_shadow.color = fill.darkened(0.35)
+	lower_shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(lower_shadow)
 
 ## ---------- HUD 更新 ----------
 
@@ -293,6 +382,18 @@ func _show_notification(text: String, duration: float = C.notify_default) -> voi
 		notify_label.visible = false
 	if is_instance_valid(notify_bg):
 		notify_bg.visible = false
+
+func _show_blueprint_hint() -> void:
+	if not is_instance_valid(blueprint_hint):
+		return
+	if blueprint_hint_tween and blueprint_hint_tween.is_running():
+		blueprint_hint_tween.kill()
+	blueprint_hint.modulate.a = 0.78
+	blueprint_hint.show()
+	blueprint_hint_tween = create_tween()
+	blueprint_hint_tween.tween_interval(1.5)
+	blueprint_hint_tween.tween_property(blueprint_hint, "modulate:a", 0.0, 0.65).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	blueprint_hint_tween.tween_callback(blueprint_hint.hide)
 
 ## ---------- 标记生成系统 ----------
 
@@ -785,10 +886,12 @@ func _request_story(id: StringName) -> void:
 	if not pending_interaction.is_empty() or not interaction_points.has(id):
 		return
 	if id == &"pulse_workbench" and (not blueprint_known or pulse_learned):
-		_show_notification("小一：我已经装好这个模块了。" if pulse_learned else "小一：这台设备，似乎还在等一份图纸。")
+		_show_notification("脉冲模块已经装配完成。" if pulse_learned else "这台设备似乎还在等待一份图纸。")
+		if not blueprint_known and not pulse_learned:
+			_show_blueprint_hint()
 		return
 	var payloads := {
-		&"pulse_blueprint": {"title": "图纸台的通讯", "summary": "", "confirm": "结束通话", "category": "通讯", "dialogue": [
+		&"pulse_blueprint": {"title": "图纸台的通讯", "summary": "", "confirm": "结束通话", "category": "通讯", "pulse_character_preview": true, "dialogue": [
 			{"speaker": "小一", "text": "这上面画的……是我的手臂？"},
 			{"speaker": "神明", "text": "是我为你预留的战斗模块。只是，还没来得及替你装上。"},
 			{"speaker": "神明", "text": "你醒来时，左手边有一台制造设备。带着这份图纸回去，它能帮你完成装配。"},

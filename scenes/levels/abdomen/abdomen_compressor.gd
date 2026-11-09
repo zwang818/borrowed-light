@@ -56,12 +56,12 @@ func _source(rect: Rect2) -> Rect2:
 
 func _draw_clipped_slider(source: Rect2, target: Rect2, bay: Rect2) -> void:
 	# Clip to the existing opening: rods never slide across the fixed housings.
-	var visible := target.intersection(bay)
-	if not visible.has_area():
+	var visible_region := target.intersection(bay)
+	if not visible_region.has_area():
 		return
 	var ratio := source.size / target.size
-	var cropped := Rect2(source.position + (visible.position - target.position) * ratio, visible.size * ratio)
-	draw_texture_rect_region(PARTS, visible, _source(cropped))
+	var cropped := Rect2(source.position + (visible_region.position - target.position) * ratio, visible_region.size * ratio)
+	draw_texture_rect_region(PARTS, visible_region, _source(cropped))
 
 func _draw() -> void:
 	# Keep the existing chassis and slider framing. Map the measured aperture into it.

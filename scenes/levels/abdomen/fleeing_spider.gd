@@ -37,4 +37,4 @@ func _draw() -> void:
 	var frame := int(age * 14.0) % 4
 	var cell := FRAMES.get_size() / 2.0
 	draw_set_transform(offset, direction.angle() + PI * 0.5)
-	draw_texture_rect_region(FRAMES, Rect2(-DRAW_SIZE / 2, DRAW_SIZE), Rect2(Vector2(frame % 2, frame / 2) * cell, cell), Color(1, 1, 1, fade))
+	draw_texture_rect_region(FRAMES, Rect2(-DRAW_SIZE / 2, DRAW_SIZE), Rect2(Vector2(frame % 2, floori(float(frame) / 2.0)) * cell, cell), Color(1, 1, 1, fade))

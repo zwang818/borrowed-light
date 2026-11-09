@@ -16,7 +16,7 @@
 | 节点 | 用途 | 美术调整方式 |
 | --- | --- | --- |
 | `WorldLayers/Landscape` | 天空与远中景荒原 | 替换 Texture，可用 PNG 或 SVG |
-| `WorldLayers/MechanicalBeast` | 倒下的机械神兽 | 替换 Texture；拖动位置与尺寸，不影响按钮 |
+| `WorldLayers/MechanicalBeast` | 倒下的机械神明遗体 | 当前使用 `assets/backgrounds/title/mechanical_deity_pixel.png`；小一已从贴图中移除，封面只显示前景大尺寸角色 |
 | `WorldLayers/HorizonHaze` | 地平线附近的薄雾色层 | 调制颜色、透明度或直接隐藏 |
 | `WorldLayers/Foreground` | 前景废铁与地面剪影 | 替换 Texture，保持透明背景 |
 | `WorldLayers/RobotAnchor` | 小机器人和两层暖光的共同位置 | 移动此节点可连同灯光一起移动 |
@@ -51,7 +51,9 @@
 
 本次新增的菜单字体覆盖当前标题、文案、按钮、提示和基本 ASCII，不能视为覆盖全部中文。新加中文时要重新补充字符或使用完整的许可字体。
 
-素材来源及许可见 `asset_credits.md` 和 `assets/fonts/README.md`。当前图片是普通 SVG，占位图可以逐张替换，场景脚本不包含神兽或机器人的绘制逻辑。
+素材来源及许可见 `asset_credits.md` 和 `assets/fonts/README.md`。标题背景保留 SVG 荒原层，神明遗体使用透明 PNG；场景脚本不包含神明或角色图像的绘制逻辑。
+
+开场交互页复用机械神明贴图，背景使用 `wasteland_intro_pixel.png`，前景荒草使用透明贴图 `wasteland_grass_foreground.png`。小一使用项目八方向行走图集进入腹腔入口；前景草会随风摆动并遮住脚部，行走段播放风声。
 
 ## 第二版：标题、动态与存档入口
 

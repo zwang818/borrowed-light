@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scenes/ui/title_screen/title_screen.gd" id="1_script"]
 [ext_resource type="Theme" path="res://scenes/ui/title_screen/title_theme.tres" id="2_theme"]
 [ext_resource type="Texture2D" path="res://assets/backgrounds/title/title_landscape.svg" id="3_landscape"]
-[ext_resource type="Texture2D" path="res://assets/backgrounds/title/mechanical_beast.svg" id="4_beast"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/title/mechanical_deity_pixel.png" id="4_beast"]
 [ext_resource type="Texture2D" path="res://assets/backgrounds/title/title_foreground.svg" id="5_foreground"]
 [ext_resource type="Texture2D" path="res://assets/sprites/title/title_robot.svg" id="6_robot"]
 [ext_resource type="FontFile" path="res://assets/fonts/noto_serif_sc_title.ttf" id="7_title_font"]
@@ -122,14 +122,15 @@ expand_mode = 1
 
 [node name="MechanicalBeast" type="TextureRect" parent="Presentation/WorldLayers"]
 layout_mode = 0
-offset_left = 527.0
-offset_top = 183.0
-offset_right = 1247.0
-offset_bottom = 563.0
+offset_left = 555.0
+offset_top = 225.0
+offset_right = 1255.0
+offset_bottom = 575.0
 mouse_filter = 2
 texture = ExtResource("4_beast")
 expand_mode = 1
 stretch_mode = 5
+texture_filter = 1
 
 [node name="HorizonHaze" type="TextureRect" parent="Presentation/WorldLayers"]
 layout_mode = 0
@@ -153,10 +154,10 @@ expand_mode = 1
 
 [node name="RobotAnchor" type="Control" parent="Presentation/WorldLayers"]
 layout_mode = 0
-offset_left = 910.0
-offset_top = 503.0
-offset_right = 1006.0
-offset_bottom = 631.0
+offset_left = 752.0
+offset_top = 407.0
+offset_right = 848.0
+offset_bottom = 535.0
 mouse_filter = 2
 
 [node name="GroundGlow" type="TextureRect" parent="Presentation/WorldLayers/RobotAnchor"]

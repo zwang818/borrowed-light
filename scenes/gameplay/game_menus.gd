@@ -290,11 +290,16 @@ func _button(text: String, callback: Callable) -> void:
 func _style(background: Color, margin: int = 8) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = background
-	style.border_color = Color(0.24, 0.48, 0.5, 0.9)
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(6)
+	var metal := background.lerp(Color(0.66, 0.82, 0.79), 0.56)
+	style.border_color = Color(metal.r, metal.g, metal.b, 0.96)
+	style.set_border_width_all(3)
+	style.border_width_top = 5
+	style.set_corner_radius_all(4)
 	style.content_margin_left = margin
 	style.content_margin_right = margin
 	style.content_margin_top = margin
 	style.content_margin_bottom = margin
+	style.shadow_color = Color(0, 0, 0, 0.55)
+	style.shadow_size = 7
+	style.shadow_offset = Vector2(0, 3)
 	return style

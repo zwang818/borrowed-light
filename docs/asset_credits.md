@@ -4,6 +4,8 @@
 | --- | --- | --- |
 | `assets/backgrounds/title/*.svg` | 本项目，Codex 辅助编写的原创几何剪影 SVG | 标题界面占位美术，非最终像素素材；未使用第三方图片或 ImageGen |
 | `assets/sprites/title/title_robot.svg` | 本项目，Codex 辅助编写的原创几何 SVG | 小机器人占位图，第二版增加金属侧面与明暗 |
+| `assets/sprites/ui/pulse_arm_blueprint.svg` | 本项目，Codex 辅助编写的原创 SVG | 依据 `tests/manual/b_combat/art/xiaoyi/xiaoyi_laser_8dir.png` 中左臂一体式激光模块绘制为爆炸分解图，并标注聚焦发射口、磁轨聚焦筒、脉冲蓄能芯、装甲罩及左臂接口；参考用户提供的机械图纸排版，不复制其实物手枪结构。制造台提示使用，运行时半透明淡出 |
+| `assets/sprites/ui/maintenance_duct_sign.svg` | 本项目，Codex 辅助编写的原创 SVG | 参考地下公用管廊的钢管、弯头与法兰结构绘制的高分辨率金属管道交互标识；无虚线与模糊滤镜，仅在管道弹窗上方短暂出现并淡出 |
 | `assets/fonts/borrowed_light_title.ttf` | IPAex Gothic 003.01 的项目裁剪版 | IPA Font License v1.0；许可与替换说明在字体目录，旧最小标题资源保留 |
 | `assets/fonts/noto_sans_sc_menu_regular.ttf` | Google Fonts / Noto Sans SC，400 字重，Google Fonts 文本子集接口 | SIL Open Font License 1.1；仅覆盖当前菜单所需字符与基本 ASCII |
 | `assets/fonts/noto_sans_sc_menu_semibold.ttf` | Google Fonts / Noto Sans SC，600 字重，同上 | 同上 |

@@ -28,14 +28,19 @@ func _ready() -> void:
 	_card.custom_minimum_size = Vector2(380, 116)
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.025, 0.045, 0.055, 0.98)
-	style.border_color = Color(0.35, 0.65, 0.65)
-	style.set_border_width_all(1)
-	style.border_width_left = 4
-	style.set_corner_radius_all(5)
+	var metal := style.bg_color.lerp(Color(0.72, 0.84, 0.81), 0.56)
+	style.border_color = Color(metal.r, metal.g, metal.b, 0.96)
+	style.set_border_width_all(3)
+	style.border_width_top = 5
+	style.border_width_left = 6
+	style.set_corner_radius_all(4)
 	style.content_margin_left = 16
 	style.content_margin_right = 16
 	style.content_margin_top = 14
 	style.content_margin_bottom = 14
+	style.shadow_color = Color(0, 0, 0, 0.6)
+	style.shadow_size = 9
+	style.shadow_offset = Vector2(0, 4)
 	_card.add_theme_stylebox_override("panel", style)
 	_host.add_child(_card)
 	var row := HBoxContainer.new()
