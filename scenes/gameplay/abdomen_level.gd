@@ -312,7 +312,7 @@ func _match_marker(marker: Marker2D) -> void:
 		"spawn":
 			if player == null:
 				player = PLAYER_SCENE.instantiate()
-				player.set_script(preload("res://scenes/player/xiaoyi_map_player.gd"))
+				player.set_script(preload("res://scenes/player/xiaoyi_field_player.gd"))
 				player.global_position = pos
 				player.pulse_gun_equipped = false
 				add_child(player)
@@ -323,12 +323,13 @@ func _match_marker(marker: Marker2D) -> void:
 				weapon_pickup = _add_weapon_pickup(marker.global_position, marker.content_id)
 		"cleaner":
 			var cleaner := CLEANER_SCENE.instantiate()
+			cleaner.set_script(preload("res://tests/manual/b_combat/web_cleaner.gd"))
 			cleaner.global_position = pos
 			cleaner.entity_id = StringName(marker.object_id)
 			cleaner.name = marker.object_id
 			add_child(cleaner)
 			cleaner.get_node("Facing/Body").hide()
-			var cleaner_model := preload("res://tests/manual/b_combat/cleaner_visual.gd").new()
+			var cleaner_model := preload("res://tests/manual/b_combat/web_cleaner_visual.gd").new()
 			cleaner_model.name = "CleanerModel"
 			cleaner_model.match_hurtbox = true
 			cleaner.add_child(cleaner_model)
@@ -440,12 +441,15 @@ func _configure_player() -> void:
 	var map_bounds: Rect2 = map.get_meta("map_bounds", Rect2(128, 32, 1120, 2688))
 	player.get_node("Facing/Body").hide()
 	player.get_node("Facing/DirectionIndicator").hide()
-	robot_visual = preload("res://tests/manual/b_combat/xiaoyi_aim_visual.gd").new()
+	robot_visual = preload("res://tests/manual/b_combat/xiaoyi_graybox_visual.gd").new()
 	robot_visual.name = "XiaoyiCombatVisual"
 	robot_visual.display_height = 60.0
 	robot_visual.enhanced_gait = true
 	robot_visual.face_firing_beam = true
 	player.get_node("Facing").add_child(robot_visual)
+	var hurtbox := preload("res://tests/manual/b_combat/player_model_hurtbox.gd").new()
+	hurtbox.name = "PlayerModelHurtbox"
+	player.add_child(hurtbox)
 	player.pulse_gun.configure_space(map_bounds, _enemy_visible_query)
 	player.died.connect(_on_player_died)
 
@@ -455,7 +459,7 @@ func _configure_enemies() -> void:
 			if enemy is StaticBody2D:
 				enemy.configure(player, _enemy_visible_query, bullets_parent)
 			else:
-				enemy.configure(player, _enemy_visible_query, _in_protocol_query)
+				enemy.configure(player, _cleaner_visible_query, _in_protocol_query)
 		enemy.died.connect(_on_enemy_died)
 		enemy_baselines[enemy.entity_id] = enemy.get_combat_state().duplicate(true)
 
@@ -495,7 +499,7 @@ func _update_interaction() -> void:
 func _remaining_cleaners() -> int:
 	var count := 0
 	for enemy in enemies:
-		if is_instance_valid(enemy) and enemy.get_script() == preload("res://scenes/enemies/cleaner/cleaner.gd"):
+		if is_instance_valid(enemy) and enemy.is_in_group("cleaners"):
 			if enemy.get_combat_state().alive:
 				count += 1
 	return count
@@ -598,6 +602,8 @@ func _door_flash_animation(door: Node) -> void:
 ## ---------- 事件回调 ----------
 
 func _on_exit_entered(body: Node, exit_id: String) -> void:
+	if body.has_method("get_damage_receiver"):
+		body = body.get_damage_receiver()
 	if body != player or player.is_dead or get_tree().paused or is_level_complete:
 		return
 	for obj in interactables_parent.get_children():
@@ -631,8 +637,11 @@ func _enemy_visible_query(enemy: Node) -> bool:
 	var bounds: Rect2 = map.get_meta("map_bounds", Rect2())
 	return bounds.has_point(enemy.global_position)
 
+func _cleaner_visible_query(enemy: Node) -> bool:
+	return enemy.is_on_screen()
+
 func _in_protocol_query() -> bool:
-	return false
+	return player.has_protocol
 
 ## ---------- 关卡完成 / 重试 ----------
 

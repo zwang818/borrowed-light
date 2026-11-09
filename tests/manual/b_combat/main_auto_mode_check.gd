@@ -21,7 +21,7 @@ func run() -> void:
 	player.set_physics_process(false)
 	var visual = player.get_node("Facing/XiaoyiCombatVisual")
 	visual.set_physics_process(false)
-	assert(visual.get_script() == load("res://tests/manual/b_combat/xiaoyi_aim_visual.gd"))
+	assert(visual.get_script() == load("res://tests/manual/b_combat/xiaoyi_graybox_visual.gd"))
 	assert(visual.enhanced_gait and visual.face_firing_beam)
 	var enemies := get_nodes_in_group("combat_enemies")
 	assert(not enemies.is_empty())
