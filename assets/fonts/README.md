@@ -48,3 +48,7 @@ https://pypi.org/project/japanize-matplotlib/1.1.3/#files
 2026-11-02 C-STORY-01：已补齐当前示例通讯台词；保持原有 Noto Sans SC/OFL 来源，准确请求字符数与哈希见 gameplay_ui_source.json。
 
 2026-11-03 C-TERMINAL-01：补齐维护口令、两房间线索与数字键盘反馈文案，仍使用原 Noto Sans SC 400／SIL OFL；来源 URL、467 个请求字符与 SHA-256 见 gameplay_ui_source.json。
+
+2026-11-09 存档接入：游戏主题字体子集增加标题档案、保存反馈与确认文案，生成范围扩展为八个游戏运行脚本及 `scenes/ui/title_screen/title_screen.gd`；准确字符数、来源 URL 与哈希以 JSON 记录为准，继续使用 SIL OFL。
+
+2026-11-09 通关收尾：用户取消第二关进场，字体生成范围恢复为八个游戏运行脚本与标题脚本，补齐“第一关已通关／重玩第一关”文案；准确字形数与哈希以来源 JSON 为准。

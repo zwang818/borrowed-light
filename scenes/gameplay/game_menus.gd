@@ -3,6 +3,7 @@ extends CanvasLayer
 
 signal retry_requested
 signal title_requested
+signal save_requested
 
 enum Page { CLOSED, PAUSE, ACHIEVEMENTS, DEATH }
 const TOAST_SCRIPT := preload("res://scenes/gameplay/achievement_toasts.gd")
@@ -138,6 +139,7 @@ func _show_page(next_page: Page) -> void:
 			_label("暂停", 34, Color(0.96, 0.9, 0.73))
 			_label("Esc 继续游戏", 16, Color(0.65, 0.75, 0.77))
 			_button("继续游戏", close_and_resume)
+			_button("保存游戏", func(): save_requested.emit())
 			_button("成就手册", func(): _show_page(Page.ACHIEVEMENTS))
 			_button("重试本房间", func(): retry_requested.emit())
 			_button("返回标题", func(): title_requested.emit())

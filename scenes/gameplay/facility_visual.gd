@@ -58,5 +58,8 @@ func _draw() -> void:
 	var atlas: Texture2D = preload("res://assets/sprites/environment/abdomen/terrain_atlas.png")
 	var cell := atlas.get_size() / 4.0
 	material = ART_SCALE.surface_material(cell.x / dimensions.x, cell.y / dimensions.y)
+	draw_rect(Rect2(-half + Vector2(3, 3), dimensions), Color(0.02, 0.04, 0.05, 0.45))
 	draw_texture_rect_region(atlas, Rect2(-half, dimensions), Rect2(Vector2(0, 2) * cell, cell), Color(0.75, 0.86, 0.87, 1))
+	draw_rect(Rect2(Vector2(-half.x, half.y - 5), Vector2(dimensions.x, 5)), Color("26373b"))
+	draw_line(Vector2(-half.x, half.y - 5), Vector2(half.x, half.y - 5), Color("75898a"), 1)
 	draw_rect(Rect2(-half, dimensions), Color("25383d"), false, 1)

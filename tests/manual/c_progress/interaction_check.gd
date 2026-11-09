@@ -96,6 +96,11 @@ func run_checks() -> void:
 	check(player.test_move(player.global_transform, Vector2(0, -60)), "Closed entrance physically blocks player")
 	level._update_interaction()
 	check(level.nearest_interactable != level.terminal, "Terminal cannot be used through closed gate")
+	player.global_position = level.terminal.global_position + Vector2(-72, 90)
+	await physics_frame
+	check(player.test_move(player.global_transform, Vector2(0, -50)), "Enclosure column blocks walking into its front end")
+	level._update_world_prompts()
+	check(level.terminal_walls[0].get_node("FacilityVisual").z_index == 0, "Standing in front of enclosure column does not hide player's upper body")
 	player.global_position = level.terminal.global_position + Vector2(-120, 0)
 	await physics_frame
 	check(player.test_move(player.global_transform, Vector2(80, 0)), "Side wall prevents bypass")
@@ -107,8 +112,12 @@ func run_checks() -> void:
 	check(is_equal_approx(level.terminal_gate.get_node("FacilityVisual").open_amount, 1.0), "Door animation exposes open entrance")
 	player.global_position = level.terminal.global_position + Vector2(0, 100)
 	check(not player.test_move(player.global_transform, Vector2(0, -60)), "Player can enter after clear")
-	player.global_position = level.terminal.global_position + Vector2(0, 24)
+	player.global_position = level.terminal.global_position + Vector2(0, 40)
 	await physics_frame
+	check(player.test_move(player.global_transform, Vector2(0, -30)), "Solid terminal blocks approaching from the front")
+	check(player.test_move(Transform2D(0, level.terminal.global_position + Vector2(48, 10)), Vector2(-40, 0)), "Solid terminal blocks approaching from the side")
+	level._update_world_prompts()
+	check(level.terminal.get_node("FacilityVisual").z_index == 0, "Player standing in front renders in front of terminal")
 	level._try_interact()
 	check(paused and level.pending_interaction == level.TERMINAL_REQUEST and not level.terminal_activated, "E opens terminal password entry")
 	for digit in level.TERMINAL_CODE:

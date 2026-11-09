@@ -24,7 +24,7 @@ func press_key(keycode: Key, unicode: int = 0) -> void:
 	await process_frame
 
 func approach(level: Node, target: Node2D) -> void:
-	level.player.global_position = target.global_position + Vector2(0, 24)
+	level.player.global_position = target.global_position + Vector2(0, 40 if target == level.terminal else 24)
 	await physics_frame
 	var event := InputEventAction.new()
 	event.action = &"interact"

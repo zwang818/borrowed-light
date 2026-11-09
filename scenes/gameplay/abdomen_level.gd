@@ -11,6 +11,9 @@ const SHEET_SCRIPT := preload("res://scenes/gameplay/interaction_sheet.gd")
 const FACILITY_SCRIPT := preload("res://scenes/gameplay/facility_visual.gd")
 const DUCT_VISUAL := preload("res://scenes/gameplay/duct_visual.gd")
 const HEALTH_SCRIPT := preload("res://scenes/gameplay/health_hearts.gd")
+const JOURNEY_SAVE := preload("res://scenes/gameplay/journey_save.gd")
+var journey_save_path := ""
+var first_level_cleared := false
 const TERMINAL_REQUEST := &"terminal_access"
 const TERMINAL_CODE := "0417"
 const TERMINAL_CLUES := {&"pulse_blueprint": "04", &"workshop_origin": "17"}
@@ -63,6 +66,7 @@ var player: CharacterBody2D
 var enemies: Array[Node] = []
 var interactables: Array[Node] = []
 var is_level_complete := false
+var exit_retry_blocked := false
 var nearest_interactable: Node = null
 
 enum Objective { GET_WEAPON, KILL_ENEMIES, ACTIVATE_TERMINAL, REACH_EXIT, CRAFT_ARM }
@@ -88,6 +92,7 @@ var pending_interaction: StringName = &""
 var interaction_token := 0
 var interaction_sheet
 var terminal_gate: StaticBody2D
+var terminal_walls: Array[StaticBody2D] = []
 var health_display: Control
 var interaction_points: Dictionary = {}
 var ducts: Dictionary = {}
@@ -130,6 +135,9 @@ func _ready() -> void:
 	add_child(game_menus)
 	game_menus.retry_requested.connect(_retry_level)
 	game_menus.title_requested.connect(_return_to_title)
+	game_menus.save_requested.connect(func():
+		_save_journey(true)
+		game_menus.close_and_resume())
 	interaction_sheet = SHEET_SCRIPT.new()
 	add_child(interaction_sheet)
 	interaction_sheet.finished.connect(finish_interaction)
@@ -139,6 +147,55 @@ func _ready() -> void:
 	_setup_terminal_gate()
 	_setup_ducts()
 	_setup_achievement_events()
+	_restore_journey()
+
+func _restore_journey() -> void:
+	if not get_tree().has_meta("journey_session"):
+		return
+	var session: Dictionary = get_tree().get_meta("journey_session")
+	get_tree().remove_meta("journey_session")
+	journey_save_path = session.path
+	var data: Dictionary = session.get("data", {})
+	if not data.is_empty():
+		first_level_cleared = data.get("first_level_cleared", false)
+		blueprint_known = data.blueprint_known
+		pulse_learned = data.pulse_learned
+		workshop_seen = data.workshop_seen
+		if blueprint_known:
+			terminal_clues[&"pulse_blueprint"] = TERMINAL_CLUES[&"pulse_blueprint"]
+		if workshop_seen:
+			terminal_clues[&"workshop_origin"] = TERMINAL_CLUES[&"workshop_origin"]
+		for id in data.ducts:
+			unlocked_ducts[StringName(id)] = true
+			ducts[StringName(id)].visual.set_unlocked(true)
+		for point in data.explored:
+			explored_positions.append(Vector2(point[0], point[1]))
+		player.restore_player(_find_spawn_position(), player.max_health, ["pulse_gun"] if pulse_learned else [])
+		current_objective = Objective.KILL_ENEMIES if pulse_learned else (Objective.CRAFT_ARM if blueprint_known else Objective.GET_WEAPON)
+		game_menus.set_achievement_progress("duct_network", unlocked_ducts.size(), ducts.size())
+		camera.global_position = player.global_position
+		camera.reset_smoothing()
+		_update_hud()
+	else:
+		_save_journey(false)
+
+func _save_journey(show_result: bool = false) -> Error:
+	if journey_save_path.is_empty():
+		if show_result:
+			_show_notification("当前为独立场景，请从标题开始旅程后保存。")
+		return ERR_UNAVAILABLE
+	var explored: Array = []
+	for point in explored_positions:
+		explored.append([point.x, point.y])
+	var error := JOURNEY_SAVE.write_save(journey_save_path, {
+		"first_level_cleared": first_level_cleared,
+		"blueprint_known": blueprint_known, "pulse_learned": pulse_learned,
+		"workshop_seen": workshop_seen, "ducts": unlocked_ducts.keys(), "explored": explored})
+	if error != OK:
+		_show_notification("存档失败，请检查磁盘空间或文件权限。", 4.0)
+	elif show_result:
+		_show_notification("旅程已保存，读档后从房间入口继续。", 3.0)
+	return error
 
 func _process(_delta: float) -> void:
 	if get_tree().paused:
@@ -158,6 +215,14 @@ func _physics_process(delta: float) -> void:
 		if last_memory_record_time >= 0.5:
 			last_memory_record_time = 0.0
 			_record_exploration(player.global_position)
+		# A large damage silhouette can enter an Area before the player's feet.
+		# Poll the legal foot landing too, including already-overlapping players.
+		if is_instance_valid(final_exit):
+			var exit_shape: CollisionShape2D = final_exit.get_child(0)
+			if exit_shape.shape.get_rect().has_point(exit_shape.to_local(player.global_position)):
+				_on_exit_entered(player, final_exit.get_meta("exit_id"))
+			else:
+				exit_retry_blocked = false
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact") and not get_tree().paused and not is_level_complete:
@@ -334,6 +399,13 @@ func _update_hp_bar() -> void:
 	health_display.set_health(float(player.health), float(player.max_health))
 
 func _update_world_prompts() -> void:
+	# Feet in front of a solid prop must render in front of its raised surface.
+	terminal.get_node("FacilityVisual").z_index = 0 if player.global_position.y > terminal.global_position.y + 28 else 5
+	for wall in terminal_walls:
+		wall.get_node("FacilityVisual").z_index = 0 if player.global_position.y > wall.get_meta("front_edge") else 5
+	for door in interactables:
+		if is_instance_valid(door) and door.has_meta("is_door"):
+			door.get_node("FacilityVisual").z_index = 0 if player.global_position.y > door.global_position.y else 5
 	# One contextual screen prompt. No duplicate labels above world objects.
 	terminal.get_node("FacilityVisual").set_status(terminal_gate.get_meta("is_open", false), nearest_interactable == terminal, terminal_activated)
 	var terminal_marker = terminal.get_node("InteractionMarker")
@@ -476,6 +548,17 @@ func _add_terminal(pos: Vector2, term_id: String, linked: Array) -> Node:
 	circle.radius = 20.0
 	shape.shape = circle
 	area.add_child(shape)
+	var solid := StaticBody2D.new()
+	solid.name = "SolidBody"
+	solid.collision_layer = 1
+	solid.collision_mask = 0
+	var solid_shape := CollisionShape2D.new()
+	var footprint := RectangleShape2D.new()
+	footprint.size = Vector2(42, 36)
+	solid_shape.shape = footprint
+	solid_shape.position = Vector2(0, 10)
+	solid.add_child(solid_shape)
+	area.add_child(solid)
 	var visual := FACILITY_SCRIPT.new()
 	visual.name = "FacilityVisual"
 	visual.kind = "terminal"
@@ -592,6 +675,8 @@ func _update_interaction() -> void:
 		if dist >= nearest_dist:
 			continue
 		var query := PhysicsRayQueryParameters2D.create(player.global_position, obj.global_position, 1)
+		if obj.has_meta("is_terminal"):
+			query.exclude = [obj.get_node("SolidBody").get_rid()]
 		if not get_world_2d().direct_space_state.intersect_ray(query).is_empty():
 			continue
 		nearest_interactable = obj
@@ -635,6 +720,7 @@ func _can_use_terminal() -> bool:
 	if player.global_position.distance_to(terminal.global_position) >= C.interaction_range:
 		return false
 	var query := PhysicsRayQueryParameters2D.create(player.global_position, terminal.global_position, 1)
+	query.exclude = [terminal.get_node("SolidBody").get_rid()]
 	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
 
 func _request_terminal_code() -> void:
@@ -705,10 +791,13 @@ func _door_flash_animation(door: Node) -> void:
 func _on_exit_entered(body: Node, exit_id: String) -> void:
 	if body.has_method("get_damage_receiver"):
 		body = body.get_damage_receiver()
-	if body != player or player.is_dead or get_tree().paused or is_level_complete:
+	if body != player or player.is_dead or get_tree().paused or is_level_complete or exit_retry_blocked:
 		return
 	for obj in interactables_parent.get_children():
 		if obj.has_meta("exit_id") and obj.get_meta("exit_id") == exit_id:
+			var exit_shape: CollisionShape2D = obj.get_child(0)
+			if not exit_shape.shape.get_rect().has_point(exit_shape.to_local(player.global_position)):
+				return
 			if obj.get_meta("is_final_exit", false) and terminal_activated:
 				is_level_complete = true
 				game_menus.unlock_achievement("first_exit")
@@ -747,25 +836,24 @@ func _in_protocol_query() -> bool:
 ## ---------- 关卡完成 / 重试 ----------
 
 func _show_level_complete() -> void:
-	await _fade_to_black()
-	var canvas := CanvasLayer.new()
-	add_child(canvas)
-	var panel := ColorRect.new()
-	panel.color = Color(0, 0, 0, 0.8)
-	panel.position = Vector2(366, 264)
-	panel.size = Vector2(420, 120)
-	canvas.add_child(panel)
-	var label := Label.new()
-	label.text = C.t_level_complete
-	label.position = Vector2(366, 264)
-	label.size = Vector2(420, 120)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 48)
-	label.add_theme_color_override("font_color", Color(1, 0.9, 0.7, 1))
-	canvas.add_child(label)
-	await get_tree().create_timer(C.level_complete_wait).timeout
-	get_tree().change_scene_to_file("res://scenes/main.tscn")
+	var previously_cleared := first_level_cleared
+	first_level_cleared = true
+	if not journey_save_path.is_empty() and _save_journey(false) != OK:
+		first_level_cleared = previously_cleared
+		is_level_complete = false
+		exit_retry_blocked = true
+		return
+	player.controls_enabled = false
+	player.velocity = Vector2.ZERO
+	player.pulse_gun.cancel()
+	var loading := preload("res://scenes/ui/intro_cutscene/entry_loading.gd").new()
+	loading.name = "EntryLoading"
+	loading.cancelled.connect(func():
+		is_level_complete = false
+		exit_retry_blocked = true
+		player.controls_enabled = true)
+	get_tree().root.add_child(loading)
+	loading.begin("res://scenes/main.tscn")
 
 func _fade_to_black() -> ColorRect:
 	var canvas := CanvasLayer.new()
@@ -955,6 +1043,8 @@ func finish_interaction(token: int, completed: bool) -> void:
 				workshop_seen = true
 				game_menus.unlock_achievement("workshop_reader")
 	# Finish this event before enabling the world again (prevents input leaking).
+	if completed:
+		_save_journey(false)
 	interaction_finished.emit(token, completed)
 	_resume_story.call_deferred()
 
@@ -967,7 +1057,9 @@ func _setup_terminal_gate() -> void:
 	var origin: Vector2 = terminal.position
 	for wall in [Rect2(-80, -72, 16, 128), Rect2(64, -72, 16, 128), Rect2(-64, -80, 128, 16)]:
 		var body := StaticBody2D.new()
+		body.name = "TerminalEnclosureWall_%d" % terminal_walls.size()
 		body.position = origin + wall.get_center()
+		body.set_meta("front_edge", origin.y + wall.end.y)
 		body.collision_layer = 1
 		body.collision_mask = 0
 		var shape := CollisionShape2D.new()
@@ -976,10 +1068,12 @@ func _setup_terminal_gate() -> void:
 		shape.shape = rectangle
 		body.add_child(shape)
 		var visual := FACILITY_SCRIPT.new()
+		visual.name = "FacilityVisual"
 		visual.kind = "wall"
 		visual.dimensions = wall.size
 		body.add_child(visual)
 		interactables_parent.add_child(body)
+		terminal_walls.append(body)
 	_add_door(origin + Vector2(0, 48), "p1_terminal_access_gate")
 	terminal_gate = interactables[-1]
 	var gate_shape: CollisionShape2D = terminal_gate.get_child(0)
@@ -987,6 +1081,8 @@ func _setup_terminal_gate() -> void:
 	terminal_gate.get_node("FacilityVisual").dimensions = Vector2(144, 16)
 
 func _return_to_title() -> void:
+	if not journey_save_path.is_empty() and _save_journey(false) != OK:
+		return
 	get_tree().paused = false
 	var error := get_tree().change_scene_to_file("res://scenes/main.tscn")
 	if error != OK:

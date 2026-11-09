@@ -33,3 +33,14 @@ C-STORY-01：interaction_check 现通过真实 E 输入打开通讯，验证第�
 `godot --headless --path . --script res://tests/manual/c_progress/terminal_password_check.gd`
 
 覆盖两房间线索、取消不记录、重复查看、知识快照隔离、真实 E 打开键盘、键盘／鼠标输入、开头零、清空／退格、空／短／错误密码、正确验证、取消与过期回调、通用完成接口不能绕过、清场与出口门分离、原终端成就、重试知识保留与新关卡清空。另检查 1152×648 和 960×540 布局。使用隔离成就文件 `test_terminal_password.cfg` 并清理，不覆盖玩家存档。非无界面运行时可通过环境变量 `C_TERMINAL_PREVIEW_PATH` 将预览保存到仓库外。
+
+## 加载、旅程存档与第一关通关（2026-11-09）
+
+```sh
+godot --headless --path . --script res://tests/manual/c_progress/journey_save_check.gd
+godot --headless --path . --script res://tests/manual/c_progress/level_clear_check.gd
+```
+
+分别输出 `JOURNEY SAVE CHECKS: PASS`、`LEVEL CLEAR CHECKS: PASS`。两者使用隔离的旅程与成就路径，覆盖损坏备份回退、覆盖／删除确认、标题读取、知识与房间基线恢复，以及脚底出口判定、先保存通关结果再加载返回标题。`progress_check.gd` 同时检查进入第一关的三秒加载、重复请求保护与场景准备前不填满。
+
+`interaction_check.gd` 增加终端正面／侧面及围墙的真实碰撞与遮挡层级检查；终端自己的实体不阻断合法交互射线，其他墙体仍阻挡。机器人动作与界面布局还需实际窗口检查。命令行检查不代表人工 F5 完整路线验收。接口与限制见 [加载说明](../../../docs/entry_loading.md)、[存档说明](../../../docs/journey_save.md)。

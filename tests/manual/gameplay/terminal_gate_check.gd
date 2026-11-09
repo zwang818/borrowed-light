@@ -8,7 +8,7 @@ func run() -> void:
 	scene.player.set_physics_process(false)
 	for enemy in scene.enemies:
 		enemy.set_physics_process(false)
-	scene.player.global_position = scene.terminal.global_position + Vector2(0,30)
+	scene.player.global_position = scene.terminal.global_position + Vector2(0,40)
 	var press := InputEventAction.new()
 	press.action = &"interact"
 	press.pressed = true
@@ -36,7 +36,7 @@ func run() -> void:
 	assert(scene._remaining_cleaners() == 3)
 	assert(not scene.terminal.get_meta("activated"))
 	assert(not door.get_meta("is_open") and door.collision_layer == 1)
-	scene.player.global_position = scene.terminal.global_position + Vector2(0,30)
+	scene.player.global_position = scene.terminal.global_position + Vector2(0,40)
 	scene._input(press)
 	assert(not scene.terminal_activated)
 	await create_timer(.15).timeout
