@@ -1,14 +1,51 @@
 @tool
 extends Node2D
-## Background motion blockouts only, not interactive machines or walkable surfaces.
+## Reuses the graybox machine anchors and animation phase for the environment art.
+const SKIN = preload("res://scenes/levels/spine/spine_machine_skin.gd")
+var skin: Node2D
 @export_enum("fan", "piston", "distributor") var kind := "fan"
 @export var phase := 0.0
 var clock := 0.0
+var art_frame := -1
+var view_probe: VisibleOnScreenNotifier2D
+var art_enabled := false:
+	set(value):
+		art_enabled = value
+		if value and skin == null:
+			skin = SKIN.new()
+			skin.name = "MachineSkin"
+			add_child(skin)
+			skin.build()
+		if skin != null:
+			skin.visible = value
+		queue_redraw()
+
+
+func _ready() -> void:
+	if Engine.is_editor_hint():
+		set_process(false)
+		return
+	view_probe = VisibleOnScreenNotifier2D.new()
+	view_probe.rect = Rect2(-106, -103, 212, 206)
+	view_probe.screen_entered.connect(_update_pose)
+	add_child(view_probe)
+
 func _process(delta: float) -> void:
-	if not Engine.is_editor_hint():
-		clock += delta
-	queue_redraw()
+	clock += delta
+	var frame := int(clock * 18.0)
+	if frame != art_frame and view_probe.is_on_screen():
+		art_frame = frame
+		_update_pose()
+
+func _update_pose() -> void:
+	if art_enabled and skin != null:
+		skin.set_pose(floorf(clock * 18.0) / 18.0, phase)
+	else:
+		queue_redraw()
+
 func _draw() -> void:
+	if art_enabled:
+		return
 	var pale := Color("657b81")
 	var dark := Color("20333d")
 	draw_rect(Rect2(-90,-90,180,180), Color("172730"))

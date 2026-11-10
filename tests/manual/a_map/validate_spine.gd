@@ -152,12 +152,45 @@ func run() -> void:
 		actor.velocity = Vector2(.422618,.906308) * 600
 		actor.move_and_slide()
 	check(map.is_walkable_point(actor.position), "Actor escaped outer edge")
-	var machine: Node2D = map.get_node("BackgroundMachines").get_child(0)
+	var art: Node2D = map.get_node("SpineArt")
+	var pumps := art.get_node("CirculationPumps")
+	check(pumps.get_child_count() == 8, "Missing authored circulation pumps")
+	var machine: Node2D = pumps.get_child(0)
 	var clock_before: float = machine.clock
+	check(not map.get_node("BackgroundMachines").visible and not map.get_node("DeepStructure").visible,
+		"Graybox machines or background show through the circulation artwork")
 	paused = true
 	for i in range(3): await process_frame
 	check(is_equal_approx(machine.clock,clock_before), "Background motion ignores pause")
+	var seam: Node2D
+	for fixture in art.get_node("Fittings").get_children():
+		if fixture.kind == "seam":
+			seam = fixture
+	check(is_instance_valid(seam) and seam.arc_preview, "Missing visual electric seam")
+	if is_instance_valid(seam):
+		var arc_before: float = seam.seconds
+		for i in range(3):
+			await process_frame
+		check(is_equal_approx(seam.seconds, arc_before), "Electric arc ignores pause")
 	paused = false
+	var sample_top: Polygon2D = map.get_node("Floors/SpineSegment00/Top")
+	var finish: ShaderMaterial = sample_top.material
+	check(is_instance_valid(finish) and finish.get_shader_parameter("pixel_world") == 1.0,
+		"Environment pixel scale differs from the abdomen baseline")
+	await press_key(KEY_F)
+	check(not art.enabled and sample_top.material == null and not preview.door_skins[0].visible,
+		"F did not restore the blockout")
+	check(map.get_node("BackgroundMachines").visible and not pumps.visible,
+		"F did not restore the original machine guides")
+	await press_key(KEY_F)
+	check(art.enabled and sample_top.material == finish and preview.door_skins[0].visible,
+		"F did not restore the environment")
+	await press_key(KEY_H)
+	check(not art.get_node("CopperBundle").visible and not art.get_node("RolledRims").visible,
+		"H did not hide the shell depth layers")
+	await press_key(KEY_H)
+	check(art.get_node("CopperBundle").visible and art.get_node("RolledRims").visible,
+		"H did not restore the shell depth layers")
 	await press_key(KEY_V)
 	check(map.get_node("BoundaryDebug").visible, "V collision view failed")
 	preview.set_overview(false)
@@ -166,5 +199,5 @@ func run() -> void:
 	check(preview.get_node("Camera").zoom.x<.65, "Overview failed")
 	for top in map.get_walk_surfaces(): check(not Geometry2D.triangulate_polygon(top.polygon).is_empty(), "Invalid terrain")
 	preview.queue_free(); await process_frame
-	print("SPINE_DIAGONAL: %s | 26 IDs, 6 sentries/6 cleaners reserved, main return walk, dead-end out/back, duct walk, gate isolation, rotated door safety, raised 2D camera" % ("PASS" if failures.is_empty() else "FAIL"))
+	print("SPINE_DIAGONAL: %s | 26 IDs, 6 sentries/6 cleaners reserved, main return walk, dead-end out/back, duct walk, gate isolation, rotated door safety, raised 2D camera, circulation art toggle and paused arc" % ("PASS" if failures.is_empty() else "FAIL"))
 	quit(0 if failures.is_empty() else 1)
