@@ -441,9 +441,10 @@ func _configure_player() -> void:
 	var map_bounds: Rect2 = map.get_meta("map_bounds", Rect2(128, 32, 1120, 2688))
 	player.get_node("Facing/Body").hide()
 	player.get_node("Facing/DirectionIndicator").hide()
-	robot_visual = preload("res://tests/manual/b_combat/xiaoyi_graybox_visual.gd").new()
+	robot_visual = preload("res://tests/manual/b_combat/xiaoyi_spark_visual.gd").new()
 	robot_visual.name = "XiaoyiCombatVisual"
 	robot_visual.display_height = 60.0
+	robot_visual.sparks_enabled = false
 	robot_visual.enhanced_gait = true
 	robot_visual.face_firing_beam = true
 	player.get_node("Facing").add_child(robot_visual)
@@ -694,6 +695,7 @@ func _retry_level() -> void:
 	var spawn_pos: Vector2 = _find_spawn_position()
 
 	player.restore_player(spawn_pos, player.max_health, ["pulse_gun"] if pulse_learned else [])
+	robot_visual.trail.clear()
 	current_objective = Objective.KILL_ENEMIES if pulse_learned else (Objective.CRAFT_ARM if blueprint_known else Objective.GET_WEAPON)
 	terminal_activated = false
 	if is_instance_valid(terminal):
