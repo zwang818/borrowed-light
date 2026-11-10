@@ -63,6 +63,27 @@ func _sheet_cell(source: Image, row: int, column: int, row_count: int) -> Rect2i
 	var y1 := roundi(float(row+1)*source.get_height()/row_count)
 	return Rect2i(x0,y0,x1-x0,y1-y0)
 
+func set_front_pose(enabled: bool) -> void:
+	if not enabled:
+		_show_frame()
+		return
+	var saved_row := facing_row
+	var saved_column := current_column
+	var saved_distance := walk_distance
+	var saved_offset := gait_offset
+	facing_row = 0
+	current_column = 0
+	walk_distance = 0.0
+	gait_offset = Vector2.ZERO
+	_show_frame()
+	if gait_material != null:
+		gait_material.set_shader_parameter("strength", 0.0)
+	facing_row = saved_row
+	current_column = saved_column
+	walk_distance = saved_distance
+	gait_offset = saved_offset
+
+
 func _show_frame() -> void:
 	# Keep weight transfer in the same rhythm as each slower walk cycle.
 	if facing_row in [0, 2, 3, 4, 6]:

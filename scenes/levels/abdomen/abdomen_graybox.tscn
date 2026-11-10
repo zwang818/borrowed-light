@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/levels/graybox/graybox_wall.tscn" id="1_wall"]
 [ext_resource type="Script" path="res://scenes/levels/graybox/graybox_floor.gd" id="2_floor"]
@@ -13,6 +13,8 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/abdomen/terrain_atlas.png" id="10_terrain"]
 [ext_resource type="PackedScene" path="res://scenes/levels/abdomen/abdomen_welding_station.tscn" id="11_welder"]
 [ext_resource type="PackedScene" path="res://scenes/levels/abdomen/abdomen_compressor.tscn" id="12_compressor"]
+
+[ext_resource type="Script" path="res://scenes/levels/abdomen/blueprint_terminal.gd" id="13_blueprint_terminal"]
 
 [sub_resource type="AtlasTexture" id="Atlas_chamfer"]
 atlas = ExtResource("10_terrain")
@@ -436,9 +438,24 @@ wall_color = Color(0.34902, 0.392157, 0.419608, 1)
 
 [node name="GunRackBase" parent="Walls" instance=ExtResource("1_wall")]
 script = ExtResource("7_wall_art")
-position = Vector2(384, 1856)
-size = Vector2(96, 64)
+position = Vector2(406.4, 1862.4)
+size = Vector2(51.2, 51.2)
 wall_color = Color(0.419608, 0.384314, 0.317647, 1)
+
+[node name="BlueprintComputer" type="Node2D" parent="Walls/GunRackBase"]
+position = Vector2(25.6, 16.8)
+scale = Vector2(0.8, 0.8)
+z_index = 2
+texture_filter = 1
+script = ExtResource("13_blueprint_terminal")
+
+[node name="ComputerBody" type="StaticBody2D" parent="Walls/GunRackBase"]
+position = Vector2(25.6, 16.8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="Collision" type="CollisionPolygon2D" parent="Walls/GunRackBase/ComputerBody"]
+polygon = PackedVector2Array(-51.2, -28, -39.2, -38.4, 43.2, -38.4, 52.8, -28, 52.8, 19.2, 43.2, 32, -51.2, 32)
 
 [node name="FirstCombatScreen" parent="Walls" instance=ExtResource("1_wall")]
 script = ExtResource("7_wall_art")
@@ -457,12 +474,6 @@ script = ExtResource("7_wall_art")
 position = Vector2(608, 384)
 size = Vector2(64, 160)
 wall_color = Color(0.34902, 0.392157, 0.419608, 1)
-
-[node name="ExitSideMachine" parent="Walls" instance=ExtResource("1_wall")]
-script = ExtResource("7_wall_art")
-position = Vector2(896, 288)
-size = Vector2(64, 64)
-wall_color = Color(0.290196, 0.364706, 0.388235, 1)
 
 [node name="ArrivalChamfer" parent="Walls" instance=ExtResource("5_chamfer")]
 position = Vector2(192, 2080)
@@ -979,11 +990,6 @@ fit_parent_wall = true
 [node name="EnvironmentSkin" type="Node2D" parent="Walls/ExitMachine"]
 script = ExtResource("9_prop")
 atlas_cell = 3
-fit_parent_wall = true
-
-[node name="EnvironmentSkin" type="Node2D" parent="Walls/ExitSideMachine"]
-script = ExtResource("9_prop")
-atlas_cell = 12
 fit_parent_wall = true
 
 [node name="Environment" parent="." instance=ExtResource("8_environment")]
