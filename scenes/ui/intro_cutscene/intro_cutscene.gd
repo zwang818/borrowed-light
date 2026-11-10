@@ -1,7 +1,7 @@
 extends Control
 ## 《借光》开场导入动画 v4
 ## 所有帧内容可在 Inspector 实时修改。
-## 修复列表（vs v3）：按钮自动绑定关卡；WASD 说明移到开头；字体美化；神明视觉更纯粹。
+## 开场插画、对白和关卡入口。
 
 signal intro_finished
 
@@ -31,8 +31,6 @@ signal intro_finished
 @export var robot_texture: Texture2D = preload("res://tests/manual/b_combat/art/xiaoyi/xiaoyi_idle_pixel.png")
 
 @export_group("Audio")
-@export var intro_bgm: AudioStream = preload("res://assets/audio/title_bgm.wav")
-@export_range(0.0, 1.0, 0.05) var bgm_volume: float = 0.4
 
 # ---------- 帧数据（Inspector 可编辑） ----------
 # mode         "auto" 按时长走；"click" 需鼠标/E 推进
@@ -42,77 +40,69 @@ signal intro_finished
 # show_deity   旧兼容字段；核心光效已绘入神明贴图
 # robot_action "idle" | "pulse" | "walk_to_beast"
 # show_hud     是否显示进入按钮
-# show_hint    是否显示 WASD 玩法说明（仅前几帧用）
 # system_lines 系统警告文字数组（空=不弹）
 @export var frames: Array[Dictionary] = [
-	{   # 1. 黑底 1s
-		"mode": "auto", "duration": 1.0,
-		"text": "", "dialog_style": "hidden",
-		"show_deity": false, "robot_action": "idle",
-		"show_hud": false, "show_hint": false,
-		"landscape_alpha": 0.0, "beast_alpha": 0.0, "robot_alpha": 0.0,
-	},
-	{   # 2. 背景淡入 + WASD 玩法说明 2s（玩家先看清环境 + 操作）
-		"mode": "auto", "duration": 2.2,
-		"text": "", "dialog_style": "hidden",
-		"show_deity": false, "robot_action": "idle",
-		"show_hud": false, "show_hint": true,
-		"landscape_alpha": 1.0, "beast_alpha": 1.0, "robot_alpha": 0.0,
-	},
 	{   # 3. 神明（edge-tts Yunxi 云希 + Madness 氛围）
+		"illustration": preload("res://assets/backgrounds/intro_story/call.png"),
 		"mode": "click", "duration": 4.5,
-		"text": "小一……传回来的那片绿，是什么？", "dialog_style": "warm",
+		"text": "神明：小一……传回来的那片绿，是什么？", "dialog_style": "warm",
 		"show_deity": true, "robot_action": "idle",
-		"show_hud": false, "show_hint": false,
+		"show_hud": false,
 		"landscape_alpha": 1.0, "beast_alpha": 1.0, "robot_alpha": 1.0,
 		"voice": "res://assets/audio/voices/frame03_deity.wav",
 	},
 	{   # 4. 小一（DROID 机器人素材 + 字幕）
+		"illustration": preload("res://assets/backgrounds/intro_story/seed.png"),
 		"mode": "click", "duration": 1.5,
-		"text": "……种子。从石缝里钻出来。", "dialog_style": "warm",
+		"text": "小一：……种子。从石缝里钻出来。", "dialog_style": "warm",
 		"show_deity": true, "robot_action": "pulse",
-		"show_hud": false, "show_hint": false,
+		"show_hud": false,
 		"landscape_alpha": 1.0, "beast_alpha": 1.0, "robot_alpha": 1.0,
 		"voice": "res://assets/audio/voices/frame04_xiaoyi.wav",
 	},
 	{   # 5. 神明
+		"illustration": preload("res://assets/backgrounds/intro_story/alarm.png"),
 		"mode": "click", "duration": 4.0,
-		"text": "小一……维护系统，在收紧。", "dialog_style": "warm_dim",
+		"text": "神明：小一……维护系统，在收紧。", "dialog_style": "warm_dim",
 		"show_deity": true, "robot_action": "pulse",
-		"show_hud": false, "show_hint": false,
+		"show_hud": false,
 		"landscape_alpha": 1.0, "beast_alpha": 1.0, "robot_alpha": 1.0,
 		"voice": "res://assets/audio/voices/frame05_deity.wav",
 	},
 	{   # 6. 神明
+		"illustration": preload("res://assets/backgrounds/intro_story/memory.png"),
 		"mode": "click", "duration": 3.5,
-		"text": "它们要清空……意识区。", "dialog_style": "warm_dim",
+		"text": "神明：它们要清空……意识区。", "dialog_style": "warm_dim",
 		"show_deity": true, "robot_action": "pulse",
-		"show_hud": false, "show_hint": false,
+		"show_hud": false,
 		"landscape_alpha": 1.0, "beast_alpha": 1.0, "robot_alpha": 1.0,
 		"voice": "res://assets/audio/voices/frame06_deity.wav",
 	},
 	{   # 7. 系统警告 auto
+		"illustration": preload("res://assets/backgrounds/intro_story/entry.png"),
 		"mode": "auto", "duration": 3.0,
 		"text": "", "dialog_style": "hidden",
 		"show_deity": false, "robot_action": "idle",
-		"show_hud": false, "show_hint": false,
+		"show_hud": false,
 		"system_lines": ["非授权外连已记录。", "意识载体定位中。"],
 		"landscape_alpha": 1.0, "beast_alpha": 1.0, "robot_alpha": 1.0,
 		"voice": "",
 	},
 	{   # 8. 求救
+		"illustration": preload("res://assets/backgrounds/intro_story/distant_call.png"),
 		"mode": "click", "duration": 3.0,
-		"text": "你能……回来吗？", "dialog_style": "warm",
+		"text": "神明：你能……回来吗？", "dialog_style": "warm",
 		"show_deity": true, "robot_action": "walk_to_beast",
-		"show_hud": false, "show_hint": false,
+		"show_hud": false,
 		"landscape_alpha": 1.0, "beast_alpha": 1.0, "robot_alpha": 1.0,
 		"voice": "res://assets/audio/voices/frame08_deity.wav",
 	},
 	{   # 9. 最后：进入按钮
+		"illustration": preload("res://assets/backgrounds/intro_story/distant_call.png"),
 		"mode": "click", "duration": 1.0,
 		"text": "", "dialog_style": "hidden",
 		"show_deity": true, "robot_action": "walk_to_beast",
-		"show_hud": true, "show_hint": false,
+		"show_hud": true,
 		"landscape_alpha": 1.0, "beast_alpha": 1.0, "robot_alpha": 1.0,
 	},
 ]
@@ -123,6 +113,12 @@ var _frame_timer: float = 0.0
 var _elapsed: float = 0.0
 
 var _landscape: TextureRect
+var _showing_illustration := false
+var _warning_marker: TextureRect
+var _alarm_player: AudioStreamPlayer
+var _alarm_elapsed := 0.0
+var _alarm_beat := -1
+const ALARM_PERIOD := 0.76
 var _beast: TextureRect
 var _robot_anchor: Control
 var _robot: TextureRect
@@ -153,16 +149,13 @@ var _system_labels: Array[Label] = []
 
 var _hud_layer: Control
 var _hud_goal: Label
-var _hud_hint: Label
 var _enter_button: Button
 var _finishing := false
 
-var _bgm_player: AudioStreamPlayer
 var _voice_player: AudioStreamPlayer
 var _page_sfx: AudioStreamPlayer
 var _footstep_sfx: AudioStreamPlayer
 var _footstep_timer: float = 0.0
-var _bgm_duck_tween: Tween
 var _tween: Tween
 
 # ---------- 生命周期 ----------
@@ -171,9 +164,11 @@ func _ready() -> void:
 	resized.connect(_fit_scene_art)
 	_fit_scene_art()
 	_setup_audio()
-	_apply_frame_visuals(frames[0])
-	if auto_start and frames.size() > 0:
-		_advance()
+	if not frames.is_empty():
+		if auto_start:
+			_advance()
+		else:
+			_apply_frame_visuals(frames[0])
 
 func _process(delta: float) -> void:
 	if _finishing:
@@ -217,7 +212,8 @@ func _advance() -> void:
 		return
 	var frame: Dictionary = frames[_frame_index]
 	_apply_frame_visuals(frame)
-	_play_page_tween(frame)
+	if frame.get("dialog_style", "hidden") != "hidden":
+		_play_page_tween(frame)
 	_play_page_click()   # 点击下一句音效
 	_play_frame_voice(frame)   # 角色配音 + BGM duck
 	var mode: String = str(frame.get("mode", "auto"))
@@ -238,7 +234,7 @@ func _finish() -> void:
 	_finishing = true
 	_enter_button.disabled = true
 	_voice_player.stop()
-	_restore_bgm()
+	_alarm_player.stop()
 	intro_finished.emit()
 	var loading := preload("res://scenes/ui/intro_cutscene/entry_loading.gd").new()
 	loading.name = "EntryLoading"
@@ -252,44 +248,23 @@ func _play_frame_voice(frame: Dictionary) -> void:
 	_voice_player.stop()
 	var voice_path: String = str(frame.get("voice", ""))
 	if voice_path.is_empty():
-		_restore_bgm()
 		return
 	var stream: AudioStream = load(voice_path)
 	if stream == null:
-		_restore_bgm()
 		return
 	_voice_player.stream = stream
-	_voice_player.volume_db = -2.0   # 语音稍响，盖过 BGM
+	_voice_player.volume_db = -2.0
 	_voice_player.play()
-	_duck_bgm()
-
-func _on_voice_finished() -> void:
-	_restore_bgm()
-
-func _duck_bgm() -> void:
-	if _bgm_duck_tween != null and _bgm_duck_tween.is_valid():
-		_bgm_duck_tween.kill()
-	_bgm_duck_tween = create_tween()
-	_bgm_duck_tween.tween_property(_bgm_player, "volume_db", linear_to_db(bgm_volume) - 10.0, 0.25).set_trans(Tween.TRANS_SINE)
-
-func _restore_bgm() -> void:
-	if _bgm_duck_tween != null and _bgm_duck_tween.is_valid():
-		_bgm_duck_tween.kill()
-	_bgm_duck_tween = create_tween()
-	_bgm_duck_tween.tween_property(_bgm_player, "volume_db", linear_to_db(bgm_volume), 0.35).set_trans(Tween.TRANS_SINE)
 
 func _setup_audio() -> void:
-	_bgm_player = AudioStreamPlayer.new()
-	add_child(_bgm_player)
-	_bgm_player.stream = intro_bgm
-	_bgm_player.volume_db = linear_to_db(bgm_volume)
-	if intro_bgm != null:
-		_bgm_player.play()
 	_voice_player = AudioStreamPlayer.new()
-	_voice_player.finished.connect(_on_voice_finished)
 	add_child(_voice_player)
 	_page_sfx = AudioStreamPlayer.new()
 	add_child(_page_sfx)
+	_alarm_player = AudioStreamPlayer.new()
+	_alarm_player.stream = _make_alarm_sound()
+	_alarm_player.volume_db = -12.0
+	add_child(_alarm_player)
 	_footstep_sfx = AudioStreamPlayer.new()
 	add_child(_footstep_sfx)
 	_wind_player = AudioStreamPlayer.new()
@@ -310,6 +285,20 @@ func _play_footstep() -> void:
 	_footstep_sfx.stream = s
 	_footstep_sfx.volume_db = -12.0
 	_footstep_sfx.play()
+
+func _make_alarm_sound() -> AudioStreamWAV:
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = 22050
+	var samples := PackedByteArray()
+	var count := int(stream.mix_rate * 0.16)
+	samples.resize(count * 2)
+	for i in range(count):
+		var t := float(i) / stream.mix_rate
+		var envelope := minf(t * 250.0, 1.0) * exp(-t * 22.0)
+		samples.encode_s16(i * 2, int(sin(t * TAU * 740.0) * envelope * 8000.0))
+	stream.data = samples
+	return stream
 
 func _make_tick_sound() -> AudioStreamWAV:
 	var sr := 44100; var dur := 0.08; var count := int(sr * dur)
@@ -386,12 +375,39 @@ func _fit_scene_art() -> void:
 		return
 	_scene_scale = minf(viewport_size.x / DESIGN_SIZE.x, viewport_size.y / DESIGN_SIZE.y)
 	_scene_offset = (viewport_size - DESIGN_SIZE * _scene_scale) * 0.5
+	_warning_marker.size = Vector2(120, 105) * _scene_scale
+	_warning_marker.position = _scene_offset + Vector2(580, 290) * _scene_scale
 	_beast.position = _scene_offset + Vector2(380.0, 145.0) * _scene_scale
 	_beast.size = Vector2(880.0, 440.0) * _scene_scale
 	_robot_anchor.position = _scene_offset + Vector2(200.0, 430.0) * _scene_scale
 	_robot_anchor.scale = Vector2.ONE * _scene_scale
 	_grass_foreground.position = _scene_offset + Vector2(0.0, 470.0) * _scene_scale
 	_grass_foreground.size = Vector2(1280.0, 250.0) * _scene_scale
+	_fit_illustration(_showing_illustration)
+
+func _fit_illustration(widescreen: bool) -> void:
+	_landscape.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	if not widescreen:
+		return
+	var viewport_size := get_viewport_rect().size
+	var width := minf(viewport_size.x, viewport_size.y * 3.0)
+	var height := width / 3.0
+	_landscape.anchor_left = 0.5
+	_landscape.anchor_right = 0.5
+	_landscape.anchor_top = 0.5
+	_landscape.anchor_bottom = 0.5
+	_landscape.offset_left = -width * 0.5
+	_landscape.offset_right = width * 0.5
+	_landscape.offset_top = -height * 0.5
+	_landscape.offset_bottom = height * 0.5
+	_dialog_container.anchor_top = 0.5
+	_dialog_container.anchor_bottom = 0.5
+	_dialog_container.offset_top = height * 0.5 - 52.0
+	_dialog_container.offset_bottom = height * 0.5 - 8.0
+	_system_container.anchor_top = 0.5
+	_system_container.anchor_bottom = 0.5
+	_system_container.offset_top = height * 0.5 - 60.0
+	_system_container.offset_bottom = height * 0.5 - 8.0
 
 # ---------- 翻页动画 ----------
 func _play_page_tween(_frame: Dictionary) -> void:
@@ -406,7 +422,21 @@ func _play_page_tween(_frame: Dictionary) -> void:
 
 # ---------- 帧静态视觉 ----------
 func _apply_frame_visuals(frame: Dictionary) -> void:
+	var illustration: Texture2D = frame.get("illustration")
+	var illustrated := illustration != null
+	_showing_illustration = illustrated
+	_landscape.texture = illustration if illustrated else landscape_texture
+	_landscape.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED if illustrated else TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_fit_illustration(illustrated)
 	_landscape.modulate.a = float(frame.get("landscape_alpha", 1.0))
+	_beast.visible = not illustrated
+	_robot_anchor.visible = not illustrated
+	_grass_foreground.visible = not illustrated
+	_warning_marker.visible = frame.get("illustration") == preload("res://assets/backgrounds/intro_story/alarm.png")
+	_alarm_elapsed = 0.0
+	_alarm_beat = -1
+	if is_instance_valid(_alarm_player):
+		_alarm_player.stop()
 	_beast.modulate.a = float(frame.get("beast_alpha", 1.0))
 	_robot_anchor.modulate.a = float(frame.get("robot_alpha", 1.0))
 	# 对话框
@@ -417,8 +447,6 @@ func _apply_frame_visuals(frame: Dictionary) -> void:
 		_dialog_container.modulate.a = 1.0
 		_dialog_container.scale = Vector2.ONE
 		_text_label.text = str(frame.get("text", ""))
-		var deity_font: Font = _load_font(font_deity_path)
-		_text_label.add_theme_font_override("font", deity_font)
 		_text_label.add_theme_font_size_override("font_size", font_size_deity)
 		match style:
 			"warm":
@@ -442,17 +470,11 @@ func _apply_frame_visuals(frame: Dictionary) -> void:
 		_show_system(sys_lines)
 	else:
 		_system_container.modulate.a = 0.0
-	# HUD：WASD 玩法说明（仅开头）
-	if bool(frame.get("show_hint", false)):
-		_hud_hint.modulate.a = 1.0
-		_hud_goal.modulate.a = 0.0
-	else:
-		_hud_hint.modulate.a = 0.0
 	# 进入按钮（仅最后一帧）
 	if bool(frame.get("show_hud", false)):
 		_enter_button.visible = true
 		_hud_goal.modulate.a = 1.0
-		_hud_hint.modulate.a = 0.0
+
 		_click_prompt.text = ""
 		_next_arrow.text = ""
 	else:
@@ -486,6 +508,17 @@ func _set_dialog_reflection(fill: Color) -> void:
 
 # ---------- 动态每帧 ----------
 func _apply_frame_dynamic(delta: float, frame: Dictionary) -> void:
+	if frame.has("illustration"):
+		if _warning_marker.visible:
+			_alarm_elapsed += delta
+			var beat := int(_alarm_elapsed / ALARM_PERIOD)
+			if beat != _alarm_beat:
+				_alarm_beat = beat
+				_alarm_player.play()
+			var phase := fposmod(_alarm_elapsed, ALARM_PERIOD) / ALARM_PERIOD
+			var hop := sin(PI * minf(phase / 0.68, 1.0))
+			_warning_marker.position = _scene_offset + Vector2(580, 290 - 22 * hop) * _scene_scale
+		return
 	var action: String = str(frame.get("robot_action", "idle"))
 	var walking := action == "walk_to_beast"
 	if _wind_player != null:
@@ -543,7 +576,15 @@ func _build_scene() -> void:
 	_landscape.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_landscape.anchor_right = 1.0; _landscape.anchor_bottom = 1.0
 	_landscape.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_landscape.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(_landscape)
+	_warning_marker = TextureRect.new()
+	_warning_marker.texture = preload("res://assets/backgrounds/intro_story/warning.svg")
+	_warning_marker.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_warning_marker.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_warning_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_warning_marker.hide()
+	add_child(_warning_marker)
 
 	# 神明遗体：透明像素贴图叠在荒原远景前
 	_beast = TextureRect.new()
@@ -606,6 +647,7 @@ func _build_scene() -> void:
 	_dialog_panel.anchor_right = 1.0; _dialog_panel.anchor_bottom = 1.0
 	_dialog_panel.add_theme_stylebox_override("panel", _make_dialog_panel(Color(0.05, 0.04, 0.03, 0.88), Color(1.0, 0.70, 0.30, 0.55)))
 	_dialog_container.add_child(_dialog_panel)
+	_dialog_panel.hide()
 	_dialog_glint_top = ColorRect.new()
 	_dialog_glint_top.anchor_right = 1.0
 	_dialog_glint_top.offset_left = 8; _dialog_glint_top.offset_right = -12
@@ -623,20 +665,24 @@ func _build_scene() -> void:
 	_text_label = Label.new()
 	_text_label.anchor_left = 0.0; _text_label.anchor_right = 1.0
 	_text_label.anchor_top = 0.0; _text_label.anchor_bottom = 1.0
-	_text_label.offset_left = 20; _text_label.offset_right = -80
-	_text_label.offset_top = 8; _text_label.offset_bottom = -4   # 右下留 4px 给翻页提示
+	_text_label.offset_left = 0; _text_label.offset_right = 0
+	_text_label.offset_top = 0; _text_label.offset_bottom = 0   # 右下留 4px 给翻页提示
 	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_text_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_text_label.add_theme_font_size_override("font_size", font_size_deity)
-	_text_label.add_theme_font_override("font", _load_font(font_deity_path))
+	var dialogue_font := FontVariation.new()
+	dialogue_font.base_font = _load_font(font_deity_path)
+	# The bundled WenKai subset lacks 明. Keep a packaged fallback for it.
+	dialogue_font.fallbacks = [preload("res://assets/fonts/noto_sans_sc_gameplay_ui.ttf")]
+	_text_label.add_theme_font_override("font", dialogue_font)
 	_text_label.add_theme_color_override("font_color", color_text_on_warm)
 	_text_label.add_theme_constant_override("line_spacing", 8)
 	_text_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
 	_text_label.add_theme_constant_override("shadow_offset_x", 2)
 	_text_label.add_theme_constant_override("shadow_offset_y", 2)
 	_text_label.add_theme_constant_override("shadow_outline_size", 4)
-	_text_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.3))
+	_text_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	_text_label.add_theme_constant_override("outline_size", 1)
 	_dialog_container.add_child(_text_label)
 	# 翻页箭头（相对 dialog_container 右下角）
@@ -652,6 +698,7 @@ func _build_scene() -> void:
 	_next_arrow.add_theme_font_override("font", _load_font(font_system_path))
 	_next_arrow.text = "▼"
 	_dialog_container.add_child(_next_arrow)
+	_next_arrow.hide()
 	_click_prompt = Label.new()
 	_click_prompt.anchor_left = 1.0; _click_prompt.anchor_right = 1.0
 	_click_prompt.anchor_top = 1.0; _click_prompt.anchor_bottom = 1.0
@@ -664,10 +711,11 @@ func _build_scene() -> void:
 	_click_prompt.add_theme_font_override("font", _load_font(font_system_path))
 	_click_prompt.text = "点击 / E 继续"
 	_dialog_container.add_child(_click_prompt)
+	_click_prompt.hide()
 
 	# 系统警告弹窗 — 绝对顶部区 (0%-10%)
 	_system_container = Control.new()
-	_system_container.anchor_left = 0.68; _system_container.anchor_right = 0.98
+	_system_container.anchor_left = 0.22; _system_container.anchor_right = 0.78
 	_system_container.anchor_top = 0.01; _system_container.anchor_bottom = 0.12
 	_system_container.modulate.a = 0.0
 	_system_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -676,11 +724,13 @@ func _build_scene() -> void:
 	sys_floor.anchor_right = 1.0; sys_floor.anchor_bottom = 1.0
 	sys_floor.add_theme_stylebox_override("panel", _make_dialog_panel(Color(0.02, 0.05, 0.08, 0.88), Color(0.35, 0.82, 0.88, 0.45)))
 	_system_container.add_child(sys_floor)
+	sys_floor.hide()
 	var sys_border := ColorRect.new()
 	sys_border.anchor_right = 1.0; sys_border.anchor_top = 0.0; sys_border.anchor_bottom = 0.0
 	sys_border.custom_minimum_size = Vector2(0, 2)
 	sys_border.color = Color(0.66, 0.91, 0.91, 0.72)
 	_system_container.add_child(sys_border)
+	sys_border.hide()
 
 	# HUD 层（WASD 提示 + 目标 + 进入按钮）
 	_hud_layer = Control.new()
@@ -701,21 +751,6 @@ func _build_scene() -> void:
 	_hud_goal.text = "当前目标：进入神明遗体"
 	_hud_layer.add_child(_hud_goal)
 	# WASD 玩法说明 — 顶部区 (5%-10%)，和系统警告同一带
-	_hud_hint = Label.new()
-	_hud_hint.position = Vector2(350, 40)
-	_hud_hint.size = Vector2(580, 28)
-	_hud_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hud_hint.add_theme_font_size_override("font_size", font_size_system)
-	_hud_hint.add_theme_color_override("font_color", Color(1.0, 1.0, 0.85, 1.0))
-	_hud_hint.add_theme_font_override("font", _load_font(font_system_path))
-	_hud_hint.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
-	_hud_hint.add_theme_constant_override("shadow_offset_x", 2)
-	_hud_hint.add_theme_constant_override("shadow_offset_y", 2)
-	_hud_hint.add_theme_constant_override("shadow_outline_size", 4)
-	_hud_hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.5))
-	_hud_hint.add_theme_constant_override("outline_size", 2)
-	_hud_hint.text = "WASD 移动  ·  鼠标瞄准  ·  E 交互"
-	_hud_layer.add_child(_hud_hint)
 
 	# 进入游戏按钮 — 对话框正上方 (85%-90%)，和对话框 92% 空 14px
 	_enter_button = Button.new()
@@ -757,7 +792,9 @@ func _show_system(lines: Array) -> void:
 	_system_labels.clear()
 	var sys_font := _load_font(font_system_path)
 	var head := Label.new()
-	head.position = Vector2(14, 10); head.size = Vector2(252, 20)
+	head.anchor_right = 1.0
+	head.offset_bottom = 18
+	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	head.add_theme_font_size_override("font_size", 13)
 	head.add_theme_color_override("font_color", color_cold)
 	head.add_theme_font_override("font", sys_font)
@@ -766,7 +803,12 @@ func _show_system(lines: Array) -> void:
 	_system_labels.append(head)
 	for i in range(lines.size()):
 		var lbl := Label.new()
-		lbl.position = Vector2(14, 36 + i * 22); lbl.size = Vector2(252, 20)
+		lbl.anchor_right = 1.0
+		lbl.offset_top = 18 + i * 18
+		lbl.offset_bottom = 36 + i * 18
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.add_theme_constant_override("outline_size", 3)
+		lbl.add_theme_color_override("font_outline_color", Color.BLACK)
 		lbl.add_theme_font_size_override("font_size", 15)
 		lbl.add_theme_color_override("font_color", color_text_on_cold)
 		lbl.add_theme_font_override("font", sys_font)
