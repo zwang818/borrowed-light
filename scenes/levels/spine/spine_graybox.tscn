@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scenes/levels/graybox/map_marker.gd" id="3_marker"]
 [ext_resource type="Script" path="res://scenes/levels/spine/spine_reservation.gd" id="4_zone"]
 [ext_resource type="Script" path="res://scenes/levels/spine/spine_machinery.gd" id="5_machine"]
+[ext_resource type="Script" path="res://scenes/levels/spine/spine_environment.gd" id="6_art"]
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_vrc40"]
 polygon = PackedVector2Array(3458.857, 1313.8036, 3516.8608, 1286.7556, 3550.67, 1359.2606, 3492.667, 1386.3076)
@@ -3099,3 +3100,6 @@ default_color = Color(0.8862745, 0.7176471, 0.45882353, 1)
 points = PackedVector2Array(5036.937, 931.0138, 5065.939, 917.4898, 5126.7964, 1047.9978, 5097.7944, 1061.5219, 5036.937, 931.0138)
 width = 3.0
 default_color = Color(0.8862745, 0.7176471, 0.45882353, 1)
+
+[node name="SpineArt" type="Node2D" parent="."]
+script = ExtResource("6_art")

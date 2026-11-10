@@ -16,3 +16,4 @@ func set_depth_enabled(value: bool) -> void:
 	depth_enabled = value
 	$CoreBundles.visible = value
 	for part in $Floors.get_children(): part.get_node("Volume").visible = value
+	$SpineArt.set_depth_enabled(value)

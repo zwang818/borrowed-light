@@ -6,6 +6,8 @@ func _initialize() -> void:
 	call_deferred("run")
 func run() -> void:
 	var map = load("res://scenes/levels/spine/spine_graybox.tscn").instantiate()
+	# Pack the graybox colors and geometry, without applying the runtime dress.
+	map.get_node("SpineArt").enabled = false
 	root.add_child(map)
 	for old_name in ["Boundaries", "BoundaryDebug"]:
 		var old: Node = map.get_node_or_null(old_name)

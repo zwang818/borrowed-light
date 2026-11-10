@@ -8,6 +8,7 @@ const DOOR_LABELS := ["协议门", "出口门"]
 @onready var map: Node2D = $Map
 @onready var actor: CharacterBody2D = $Actor
 var doors: Array[Node2D] = []
+var door_skins: Array[Node2D] = []
 var selected_door := 0
 var _overview := false
 var _dark := false
@@ -17,7 +18,7 @@ var _status: Label
 
 func _ready() -> void:
 	_font.font_names = PackedStringArray(["PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "WenQuanYi Zen Hei"])
-	DisplayServer.window_set_title("借光 · 斜向脊柱 · 2D灰盒（开阔视角）")
+	DisplayServer.window_set_title("借光 · 斜向脊柱 · 2D环境预览")
 	RenderingServer.set_default_clear_color(Color("10191f"))
 	actor.position = map.get_node("Markers/PlayerSpawn").position
 	actor.get_node("Lamp").visible = false
@@ -43,10 +44,10 @@ func _ready() -> void:
 		add_child(door)
 		door.z_index = 4
 		doors.append(door)
+		door_skins.append(map.get_node("SpineArt").make_door_skin(door, name == "AuthorizedDoor"))
 	_build_guides()
-	_guides.visible = true
-	for marker in map.get_node("Markers").get_children():
-		marker.show_guide = true
+	_set_guides_visible(false)
+	_set_art_visible(true)
 	_build_ui()
 	get_viewport().size_changed.connect(_fit_camera)
 	_fit_camera()
@@ -96,7 +97,7 @@ func _build_ui() -> void:
 	top.offset_bottom = 90
 	top.color = Color("17232b")
 	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var title := _label("第二关 · 斜向脊柱 · 2D灰盒", 23)
+	var title := _label("第二关 · 脊柱输能区 · 环境预览", 23)
 	title.position = Vector2(20, 10)
 	ui.add_child(title)
 	var detail := _label("左下进入 → 右上离开｜镜头缩放0.55｜角色占地与第一关一致", 15)
@@ -108,7 +109,7 @@ func _build_ui() -> void:
 	bottom.offset_top = -108
 	bottom.color = Color("17232b")
 	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var controls := _label("WASD 移动 · Tab 全图 · G 标记 · L 遮光 · R 回入口\nH 侧壁／管束 · V 碰撞轮廓 · 1/2 选门 · P 开关 · 滚轮调整视野", 15)
+	var controls := _label("WASD 移动 · Tab 全图 · G 标记 · L 遮光 · R 回入口\nF 美术／灰盒 · H 侧壁／管束 · V 碰撞 · 1/2 选门 · P 开关 · 滚轮缩放", 15)
 	ui.add_child(controls)
 	controls.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	controls.position = Vector2(20, get_viewport_rect().size.y - 100)
@@ -117,7 +118,7 @@ func _build_ui() -> void:
 	_status.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	_status.offset_left = 20
 	_status.offset_top = -48
-	var note := _label("机关／敌人仅标记｜散射须回第一关制造｜跨关管道未接入", 14)
+	var note := _label("通电接缝仅演示电弧｜敌人和跨关管道为预留点位", 14)
 	ui.add_child(note)
 	note.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	note.offset_left = 20
@@ -161,9 +162,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_TAB:
 			set_overview(not _overview)
 		KEY_G:
-			_guides.visible = not _guides.visible
-			for marker in map.get_node("Markers").get_children():
-				marker.show_guide = _guides.visible
+			_set_guides_visible(not _guides.visible)
+		KEY_F:
+			_set_art_visible(not map.get_node("SpineArt").enabled)
 		KEY_L:
 			_dark = not _dark
 			$Darkness.color = Color(0.25, 0.29, 0.33) if _dark else Color.WHITE
@@ -182,6 +183,18 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_V:
 			map.get_node("BoundaryDebug").visible = not map.get_node("BoundaryDebug").visible
 	get_viewport().set_input_as_handled()
+
+func _set_guides_visible(value: bool) -> void:
+	_guides.visible = value
+	map.get_node("Reservations").visible = value
+	for marker in map.get_node("Markers").get_children():
+		marker.show_guide = value
+
+func _set_art_visible(value: bool) -> void:
+	map.get_node("SpineArt").set_art_enabled(value)
+	for index in range(doors.size()):
+		doors[index].self_modulate.a = 0.0 if value else 1.0
+		door_skins[index].visible = value
 
 func _process(_delta: float) -> void:
 	if not _overview:
