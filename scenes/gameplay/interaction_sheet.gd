@@ -62,9 +62,10 @@ func present(request_token: int, payload: Dictionary) -> void:
 	overlay.theme = UI_THEME
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(overlay)
+	overlay.set_meta("card_width", payload.get("card_width", 660.0))
 	overlay.set_meta("disable_confirm", payload.get("disable_confirm", false))
 	var shade := ColorRect.new()
-	shade.color = Color(0.015, 0.025, 0.035, 0.65)
+	shade.color = Color(0.015, 0.025, 0.035, payload.get("backdrop_alpha", 0.65))
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.add_child(shade)
 	var margins := MarginContainer.new()
@@ -78,10 +79,13 @@ func present(request_token: int, payload: Dictionary) -> void:
 	var column := VBoxContainer.new()
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margins.add_child(column)
-	var spacer := Control.new()
-	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	column.add_child(spacer)
+	if payload.get("center_card", false):
+		column.alignment = BoxContainer.ALIGNMENT_CENTER
+	else:
+		var spacer := Control.new()
+		spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		column.add_child(spacer)
 	if payload.get("category", "") == "维护管道":
 		_duct_icon = TextureRect.new()
 		_duct_icon.name = "TemporaryDuctMarker"
@@ -97,9 +101,10 @@ func present(request_token: int, payload: Dictionary) -> void:
 	column.add_child(row)
 	panel = PanelContainer.new()
 	panel.name = "InteractionCard"
+	var terminal_mode: bool = payload.get("input_mode", "") == "terminal_code"
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color("101b21", 0.98)
-	style.border_color = style.bg_color.lerp(Color("a9c6c0"), 0.62)
+	style.bg_color = Color("081711") if terminal_mode else Color("101b21", 0.98)
+	style.border_color = Color("528061") if terminal_mode else style.bg_color.lerp(Color("a9c6c0"), 0.62)
 	style.set_border_width_all(5)
 	style.border_width_top = 8
 	style.set_corner_radius_all(4)
@@ -140,6 +145,14 @@ func present(request_token: int, payload: Dictionary) -> void:
 	body.add_theme_color_override("font_outline_color", Color("071116", 0.95))
 	body.add_theme_constant_override("outline_size", 1)
 	detail_row.add_child(body)
+	if payload.has("blueprint_preview"):
+		var preview := TextureRect.new()
+		preview.texture = payload["blueprint_preview"]
+		preview.custom_minimum_size = Vector2(280, 174)
+		preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		detail_row.add_child(preview)
 	if payload.get("pulse_character_preview", false):
 		_pulse_preview = TextureRect.new()
 		_pulse_preview.name = "PulseEquippedXiaoyiPreview"
@@ -159,7 +172,14 @@ func present(request_token: int, payload: Dictionary) -> void:
 		destination.pressed.connect(_select_destination.bind(request_token, StringName(choice.id)))
 		content.add_child(destination)
 	if payload.get("input_mode", "") == "terminal_code":
-		_build_keypad(content)
+		var console_font := UI_THEME.default_font
+		for label in [category, title]:
+			label.add_theme_font_override("font", console_font)
+			label.add_theme_color_override("font_color", Color("a5e8ae"))
+		body.add_theme_font_override("normal_font", console_font)
+		body.add_theme_color_override("default_color", Color("a5e8ae"))
+		body.custom_minimum_size.y = 84
+		_build_console_input(content, console_font)
 	var actions := HBoxContainer.new()
 	actions.add_theme_constant_override("separation", 12)
 	content.add_child(actions)
@@ -202,31 +222,27 @@ func present(request_token: int, payload: Dictionary) -> void:
 	if is_instance_valid(_code_input):
 		_code_input.grab_focus()
 
-func _build_keypad(content: VBoxContainer) -> void:
+func _build_console_input(content: VBoxContainer, console_font: Font) -> void:
+	var command := HBoxContainer.new()
+	content.add_child(command)
+	var prompt := _label("ACCESS >", 18, Color("a5e8ae"))
+	prompt.add_theme_font_override("font", console_font)
+	command.add_child(prompt)
 	_code_input = LineEdit.new()
 	_code_input.name = "TerminalCode"
 	_code_input.max_length = 4
-	_code_input.placeholder_text = "输入四位口令"
-	_code_input.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_code_input.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
-	_code_input.add_theme_font_size_override("font_size", 26)
-	_code_input.custom_minimum_size.y = 44
+	_code_input.placeholder_text = "----"
+	_code_input.caret_blink = true
+	_code_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_code_input.add_theme_font_override("font", console_font)
+	_code_input.add_theme_font_size_override("font_size", 22)
+	_code_input.add_theme_color_override("font_color", Color("c4f4bd"))
+	_code_input.custom_minimum_size.y = 38
 	_code_input.text_changed.connect(_filter_code.bind(_code_input))
 	_code_input.text_submitted.connect(func(_text: String): _advance_or_finish())
-	content.add_child(_code_input)
-	var grid := GridContainer.new()
-	grid.columns = 3
-	grid.add_theme_constant_override("h_separation", 8)
-	grid.add_theme_constant_override("v_separation", 6)
-	content.add_child(grid)
-	for key in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "清空", "0", "退格"]:
-		var button := Button.new()
-		button.text = key
-		button.custom_minimum_size.y = 32
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.pressed.connect(_type_code.bind(key))
-		grid.add_child(button)
-	_code_status = _label("", 12, Color("dfbd81"))
+	command.add_child(_code_input)
+	_code_status = _label("ENTER: SUBMIT   ESC: DISCONNECT", 17, Color("a5e8ae"))
+	_code_status.add_theme_font_override("font", console_font)
 	content.add_child(_code_status)
 
 func _make_pulse_preview_frames() -> Array[Texture2D]:
@@ -272,38 +288,31 @@ func _filter_code(text: String, source: LineEdit) -> void:
 		_code_input.caret_column = mini(caret, digits.length())
 	_code_status.text = ""
 
-func _type_code(key: String) -> void:
-	if not is_instance_valid(overlay) or not is_instance_valid(_code_input):
-		return
-	get_viewport().set_input_as_handled()
-	if key == "清空":
-		_code_input.clear()
-		_code_input.deselect()
-	else:
-		var had_selection := _code_input.has_selection()
-		if had_selection:
-			var start := _code_input.get_selection_from_column()
-			_code_input.delete_text(start, _code_input.get_selection_to_column())
-			_code_input.deselect()
-			_code_input.caret_column = start
-		if key == "退格":
-			if not had_selection:
-				_code_input.delete_char_at_caret()
-		else:
-			_code_input.insert_text_at_caret(key)
-	_code_input.grab_focus()
-
 func show_code_error(request_token: int) -> void:
 	if request_token != token or not is_instance_valid(overlay) or not is_instance_valid(_code_input):
 		return
-	_code_status.text = "口令不匹配，请核对原始记录。"
+	_code_status.text = "ACCESS DENIED. CHECK THE CODE."
 	_code_input.grab_focus()
 	_code_input.select_all()
+
+func show_code_success(request_token: int) -> void:
+	if request_token != token or not is_instance_valid(_code_input):
+		return
+	_code_input.editable = false
+	_confirm.disabled = true
+	overlay.set_meta("disable_confirm", true)
+	for control in _code_status.get_parent().get_children():
+		control.visible = control == _code_status
+	_code_status.text = "SUCCESSFULLY ENTERED！"
+	_code_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_code_status.add_theme_font_override("font", UI_THEME.default_font)
+	_code_status.add_theme_font_size_override("font_size", 30)
+	_code_status.add_theme_color_override("font_color", Color("a5e8ae"))
 
 func _layout_panel() -> void:
 	if not is_instance_valid(panel) or not is_instance_valid(overlay):
 		return
-	var width := minf(660, maxf(280, overlay.size.x - 40))
+	var width := minf(overlay.get_meta("card_width"), maxf(280, overlay.size.x - 40))
 	panel.custom_minimum_size.x = width
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -321,8 +330,10 @@ func _advance_or_finish() -> void:
 		return
 	get_viewport().set_input_as_handled()
 	if is_instance_valid(_code_input):
+		if not _code_input.editable:
+			return
 		if _code_input.text.length() != 4:
-			_code_status.text = "请输入完整的四位口令。"
+			_code_status.text = "ENTER ALL FOUR DIGITS."
 			return
 		code_submitted.emit(token, _code_input.text)
 		return

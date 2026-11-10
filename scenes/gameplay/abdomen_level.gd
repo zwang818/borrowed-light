@@ -88,13 +88,22 @@ var blueprint_known := false
 var pulse_learned := false
 var workshop_seen := false
 var terminal_clues: Dictionary = {}
-var pending_interaction: StringName = &""
+var pending_interaction: StringName = &"":
+	set(value):
+		pending_interaction = value
+		if not value.is_empty() and is_instance_valid(interact_bg):
+			interact_bg.hide()
 var interaction_token := 0
 var interaction_sheet
 var terminal_gate: StaticBody2D
-var terminal_walls: Array[StaticBody2D] = []
+const EXIT_TERMINAL_PLATFORM := preload("res://scenes/gameplay/exit_terminal_platform.gd")
 var health_display: Control
 var interaction_points: Dictionary = {}
+const ARRIVAL_GRIPPER = preload("res://scenes/levels/abdomen/arrival_gripper.gd")
+var arrival_gripper: Node2D
+var arrival_grip_tween: Tween
+var arrival_grip_origin: Vector2
+var arrival_player_z: int
 var ducts: Dictionary = {}
 var unlocked_ducts: Dictionary = {}
 var achievement_webs: Array[Node] = []
@@ -109,6 +118,11 @@ var notify_label: Label
 var notify_bg: Panel
 var blueprint_hint: TextureRect
 var blueprint_hint_tween: Tween
+var blueprint_transfer: Tween
+var blueprint_transfer_socket: Vector2
+var blueprint_transfer_complete := false
+var blueprint_plug_ready := false
+@onready var blueprint_computer: Node2D = $AbdomenGraybox/Walls/GunRackBase/BlueprintComputer
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
@@ -119,11 +133,6 @@ func _ready() -> void:
 	pause_input.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(pause_input)
 	print("[C-MODULE] abdomen_level.gd 已加载 - v4")
-	# Main-level rack: 2 x 2 tiles (32 px each), preserving its display center.
-	var rack = map.get_node("Walls/GunRackBase")
-	var rack_center: Vector2 = rack.position + rack.size * 0.5
-	rack.size = Vector2(64, 64)
-	rack.position = rack_center - rack.size * 0.5
 	_spawn_from_markers()
 	_configure_player()
 	_configure_enemies()
@@ -400,9 +409,7 @@ func _update_hp_bar() -> void:
 
 func _update_world_prompts() -> void:
 	# Feet in front of a solid prop must render in front of its raised surface.
-	terminal.get_node("FacilityVisual").z_index = 0 if player.global_position.y > terminal.global_position.y + 28 else 5
-	for wall in terminal_walls:
-		wall.get_node("FacilityVisual").z_index = 0 if player.global_position.y > wall.get_meta("front_edge") else 5
+	terminal.get_node("FacilityVisual").z_index = 6
 	for door in interactables:
 		if is_instance_valid(door) and door.has_meta("is_door"):
 			door.get_node("FacilityVisual").z_index = 0 if player.global_position.y > door.global_position.y else 5
@@ -548,25 +555,32 @@ func _add_terminal(pos: Vector2, term_id: String, linked: Array) -> Node:
 	circle.radius = 20.0
 	shape.shape = circle
 	area.add_child(shape)
-	var solid := StaticBody2D.new()
-	solid.name = "SolidBody"
-	solid.collision_layer = 1
-	solid.collision_mask = 0
-	var solid_shape := CollisionShape2D.new()
-	var footprint := RectangleShape2D.new()
-	footprint.size = Vector2(42, 36)
-	solid_shape.shape = footprint
-	solid_shape.position = Vector2(0, 10)
-	solid.add_child(solid_shape)
-	area.add_child(solid)
-	var visual := FACILITY_SCRIPT.new()
+	var visual := preload("res://scenes/gameplay/exit_terminal_visual.gd").new()
 	visual.name = "FacilityVisual"
-	visual.kind = "terminal"
+	visual.position = Vector2(0, -63)
+	visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	area.add_child(visual)
+	var cabinet := StaticBody2D.new()
+	cabinet.name = "TerminalCabinet"
+	# The player collider is at the feet. Reserve the projected head clearance
+	# in front of the wall-mounted casing as part of its solid footprint.
+	cabinet.position = visual.position + Vector2(0, 21)
+	cabinet.collision_layer = 1
+	cabinet.collision_mask = 0
+	var cabinet_shape := CollisionShape2D.new()
+	var casing := RectangleShape2D.new()
+	casing.size = Vector2(112, 78)
+	cabinet_shape.shape = casing
+	cabinet.add_child(cabinet_shape)
+	area.add_child(cabinet)
+	var platform := EXIT_TERMINAL_PLATFORM.new()
+	platform.name = "ExitTerminalSteps"
+	map.add_child(platform)
+	platform.global_position = interactables_parent.to_global(pos)
 	# Presentation only: the Area2D remains the sole terminal interaction target.
 	var marker := POINT_SCRIPT.new()
 	marker.name = "InteractionMarker"
-	marker.position = Vector2(0, 26)
+	marker.position = Vector2(40, 14)
 	area.add_child(marker)
 	area.set_meta("terminal_id", term_id)
 	area.set_meta("linked_ids", linked)
@@ -669,14 +683,13 @@ func _update_interaction() -> void:
 			continue
 		if not obj.has_meta("is_terminal") and obj.get_script() != POINT_SCRIPT:
 			continue
-		if obj.has_meta("is_terminal") and not terminal_gate.get_meta("is_open", false):
+		if obj == terminal and (not terminal_gate.get_meta("is_open", false) or not _on_terminal_landing()):
 			continue
-		var dist: float = player.global_position.distance_to(obj.global_position)
+		var target: Vector2 = _terminal_access_position() if obj == terminal else obj.global_position
+		var dist: float = player.global_position.distance_to(target)
 		if dist >= nearest_dist:
 			continue
-		var query := PhysicsRayQueryParameters2D.create(player.global_position, obj.global_position, 1)
-		if obj.has_meta("is_terminal"):
-			query.exclude = [obj.get_node("SolidBody").get_rid()]
+		var query := PhysicsRayQueryParameters2D.create(player.global_position, target, 1)
 		if not get_world_2d().direct_space_state.intersect_ray(query).is_empty():
 			continue
 		nearest_interactable = obj
@@ -694,7 +707,7 @@ func _terminal_prompt() -> String:
 	var remaining := _remaining_cleaners()
 	if terminal_activated:
 		return "终端已激活 · 出口门已开启"
-	return "终端锁定 · 剩余 %d 台清扫者" % remaining if remaining > 0 else "[E] 接入终端"
+	return "终端锁定 · 剩余 %d 台清扫者" % remaining if remaining > 0 else ("[E] 接入终端" if terminal.get_node("FacilityVisual").powered else "[E] 拉下电闸")
 
 func _try_interact() -> void:
 	if player.is_dead or get_tree().paused:
@@ -703,7 +716,9 @@ func _try_interact() -> void:
 	if nearest_interactable == null:
 		return
 	if nearest_interactable.get_script() == POINT_SCRIPT:
-		if ducts.has(nearest_interactable.interaction_id):
+		if nearest_interactable.interaction_id == &"arrival_gripper":
+			_start_arrival_grip()
+		elif ducts.has(nearest_interactable.interaction_id):
 			_request_duct(nearest_interactable.interaction_id)
 		else:
 			_request_story(nearest_interactable.interaction_id)
@@ -712,15 +727,26 @@ func _try_interact() -> void:
 		if _remaining_cleaners() > 0:
 			_show_notification(_terminal_prompt(), 1.5)
 			return
+		var console = terminal.get_node("FacilityVisual")
+		if not console.powered:
+			console.set_power(true)
+			terminal.get_node("InteractionMarker").position = Vector2(-12, 14)
+			return
 		_request_terminal_code()
 
+func _terminal_access_position() -> Vector2:
+	return terminal.get_node("InteractionMarker").global_position
+
+func _on_terminal_landing() -> bool:
+	return EXIT_TERMINAL_PLATFORM.LANDING.has_point(terminal.to_local(player.global_position))
+
 func _can_use_terminal() -> bool:
-	if player.is_dead or terminal_activated or _remaining_cleaners() > 0 or not terminal_gate.get_meta("is_open", false):
+	if player.is_dead or terminal_activated or not _on_terminal_landing() or _remaining_cleaners() > 0 or not terminal_gate.get_meta("is_open", false):
 		return false
-	if player.global_position.distance_to(terminal.global_position) >= C.interaction_range:
+	var target := _terminal_access_position()
+	if not terminal.get_node("FacilityVisual").powered or player.global_position.distance_to(target) >= C.interaction_range:
 		return false
-	var query := PhysicsRayQueryParameters2D.create(player.global_position, terminal.global_position, 1)
-	query.exclude = [terminal.get_node("SolidBody").get_rid()]
+	var query := PhysicsRayQueryParameters2D.create(player.global_position, target, 1)
 	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
 
 func _request_terminal_code() -> void:
@@ -731,12 +757,12 @@ func _request_terminal_code() -> void:
 	get_tree().paused = true
 	# Functional input belongs to C; D's story presenter never grants authorization.
 	interaction_sheet.present(interaction_token, {
-		"title": "出口维护终端", "category": "访问验证", "badge": "等待口令",
-		"summary": "请输入四位维护口令。\n原始口令分段保存在图纸与制造室记录中。",
-		"confirm": "验证口令", "input_mode": "terminal_code"})
+		"title": "EXIT MAINTENANCE", "category": "BL / SERVICE CONSOLE",
+		"summary": "POWER: ONLINE\nEXIT LOCK: ENGAGED\nAUTH: ENTER 4-DIGIT ACCESS CODE",
+		"confirm": "Enter", "input_mode": "terminal_code", "center_card": true})
 
 func _submit_terminal_code(token: int, code: String) -> void:
-	if token != interaction_token or pending_interaction != TERMINAL_REQUEST:
+	if token != interaction_token or pending_interaction != TERMINAL_REQUEST or terminal_activated:
 		return
 	if not _can_use_terminal():
 		finish_interaction(token, false)
@@ -755,7 +781,8 @@ func _submit_terminal_code(token: int, code: String) -> void:
 	game_menus.unlock_achievement("first_terminal")
 	_show_notification(C.t_terminal_ok, C.notify_default)
 	current_objective = Objective.REACH_EXIT
-	finish_interaction(token, true)
+	interaction_sheet.show_code_success(token)
+	get_tree().create_timer(1.8).timeout.connect(finish_interaction.bind(token, true))
 
 func _play_terminal_sound() -> void:
 	# Optional existing sound is absent in this checkout; do not add a new effect.
@@ -887,6 +914,8 @@ func _retry_level() -> void:
 	terminal_activated = false
 	if is_instance_valid(terminal):
 		terminal.set_meta("activated", false)
+		terminal.get_node("FacilityVisual").set_power(false)
+		terminal.get_node("InteractionMarker").position = Vector2(40, 14)
 		for child in terminal.get_children():
 			if child is Polygon2D:
 				child.color = Color(0.2, 0.8, 0.4, 0.7)
@@ -945,6 +974,8 @@ func _add_story_point(id: StringName, pos: Vector2) -> Node2D:
 	return point
 
 func _setup_story_points() -> void:
+	var arm := map.get_node("Environment/Decor/ArrivalExteriorArm") as Node2D
+	_add_story_point(&"arrival_gripper", arm.global_position + Vector2(-128, 0))
 	# Attach to existing furniture without modifying A's map or its collision.
 	var base = map.get_node("Walls/AssemblyBase")
 	_add_story_point(&"pulse_workbench", base.to_global(Vector2(base.size.x * 0.5, base.size.y + 4)))
@@ -955,8 +986,10 @@ func _point_prompt(id: StringName) -> String:
 	if ducts.has(id):
 		return "[E] 打开管道 · " + ducts[id].title if unlocked_ducts.has(id) else "[E] 解锁管道 · " + ducts[id].title
 	match id:
+		&"arrival_gripper":
+			return "[E] 靠近机械臂"
 		&"pulse_blueprint":
-			return "[E] 查看图纸" if not blueprint_known else "[E] 回听通讯"
+			return "[E] 查看图纸"
 		&"pulse_workbench":
 			if pulse_learned:
 				return "脉冲机械臂已制造完成"
@@ -979,7 +1012,7 @@ func _request_story(id: StringName) -> void:
 			_show_blueprint_hint()
 		return
 	var payloads := {
-		&"pulse_blueprint": {"title": "图纸台的通讯", "summary": "", "confirm": "结束通话", "category": "通讯", "pulse_character_preview": true, "dialogue": [
+		&"pulse_blueprint": {"title": "图纸台的通讯", "summary": "", "confirm": "接入图纸", "category": "通讯", "blueprint_preview": PULSE_BLUEPRINT_TEXTURE, "dialogue": [
 			{"speaker": "小一", "text": "这上面画的……是我的手臂？"},
 			{"speaker": "神明", "text": "是我为你预留的战斗模块。只是，还没来得及替你装上。"},
 			{"speaker": "神明", "text": "你醒来时，左手边有一台制造设备。带着这份图纸回去，它能帮你完成装配。"},
@@ -1007,13 +1040,96 @@ func _request_story(id: StringName) -> void:
 	else:
 		interaction_requested.emit(id, payload, interaction_token)
 
+func _start_arrival_grip() -> void:
+	if not pending_interaction.is_empty():
+		return
+	var arm := map.get_node("Environment/Decor/ArrivalExteriorArm") as Node2D
+	arrival_grip_origin = player.global_position
+	arrival_player_z = player.z_index
+	interaction_token += 1
+	pending_interaction = &"arrival_gripper"
+	get_tree().paused = true
+	arrival_gripper = ARRIVAL_GRIPPER.new()
+	arrival_gripper.z_index = 31
+	add_child(arrival_gripper)
+	player.z_index = 30
+	robot_visual.set_front_pose(true)
+	arm.hide()
+	arrival_gripper.shoulder = arrival_gripper.to_local(arm.global_position + Vector2(-16, 19))
+	var socket := arrival_grip_origin + ARRIVAL_GRIPPER.SOCKET
+	var parked := arm.global_position + Vector2(37, -10)
+	arrival_gripper.pose(parked, 0.0)
+	arrival_grip_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	arrival_grip_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	arrival_grip_tween.tween_method(func(t: float): arrival_gripper.pose(parked.lerp(socket, t), 0.0), 0.0, 1.0, 0.65)
+	arrival_grip_tween.tween_method(func(t: float): arrival_gripper.pose(socket, t), 0.0, 1.0, 0.24)
+	arrival_grip_tween.tween_method(_lift_arrival_player, 0.0, 1.0, 0.65)
+	arrival_grip_tween.tween_callback(func(): interaction_sheet.present(interaction_token, {
+		"title": "机械臂", "category": "维护设备", "confirm": "松开",
+		"summary": "", "backdrop_alpha": 0.0, "card_width": 360.0,
+		"dialogue": [{"speaker": "小一", "text": "咦，我怎么被抓起来啦"}],
+	}))
+
+func _lift_arrival_player(progress: float) -> void:
+	player.global_position = arrival_grip_origin + Vector2(12, -35) * progress
+	arrival_gripper.pose(player.global_position + ARRIVAL_GRIPPER.SOCKET, 1.0)
+
+func _restore_arrival_grip() -> void:
+	arrival_grip_tween.kill()
+	player.global_position = arrival_grip_origin
+	player.z_index = arrival_player_z
+	robot_visual.set_front_pose(false)
+	arrival_gripper.queue_free()
+	map.get_node("Environment/Decor/ArrivalExteriorArm").show()
+
+func _offer_blueprint_plug(token: int) -> void:
+	blueprint_plug_ready = true
+	robot_visual.set_front_pose(true)
+	blueprint_transfer_socket = player.global_position + Vector2(16, -19)
+	blueprint_computer.show_transfer(0.55, blueprint_transfer_socket, false)
+	interaction_sheet.present(token, {
+		"title": "接口", "summary": "", "confirm": "接入",
+		"backdrop_alpha": 0.0, "card_width": 320.0, "center_card": true,
+	})
+
+func _play_blueprint_transfer(token: int) -> void:
+	interaction_sheet.dismiss()
+	blueprint_transfer = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	blueprint_transfer.tween_method(_draw_blueprint_transfer, 0.0, 5.0, 5.0)
+	blueprint_transfer.tween_callback(func():
+		blueprint_transfer_complete = true
+		finish_interaction(token, true)
+	)
+
+func _draw_blueprint_transfer(seconds: float) -> void:
+	blueprint_computer.show_transfer(seconds, blueprint_transfer_socket)
+
 func finish_interaction(token: int, completed: bool) -> void:
 	if token != interaction_token or pending_interaction.is_empty():
 		return
 	var id := pending_interaction
+	if id == &"pulse_blueprint":
+		if blueprint_transfer == null and completed:
+			if blueprint_plug_ready:
+				_play_blueprint_transfer(token)
+			else:
+				_offer_blueprint_plug(token)
+			return
+		if blueprint_transfer != null:
+			if completed and not blueprint_transfer_complete:
+				return
+			blueprint_transfer.kill()
+			blueprint_transfer = null
+			blueprint_transfer_complete = false
+		if blueprint_plug_ready:
+			blueprint_plug_ready = false
+			blueprint_computer.show_transfer(-1.0, blueprint_transfer_socket)
+			robot_visual.set_front_pose(false)
+	if id == &"arrival_gripper":
+		_restore_arrival_grip()
 	# A generic story-completed callback must never bypass the password check.
 	if id == TERMINAL_REQUEST:
-		completed = completed and terminal_activated
+		completed = terminal_activated
 	pending_interaction = &""
 	interaction_sheet.dismiss()
 	if ducts.has(id):
@@ -1043,7 +1159,7 @@ func finish_interaction(token: int, completed: bool) -> void:
 				workshop_seen = true
 				game_menus.unlock_achievement("workshop_reader")
 	# Finish this event before enabling the world again (prevents input leaking).
-	if completed:
+	if completed and id != &"arrival_gripper":
 		_save_journey(false)
 	interaction_finished.emit(token, completed)
 	_resume_story.call_deferred()
@@ -1053,27 +1169,7 @@ func _resume_story() -> void:
 		get_tree().paused = false
 
 func _setup_terminal_gate() -> void:
-	# Local enclosure inside C's runtime: the terminal cannot be reached sideways.
 	var origin: Vector2 = terminal.position
-	for wall in [Rect2(-80, -72, 16, 128), Rect2(64, -72, 16, 128), Rect2(-64, -80, 128, 16)]:
-		var body := StaticBody2D.new()
-		body.name = "TerminalEnclosureWall_%d" % terminal_walls.size()
-		body.position = origin + wall.get_center()
-		body.set_meta("front_edge", origin.y + wall.end.y)
-		body.collision_layer = 1
-		body.collision_mask = 0
-		var shape := CollisionShape2D.new()
-		var rectangle := RectangleShape2D.new()
-		rectangle.size = wall.size
-		shape.shape = rectangle
-		body.add_child(shape)
-		var visual := FACILITY_SCRIPT.new()
-		visual.name = "FacilityVisual"
-		visual.kind = "wall"
-		visual.dimensions = wall.size
-		body.add_child(visual)
-		interactables_parent.add_child(body)
-		terminal_walls.append(body)
 	_add_door(origin + Vector2(0, 48), "p1_terminal_access_gate")
 	terminal_gate = interactables[-1]
 	var gate_shape: CollisionShape2D = terminal_gate.get_child(0)
