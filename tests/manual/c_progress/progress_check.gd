@@ -136,14 +136,31 @@ func run_checks() -> void:
 	await process_frame
 	await process_frame
 	check(not paused and current_scene.scene_file_path == "res://scenes/main.tscn", "Return to title clears pause")
+	current_scene.game_save_path = "user://test_c_progress_journey.json"
+	preload("res://scenes/gameplay/journey_save.gd").erase(current_scene.game_save_path)
 	current_scene._on_start_pressed()
 	await process_frame
 	await process_frame
 	check(not paused and current_scene.scene_file_path == "res://scenes/ui/intro_cutscene/intro_cutscene.tscn", "New game enters updated intro after returning to title")
 	current_scene._finish()
-	await process_frame
-	await process_frame
+	check(paused and root.has_node("EntryLoading"), "Intro opens loading overlay and blocks gameplay input")
+	current_scene._finish()
+	check(root.get_children().filter(func(node: Node): return node.get_script() == preload("res://scenes/ui/intro_cutscene/entry_loading.gd")).size() == 1, "Duplicate entry request keeps a single loading overlay")
+	# Allow cold visual/resource initialization; the loading UI stays up until ready.
+	var deadline := Time.get_ticks_msec() + 30000
+	var active_loading = root.get_node("EntryLoading")
+	var previous_fill := 0.0
+	while Time.get_ticks_msec() < deadline:
+		await process_frame
+		if is_instance_valid(active_loading):
+			check(active_loading.fill.size.x + 0.001 >= previous_fill, "Loading bar never resets backwards")
+			previous_fill = active_loading.fill.size.x
+			if current_scene != null and current_scene.scene_file_path != "res://scenes/gameplay/abdomen_level.tscn":
+				check(previous_fill <= 108.001, "Loading bar cannot finish before gameplay exists")
+		if not paused and current_scene != null and current_scene.scene_file_path == "res://scenes/gameplay/abdomen_level.tscn":
+			break
 	check(not paused and current_scene.scene_file_path == "res://scenes/gameplay/abdomen_level.tscn", "Intro leads back into gameplay")
+	preload("res://scenes/gameplay/journey_save.gd").erase("user://test_c_progress_journey.json")
 	if FileAccess.file_exists("user://test_c_progress_level.cfg"):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_c_progress_level.cfg"))
 	print("RESTORE CHECKS: ", "PASS" if failures.is_empty() else failures)

@@ -155,6 +155,7 @@ var _hud_layer: Control
 var _hud_goal: Label
 var _hud_hint: Label
 var _enter_button: Button
+var _finishing := false
 
 var _bgm_player: AudioStreamPlayer
 var _voice_player: AudioStreamPlayer
@@ -170,16 +171,13 @@ func _ready() -> void:
 	resized.connect(_fit_scene_art)
 	_fit_scene_art()
 	_setup_audio()
-	# 自动绑定关卡（兜底，即使 Inspector 没配也能走通）
-	if crossfade_to_scene == null:
-		var fallback := load("res://scenes/gameplay/abdomen_level.tscn")
-		if fallback != null:
-			crossfade_to_scene = fallback
 	_apply_frame_visuals(frames[0])
 	if auto_start and frames.size() > 0:
 		_advance()
 
 func _process(delta: float) -> void:
+	if _finishing:
+		return
 	_elapsed += delta
 	if _frame_index < 0 or _frame_index >= frames.size():
 		return
@@ -191,6 +189,8 @@ func _process(delta: float) -> void:
 			_advance()
 
 func _input(event: InputEvent) -> void:
+	if _finishing:
+		return
 	if _frame_index < 0 or _frame_index >= frames.size():
 		return
 	var frame: Dictionary = frames[_frame_index]
@@ -233,12 +233,20 @@ func _advance() -> void:
 		_next_arrow.text = ""
 
 func _finish() -> void:
-	_frame_index = -1
+	if _finishing:
+		return
+	_finishing = true
+	_enter_button.disabled = true
 	_voice_player.stop()
 	_restore_bgm()
 	intro_finished.emit()
-	if crossfade_to_scene != null:
-		get_tree().change_scene_to_packed(crossfade_to_scene)
+	var loading := preload("res://scenes/ui/intro_cutscene/entry_loading.gd").new()
+	loading.name = "EntryLoading"
+	loading.cancelled.connect(func():
+		_finishing = false
+		_enter_button.disabled = false)
+	get_tree().root.add_child(loading)
+	loading.begin("res://scenes/gameplay/abdomen_level.tscn", crossfade_to_scene)
 
 func _play_frame_voice(frame: Dictionary) -> void:
 	_voice_player.stop()

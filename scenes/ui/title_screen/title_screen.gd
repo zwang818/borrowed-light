@@ -3,6 +3,13 @@ extends Control
 
 signal start_requested
 signal archive_opened
+const JOURNEY_SAVE := preload("res://scenes/gameplay/journey_save.gd")
+@export var game_save_path := JOURNEY_SAVE.DEFAULT_PATH
+var _save_data: Dictionary = {}
+var _archive_action := ""
+var _load_button: Button
+var _new_button: Button
+var _delete_button: Button
 
 @export_group("Presentation")
 @export var design_size := Vector2(1280.0, 720.0)
@@ -53,6 +60,103 @@ func _ready() -> void:
 	status_label.visible = start_scene == null
 	_fit_presentation()
 	_init_bgm()
+	_build_archive_actions()
+	_refresh_archive()
+
+func _build_archive_actions() -> void:
+	var panel: Control = archive_close.get_parent()
+	panel.position.y = 140
+	panel.size.y = 440
+	var font: Font = preload("res://scenes/gameplay/gameplay_ui_theme.tres").default_font
+	for label in panel.find_children("*", "Label", true, false):
+		label.add_theme_font_override("font", font)
+	var description: Label = panel.get_node("Description")
+	description.size.y = 48
+	description.text = "自动保存图纸、能力、记录与管道解锁。\n读档从房间入口继续，敌人和门禁重新开始。"
+	archive_close.position.y = 350
+	archive_close.add_theme_font_override("font", font)
+	var actions := HBoxContainer.new()
+	actions.position = Vector2(38, 272)
+	actions.size = Vector2(544, 44)
+	actions.add_theme_constant_override("separation", 12)
+	actions.theme = preload("res://scenes/gameplay/gameplay_ui_theme.tres")
+	panel.add_child(actions)
+	_load_button = Button.new()
+	_new_button = Button.new()
+	_delete_button = Button.new()
+	for action in [_load_button, _new_button, _delete_button]:
+		action.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		actions.add_child(action)
+	_load_button.pressed.connect(_continue_journey)
+	_new_button.pressed.connect(_new_journey)
+	_delete_button.pressed.connect(_delete_journey)
+	start_button.add_theme_font_override("font", font)
+
+func _refresh_archive() -> void:
+	_save_data = JOURNEY_SAVE.read_save(game_save_path)
+	var has_save := not _save_data.is_empty()
+	start_button.text = "继续游戏" if has_save else "开始游戏"
+	var cleared: bool = has_save and _save_data.get("first_level_cleared", false)
+	if cleared:
+		start_button.text = "重玩第一关"
+	status_label.visible = cleared or start_scene == null
+	if cleared:
+		status_label.add_theme_font_override("font", preload("res://scenes/gameplay/gameplay_ui_theme.tres").default_font)
+		status_label.text = "第一关已通关"
+	_load_button.text = "读取存档"
+	if cleared:
+		_load_button.text = "重玩第一关"
+	_load_button.disabled = not has_save
+	_new_button.text = "确认新旅程" if _archive_action == "new" else "开启新旅程"
+	_delete_button.text = "确认删除" if _archive_action == "delete" else "删除存档"
+	_delete_button.disabled = not FileAccess.file_exists(game_save_path) and not FileAccess.file_exists(game_save_path + ".bak")
+	var slot: Node = archive_close.get_parent().get_node("EmptySlot")
+	if has_save:
+		slot.get_node("EmptyTitle").text = "第一关 · 已通关" if cleared else "腹腔 · " + ("脉冲机械臂已解锁" if _save_data.pulse_learned else ("已记录图纸" if _save_data.blueprint_known else "旅程起点"))
+		slot.get_node("EmptyHint").text = "%s · 管道 %d/3%s" % [_save_data.saved_at, _save_data.ducts.size(), " · 备份恢复" if _save_data.get("recovered", false) else ""]
+	else:
+		slot.get_node("EmptyTitle").text = "尚无存档" if _delete_button.disabled else "存档无法读取"
+		slot.get_node("EmptyHint").text = "开启新旅程后自动建立记录。"
+	if not _archive_action.is_empty():
+		slot.get_node("EmptyHint").text = "再次点击确认将覆盖当前旅程。" if _archive_action == "new" else "再次点击确认删除，成就记录保留。"
+
+func _continue_journey() -> void:
+	if _is_starting:
+		return
+	var data := JOURNEY_SAVE.read_save(game_save_path)
+	if data.is_empty():
+		_refresh_archive()
+		_open_archive()
+		return
+	_is_starting = true
+	get_tree().set_meta("journey_session", {"path": game_save_path, "data": data})
+	var loading := preload("res://scenes/ui/intro_cutscene/entry_loading.gd").new()
+	loading.name = "EntryLoading"
+	loading.cancelled.connect(func():
+		_is_starting = false
+		get_tree().remove_meta("journey_session"))
+	get_tree().root.add_child(loading)
+	loading.begin(JOURNEY_SAVE.SCENE)
+
+func _new_journey() -> void:
+	if _is_starting:
+		return
+	if (FileAccess.file_exists(game_save_path) or FileAccess.file_exists(game_save_path + ".bak")) and _archive_action != "new":
+		_archive_action = "new"
+		_refresh_archive()
+		return
+	_start_new_journey()
+
+func _delete_journey() -> void:
+	if _archive_action != "delete":
+		_archive_action = "delete"
+		_refresh_archive()
+		return
+	var error := JOURNEY_SAVE.erase(game_save_path)
+	_archive_action = ""
+	_refresh_archive()
+	if error != OK:
+		archive_close.get_parent().get_node("EmptySlot/EmptyHint").text = "删除失败，请检查文件权限。"
 
 
 func _init_bgm() -> void:
@@ -85,6 +189,8 @@ func _input(event: InputEvent) -> void:
 
 
 func _open_archive() -> void:
+	_archive_action = ""
+	_refresh_archive()
 	_previous_focus = get_viewport().gui_get_focus_owner()
 	archive_overlay.show()
 	# Prevent keyboard focus from leaving the modal and triggering background actions.
@@ -96,6 +202,7 @@ func _open_archive() -> void:
 
 
 func _close_archive() -> void:
+	_archive_action = ""
 	archive_overlay.hide()
 	archive_button.focus_mode = Control.FOCUS_ALL
 	quit_button.focus_mode = Control.FOCUS_ALL
@@ -120,10 +227,20 @@ func _fit_presentation() -> void:
 func _on_start_pressed() -> void:
 	if start_scene == null or _is_starting or archive_overlay.visible:
 		return
+	if not JOURNEY_SAVE.read_save(game_save_path).is_empty():
+		_continue_journey()
+	elif FileAccess.file_exists(game_save_path) or FileAccess.file_exists(game_save_path + ".bak"):
+		_open_archive()
+	else:
+		_start_new_journey()
+
+func _start_new_journey() -> void:
 	_is_starting = true
 	start_requested.emit()
+	get_tree().set_meta("journey_session", {"path": game_save_path})
 	var error := get_tree().change_scene_to_file(_intro_scene_path)
 	if error != OK:
+		get_tree().remove_meta("journey_session")
 		_is_starting = false
 		push_error("Title could not open intro cutscene: %s" % error)
 
