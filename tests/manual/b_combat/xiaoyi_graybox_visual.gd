@@ -138,6 +138,9 @@ func _draw() -> void:
 		draw_ellipse_web(silk)
 	if not player.sprint_active or player.is_dead or not player.controls_enabled or player.sprint_motion.length_squared() < 0.01:
 		return
+	_draw_sprint_trail()
+
+func _draw_sprint_trail() -> void:
 	var heading: Vector2 = player.sprint_motion.normalized()
 	var side := heading.orthogonal()
 	var pulse := sin(walk_distance/16.0*PI)*1.5

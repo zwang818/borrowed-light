@@ -13,6 +13,9 @@ func run() -> void:
 	player.set_physics_process(false)
 	var visual = level.robot_visual
 	visual.set_physics_process(false)
+	var trail = visual.trail
+	trail.set_physics_process(false)
+	trail.clear()
 	for unit in level.enemies:
 		unit.set_physics_process(false)
 	assert(not player.pulse_gun_equipped and not player.scatter_unlocked)
@@ -23,6 +26,8 @@ func run() -> void:
 	Input.action_press("b_sprint")
 	player._physics_process(0.01)
 	assert(player.sprint_active and is_equal_approx(player.velocity.length(),200.0))
+	trail._physics_process(0.01)
+	assert(not trail.particles.is_empty())
 	Input.action_release("b_sprint")
 	player._physics_process(0.01)
 	assert(not player.sprint_active and is_equal_approx(player.velocity.length(),160.0))
@@ -45,13 +50,16 @@ func run() -> void:
 	player.apply_web_slow(2.0,0.6)
 	paused = true
 	var before: float = player.web_slow_remaining
+	var particle_age: float = trail.particles[0].age
 	await create_timer(0.05,true).timeout
 	assert(player.web_slow_remaining == before and not web.can_process())
+	assert(not trail.can_process() and trail.particles[0].age == particle_age)
 	paused = false
 	player.learn_pulse()
 	level.pulse_learned = true
 	level._retry_level()
 	await process_frame
+	assert(trail.particles.is_empty())
 	assert(player.pulse_gun_equipped and not player.scatter_unlocked)
 	assert(player.web_slow_remaining == 0.0 and not player.sprint_active)
 	assert(get_nodes_in_group("b_cleaner_webs").is_empty())

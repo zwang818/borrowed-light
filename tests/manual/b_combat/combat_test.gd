@@ -28,8 +28,10 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	var visual := Node2D.new()
 	visual.name = "XiaoyiCombatVisual"
-	visual.set_script(preload("res://tests/manual/b_combat/xiaoyi_graybox_visual.gd"))
+	visual.set_script(preload("res://tests/manual/b_combat/xiaoyi_spark_visual.gd"))
 	visual.display_height = 60.0
+	visual.sparks_enabled = false
+	visual.dust_color = Color(0.48,0.48,0.48,0.65)
 	visual.enhanced_gait = true
 	visual.face_firing_beam = true
 	$SpawnPoints/PlayerSpawn/Player/Facing.add_child(visual)
@@ -71,6 +73,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func reset_test_combat() -> void:
+	$SpawnPoints/PlayerSpawn/Player/Facing/XiaoyiCombatVisual.trail.clear()
 	$CombatAudio.resetting = true
 	$CombatAudio.stop_all()
 	$SpawnPoints/CleanerSpawn/Cleaner.restore_combat_state({"entity_id": &"cleaner_test_01", "health": $SpawnPoints/CleanerSpawn/Cleaner.max_health})
