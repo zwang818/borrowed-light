@@ -1,0 +1,6 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="PackedScene" path="res://tests/manual/b_combat/spine_combat_test.tscn" id="1"]
+[ext_resource type="Script" path="res://scenes/gameplay/spine_level.gd" id="2"]
+[node name="SpineLevel" instance=ExtResource("1")]
+script = ExtResource("2")
+metadata/test_only = false

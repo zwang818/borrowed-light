@@ -98,21 +98,21 @@ func _refresh_archive() -> void:
 	start_button.text = "继续游戏" if has_save else "开始游戏"
 	var cleared: bool = has_save and _save_data.get("first_level_cleared", false)
 	if cleared:
-		start_button.text = "重玩第一关"
+		start_button.text = "继续第二关"
 	status_label.visible = cleared or start_scene == null
 	if cleared:
 		status_label.add_theme_font_override("font", preload("res://scenes/gameplay/gameplay_ui_theme.tres").default_font)
 		status_label.text = "第一关已通关"
 	_load_button.text = "读取存档"
 	if cleared:
-		_load_button.text = "重玩第一关"
+		_load_button.text = "继续第二关"
 	_load_button.disabled = not has_save
 	_new_button.text = "确认新旅程" if _archive_action == "new" else "开启新旅程"
 	_delete_button.text = "确认删除" if _archive_action == "delete" else "删除存档"
 	_delete_button.disabled = not FileAccess.file_exists(game_save_path) and not FileAccess.file_exists(game_save_path + ".bak")
 	var slot: Node = archive_close.get_parent().get_node("EmptySlot")
 	if has_save:
-		slot.get_node("EmptyTitle").text = "第一关 · 已通关" if cleared else "腹腔 · " + ("脉冲机械臂已解锁" if _save_data.pulse_learned else ("已记录图纸" if _save_data.blueprint_known else "旅程起点"))
+		slot.get_node("EmptyTitle").text = "第二关 · 脊柱入口" if cleared else "腹腔 · " + ("脉冲机械臂已解锁" if _save_data.pulse_learned else ("已记录图纸" if _save_data.blueprint_known else "旅程起点"))
 		slot.get_node("EmptyHint").text = "%s · 管道 %d/3%s" % [_save_data.saved_at, _save_data.ducts.size(), " · 备份恢复" if _save_data.get("recovered", false) else ""]
 	else:
 		slot.get_node("EmptyTitle").text = "尚无存档" if _delete_button.disabled else "存档无法读取"
@@ -136,7 +136,7 @@ func _continue_journey() -> void:
 		_is_starting = false
 		get_tree().remove_meta("journey_session"))
 	get_tree().root.add_child(loading)
-	loading.begin(JOURNEY_SAVE.SCENE)
+	loading.begin("res://scenes/gameplay/spine_level.tscn" if data.get("first_level_cleared",false) else JOURNEY_SAVE.SCENE)
 
 func _new_journey() -> void:
 	if _is_starting:
