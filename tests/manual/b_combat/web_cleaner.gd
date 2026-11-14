@@ -9,6 +9,7 @@ var web_phase := 0 # 0 chase/melee, 1 telegraph, 2 release/recover
 var web_remaining := 0.0
 var web_cooldown := 0.8
 var web_direction := Vector2.RIGHT
+var persistent_projectiles := false
 
 func _ready() -> void:
 	add_to_group("cleaners")
@@ -95,6 +96,9 @@ func fire_web() -> void:
 	var web := Node2D.new()
 	web.set_script(WEB)
 	web.source = self
+	if persistent_projectiles:
+		web.speed = 330.0
+		web.persistent_flight = true
 	web.direction = web_direction
 	get_parent().add_child(web)
 	web.global_position = origin

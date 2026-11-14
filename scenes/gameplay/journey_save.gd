@@ -29,6 +29,8 @@ static func _read(path: String) -> Dictionary:
 	if data.has("first_level_cleared") and not data.first_level_cleared is bool:
 		return {}
 	data["first_level_cleared"] = data.get("first_level_cleared", false)
+	if data.has("scatter_unlocked") and not data.scatter_unlocked is bool:
+		return {}
 	var seen: Dictionary = {}
 	for id in data.ducts:
 		if not id is String or not (id in DUCTS) or seen.has(id):
