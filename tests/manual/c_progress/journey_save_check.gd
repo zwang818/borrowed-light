@@ -9,9 +9,31 @@ func check(ok: bool, message: String) -> void:
 	if not ok:
 		failures.append(message)
 		printerr("FAIL: " + message)
+func menu_labels(title: Control) -> Array[String]:
+	var labels: Array[String] = []
+	for child in title.start_button.get_parent().get_children():
+		if child is Button and child.visible:
+			labels.append(child.text)
+	return labels
+func wait_for_room() -> bool:
+	var deadline := Time.get_ticks_msec() + 120000
+	while Time.get_ticks_msec() < deadline:
+		await process_frame
+		if not paused and current_scene != null and current_scene.scene_file_path == SAVE.SCENE and current_scene.get("game_menus") != null:
+			return true
+	return false
 func run() -> void:
 	SAVE.erase(PATH)
 	check(SAVE.read_save(PATH).is_empty(), "No fake continue for empty slot")
+	var empty_title = load("res://scenes/main.tscn").instantiate()
+	empty_title.game_save_path = PATH
+	root.add_child(empty_title)
+	current_scene = empty_title
+	await process_frame
+	check(menu_labels(empty_title) == ["开始旅程", "退出"], "First visit has exactly two journey actions")
+	check(not empty_title.has_node("Presentation/SpineReviewButton"), "Default title keeps review shortcut out of the player menu")
+	empty_title.queue_free()
+	await process_frame
 	var data := {"blueprint_known": true, "pulse_learned": true, "workshop_seen": false,
 		"ducts": ["duct_arrival", "duct_weapon"], "explored": [[320, 2500], [432, 1924]]}
 	check(SAVE.write_save(PATH, data) == OK, "Checkpoint is written")
@@ -29,8 +51,9 @@ func run() -> void:
 	root.add_child(title)
 	current_scene = title
 	await process_frame
-	check(title.start_button.text == "继续游戏", "Title shows real continue when valid data exists")
+	check(menu_labels(title) == ["继续旅程", "重新开始旅程", "退出"], "Readable save exposes continue, restart and quit")
 	title._open_archive()
+	check(title.restart_button.focus_mode == Control.FOCUS_NONE, "Archive modal excludes restart from background navigation")
 	title._new_button.pressed.emit()
 	check(title._archive_action == "new" and SAVE.read_save(PATH).pulse_learned, "New journey requires confirmation and does not erase current data")
 	title._close_archive()
@@ -43,7 +66,7 @@ func run() -> void:
 	title._load_button.pressed.emit()
 	check(paused and root.has_node("EntryLoading"), "Archive read uses loading transition")
 	# Restoring the learned arm also initializes its shared visual resources.
-	var deadline := Time.get_ticks_msec() + 30000
+	var deadline := Time.get_ticks_msec() + 120000
 	while Time.get_ticks_msec() < deadline:
 		await process_frame
 		if not paused and current_scene != null and current_scene.scene_file_path == SAVE.SCENE:
@@ -76,11 +99,43 @@ func run() -> void:
 		await process_frame
 		title = current_scene
 		title.game_save_path = PATH
+		title._refresh_archive()
+		var before_restart := FileAccess.get_file_as_bytes(PATH)
+		var achievements := "user://test_journey_achievements.cfg"
+		var before_achievements := FileAccess.get_file_as_bytes(achievements) if FileAccess.file_exists(achievements) else PackedByteArray()
+		title.restart_button.pressed.emit()
+		check(title.restart_overlay.visible and not title._is_starting, "Restart opens confirmation without starting or deleting")
+		check(root.gui_get_focus_owner() == title.restart_cancel, "Restart initially focuses safe return action")
+		var escape := InputEventAction.new()
+		escape.action = "ui_cancel"
+		escape.pressed = true
+		root.push_input(escape, true)
+		check(not title.restart_overlay.visible and before_restart == FileAccess.get_file_as_bytes(PATH), "Escape cancels restart and keeps saved bytes")
+		title.restart_button.pressed.emit()
+		title.restart_cancel.pressed.emit()
+		check(not title.restart_overlay.visible and not title._is_starting, "Return button also cancels restart")
+		title.restart_button.pressed.emit()
+		title.restart_confirm.pressed.emit()
+		await process_frame
+		await process_frame
+		check(current_scene.scene_file_path == "res://scenes/ui/intro_cutscene/intro_cutscene.tscn", "Confirmed restart replays the real opening")
+		check(before_restart == FileAccess.get_file_as_bytes(PATH) and not get_meta("journey_session").has("data"), "Restart passes a fresh session and keeps old save until safe gameplay arrival")
+		current_scene._finish()
+		check(await wait_for_room(), "Restart opening loads a playable first-level entry")
+		level = current_scene
+		check(not level.pulse_learned and not level.blueprint_known and level.unlocked_ducts.is_empty() and not level.first_level_cleared, "Restart resets abilities, clues, ducts and level progress")
+		check(not SAVE.read_save(PATH).pulse_learned and SAVE.read_save(PATH).scene == SAVE.SCENE, "New first-level checkpoint replaces previous journey")
+		check(before_achievements == (FileAccess.get_file_as_bytes(achievements) if FileAccess.file_exists(achievements) else PackedByteArray()), "Restart preserves independent achievements")
+		level._return_to_title()
+		await process_frame
+		await process_frame
+		title = current_scene
+		title.game_save_path = PATH
 		title._open_archive()
 		title._delete_button.pressed.emit()
 		title._delete_button.pressed.emit()
 		check(SAVE.read_save(PATH).is_empty() and not FileAccess.file_exists(PATH + ".bak"), "Confirmed delete clears checkpoint and backup")
-		check(title.start_button.text == "开始游戏" and title._load_button.disabled, "Deleting refreshes empty title state")
+		check(menu_labels(title) == ["开始旅程", "退出"] and title._load_button.disabled, "Deleting restores two-button first-visit menu")
 	current_scene.queue_free()
 	await process_frame
 	SAVE.erase(PATH)
