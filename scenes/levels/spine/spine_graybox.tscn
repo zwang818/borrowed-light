@@ -7,7 +7,7 @@
 [ext_resource type="Script" path="res://scenes/levels/spine/spine_environment.gd" id="6_art"]
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_vrc40"]
-polygon = PackedVector2Array(3458.857, 1313.8036, 3516.8608, 1286.7556, 3550.67, 1359.2606, 3492.667, 1386.3076)
+polygon = PackedVector2Array(2796.70071, 1446.03213, 2854.70441, 1418.98456, 2888.51387, 1491.48919, 2830.51017, 1518.53676)
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_s06fw"]
 polygon = PackedVector2Array(8757.558, -1368.8698, 8815.561, -1395.9167, 8842.608, -1337.9138, 8784.6045, -1310.8658)
@@ -24,9 +24,54 @@ polygon = PackedVector2Array(9541.507, -1504.9288, 9599.51, -1531.9758, 9626.558
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_p0fxd"]
 polygon = PackedVector2Array(5036.937, 931.0138, 5065.939, 917.4898, 5126.7964, 1047.9978, 5097.7944, 1061.5219)
 
+[sub_resource type="OccluderPolygon2D" id="Occluder_RearBulkhead"]
+polygon = PackedVector2Array(1509.97317, 1677.51481, 2177.01570, 1366.46777, 2182.08712, 1377.34347, 1515.04459, 1688.39051)
+
+[sub_resource type="OccluderPolygon2D" id="Occluder_InnerBulkheadA"]
+polygon = PackedVector2Array(1597.67253, 1742.54421, 1822.43686, 1637.73488, 1827.50828, 1648.61058, 1602.74395, 1753.41991)
+
+[sub_resource type="OccluderPolygon2D" id="Occluder_InnerBulkheadB"]
+polygon = PackedVector2Array(1956.57041, 1575.18738, 2199.46090, 1461.92569, 2204.53232, 1472.80138, 1961.64183, 1586.06307)
+
+[sub_resource type="OccluderPolygon2D" id="Occluder_DefenseBayShield"]
+polygon = PackedVector2Array(1566.78973, 1988.65446, 1708.17375, 1922.72601, 1672.67381, 1846.59616, 1656.36027, 1854.20328, 1684.25308, 1914.01960, 1559.18261, 1972.34092)
+
+[sub_resource type="OccluderPolygon2D" id="Occluder_HatchOuterWall"]
+polygon = PackedVector2Array(1490.19321, 1762.87144, 1501.06890, 1757.80002, 1542.06287, 1845.71187, 1531.18718, 1850.78329)
+
+[sub_resource type="OccluderPolygon2D" id="Occluder_HatchInnerWall"]
+polygon = PackedVector2Array(1598.81824, 1749.73360, 1609.69393, 1744.66218, 1636.31888, 1801.75957, 1625.44319, 1806.83099)
+
+[sub_resource type="OccluderPolygon2D" id="Occluder_RejoinOuterWall"]
+polygon = PackedVector2Array(2443.90019, 1422.97147, 2454.77589, 1417.90005, 2502.10913, 1519.40652, 2491.23344, 1524.47794)
+
+[sub_resource type="OccluderPolygon2D" id="Occluder_RejoinInnerWall"]
+polygon = PackedVector2Array(2357.18536, 1502.02549, 2368.06105, 1496.95407, 2400.60266, 1566.73977, 2389.72697, 1571.81119)
+
+[sub_resource type="RectangleShape2D" id="Shape_MaintenanceHatch"]
+size = Vector2(20, 108)
+
+[sub_resource type="OccluderPolygon2D" id="Occluder_MaintenanceHatch"]
+polygon = PackedVector2Array(-10, -54, 10, -54, 10, 54, -10, 54)
+
+[sub_resource type="RectangleShape2D" id="Shape_MaintenanceExit"]
+size = Vector2(20, 116)
+
+[sub_resource type="OccluderPolygon2D" id="Occluder_MaintenanceExit"]
+polygon = PackedVector2Array(-10, -58, 10, -58, 10, 58, -10, 58)
+
+[sub_resource type="OccluderPolygon2D" id="Occluder_ProtocolBayScreen"]
+polygon = PackedVector2Array(5598.29106, 99.90749, 5839.36893, -12.50896, 5795.41663, -106.76497, 5811.73017, -114.37210, 5863.28960, -3.80255, 5605.89818, 116.22103)
+
+[sub_resource type="OccluderPolygon2D" id="Occluder_ProtocolGateCover"]
+polygon = PackedVector2Array(6793.35686, -280.82038, 6851.36056, -307.86795, 6895.31286, -213.61194, 6837.30916, -186.56437)
+
+[sub_resource type="OccluderPolygon2D" id="Occluder_SpinalFluidPlinth"]
+polygon = PackedVector2Array(7727.51578, -1116.95202, 7778.26902, -1140.61864, 7798.55469, -1097.11587, 7747.80146, -1073.44924)
+
 [node name="SpineGraybox" type="Node2D" unique_id=6396382]
 script = ExtResource("1_map")
-metadata/layout_revision = 4
+metadata/layout_revision = 5
 metadata/graybox_only = true
 metadata/map_bounds = Rect2(-256, -3328, 11776, 6656)
 metadata/unit = 32
@@ -1869,14 +1914,14 @@ z_index = -5
 
 [node name="Underside" type="Polygon2D" parent="Floors/SpineSegment01/Volume" unique_id=1984409791]
 color = Color(0.161, 0.239, 0.282, 1)
-polygon = PackedVector2Array(1809.4158, 1970.545, 2106.6848, 1831.926, 2160.7798, 1947.934, 1863.5107, 2086.552)
+polygon = PackedVector2Array(1782.36884, 1912.54178, 2079.63780, 1773.92299, 2187.82807, 2005.93778, 1890.55912, 2144.55657)
 
 [node name="Top" type="Polygon2D" parent="Floors/SpineSegment01" unique_id=1328115088]
 color = Color(0.537, 0.596, 0.608, 1)
-polygon = PackedVector2Array(1809.4158, 1950.545, 2106.6848, 1811.926, 2160.7798, 1927.934, 1863.5107, 2066.552)
+polygon = PackedVector2Array(1782.36884, 1892.54178, 2079.63780, 1753.92299, 2187.82807, 1985.93778, 1890.55912, 2124.55657)
 
 [node name="Rim" type="Line2D" parent="Floors/SpineSegment01/Top" unique_id=1661112112]
-points = PackedVector2Array(1809.4158, 1950.545, 2106.6848, 1811.926, 2160.7798, 1927.934, 1863.5107, 2066.552, 1809.4158, 1950.545)
+points = PackedVector2Array(1782.36884, 1892.54178, 2079.63780, 1753.92299, 2187.82807, 1985.93778, 1890.55912, 2124.55657, 1782.36884, 1892.54178)
 width = 3.0
 default_color = Color(0.741, 0.78, 0.765, 1)
 joint_mode = 2
@@ -1886,7 +1931,7 @@ end_cap_mode = 2
 [node name="Ribs" type="Node2D" parent="Floors/SpineSegment01/Top" unique_id=424250636]
 
 [node name="Seam1_672" type="Line2D" parent="Floors/SpineSegment01/Top/Ribs" unique_id=388145390]
-points = PackedVector2Array(1845.4238, 1942.581, 1892.7568, 2044.088)
+points = PackedVector2Array(1819.22211, 1886.39060, 1918.96002, 2100.27924)
 width = 1.0
 default_color = Color(0.396, 0.482, 0.51, 1)
 joint_mode = 2
@@ -1894,7 +1939,7 @@ begin_cap_mode = 2
 end_cap_mode = 2
 
 [node name="Seam1_768" type="Line2D" parent="Floors/SpineSegment01/Top/Ribs" unique_id=2053743292]
-points = PackedVector2Array(1932.4298, 1902.01, 1979.7628, 2003.516)
+points = PackedVector2Array(1906.22766, 1845.81925, 2005.96556, 2059.70788)
 width = 1.0
 default_color = Color(0.396, 0.482, 0.51, 1)
 joint_mode = 2
@@ -1902,7 +1947,7 @@ begin_cap_mode = 2
 end_cap_mode = 2
 
 [node name="Seam1_864" type="Line2D" parent="Floors/SpineSegment01/Top/Ribs" unique_id=568435080]
-points = PackedVector2Array(2019.4348, 1861.439, 2066.7688, 1962.945)
+points = PackedVector2Array(1993.23320, 1805.24789, 2092.97111, 2019.13653)
 width = 1.0
 default_color = Color(0.396, 0.482, 0.51, 1)
 joint_mode = 2
@@ -2461,14 +2506,14 @@ z_index = -5
 
 [node name="Underside" type="Polygon2D" parent="Floors/BlueprintWing/Volume" unique_id=299970730]
 color = Color(0.161, 0.239, 0.282, 1)
-polygon = PackedVector2Array(7473.7363, -732.5602, 7461.7173, -947.6312, 7636.7065, -1064.5382, 7764.2837, -1018.1032, 7796.1387, -874.0712)
+polygon = PackedVector2Array(7473.73746, -732.55997, 7461.71843, -947.63099, 7591.15675, -1067.57148, 7745.22908, -1139.41658, 7837.35247, -1121.68864, 7875.81074, -1039.21463, 7796.13875, -874.07113)
 
 [node name="Top" type="Polygon2D" parent="Floors/BlueprintWing" unique_id=1872562942]
 color = Color(0.537, 0.596, 0.608, 1)
-polygon = PackedVector2Array(7473.7363, -752.5602, 7461.7173, -967.6312, 7636.7065, -1084.5382, 7764.2837, -1038.1031, 7796.1387, -894.0712)
+polygon = PackedVector2Array(7473.73746, -752.55997, 7461.71843, -967.63099, 7591.15675, -1087.57148, 7745.22908, -1159.41658, 7837.35247, -1141.68864, 7875.81074, -1059.21463, 7796.13875, -894.07113)
 
 [node name="Rim" type="Line2D" parent="Floors/BlueprintWing/Top" unique_id=1406155268]
-points = PackedVector2Array(7473.7363, -752.5602, 7461.7173, -967.6312, 7636.7065, -1084.5382, 7764.2837, -1038.1031, 7796.1387, -894.0712, 7473.7363, -752.5602)
+points = PackedVector2Array(7473.73746, -752.55997, 7461.71843, -967.63099, 7591.15675, -1087.57148, 7745.22908, -1159.41658, 7837.35247, -1141.68864, 7875.81074, -1059.21463, 7796.13875, -894.07113, 7473.73746, -752.55997)
 width = 3.0
 default_color = Color(0.741, 0.78, 0.765, 1)
 joint_mode = 2
@@ -2476,6 +2521,73 @@ begin_cap_mode = 2
 end_cap_mode = 2
 
 [node name="Ribs" type="Node2D" parent="Floors/BlueprintWing/Top" unique_id=1075790977]
+
+[node name="DefenseSafeBay" type="Node2D" parent="Floors"]
+metadata/surface_kind = "shell"
+
+[node name="Volume" type="Node2D" parent="Floors/DefenseSafeBay"]
+z_index = -5
+
+[node name="Underside" type="Polygon2D" parent="Floors/DefenseSafeBay/Volume"]
+color = Color(0.16, 0.2, 0.23, 1)
+polygon = PackedVector2Array(1504.42795, 2068.21531, 1479.44704, 1967.31955, 1505.68842, 1891.08707, 1647.07243, 1825.15862, 1721.49229, 1852.24524, 1779.94552, 1939.73935)
+
+[node name="Top" type="Polygon2D" parent="Floors/DefenseSafeBay"]
+color = Color(0.37, 0.43, 0.45, 1)
+polygon = PackedVector2Array(1504.42795, 2044.21531, 1479.44704, 1943.31955, 1505.68842, 1867.08707, 1647.07243, 1801.15862, 1721.49229, 1828.24524, 1779.94552, 1915.73935)
+
+[node name="Rim" type="Line2D" parent="Floors/DefenseSafeBay/Top"]
+points = PackedVector2Array(1504.42795, 2044.21531, 1479.44704, 1943.31955, 1505.68842, 1867.08707, 1647.07243, 1801.15862, 1721.49229, 1828.24524, 1779.94552, 1915.73935, 1504.42795, 2044.21531)
+width = 3.0
+default_color = Color(0.63, 0.75, 0.74, 1)
+
+[node name="Ribs" type="Node2D" parent="Floors/DefenseSafeBay/Top"]
+
+
+[node name="ServiceCatwalk" type="Node2D" parent="Floors"]
+visible = false
+metadata/surface_kind = "shell"
+
+[node name="Volume" type="Node2D" parent="Floors/ServiceCatwalk"]
+z_index = -5
+
+[node name="Underside" type="Polygon2D" parent="Floors/ServiceCatwalk/Volume"]
+color = Color(0.16, 0.2, 0.23, 1)
+polygon = PackedVector2Array(1550.99405, 1903.06205, 1492.67273, 1777.99157, 1512.50888, 1706.95266, 2179.55141, 1395.90562, 2299.65309, 1388.44992, 2443.42138, 1431.74745, 2507.65936, 1569.50623, 2406.15289, 1616.83948, 2362.20059, 1522.58347, 2266.39577, 1492.22829, 2201.99661, 1491.36353, 1603.83347, 1770.29159, 1645.25006, 1859.10975)
+
+[node name="Top" type="Polygon2D" parent="Floors/ServiceCatwalk"]
+color = Color(0.29, 0.36, 0.39, 1)
+polygon = PackedVector2Array(1550.99405, 1879.06205, 1492.67273, 1753.99157, 1512.50888, 1682.95266, 2179.55141, 1371.90562, 2299.65309, 1364.44992, 2443.42138, 1407.74745, 2507.65936, 1545.50623, 2406.15289, 1592.83948, 2362.20059, 1498.58347, 2266.39577, 1468.22829, 2201.99661, 1467.36353, 1603.83347, 1746.29159, 1645.25006, 1835.10975)
+
+[node name="Rim" type="Line2D" parent="Floors/ServiceCatwalk/Top"]
+points = PackedVector2Array(1550.99405, 1879.06205, 1492.67273, 1753.99157, 1512.50888, 1682.95266, 2179.55141, 1371.90562, 2299.65309, 1364.44992, 2443.42138, 1407.74745, 2507.65936, 1545.50623, 2406.15289, 1592.83948, 2362.20059, 1498.58347, 2266.39577, 1468.22829, 2201.99661, 1467.36353, 1603.83347, 1746.29159, 1645.25006, 1835.10975, 1550.99405, 1879.06205)
+width = 3.0
+default_color = Color(0.63, 0.75, 0.74, 1)
+
+[node name="Ribs" type="Node2D" parent="Floors/ServiceCatwalk/Top"]
+
+
+[node name="ProtocolObservationBay" type="Node2D" parent="Floors"]
+metadata/surface_kind = "shell"
+
+[node name="Volume" type="Node2D" parent="Floors/ProtocolObservationBay"]
+z_index = -5
+
+[node name="Underside" type="Polygon2D" parent="Floors/ProtocolObservationBay/Volume"]
+color = Color(0.22, 0.18, 0.21, 1)
+polygon = PackedVector2Array(5530.01262, 165.78003, 5529.07452, 69.12022, 5558.45256, 9.07914, 5757.84027, -83.89688, 5855.94627, -72.26881, 5888.91050, -1.57680)
+
+[node name="Top" type="Polygon2D" parent="Floors/ProtocolObservationBay"]
+color = Color(0.37, 0.44, 0.47, 1)
+polygon = PackedVector2Array(5530.01262, 142.78003, 5529.07452, 46.12022, 5558.45256, -13.92086, 5757.84027, -106.89688, 5855.94627, -95.26881, 5888.91050, -24.57680)
+
+[node name="Rim" type="Line2D" parent="Floors/ProtocolObservationBay/Top"]
+points = PackedVector2Array(5530.01262, 142.78003, 5529.07452, 46.12022, 5558.45256, -13.92086, 5757.84027, -106.89688, 5855.94627, -95.26881, 5888.91050, -24.57680, 5530.01262, 142.78003)
+width = 3.0
+default_color = Color(0.61, 0.72, 0.72, 1)
+
+[node name="Ribs" type="Node2D" parent="Floors/ProtocolObservationBay/Top"]
+
 
 [node name="SleeveRoofs" type="Node2D" parent="." unique_id=1434297048]
 
@@ -2485,20 +2597,20 @@ z_index = 4
 [node name="Covers" type="Node2D" parent="." unique_id=1107496631]
 
 [node name="Valve0" type="Node2D" parent="Covers" unique_id=1912743494]
-metadata/depth_anchor_y = 2066.816
+metadata/depth_anchor_y = 1468.76066
 
 [node name="Volume" type="Node2D" parent="Covers/Valve0" unique_id=22935790]
 
 [node name="Side" type="Polygon2D" parent="Covers/Valve0/Volume" unique_id=766174409]
 color = Color(0.204, 0.294, 0.341, 1)
-polygon = PackedVector2Array(3458.857, 1333.8036, 3516.8608, 1306.7556, 3550.67, 1379.2606, 3492.667, 1406.3076)
+polygon = PackedVector2Array(2796.70071, 1466.03213, 2854.70441, 1438.98456, 2888.51387, 1511.48919, 2830.51017, 1538.53676)
 
 [node name="Top" type="Polygon2D" parent="Covers/Valve0/Volume" unique_id=255037980]
 color = Color(0.376, 0.475, 0.51, 1)
-polygon = PackedVector2Array(3458.857, 1313.8036, 3516.8608, 1286.7556, 3550.67, 1359.2606, 3492.667, 1386.3076)
+polygon = PackedVector2Array(2796.70071, 1446.03213, 2854.70441, 1418.98456, 2888.51387, 1491.48919, 2830.51017, 1518.53676)
 
 [node name="Edge" type="Line2D" parent="Covers/Valve0/Volume" unique_id=255269146]
-points = PackedVector2Array(3458.857, 1313.8036, 3516.8608, 1286.7556, 3550.67, 1359.2606, 3492.667, 1386.3076, 3458.857, 1313.8036)
+points = PackedVector2Array(2796.70071, 1446.03213, 2854.70441, 1418.98456, 2888.51387, 1491.48919, 2830.51017, 1518.53676, 2796.70071, 1446.03213)
 width = 3.0
 default_color = Color(0.69, 0.741, 0.725, 1)
 joint_mode = 2
@@ -2509,7 +2621,7 @@ end_cap_mode = 2
 collision_mask = 0
 
 [node name="Collision" type="CollisionPolygon2D" parent="Covers/Valve0/Body" unique_id=2027663012]
-polygon = PackedVector2Array(3458.857, 1313.8036, 3516.8608, 1286.7556, 3550.67, 1359.2606, 3492.667, 1386.3076)
+polygon = PackedVector2Array(2796.70071, 1446.03213, 2854.70441, 1418.98456, 2888.51387, 1491.48919, 2830.51017, 1518.53676)
 
 [node name="Occluder" type="LightOccluder2D" parent="Covers/Valve0" unique_id=1087008189]
 occluder = SubResource("OccluderPolygon2D_vrc40")
@@ -2664,8 +2776,203 @@ polygon = PackedVector2Array(5036.937, 931.0138, 5065.939, 917.4898, 5126.7964, 
 [node name="Occluder" type="LightOccluder2D" parent="Covers/BlockedRecordEnd" unique_id=1866953501]
 occluder = SubResource("OccluderPolygon2D_p0fxd")
 
+[node name="DefenseBayShield" type="Node2D" parent="Covers"]
+
+[node name="Volume" type="Node2D" parent="Covers/DefenseBayShield"]
+
+[node name="Side" type="Polygon2D" parent="Covers/DefenseBayShield/Volume"]
+color = Color(0.32, 0.24, 0.25, 1)
+polygon = PackedVector2Array(1566.78973, 1988.65446, 1708.17375, 1922.72601, 1672.67381, 1846.59616, 1656.36027, 1854.20328, 1684.25308, 1914.01960, 1559.18261, 1972.34092)
+
+[node name="Top" type="Polygon2D" parent="Covers/DefenseBayShield/Volume"]
+color = Color(0.44, 0.34, 0.32, 1)
+polygon = PackedVector2Array(1566.78973, 1980.65446, 1708.17375, 1914.72601, 1672.67381, 1838.59616, 1656.36027, 1846.20328, 1684.25308, 1906.01960, 1559.18261, 1964.34092)
+
+[node name="Edge" type="Line2D" parent="Covers/DefenseBayShield/Volume"]
+points = PackedVector2Array(1566.78973, 1980.65446, 1708.17375, 1914.72601, 1672.67381, 1838.59616, 1656.36027, 1846.20328, 1684.25308, 1906.01960, 1559.18261, 1964.34092, 1566.78973, 1980.65446)
+width = 2.0
+default_color = Color(0.74, 0.63, 0.57, 1)
+
+[node name="Body" type="StaticBody2D" parent="Covers/DefenseBayShield"]
+collision_mask = 0
+
+[node name="Collision" type="CollisionPolygon2D" parent="Covers/DefenseBayShield/Body"]
+polygon = PackedVector2Array(1566.78973, 1988.65446, 1708.17375, 1922.72601, 1672.67381, 1846.59616, 1656.36027, 1854.20328, 1684.25308, 1914.01960, 1559.18261, 1972.34092)
+
+[node name="Occluder" type="LightOccluder2D" parent="Covers/DefenseBayShield"]
+occluder = SubResource("Occluder_DefenseBayShield")
+
+[node name="ProtocolBayScreen" type="Node2D" parent="Covers"]
+
+
+[node name="Volume" type="Node2D" parent="Covers/ProtocolBayScreen"]
+
+
+[node name="Side" type="Polygon2D" parent="Covers/ProtocolBayScreen/Volume"]
+color = Color(0.28, 0.22, 0.26, 1)
+polygon = PackedVector2Array(5598.29106, 99.90749, 5839.36893, -12.50896, 5795.41663, -106.76497, 5811.73017, -114.37210, 5863.28960, -3.80255, 5605.89818, 116.22103)
+
+[node name="Top" type="Polygon2D" parent="Covers/ProtocolBayScreen/Volume"]
+color = Color(0.40, 0.34, 0.35, 1)
+polygon = PackedVector2Array(5598.29106, 87.90749, 5839.36893, -24.50896, 5795.41663, -118.76497, 5811.73017, -126.37210, 5863.28960, -15.80255, 5605.89818, 104.22103)
+
+[node name="Edge" type="Line2D" parent="Covers/ProtocolBayScreen/Volume"]
+points = PackedVector2Array(5598.29106, 87.90749, 5839.36893, -24.50896, 5795.41663, -118.76497, 5811.73017, -126.37210, 5863.28960, -15.80255, 5605.89818, 104.22103, 5598.29106, 87.90749)
+width = 2.0
+default_color = Color(0.68, 0.61, 0.57, 1)
+
+[node name="Body" type="StaticBody2D" parent="Covers/ProtocolBayScreen"]
+collision_mask = 0
+
+[node name="Collision" type="CollisionPolygon2D" parent="Covers/ProtocolBayScreen/Body"]
+polygon = PackedVector2Array(5598.29106, 99.90749, 5839.36893, -12.50896, 5795.41663, -106.76497, 5811.73017, -114.37210, 5863.28960, -3.80255, 5605.89818, 116.22103)
+
+[node name="Occluder" type="LightOccluder2D" parent="Covers/ProtocolBayScreen"]
+occluder = SubResource("Occluder_ProtocolBayScreen")
+
+[node name="ProtocolGateCover" type="Node2D" parent="Covers"]
+
+
+[node name="Volume" type="Node2D" parent="Covers/ProtocolGateCover"]
+
+
+[node name="Side" type="Polygon2D" parent="Covers/ProtocolGateCover/Volume"]
+color = Color(0.28, 0.22, 0.26, 1)
+polygon = PackedVector2Array(6793.35686, -280.82038, 6851.36056, -307.86795, 6895.31286, -213.61194, 6837.30916, -186.56437)
+
+[node name="Top" type="Polygon2D" parent="Covers/ProtocolGateCover/Volume"]
+color = Color(0.40, 0.34, 0.35, 1)
+polygon = PackedVector2Array(6793.35686, -292.82038, 6851.36056, -319.86795, 6895.31286, -225.61194, 6837.30916, -198.56437)
+
+[node name="Edge" type="Line2D" parent="Covers/ProtocolGateCover/Volume"]
+points = PackedVector2Array(6793.35686, -292.82038, 6851.36056, -319.86795, 6895.31286, -225.61194, 6837.30916, -198.56437, 6793.35686, -292.82038)
+width = 2.0
+default_color = Color(0.68, 0.61, 0.57, 1)
+
+[node name="Body" type="StaticBody2D" parent="Covers/ProtocolGateCover"]
+collision_mask = 0
+
+[node name="Collision" type="CollisionPolygon2D" parent="Covers/ProtocolGateCover/Body"]
+polygon = PackedVector2Array(6793.35686, -280.82038, 6851.36056, -307.86795, 6895.31286, -213.61194, 6837.30916, -186.56437)
+
+[node name="Occluder" type="LightOccluder2D" parent="Covers/ProtocolGateCover"]
+occluder = SubResource("Occluder_ProtocolGateCover")
+
+[node name="SpinalFluidPlinth" type="Node2D" parent="Covers"]
+
+
+[node name="Volume" type="Node2D" parent="Covers/SpinalFluidPlinth"]
+
+
+[node name="Side" type="Polygon2D" parent="Covers/SpinalFluidPlinth/Volume"]
+color = Color(0.29, 0.23, 0.25, 1)
+polygon = PackedVector2Array(7727.51578, -1116.95202, 7778.26902, -1140.61864, 7798.55469, -1097.11587, 7747.80146, -1073.44924)
+
+[node name="Top" type="Polygon2D" parent="Covers/SpinalFluidPlinth/Volume"]
+color = Color(0.43, 0.34, 0.33, 1)
+polygon = PackedVector2Array(7727.51578, -1125.95202, 7778.26902, -1149.61864, 7798.55469, -1106.11587, 7747.80146, -1082.44924)
+
+[node name="Edge" type="Line2D" parent="Covers/SpinalFluidPlinth/Volume"]
+points = PackedVector2Array(7727.51578, -1125.95202, 7778.26902, -1149.61864, 7798.55469, -1106.11587, 7747.80146, -1082.44924, 7727.51578, -1125.95202)
+width = 2.0
+default_color = Color(0.66, 0.58, 0.53, 1)
+
+[node name="Body" type="StaticBody2D" parent="Covers/SpinalFluidPlinth"]
+collision_mask = 0
+
+[node name="Collision" type="CollisionPolygon2D" parent="Covers/SpinalFluidPlinth/Body"]
+polygon = PackedVector2Array(7727.51578, -1116.95202, 7778.26902, -1140.61864, 7798.55469, -1097.11587, 7747.80146, -1073.44924)
+
+[node name="Occluder" type="LightOccluder2D" parent="Covers/SpinalFluidPlinth"]
+occluder = SubResource("Occluder_SpinalFluidPlinth")
+
+[node name="EntranceDefense" type="Node2D" parent="."]
+
+
+[node name="ServiceWalls" type="Node2D" parent="EntranceDefense"]
+visible = false
+z_index = 2
+
+[node name="RearBulkhead" type="Polygon2D" parent="EntranceDefense/ServiceWalls"]
+color = Color(0.38, 0.28, 0.29, 1)
+polygon = PackedVector2Array(1509.97317, 1677.51481, 2177.01570, 1366.46777, 2182.08712, 1377.34347, 1515.04459, 1688.39051)
+
+[node name="Occluder" type="LightOccluder2D" parent="EntranceDefense/ServiceWalls/RearBulkhead"]
+occluder = SubResource("Occluder_RearBulkhead")
+
+[node name="InnerBulkheadA" type="Polygon2D" parent="EntranceDefense/ServiceWalls"]
+color = Color(0.38, 0.28, 0.29, 1)
+polygon = PackedVector2Array(1597.67253, 1742.54421, 1822.43686, 1637.73488, 1827.50828, 1648.61058, 1602.74395, 1753.41991)
+
+[node name="Occluder" type="LightOccluder2D" parent="EntranceDefense/ServiceWalls/InnerBulkheadA"]
+occluder = SubResource("Occluder_InnerBulkheadA")
+
+[node name="InnerBulkheadB" type="Polygon2D" parent="EntranceDefense/ServiceWalls"]
+color = Color(0.38, 0.28, 0.29, 1)
+polygon = PackedVector2Array(1956.57041, 1575.18738, 2199.46090, 1461.92569, 2204.53232, 1472.80138, 1961.64183, 1586.06307)
+
+[node name="Occluder" type="LightOccluder2D" parent="EntranceDefense/ServiceWalls/InnerBulkheadB"]
+occluder = SubResource("Occluder_InnerBulkheadB")
+
+[node name="HatchOuterWall" type="Polygon2D" parent="EntranceDefense/ServiceWalls"]
+color = Color(0.38, 0.28, 0.29, 1)
+polygon = PackedVector2Array(1490.19321, 1762.87144, 1501.06890, 1757.80002, 1542.06287, 1845.71187, 1531.18718, 1850.78329)
+
+[node name="Occluder" type="LightOccluder2D" parent="EntranceDefense/ServiceWalls/HatchOuterWall"]
+occluder = SubResource("Occluder_HatchOuterWall")
+
+[node name="HatchInnerWall" type="Polygon2D" parent="EntranceDefense/ServiceWalls"]
+color = Color(0.38, 0.28, 0.29, 1)
+polygon = PackedVector2Array(1598.81824, 1749.73360, 1609.69393, 1744.66218, 1636.31888, 1801.75957, 1625.44319, 1806.83099)
+
+[node name="Occluder" type="LightOccluder2D" parent="EntranceDefense/ServiceWalls/HatchInnerWall"]
+occluder = SubResource("Occluder_HatchInnerWall")
+
+[node name="RejoinOuterWall" type="Polygon2D" parent="EntranceDefense/ServiceWalls"]
+color = Color(0.38, 0.28, 0.29, 1)
+polygon = PackedVector2Array(2443.90019, 1422.97147, 2454.77589, 1417.90005, 2502.10913, 1519.40652, 2491.23344, 1524.47794)
+
+[node name="Occluder" type="LightOccluder2D" parent="EntranceDefense/ServiceWalls/RejoinOuterWall"]
+occluder = SubResource("Occluder_RejoinOuterWall")
+
+[node name="RejoinInnerWall" type="Polygon2D" parent="EntranceDefense/ServiceWalls"]
+color = Color(0.38, 0.28, 0.29, 1)
+polygon = PackedVector2Array(2357.18536, 1502.02549, 2368.06105, 1496.95407, 2400.60266, 1566.73977, 2389.72697, 1571.81119)
+
+[node name="Occluder" type="LightOccluder2D" parent="EntranceDefense/ServiceWalls/RejoinInnerWall"]
+occluder = SubResource("Occluder_RejoinInnerWall")
+
+[node name="ServiceSeals" type="Node2D" parent="EntranceDefense"]
+
+[node name="MaintenanceHatch" type="StaticBody2D" parent="EntranceDefense/ServiceSeals"]
+position = Vector2(1587.13398, 1833.52190)
+rotation = 1.13446401
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape2D" parent="EntranceDefense/ServiceSeals/MaintenanceHatch"]
+shape = SubResource("Shape_MaintenanceHatch")
+
+[node name="Occluder" type="LightOccluder2D" parent="EntranceDefense/ServiceSeals/MaintenanceHatch"]
+occluder = SubResource("Occluder_MaintenanceHatch")
+
+[node name="MaintenanceExit" type="StaticBody2D" parent="EntranceDefense/ServiceSeals"]
+position = Vector2(2444.65019, 1542.88993)
+rotation = 1.13446401
+collision_mask = 0
+
+[node name="Collision" type="CollisionShape2D" parent="EntranceDefense/ServiceSeals/MaintenanceExit"]
+shape = SubResource("Shape_MaintenanceExit")
+
+[node name="Occluder" type="LightOccluder2D" parent="EntranceDefense/ServiceSeals/MaintenanceExit"]
+occluder = SubResource("Occluder_MaintenanceExit")
+
 [node name="Reservations" type="Node2D" parent="." unique_id=26290402]
 z_index = 1
+
+[node name="DefenseArena" type="Polygon2D" parent="Reservations"]
+visible = false
+polygon = PackedVector2Array(1533.07313, 2010.99704, 2074.13888, 1758.69393, 2060.61510, 1729.69208, 2179.34142, 1674.32909, 2312.88879, 1960.72235, 2194.16247, 2016.08534, 2180.63868, 1987.08350, 1639.57293, 2239.38660)
+metadata/role = "entry_hazard_area"
 
 [node name="ElectricFloor" type="Node2D" parent="Reservations" unique_id=1353397383]
 position = Vector2(1914.5479, 1901.521)
@@ -2676,10 +2983,10 @@ kind = "electric_floor"
 metadata/logic_implemented = false
 
 [node name="ProtocolZone" type="Node2D" parent="Reservations" unique_id=1256905660]
-position = Vector2(5679.98, 57.4006)
-rotation = -0.436
+position = Vector2(5592.97535, 97.97274)
+rotation = -0.43633231
 script = ExtResource("4_zone")
-size = Vector2(960, 288)
+size = Vector2(1224, 288)
 kind = "protocol"
 metadata/logic_implemented = false
 
@@ -2725,33 +3032,314 @@ object_id = "p2_sentry_01"
 object_type = "sentry"
 room_id = "p2_spine_lower"
 
+[node name="DefenseSafePocket" type="Marker2D" parent="Markers"]
+position = Vector2(1600.28157, 1909.04104)
+script = ExtResource("3_marker")
+object_id = "p2_defense_safe_pocket"
+room_id = "p2_spine_lower"
+footprint = Vector2(96, 64)
+metadata/role = "observation_and_story_return"
+metadata/logic_implemented = false
+
+[node name="MaintenanceHatch" type="Marker2D" parent="Markers"]
+position = Vector2(1587.13398, 1833.52190)
+rotation = 1.13446401
+script = ExtResource("3_marker")
+object_id = "p2_maintenance_hatch"
+room_id = "p2_spine_lower"
+footprint = Vector2(20, 108)
+linked_ids = Array[String](["p2_defense_safe_pocket", "p2_maintenance_exit"])
+metadata/role = "service_hatch"
+metadata/logic_implemented = false
+metadata/interaction_range = 88.0
+
+[node name="MaintenanceWindow" type="Marker2D" parent="Markers"]
+position = Vector2(1881.17341, 1583.86451)
+script = ExtResource("3_marker")
+object_id = "p2_maintenance_window"
+room_id = "p2_spine_lower"
+footprint = Vector2(152, 40)
+metadata/role = "inspection_window"
+metadata/logic_implemented = false
+
+[node name="MaintenanceExit" type="Marker2D" parent="Markers"]
+position = Vector2(2444.65019, 1542.88993)
+rotation = 1.13446401
+script = ExtResource("3_marker")
+object_id = "p2_maintenance_exit"
+room_id = "p2_spine_lower"
+footprint = Vector2(20, 116)
+linked_ids = Array[String](["p2_maintenance_hatch"])
+metadata/role = "service_rejoin"
+metadata/logic_implemented = false
+
+[node name="IsolationGate" type="Marker2D" parent="Markers"]
+position = Vector2(2246.11510, 1817.52572)
+rotation = -0.43633231
+script = ExtResource("3_marker")
+object_id = "p2_defense_isolation_gate"
+room_id = "p2_spine_lower"
+footprint = Vector2(36, 320)
+linked_ids = Array[String](["p2_defense_electrode_03"])
+metadata/role = "isolation_gate"
+metadata/logic_implemented = false
+
+[node name="DefenseEmitter01" type="Marker2D" parent="Markers"]
+position = Vector2(1690.81474, 2197.83810)
+rotation = -1.36135682
+script = ExtResource("3_marker")
+object_id = "p2_defense_emitter_01"
+room_id = "p2_spine_lower"
+footprint = Vector2(50, 34)
+metadata/role = "wall_emitter"
+metadata/logic_implemented = false
+
+[node name="DefenseEmitter02" type="Marker2D" parent="Markers"]
+position = Vector2(1769.61458, 1917.24661)
+rotation = 0.66322512
+script = ExtResource("3_marker")
+object_id = "p2_defense_emitter_02"
+room_id = "p2_spine_lower"
+footprint = Vector2(50, 34)
+metadata/role = "wall_emitter"
+metadata/logic_implemented = false
+
+[node name="DefenseEmitter03" type="Marker2D" parent="Markers"]
+position = Vector2(1979.86585, 2065.25811)
+rotation = -2.02458193
+script = ExtResource("3_marker")
+object_id = "p2_defense_emitter_03"
+room_id = "p2_spine_lower"
+footprint = Vector2(50, 34)
+metadata/role = "wall_emitter"
+metadata/logic_implemented = false
+
+[node name="DefenseEmitter04" type="Marker2D" parent="Markers"]
+position = Vector2(1975.83014, 1819.98334)
+rotation = 1.04719755
+script = ExtResource("3_marker")
+object_id = "p2_defense_emitter_04"
+room_id = "p2_spine_lower"
+footprint = Vector2(50, 34)
+metadata/role = "wall_emitter"
+metadata/logic_implemented = false
+
+[node name="DefenseElectrode01" type="Marker2D" parent="Markers"]
+position = Vector2(1796.33239, 2069.19120)
+rotation = -0.43633231
+script = ExtResource("3_marker")
+object_id = "p2_defense_electrode_01"
+room_id = "p2_spine_lower"
+footprint = Vector2(52, 52)
+metadata/role = "recessed_electrode"
+metadata/logic_implemented = false
+metadata/pulse_radius = 54.0
+
+[node name="DefenseElectrode02" type="Marker2D" parent="Markers"]
+position = Vector2(1863.85107, 1939.50609)
+rotation = -0.43633231
+script = ExtResource("3_marker")
+object_id = "p2_defense_electrode_02"
+room_id = "p2_spine_lower"
+footprint = Vector2(53, 53)
+metadata/role = "recessed_electrode"
+metadata/logic_implemented = false
+metadata/pulse_radius = 66.0
+
+[node name="DefenseElectrode03" type="Marker2D" parent="Markers"]
+position = Vector2(2190.83033, 1843.30544)
+rotation = -0.43633231
+script = ExtResource("3_marker")
+object_id = "p2_defense_electrode_03"
+room_id = "p2_spine_lower"
+footprint = Vector2(80, 80)
+metadata/role = "recessed_electrode"
+metadata/logic_implemented = false
+metadata/pulse_radius = 142.0
+
+[node name="DefenseEmitter05" type="Marker2D" parent="Markers"]
+position = Vector2(2122.63987, 1997.57812)
+rotation = -2.23402144
+script = ExtResource("3_marker")
+object_id = "p2_defense_emitter_05"
+room_id = "p2_spine_lower"
+footprint = Vector2(50, 34)
+metadata/role = "wall_emitter"
+metadata/logic_implemented = false
+
+[node name="DefenseEmitter06" type="Marker2D" parent="Markers"]
+position = Vector2(2042.89692, 1788.70959)
+rotation = 1.57079633
+script = ExtResource("3_marker")
+object_id = "p2_defense_emitter_06"
+room_id = "p2_spine_lower"
+footprint = Vector2(50, 34)
+metadata/role = "wall_emitter"
+metadata/logic_implemented = false
+
+[node name="DefenseEmitter07" type="Marker2D" parent="Markers"]
+position = Vector2(2222.74658, 1985.10231)
+rotation = -2.12930169
+script = ExtResource("3_marker")
+object_id = "p2_defense_emitter_07"
+room_id = "p2_spine_lower"
+footprint = Vector2(50, 34)
+metadata/role = "wall_emitter"
+metadata/logic_implemented = false
+
+[node name="DefenseEmitter08" type="Marker2D" parent="Markers"]
+position = Vector2(2145.80315, 1706.51891)
+rotation = 1.29154365
+script = ExtResource("3_marker")
+object_id = "p2_defense_emitter_08"
+room_id = "p2_spine_lower"
+footprint = Vector2(50, 34)
+metadata/role = "wall_emitter"
+metadata/logic_implemented = false
+
+[node name="DefenseElectrode04" type="Marker2D" parent="Markers"]
+position = Vector2(1929.07107, 2024.94819)
+rotation = -0.43633231
+script = ExtResource("3_marker")
+object_id = "p2_defense_electrode_04"
+room_id = "p2_spine_lower"
+footprint = Vector2(54, 54)
+metadata/role = "recessed_electrode"
+metadata/logic_implemented = false
+metadata/pulse_radius = 61.0
+
+[node name="DefenseElectrode05" type="Marker2D" parent="Markers"]
+position = Vector2(1963.90647, 1896.15963)
+rotation = -0.43633231
+script = ExtResource("3_marker")
+object_id = "p2_defense_electrode_05"
+room_id = "p2_spine_lower"
+footprint = Vector2(56, 56)
+metadata/role = "recessed_electrode"
+metadata/logic_implemented = false
+metadata/pulse_radius = 71.0
+
+[node name="DefenseElectrode06" type="Marker2D" parent="Markers"]
+position = Vector2(2086.89077, 1946.94215)
+rotation = -0.43633231
+script = ExtResource("3_marker")
+object_id = "p2_defense_electrode_06"
+room_id = "p2_spine_lower"
+footprint = Vector2(55, 55)
+metadata/role = "recessed_electrode"
+metadata/logic_implemented = false
+metadata/pulse_radius = 67.0
+
+[node name="DefenseElectrode07" type="Marker2D" parent="Markers"]
+position = Vector2(2107.04691, 1815.06823)
+rotation = -0.43633231
+script = ExtResource("3_marker")
+object_id = "p2_defense_electrode_07"
+room_id = "p2_spine_lower"
+footprint = Vector2(60, 60)
+metadata/role = "recessed_electrode"
+metadata/logic_implemented = false
+metadata/pulse_radius = 72.0
+
 [node name="ProtocolTerminal" type="Marker2D" parent="Markers" unique_id=1572971727]
-position = Vector2(5721.5293, 108.6426)
+position = Vector2(5741.02840, -48.30199)
 script = ExtResource("3_marker")
 object_id = "p2_protocol_terminal"
 object_type = "terminal"
 room_id = "p2_spine_middle"
-linked_ids = Array[String](["p2_authorized_door"])
+linked_ids = Array[String](["p2_authorized_door", "p2_protocol_demo_reader"])
+footprint = Vector2(76, 47)
 metadata/role = "protocol"
 metadata/region_id = "p2_protocol_region"
+metadata/interaction_range = 76.0
+metadata/dial_count = 3
 
 [node name="ProtocolCleaner" type="Marker2D" parent="Markers" unique_id=1660689094]
-position = Vector2(5989.307, 1.4296)
+position = Vector2(5740.01221, 119.88531)
+rotation = -0.43633231
 script = ExtResource("3_marker")
 object_id = "p2_cleaner_01"
 object_type = "cleaner"
 room_id = "p2_spine_middle"
 metadata/protocol_region_id = "p2_protocol_region"
+metadata/role = "protocol_demo_stop"
 
 [node name="AuthorizedDoor" type="Marker2D" parent="Markers" unique_id=885078437]
-position = Vector2(6668.896, -244.8514)
-rotation = -0.436
+position = Vector2(6668.89710, -244.85140)
+rotation = -0.43633231
 script = ExtResource("3_marker")
 object_id = "p2_authorized_door"
 object_type = "door"
 room_id = "p2_spine_middle"
 footprint = Vector2(32, 288)
 metadata/role = "authorized_gate"
+linked_ids = Array[String](["p2_protocol_gate_reader", "p2_protocol_exit"])
+
+[node name="ProtocolObservation" type="Marker2D" parent="Markers"]
+position = Vector2(5647.30739, 25.19204)
+script = ExtResource("3_marker")
+object_id = "p2_protocol_observation"
+room_id = "p2_spine_middle"
+metadata/role = "protocol_observation"
+linked_ids = Array[String](["p2_cleaner_01", "p2_protocol_demo_reader"])
+
+[node name="ProtocolDemoReader" type="Marker2D" parent="Markers"]
+position = Vector2(5802.54745, 90.72465)
+script = ExtResource("3_marker")
+object_id = "p2_protocol_demo_reader"
+room_id = "p2_spine_middle"
+metadata/role = "protocol_demo_reader"
+footprint = Vector2(32, 28)
+metadata/interaction_range = 148.0
+
+[node name="ProtocolTerminalUse" type="Marker2D" parent="Markers"]
+position = Vector2(5733.22342, -8.25099)
+script = ExtResource("3_marker")
+object_id = "p2_protocol_terminal_use"
+room_id = "p2_spine_middle"
+metadata/role = "protocol_operator"
+linked_ids = Array[String](["p2_protocol_terminal"])
+
+[node name="ProtocolGateReader" type="Marker2D" parent="Markers"]
+position = Vector2(6541.44234, -295.75606)
+script = ExtResource("3_marker")
+object_id = "p2_protocol_gate_reader"
+room_id = "p2_spine_middle"
+metadata/role = "protocol_gate_reader"
+footprint = Vector2(34, 30)
+metadata/interaction_range = 80.0
+linked_ids = Array[String](["p2_authorized_door"])
+
+[node name="ProtocolYieldRear" type="Marker2D" parent="Markers"]
+position = Vector2(6585.73416, -328.54683)
+script = ExtResource("3_marker")
+object_id = "p2_protocol_yield_rear"
+room_id = "p2_spine_middle"
+metadata/role = "cleaner_yield"
+
+[node name="ProtocolYieldFront" type="Marker2D" parent="Markers"]
+position = Vector2(6679.55542, -127.34650)
+script = ExtResource("3_marker")
+object_id = "p2_protocol_yield_front"
+room_id = "p2_spine_middle"
+metadata/role = "cleaner_yield"
+
+[node name="ProtocolExit" type="Marker2D" parent="Markers"]
+position = Vector2(6797.45114, -234.18094)
+script = ExtResource("3_marker")
+object_id = "p2_protocol_exit"
+room_id = "p2_spine_middle"
+metadata/role = "protocol_exit_behind_cover"
+metadata/region_id = "p2_protocol_region"
+
+[node name="ProtocolGateSentry" type="Marker2D" parent="Markers"]
+position = Vector2(7064.51635, -380.78305)
+script = ExtResource("3_marker")
+object_id = "p2_protocol_gate_sentry"
+room_id = "p2_spine_middle"
+metadata/role = "reserved_sentry"
+footprint = Vector2(44, 44)
+metadata/reservation_only = true
 
 [node name="ScatterEvolution" type="Marker2D" parent="Markers" unique_id=65214806]
 position = Vector2(7532.2686, -929.9132)
@@ -2801,7 +3389,7 @@ object_type = "cleaner"
 room_id = "p2_spine_upper"
 
 [node name="ExitSentry" type="Marker2D" parent="Markers" unique_id=1053690742]
-position = Vector2(8827.58, -1180.8458)
+position = Vector2(8799.42397, -1165.50945)
 script = ExtResource("3_marker")
 object_id = "p2_sentry_02"
 object_type = "sentry"
@@ -2871,6 +3459,26 @@ room_id = "p2_spine_middle"
 metadata/role = "duct_arrival"
 metadata/logic_implemented = false
 
+[node name="SpinalFluidTap" type="Marker2D" parent="Markers"]
+position = Vector2(7763.03524, -1107.03394)
+rotation = -0.43633231
+script = ExtResource("3_marker")
+object_id = "p2_spinal_fluid_tap"
+room_id = "p2_spine_middle"
+footprint = Vector2(68, 58)
+linked_ids = Array[String](["p2_scatter_return_entry", "p2_spinal_fluid_tap_use"])
+metadata/role = "spinal_fluid_tap"
+metadata/interaction_range = 82.0
+metadata/logic_implemented = false
+
+[node name="SpinalFluidTapUse" type="Marker2D" parent="Markers"]
+position = Vector2(7791.35066, -1046.31132)
+script = ExtResource("3_marker")
+object_id = "p2_spinal_fluid_tap_use"
+room_id = "p2_spine_middle"
+linked_ids = Array[String](["p2_spinal_fluid_tap"])
+metadata/role = "spinal_fluid_operator"
+
 [node name="Cleaner03" type="Marker2D" parent="Markers" unique_id=314145713]
 position = Vector2(6129.958, -37.6764)
 script = ExtResource("3_marker")
@@ -2886,42 +3494,46 @@ object_type = "cleaner"
 room_id = "p2_spine_middle"
 
 [node name="Cleaner05" type="Marker2D" parent="Markers" unique_id=1842658175]
-position = Vector2(6390.975, -159.3904)
+position = Vector2(6591.15249, -264.87076)
 script = ExtResource("3_marker")
 object_id = "p2_cleaner_05"
 object_type = "cleaner"
 room_id = "p2_spine_middle"
+metadata/role = "protocol_gate_guard"
+linked_ids = Array[String](["p2_protocol_yield_rear"])
 
 [node name="Cleaner06" type="Marker2D" parent="Markers" unique_id=215598029]
-position = Vector2(6555.293, -147.7424)
+position = Vector2(6634.25955, -172.42737)
 script = ExtResource("3_marker")
 object_id = "p2_cleaner_06"
 object_type = "cleaner"
 room_id = "p2_spine_middle"
+metadata/role = "protocol_gate_guard"
+linked_ids = Array[String](["p2_protocol_yield_front"])
 
 [node name="Sentry03" type="Marker2D" parent="Markers" unique_id=296806594]
-position = Vector2(8957.639, -1356.2448)
+position = Vector2(8985.43933, -1391.27545)
 script = ExtResource("3_marker")
 object_id = "p2_sentry_03"
 object_type = "sentry"
 room_id = "p2_spine_upper"
 
 [node name="Sentry04" type="Marker2D" parent="Markers" unique_id=1167983801]
-position = Vector2(9165.46, -1364.8828)
+position = Vector2(9274.93021, -1376.20787)
 script = ExtResource("3_marker")
 object_id = "p2_sentry_04"
 object_type = "sentry"
 room_id = "p2_spine_upper"
 
 [node name="Sentry05" type="Marker2D" parent="Markers" unique_id=822336719]
-position = Vector2(9305.661, -1518.5308)
+position = Vector2(9443.06369, -1602.46244)
 script = ExtResource("3_marker")
 object_id = "p2_sentry_05"
 object_type = "sentry"
 room_id = "p2_spine_upper"
 
 [node name="Sentry06" type="Marker2D" parent="Markers" unique_id=1438964600]
-position = Vector2(9513.481, -1527.1688)
+position = Vector2(9759.86594, -1604.54387)
 script = ExtResource("3_marker")
 object_id = "p2_sentry_06"
 object_type = "sentry"
@@ -3053,6 +3665,156 @@ position = Vector2(7690.8013, -968.5302)
 [node name="Point03" type="Marker2D" parent="RouteWaypoints/DuctRoute" unique_id=202931796]
 position = Vector2(7532.2686, -929.9132)
 
+[node name="ServiceRoute" type="Node2D" parent="RouteWaypoints"]
+
+
+[node name="Point00" type="Marker2D" parent="RouteWaypoints/ServiceRoute"]
+position = Vector2(1589.94826, 2123.50134)
+
+[node name="Point01" type="Marker2D" parent="RouteWaypoints/ServiceRoute"]
+position = Vector2(1528.24600, 1991.18041)
+
+[node name="Point02" type="Marker2D" parent="RouteWaypoints/ServiceRoute"]
+position = Vector2(1526.56529, 1954.44929)
+
+[node name="Point03" type="Marker2D" parent="RouteWaypoints/ServiceRoute"]
+position = Vector2(1600.28157, 1909.04104)
+
+[node name="Point04" type="Marker2D" parent="RouteWaypoints/ServiceRoute"]
+position = Vector2(1587.13398, 1833.52190)
+
+[node name="Point05" type="Marker2D" parent="RouteWaypoints/ServiceRoute"]
+position = Vector2(1542.75906, 1738.35958)
+
+[node name="Point06" type="Marker2D" parent="RouteWaypoints/ServiceRoute"]
+position = Vector2(1602.64133, 1691.67859)
+
+[node name="Point07" type="Marker2D" parent="RouteWaypoints/ServiceRoute"]
+position = Vector2(1872.72105, 1565.73835)
+
+[node name="Point08" type="Marker2D" parent="RouteWaypoints/ServiceRoute"]
+position = Vector2(2174.52154, 1425.00647)
+
+[node name="Point09" type="Marker2D" parent="RouteWaypoints/ServiceRoute"]
+position = Vector2(2268.76779, 1414.16006)
+
+[node name="Point10" type="Marker2D" parent="RouteWaypoints/ServiceRoute"]
+position = Vector2(2399.73052, 1451.29177)
+
+[node name="Point11" type="Marker2D" parent="RouteWaypoints/ServiceRoute"]
+position = Vector2(2444.65019, 1542.88993)
+
+[node name="Point12" type="Marker2D" parent="RouteWaypoints/ServiceRoute"]
+position = Vector2(2514.38221, 1692.43072)
+
+[node name="ProtocolBayRoute" type="Node2D" parent="RouteWaypoints"]
+
+
+[node name="Point00" type="Marker2D" parent="RouteWaypoints/ProtocolBayRoute"]
+position = Vector2(5612.14222, 247.92150)
+
+[node name="Point01" type="Marker2D" parent="RouteWaypoints/ProtocolBayRoute"]
+position = Vector2(5578.76514, 143.21729)
+
+[node name="Point02" type="Marker2D" parent="RouteWaypoints/ProtocolBayRoute"]
+position = Vector2(5572.02277, 62.50459)
+
+[node name="Point03" type="Marker2D" parent="RouteWaypoints/ProtocolBayRoute"]
+position = Vector2(5647.30739, 25.19204)
+
+[node name="Point04" type="Marker2D" parent="RouteWaypoints/ProtocolBayRoute"]
+position = Vector2(5733.22342, -8.25099)
+
+[node name="FluidReturnRoute" type="Node2D" parent="RouteWaypoints"]
+
+
+[node name="Point00" type="Marker2D" parent="RouteWaypoints/FluidReturnRoute"]
+position = Vector2(7665.63043, -833.21411)
+
+[node name="Point01" type="Marker2D" parent="RouteWaypoints/FluidReturnRoute"]
+position = Vector2(7717.48295, -897.11494)
+
+[node name="Point02" type="Marker2D" parent="RouteWaypoints/FluidReturnRoute"]
+position = Vector2(7778.87735, -950.01793)
+
+[node name="Point03" type="Marker2D" parent="RouteWaypoints/FluidReturnRoute"]
+position = Vector2(7804.87444, -1017.30947)
+
+[node name="Point04" type="Marker2D" parent="RouteWaypoints/FluidReturnRoute"]
+position = Vector2(7791.35066, -1046.31132)
+
+[node name="Point05" type="Marker2D" parent="RouteWaypoints/FluidReturnRoute"]
+position = Vector2(7816.70776, -991.93285)
+
+[node name="Point06" type="Marker2D" parent="RouteWaypoints/FluidReturnRoute"]
+position = Vector2(7750.16622, -898.01148)
+
+[node name="Point07" type="Marker2D" parent="RouteWaypoints/FluidReturnRoute"]
+position = Vector2(7799.96922, -772.27899)
+
+[node name="UpperLaserRoute" type="Node2D" parent="RouteWaypoints"]
+
+
+[node name="Point00" type="Marker2D" parent="RouteWaypoints/UpperLaserRoute"]
+position = Vector2(8496.01360, -1096.84981)
+
+[node name="Point01" type="Marker2D" parent="RouteWaypoints/UpperLaserRoute"]
+position = Vector2(8831.34748, -1253.21857)
+
+[node name="Point02" type="Marker2D" parent="RouteWaypoints/UpperLaserRoute"]
+position = Vector2(9193.87060, -1422.26587)
+
+[node name="Point03" type="Marker2D" parent="RouteWaypoints/UpperLaserRoute"]
+position = Vector2(9529.20448, -1578.63463)
+
+[node name="Point04" type="Marker2D" parent="RouteWaypoints/UpperLaserRoute"]
+position = Vector2(9918.91683, -1760.36048)
+
+[node name="UpperCoverRoute" type="Node2D" parent="RouteWaypoints"]
+
+
+[node name="Point00" type="Marker2D" parent="RouteWaypoints/UpperCoverRoute"]
+position = Vector2(8496.01360, -1096.84981)
+
+[node name="Point01" type="Marker2D" parent="RouteWaypoints/UpperCoverRoute"]
+position = Vector2(8743.89241, -1327.18890)
+
+[node name="Point02" type="Marker2D" parent="RouteWaypoints/UpperCoverRoute"]
+position = Vector2(8723.60673, -1370.69168)
+
+[node name="Point03" type="Marker2D" parent="RouteWaypoints/UpperCoverRoute"]
+position = Vector2(8832.36367, -1421.40587)
+
+[node name="Point04" type="Marker2D" parent="RouteWaypoints/UpperCoverRoute"]
+position = Vector2(9045.68565, -1238.41479)
+
+[node name="Point05" type="Marker2D" parent="RouteWaypoints/UpperCoverRoute"]
+position = Vector2(9085.91009, -1204.20962)
+
+[node name="Point06" type="Marker2D" parent="RouteWaypoints/UpperCoverRoute"]
+position = Vector2(9194.66703, -1254.92381)
+
+[node name="Point07" type="Marker2D" parent="RouteWaypoints/UpperCoverRoute"]
+position = Vector2(9201.57784, -1540.61112)
+
+[node name="Point08" type="Marker2D" parent="RouteWaypoints/UpperCoverRoute"]
+position = Vector2(9181.29217, -1584.11390)
+
+[node name="Point09" type="Marker2D" parent="RouteWaypoints/UpperCoverRoute"]
+position = Vector2(9296.39325, -1637.78642)
+
+[node name="Point10" type="Marker2D" parent="RouteWaypoints/UpperCoverRoute"]
+position = Vector2(9522.40354, -1460.71200)
+
+[node name="Point11" type="Marker2D" parent="RouteWaypoints/UpperCoverRoute"]
+position = Vector2(9542.68922, -1417.20922)
+
+[node name="Point12" type="Marker2D" parent="RouteWaypoints/UpperCoverRoute"]
+position = Vector2(9658.69662, -1471.30436)
+
+[node name="Point13" type="Marker2D" parent="RouteWaypoints/UpperCoverRoute"]
+position = Vector2(9918.91683, -1760.36048)
+
 [node name="Boundaries" type="Node2D" parent="." unique_id=1373317688]
 
 [node name="Perimeter00" type="StaticBody2D" parent="Boundaries" unique_id=1134970792]
@@ -3060,19 +3822,31 @@ collision_mask = 0
 
 [node name="Collision" type="CollisionPolygon2D" parent="Boundaries/Perimeter00" unique_id=398023776]
 build_mode = 1
-polygon = PackedVector2Array(10685.369, -1976.5316, 10482.357, -1881.8646, 10502.643, -1838.3625, 7972.2305, -658.4122, 7965.4688, -672.91296, 6805.395, -131.9614, 6798.633, -146.46254, 5645.8096, 391.10773, 5652.5713, 405.6086, 4502.1396, 942.06366, 4527.1113, 999.8358, 4693.722, 1120.8518, 4880.9546, 1031.8898, 4866.7954, 1001.5248, 5040.806, 920.3818, 5054.379, 949.48865, 5068.831, 942.6218, 5109.4023, 1029.6278, 5094.856, 1036.2926, 5108.4253, 1065.3918, 4934.414, 1146.5338, 4920.3022, 1116.2705, 4701.4614, 1216.5398, 4460.248, 1068.7228, 4417.31, 981.62036, 2194.1008, 2018.32, 2153.5295, 1931.3148, 1870.7612, 2063.1711, 1897.8088, 2121.175, 498.47, 2773.698, 390.28, 2541.683, 1789.6188, 1889.16, 1816.6664, 1947.1641, 2099.434, 1815.3071, 2058.8628, 1728.302, 5517.333, 115.5906, 5524.095, 130.0919, 6676.919, -407.47952, 6670.157, -421.9804, 7471.3325, -795.5743, 7461.7173, -967.6312, 7636.7065, -1084.5382, 7764.2837, -1038.1031, 7785.52, -942.0823, 7830.2314, -962.93146, 7823.4697, -977.4322, 10353.88, -2157.3826, 10374.166, -2113.8792, 10577.18, -2208.5466)
+polygon = PackedVector2Array(10685.369, -1976.5316, 10482.357, -1881.8646, 10502.643, -1838.3625, 7972.2305, -658.4122, 7965.4688, -672.91296, 6805.395, -131.9614, 6798.633, -146.46254, 5645.8096, 391.10773, 5652.5713, 405.6086, 4502.1396, 942.06366, 4527.1113, 999.8358, 4693.722, 1120.8518, 4880.9546, 1031.8898, 4866.7954, 1001.5248, 5040.806, 920.3818, 5054.379, 949.48865, 5068.831, 942.6218, 5109.4023, 1029.6278, 5094.856, 1036.2926, 5108.4253, 1065.3918, 4934.414, 1146.5338, 4920.3022, 1116.2705, 4701.4614, 1216.5398, 4460.248, 1068.7228, 4417.31, 981.62036, 2194.1008, 2018.32, 2180.5774, 1989.3188, 1890.5591, 2124.5566, 1890.5587, 2124.556, 498.47, 2773.698, 390.28, 2541.683, 1499.5295, 2024.431, 1479.447, 1943.3196, 1505.6885, 1867.087, 1538.3154, 1851.8728, 1492.6727, 1753.9916, 1512.5089, 1682.9526, 2179.5515, 1371.9056, 2299.653, 1364.45, 2443.4214, 1407.7474, 2497.5164, 1523.7544, 5517.333, 115.5906, 5524.095, 130.0919, 5529.8633, 127.402115, 5529.0747, 46.120224, 5558.4526, -13.92086, 5757.8403, -106.89688, 5855.9463, -95.26881, 5882.9937, -37.26552, 6676.919, -407.47952, 6670.157, -421.9804, 7471.3335, -795.5747, 7461.7183, -967.631, 7591.1567, -1087.5715, 7745.229, -1159.4166, 7837.3525, -1141.6886, 7875.8105, -1059.2146, 7840.0957, -985.185, 10353.88, -2157.3826, 10374.166, -2113.8792, 10577.18, -2208.5466)
+
+[node name="Perimeter01" type="StaticBody2D" parent="Boundaries"]
+collision_mask = 0
+
+[node name="Collision" type="CollisionPolygon2D" parent="Boundaries/Perimeter01"]
+build_mode = 1
+polygon = PackedVector2Array(1603.8335, 1746.2916, 1632.5714, 1807.9204, 1647.0724, 1801.1586, 1721.4923, 1828.2452, 1768.704, 1898.9127, 1789.6188, 1889.16, 1789.6191, 1889.1609, 2072.3867, 1757.3042, 2058.8628, 1728.302, 2396.0098, 1571.0878, 2362.2007, 1498.5835, 2266.3958, 1468.2283, 2201.9966, 1467.3635)
 
 [node name="BoundaryDebug" type="Node2D" parent="." unique_id=1536948802]
 visible = false
 z_index = 25
 
 [node name="Perimeter00" type="Line2D" parent="BoundaryDebug" unique_id=1667540045]
-points = PackedVector2Array(10685.369, -1976.5316, 10482.357, -1881.8646, 10502.643, -1838.3625, 7972.2305, -658.4122, 7965.4688, -672.91296, 6805.395, -131.9614, 6798.633, -146.46254, 5645.8096, 391.10773, 5652.5713, 405.6086, 4502.1396, 942.06366, 4527.1113, 999.8358, 4693.722, 1120.8518, 4880.9546, 1031.8898, 4866.7954, 1001.5248, 5040.806, 920.3818, 5054.379, 949.48865, 5068.831, 942.6218, 5109.4023, 1029.6278, 5094.856, 1036.2926, 5108.4253, 1065.3918, 4934.414, 1146.5338, 4920.3022, 1116.2705, 4701.4614, 1216.5398, 4460.248, 1068.7228, 4417.31, 981.62036, 2194.1008, 2018.32, 2153.5295, 1931.3148, 1870.7612, 2063.1711, 1897.8088, 2121.175, 498.47, 2773.698, 390.28, 2541.683, 1789.6188, 1889.16, 1816.6664, 1947.1641, 2099.434, 1815.3071, 2058.8628, 1728.302, 5517.333, 115.5906, 5524.095, 130.0919, 6676.919, -407.47952, 6670.157, -421.9804, 7471.3325, -795.5743, 7461.7173, -967.6312, 7636.7065, -1084.5382, 7764.2837, -1038.1031, 7785.52, -942.0823, 7830.2314, -962.93146, 7823.4697, -977.4322, 10353.88, -2157.3826, 10374.166, -2113.8792, 10577.18, -2208.5466, 10685.369, -1976.5316)
+points = PackedVector2Array(10685.369, -1976.5316, 10482.357, -1881.8646, 10502.643, -1838.3625, 7972.2305, -658.4122, 7965.4688, -672.91296, 6805.395, -131.9614, 6798.633, -146.46254, 5645.8096, 391.10773, 5652.5713, 405.6086, 4502.1396, 942.06366, 4527.1113, 999.8358, 4693.722, 1120.8518, 4880.9546, 1031.8898, 4866.7954, 1001.5248, 5040.806, 920.3818, 5054.379, 949.48865, 5068.831, 942.6218, 5109.4023, 1029.6278, 5094.856, 1036.2926, 5108.4253, 1065.3918, 4934.414, 1146.5338, 4920.3022, 1116.2705, 4701.4614, 1216.5398, 4460.248, 1068.7228, 4417.31, 981.62036, 2194.1008, 2018.32, 2180.5774, 1989.3188, 1890.5591, 2124.5566, 1890.5587, 2124.556, 498.47, 2773.698, 390.28, 2541.683, 1499.5295, 2024.431, 1479.447, 1943.3196, 1505.6885, 1867.087, 1538.3154, 1851.8728, 1492.6727, 1753.9916, 1512.5089, 1682.9526, 2179.5515, 1371.9056, 2299.653, 1364.45, 2443.4214, 1407.7474, 2497.5164, 1523.7544, 5517.333, 115.5906, 5524.095, 130.0919, 5529.8633, 127.402115, 5529.0747, 46.120224, 5558.4526, -13.92086, 5757.8403, -106.89688, 5855.9463, -95.26881, 5882.9937, -37.26552, 6676.919, -407.47952, 6670.157, -421.9804, 7471.3335, -795.5747, 7461.7183, -967.631, 7591.1567, -1087.5715, 7745.229, -1159.4166, 7837.3525, -1141.6886, 7875.8105, -1059.2146, 7840.0957, -985.185, 10353.88, -2157.3826, 10374.166, -2113.8792, 10577.18, -2208.5466, 10685.369, -1976.5316)
+width = 3.0
+default_color = Color(0.45882353, 0.8862745, 0.77254903, 1)
+
+[node name="Perimeter01" type="Line2D" parent="BoundaryDebug"]
+points = PackedVector2Array(1603.8335, 1746.2916, 1632.5714, 1807.9204, 1647.0724, 1801.1586, 1721.4923, 1828.2452, 1768.704, 1898.9127, 1789.6188, 1889.16, 1789.6191, 1889.1609, 2072.3867, 1757.3042, 2058.8628, 1728.302, 2396.0098, 1571.0878, 2362.2007, 1498.5835, 2266.3958, 1468.2283, 2201.9966, 1467.3635, 1603.8335, 1746.2916)
 width = 3.0
 default_color = Color(0.45882353, 0.8862745, 0.77254903, 1)
 
 [node name="Valve0" type="Line2D" parent="BoundaryDebug" unique_id=1075711909]
-points = PackedVector2Array(3458.857, 1313.8036, 3516.8608, 1286.7556, 3550.67, 1359.2606, 3492.667, 1386.3076, 3458.857, 1313.8036)
+points = PackedVector2Array(2796.70071, 1446.03213, 2854.70441, 1418.98456, 2888.51387, 1491.48919, 2830.51017, 1518.53676, 2796.70071, 1446.03213)
 width = 3.0
 default_color = Color(0.8862745, 0.7176471, 0.45882353, 1)
 
@@ -3100,6 +3874,26 @@ default_color = Color(0.8862745, 0.7176471, 0.45882353, 1)
 points = PackedVector2Array(5036.937, 931.0138, 5065.939, 917.4898, 5126.7964, 1047.9978, 5097.7944, 1061.5219, 5036.937, 931.0138)
 width = 3.0
 default_color = Color(0.8862745, 0.7176471, 0.45882353, 1)
+
+[node name="DefenseBayShield" type="Line2D" parent="BoundaryDebug"]
+points = PackedVector2Array(1566.78973, 1988.65446, 1708.17375, 1922.72601, 1672.67381, 1846.59616, 1656.36027, 1854.20328, 1684.25308, 1914.01960, 1559.18261, 1972.34092, 1566.78973, 1988.65446)
+width = 3.0
+default_color = Color(0.886, 0.718, 0.459, 1)
+
+[node name="ProtocolBayScreen" type="Line2D" parent="BoundaryDebug" unique_id=1734150807]
+points = PackedVector2Array(5598.291, 99.90749, 5839.369, -12.50896, 5795.4165, -106.76497, 5811.73, -114.3721, 5863.2896, -3.80255, 5605.898, 116.22103, 5598.291, 99.90749)
+width = 3.0
+default_color = Color(0.8862745, 0.7176471, 0.45882353, 1)
+
+[node name="ProtocolGateCover" type="Line2D" parent="BoundaryDebug" unique_id=1611492136]
+points = PackedVector2Array(6793.357, -280.82037, 6851.3604, -307.86795, 6895.313, -213.61194, 6837.309, -186.56438, 6793.357, -280.82037)
+width = 3.0
+default_color = Color(0.8862745, 0.7176471, 0.45882353, 1)
+
+[node name="SpinalFluidPlinth" type="Line2D" parent="BoundaryDebug"]
+points = PackedVector2Array(7727.51578, -1116.95202, 7778.26902, -1140.61864, 7798.55469, -1097.11587, 7747.80146, -1073.44924, 7727.51578, -1116.95202)
+width = 3.0
+default_color = Color(0.886, 0.718, 0.459, 1)
 
 [node name="SpineArt" type="Node2D" parent="."]
 script = ExtResource("6_art")

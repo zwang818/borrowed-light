@@ -16,6 +16,11 @@ func run() -> void:
 			old.free()
 	var merged: Array[PackedVector2Array] = []
 	var surfaces: Array = map.get_walk_surfaces()
+	# Merge the hull before closing the loop. Later unions would treat the hole as a solid island.
+	var service_top: Node = map.get_node_or_null("Floors/ServiceCatwalk/Top")
+	if service_top != null:
+		surfaces.erase(service_top)
+		surfaces.append(service_top)
 	for surface in surfaces:
 		var candidate := PackedVector2Array()
 		for point in surface.polygon:

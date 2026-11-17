@@ -1,10 +1,14 @@
 extends Node2D
 ## A-only solid-form preview. Door keys never implement C's authorization or unlock state.
 const DOOR = preload("res://tests/manual/a_map/preview_door.gd")
+const HAZARDS = preload("res://tests/manual/a_map/spine_hazard_preview.gd")
+const PROTOCOL_PREVIEW = preload("res://tests/manual/a_map/spine_protocol_preview.gd")
 var _font := SystemFont.new()
 const METRICS = preload("res://scenes/levels/graybox/graybox_metrics.gd")
-const DOOR_NAMES := ["AuthorizedDoor", "Door"]
-const DOOR_LABELS := ["协议门", "出口门"]
+enum TestDoor { PROTOCOL, EXIT, ISOLATION }
+const DOOR_NAMES := ["AuthorizedDoor", "Door", "IsolationGate"]
+const DOOR_LABELS := ["协议门", "出口门", "隔离闸"]
+const PASSAGE_LABELS := ["封板隐藏", "盖板亮起", "暗道已打开"]
 @onready var map: Node2D = $Map
 @onready var actor: CharacterBody2D = $Actor
 var doors: Array[Node2D] = []
@@ -15,6 +19,11 @@ var _dark := false
 var follow_zoom := 0.55
 var _guides: Node2D
 var _status: Label
+var _hazards: Node2D
+var _protocol_preview: Node2D
+var _hazard_hits := 0
+var _last_hazard := ""
+var _hit_flash := 0.0
 
 func _ready() -> void:
 	_font.font_names = PackedStringArray(["PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "WenQuanYi Zen Hei"])
@@ -44,7 +53,25 @@ func _ready() -> void:
 		add_child(door)
 		door.z_index = 4
 		doors.append(door)
-		door_skins.append(map.get_node("SpineArt").make_door_skin(door, name == "AuthorizedDoor"))
+		var art := map.get_node("SpineArt")
+		var fitting := art.get_node_or_null("EntranceFittings/" + name)
+		if fitting != null:
+			fitting.track_door(door)
+			door_skins.append(fitting)
+		else:
+			door_skins.append(art.make_door_skin(door, name == "AuthorizedDoor"))
+	var seam: Node2D = map.get_node("SpineArt/Fittings/ElectricSeam")
+	seam.arc_preview = false
+	seam.set_process(false)
+	_hazards = HAZARDS.new()
+	_hazards.name = "EntranceHazards"
+	_hazards.configure(map, actor)
+	_hazards.actor_hit.connect(_on_hazard_hit)
+	add_child(_hazards)
+	_protocol_preview = PROTOCOL_PREVIEW.new()
+	_protocol_preview.name = "ProtocolSignalPreview"
+	_protocol_preview.configure(map, actor)
+	add_child(_protocol_preview)
 	_build_guides()
 	_set_guides_visible(false)
 	_set_art_visible(true)
@@ -109,7 +136,7 @@ func _build_ui() -> void:
 	bottom.offset_top = -108
 	bottom.color = Color("17232b")
 	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var controls := _label("WASD 移动 · Tab 全图 · G 标记 · L 遮光 · R 回入口\nF 美术／灰盒 · H 侧壁／管束 · V 碰撞 · 1/2 选门 · P 开关 · 滚轮缩放", 15)
+	var controls := _label("WASD 移动 · Tab 全图 · G 标记 · L 遮光 · R 回入口\nF 美术／灰盒 · H 侧壁／管束 · V 碰撞 · 1–3 选门 · P 开关 · 滚轮缩放", 15)
 	ui.add_child(controls)
 	controls.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	controls.position = Vector2(20, get_viewport_rect().size.y - 100)
@@ -118,7 +145,7 @@ func _build_ui() -> void:
 	_status.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	_status.offset_left = 20
 	_status.offset_top = -48
-	var note := _label("通电接缝仅演示电弧｜敌人和跨关管道为预留点位", 14)
+	var note := _label("K 模拟通讯揭示盖板 · 靠近亮缝按 E 打开暗道 · 1/2/3 协议门／出口门／隔离闸", 14)
 	ui.add_child(note)
 	note.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	note.offset_left = 20
@@ -153,7 +180,10 @@ func toggle_selected_door() -> bool:
 	return true
 
 func _update_status() -> void:
-	_status.text = "所选：" + DOOR_LABELS[selected_door] + ("（已打开）" if doors[selected_door].is_open else "（关闭）") + "｜纯2D俯视：背景机械不可走，记录支路须折返"
+	var door_state := "已打开" if doors[selected_door].is_open else "关闭"
+	_status.text = "%s（%s） · %s · 机关命中 %d %s" % [
+		DOOR_LABELS[selected_door], door_state, PASSAGE_LABELS[map.service_passage_state],
+		_hazard_hits, _last_hazard]
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
@@ -172,8 +202,26 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_R:
 			actor.position = map.get_node("Markers/PlayerSpawn").position
 			actor.velocity = Vector2.ZERO
+			doors[TestDoor.ISOLATION].set_open(false)
+			_hazards.reset_motion()
+			_hazard_hits = 0
+			_last_hazard = ""
+			_hit_flash = 0.0
+			actor.modulate = Color.WHITE
+			map.set_service_passage_state(map.ServicePassage.CONCEALED)
 			_fit_camera()
-		KEY_1, KEY_2:
+			_update_status()
+		KEY_K:
+			if map.service_passage_state == map.ServicePassage.CONCEALED:
+				map.set_service_passage_state(map.ServicePassage.REVEALED)
+				_update_status()
+		KEY_E:
+			var hatch: Node2D = map.get_node("Markers/MaintenanceHatch")
+			if map.service_passage_state == map.ServicePassage.REVEALED and \
+					actor.global_position.distance_to(hatch.global_position) <= float(hatch.get_meta("interaction_range")):
+				map.set_service_passage_state(map.ServicePassage.OPEN)
+				_update_status()
+		KEY_1, KEY_2, KEY_3:
 			selected_door = event.physical_keycode - KEY_1
 			_update_status()
 		KEY_P:
@@ -192,11 +240,23 @@ func _set_guides_visible(value: bool) -> void:
 
 func _set_art_visible(value: bool) -> void:
 	map.get_node("SpineArt").set_art_enabled(value)
+	_protocol_preview.visible = value
 	for index in range(doors.size()):
 		doors[index].self_modulate.a = 0.0 if value else 1.0
 		door_skins[index].visible = value
 
-func _process(_delta: float) -> void:
+func _on_hazard_hit(device: String) -> void:
+	_hazard_hits += 1
+	_last_hazard = device
+	_hit_flash = 0.24
+	actor.modulate = Color("ff9d8a")
+	_update_status()
+
+func _process(delta: float) -> void:
+	if _hit_flash > 0.0:
+		_hit_flash = maxf(0.0, _hit_flash - delta)
+		if _hit_flash == 0.0:
+			actor.modulate = Color.WHITE
 	if not _overview:
 		$Camera.position = actor.global_position + Vector2(120, -56)
 
