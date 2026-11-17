@@ -72,6 +72,10 @@ func _write() -> void:
 	bullet.direction = Vector2.LEFT
 	bullet.travelled = 53.5
 	spine.entrance_hazards.elapsed = 8.25
+	spine.defense.elapsed = 7.25
+	spine.hero().pressure = 3
+	spine.state.record_read = true
+	spine.authorized_gate.set_open(true)
 	spine.entrance_hazards.ring_hit_cycle[0] = 1
 	var hazard := {"position": [player.global_position.x + 100, player.global_position.y],
 		"direction": [-1, 0], "travel_left": 97.5}
@@ -84,8 +88,10 @@ func _write() -> void:
 	burst.distances[0] = 50.5
 	burst.spent[0] = true
 	burst.age = 0.17
+	spine.state.first_fall = true
 	assert(spine._save_progress())
 
+	spine.state.first_fall = true # The story recovery has already been seen.
 	# Return to the title from death. Then verify the window close uses the
 	# latest state rather than the last pause-menu save.
 	player.invulnerability_remaining = 0.0
@@ -128,6 +134,7 @@ func _read() -> void:
 	var sentry = spine.enemies[0]
 	assert(sentry.state == sentry.State.BURST and sentry.shots_left == 2 and sentry.shot_index == 4)
 	assert(spine.enemies[1].health == 0 and spine.enemies[1].collision_layer == 0)
+	assert(is_equal_approx(spine.defense.elapsed, 7.25) and spine.hero().pressure == 3 and spine.state.record_read and spine.authorized_gate.is_open)
 	assert(is_equal_approx(spine.entrance_hazards.elapsed, 8.25) and spine.entrance_hazards.ring_hit_cycle[0] == 1)
 	assert(is_equal_approx(spine.entrance_hazards.orbs.back().travel_left, 97.5))
 	assert(is_equal_approx(spine.get_node("EnemyProjectiles").get_child(0).travelled, 53.5))

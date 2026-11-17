@@ -92,6 +92,7 @@ func _build_frames() -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	if not preparation_complete: return
 	var distance := enemy.position.distance_to(previous)
 	previous = enemy.position
 	walked_this_tick = distance > 0.01 and distance < 30.0

@@ -57,3 +57,7 @@ godot --headless --path . --script res://tests/manual/c_progress/level_clear_che
 `loading_cards_check.gd` 不引用本机未提交的二关Demo或房间缓存代码；该部分不属于本PR。详细验证与已知资源清理警告见 `docs/entry_loading.md`。
 
 资源一致性检查：`godot --headless --path . --script res://tests/manual/c_progress/loading_resource_check.gd`。验证三张真实角色源图的像素回读、原清理算法输出一致、缓存副本隔离以及加载结束释放，实测输出 `LOADING RESOURCE CHECK: ... PASS`。
+
+## 本地开始界面恢复（2026-11-17）
+
+实窗运行 `settings_check.gd`、`bindings_check.gd`、`title_menu_feedback_check.gd`（均为`--script res://tests/manual/c_progress/<文件名>`）；分别验证设置保存/焦点/尺寸、真实改键/游戏输入，以及标题按钮悬停和按下反馈且点击区域不变。旅程/第二关续玩另用`journey_save_check.gd`和`tests/manual/gameplay/spine_save_check.gd`检查，菜单断言含设置入口。测试使用独立user文件，反馈截图可由`UI_FEEDBACK_CAPTURE_DIR`输出到仓库外。

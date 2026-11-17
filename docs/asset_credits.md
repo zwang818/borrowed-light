@@ -56,3 +56,7 @@ Noto Sans SC 的许可副本：`assets/fonts/OFL-NotoSansSC.txt`。
 
 
 2026-11-17 C-LOAD-CARDS：三张用户已排版的原PNG（腹腔工坊／输能脊柱／地下管道）与用户本地工程 `xiaoyi_run.png` 原样加入 `assets/loading/`。三张成图尺寸1672×941，源路径／SHA-256见 `assets/loading/loading_cards_source.json`；跑动图集768×96、8×96×96，不重绘、不转码，不新增第三方下载图片、声音或字体。原作者和独立分发许可未随本地素材单独提供，团队发布前需补齐，本文不虚构许可。原角色与环境资产来源沿用既有记录。运行时帧处理只复用原清理结果，不提交预计算帧或生成构建产物。
+
+- 第二关流程试玩：复用现有A地图/B角色和音效；信号音、锁销、校准触点、压力表由代码绘制/生成。新增官方Noto Sans SC 400子集`assets/fonts/noto_sans_sc_spine_flow.ttf`，SIL OFL 1.1，来源与哈希见同目录`spine_flow_source.json`，保留既有OFL许可。未添加来源不明的第三方模型。
+
+2026-11-17 标题设置页新增 `assets/fonts/noto_sans_sc_settings.ttf`，官方Noto Sans SC 400文本子集，SIL OFL 1.1；来源URL、请求字符与SHA-256见`assets/fonts/settings_source.json`，许可副本`OFL-NotoSansSC.txt`随仓库保留。按钮动画与设置控件由代码实现，无新增第三方图片或音频。
