@@ -8,6 +8,7 @@ var health_display
 var save_path := ""
 var save_data: Dictionary = {}
 var notice: Label
+var scatter_approach = preload("res://scenes/gameplay/interaction_point.gd").new()
 
 func is_entry_ready() -> bool:
 	return entry_ready
@@ -67,9 +68,9 @@ func _ready() -> void:
 	entry_progress = 1.0
 	entry_ready = true
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_update_camera()
-	_update_scatter_prompt()
+	_refresh_scatter_response(delta)
 	var player = $SpawnPoints/PlayerSpawn/Player
 	if health_display != null:
 		health_display.set_health(player.health,player.max_health)
@@ -84,11 +85,31 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _update_scatter_prompt() -> void:
-	if not is_instance_valid(scatter_prompt): return
-	var player = $SpawnPoints/PlayerSpawn/Player
+	if not is_instance_valid(scatter_prompt):
+		return
 	scatter_station.hide()
-	scatter_prompt.visible = not player.scatter_unlocked and _can_use_scatter_station()
+	scatter_prompt.hide()
+	if scatter_approach.is_inside_tree():
+		return
+	add_child(scatter_approach)
+	scatter_approach.global_position = scatter_station.global_position
+	scatter_approach.cue = scatter_approach.Cue.SEAM
+	scatter_approach.cue_offset = Vector2(-6, -21)
+	scatter_prompt.position = to_local(scatter_station.global_position) + Vector2(-66, -66)
+	scatter_prompt.add_theme_font_size_override("font_size", 13)
+	scatter_prompt.add_theme_color_override("font_color", Color("c5decd"))
+	scatter_prompt.add_theme_color_override("font_outline_color", Color("14201e"))
+	scatter_prompt.add_theme_constant_override("outline_size", 3)
 	scatter_prompt.text = "E · 装配右臂散弹"
+
+func _refresh_scatter_response(delta: float) -> void:
+	if not scatter_approach.is_inside_tree():
+		return
+	var player = $SpawnPoints/PlayerSpawn/Player
+	var active: bool = not player.scatter_unlocked and not player.is_dead and player.controls_enabled and not player.has_protocol
+	scatter_approach.visible = active
+	scatter_approach.update_approach(player.global_position, active and _can_use_scatter_station(), player.velocity.length_squared() < 1.0, delta)
+	scatter_prompt.visible = active and scatter_approach.prompt_ready
 
 func _toggle_pause() -> void:
 	menus.toggle_pause()

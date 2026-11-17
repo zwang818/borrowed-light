@@ -455,7 +455,7 @@ collision_layer = 1
 collision_mask = 0
 
 [node name="Collision" type="CollisionPolygon2D" parent="Walls/GunRackBase/ComputerBody"]
-polygon = PackedVector2Array(-51.2, -28, -39.2, -38.4, 43.2, -38.4, 52.8, -28, 52.8, 19.2, 43.2, 32, -51.2, 32)
+polygon = PackedVector2Array(-51.2, -28, -39.2, -38.4, 43.2, -38.4, 52.8, -28, 52.8, 19.2, 48, 80, -48, 80, -51.2, 32)
 
 [node name="FirstCombatScreen" parent="Walls" instance=ExtResource("1_wall")]
 script = ExtResource("7_wall_art")

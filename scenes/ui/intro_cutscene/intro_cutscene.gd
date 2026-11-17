@@ -88,22 +88,14 @@ signal intro_finished
 		"landscape_alpha": 1.0, "beast_alpha": 1.0, "robot_alpha": 1.0,
 		"voice": "",
 	},
-	{   # 8. 求救
-		"illustration": preload("res://assets/backgrounds/intro_story/distant_call.png"),
+	{   # 8. 延续外连镜头，接神明的求救和关卡入口
+		"illustration": preload("res://assets/backgrounds/intro_story/entry.png"),
 		"mode": "click", "duration": 3.0,
 		"text": "神明：你能……回来吗？", "dialog_style": "warm",
 		"show_deity": true, "robot_action": "walk_to_beast",
-		"show_hud": false,
-		"landscape_alpha": 1.0, "beast_alpha": 1.0, "robot_alpha": 1.0,
-		"voice": "res://assets/audio/voices/frame08_deity.wav",
-	},
-	{   # 9. 最后：进入按钮
-		"illustration": preload("res://assets/backgrounds/intro_story/distant_call.png"),
-		"mode": "click", "duration": 1.0,
-		"text": "", "dialog_style": "hidden",
-		"show_deity": true, "robot_action": "walk_to_beast",
 		"show_hud": true,
 		"landscape_alpha": 1.0, "beast_alpha": 1.0, "robot_alpha": 1.0,
+		"voice": "res://assets/audio/voices/frame08_deity.wav",
 	},
 ]
 
@@ -671,11 +663,7 @@ func _build_scene() -> void:
 	_text_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_text_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_text_label.add_theme_font_size_override("font_size", font_size_deity)
-	var dialogue_font := FontVariation.new()
-	dialogue_font.base_font = _load_font(font_deity_path)
-	# The bundled WenKai subset lacks 明. Keep a packaged fallback for it.
-	dialogue_font.fallbacks = [preload("res://assets/fonts/noto_sans_sc_gameplay_ui.ttf")]
-	_text_label.add_theme_font_override("font", dialogue_font)
+	_text_label.add_theme_font_override("font", _load_font(font_deity_path))
 	_text_label.add_theme_color_override("font_color", color_text_on_warm)
 	_text_label.add_theme_constant_override("line_spacing", 8)
 	_text_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
