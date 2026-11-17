@@ -1,7 +1,9 @@
 extends RefCounted
-## Room-checkpoint persistence. JSON contains data only, never executable resources.
+## Journey persistence. JSON contains data only, never executable resources.
 const DEFAULT_PATH := "user://journey_save.json"
 const SCENE := "res://scenes/gameplay/abdomen_level.tscn"
+const SPINE := "res://scenes/gameplay/spine_level.tscn"
+const SNAPSHOT := preload("res://scenes/gameplay/journey_snapshot.gd")
 const FLAGS := ["blueprint_known", "pulse_learned", "workshop_seen"]
 const DUCTS := ["duct_arrival", "duct_weapon", "duct_exit"]
 
@@ -15,7 +17,20 @@ static func _read(path: String) -> Dictionary:
 	if parser.parse(file.get_as_text()) != OK:
 		return {}
 	var data = parser.data
-	if not data is Dictionary or data.get("version") != 1 or data.get("scene") != SCENE:
+	if not data is Dictionary:
+		return {}
+	if not SNAPSHOT.number(data.get("version")) or int(data.version) != data.version:
+		return {}
+	match int(data.version):
+		1:
+			if data.get("scene") != SCENE or data.has("snapshot"):
+				return {}
+		2:
+			if data.get("scene") not in [SCENE, SPINE] or not _valid_snapshot(data.get("snapshot")):
+				return {}
+		_:
+			return {}
+	if data.get("scene") == SPINE and data.get("first_level_cleared") != true:
 		return {}
 	if not data.get("saved_at") is String or not data.get("ducts") is Array or not data.get("explored") is Array:
 		return {}
@@ -46,6 +61,49 @@ static func _read(path: String) -> Dictionary:
 				return {}
 	return data
 
+static func resume_scene(data: Dictionary) -> String:
+	if data.get("version") == 2:
+		return data.scene
+	return SPINE if data.get("first_level_cleared", false) else SCENE
+
+static func _valid_snapshot(snapshot: Variant) -> bool:
+	if not snapshot is Dictionary or not snapshot.get("player") is Dictionary or not snapshot.get("enemies") is Dictionary:
+		return false
+	var player: Dictionary = snapshot.player
+	if not SNAPSHOT.point(player.get("global_position")) or not SNAPSHOT.number(player.get("health")):
+		return false
+	if not player.get("pose", {}) is Dictionary or not player.get("gun", {}) is Dictionary:
+		return false
+	var gun: Dictionary = player.get("gun", {})
+	if not gun.get("damaged", []) is Array or not gun.get("beam_points", []) is Array:
+		return false
+	for id in gun.get("damaged", []):
+		if not id is String:
+			return false
+	for point in gun.get("beam_points", []):
+		if not SNAPSHOT.point(point):
+			return false
+	for enemy in snapshot.enemies.values():
+		if not enemy is Dictionary or not SNAPSHOT.point(enemy.get("global_position")) or not SNAPSHOT.number(enemy.get("health")):
+			return false
+		if not SNAPSHOT.number(enemy.get("state")) or not enemy.get("pose", {}) is Dictionary:
+			return false
+	var projectiles = snapshot.get("projectiles", [])
+	if not projectiles is Array:
+		return false
+	for item in projectiles:
+		if not item is Dictionary or not item.get("state") is Dictionary or item.get("kind") not in ["bullet", "silk", "scatter"]:
+			return false
+		if not SNAPSHOT.point(item.state.get("global_position")) or not item.get("source", "") is String:
+			return false
+		if item.kind == "scatter":
+			if not item.get("pellets") is Array:
+				return false
+			for pellet in item.pellets:
+				if not pellet is Dictionary or not SNAPSHOT.point(pellet.get("point")) or not SNAPSHOT.number(pellet.get("distance")) or not pellet.get("spent") is bool:
+					return false
+	return snapshot.get("room") is Dictionary
+
 static func read_save(path: String = DEFAULT_PATH) -> Dictionary:
 	var data := _read(path)
 	if data.is_empty():
@@ -54,17 +112,17 @@ static func read_save(path: String = DEFAULT_PATH) -> Dictionary:
 			data["recovered"] = true
 	return data
 
-static func write_save(path: String, knowledge: Dictionary) -> Error:
+static func write_save(path: String, knowledge: Dictionary, scene: String = SCENE) -> Error:
 	var data := knowledge.duplicate(true)
 	data.erase("recovered")
-	data["version"] = 1
-	data["scene"] = SCENE
+	data["version"] = 2 if data.has("snapshot") else 1
+	data["scene"] = scene
 	data["saved_at"] = Time.get_datetime_string_from_system(false, true)
 	var temporary := path + ".tmp"
 	var file := FileAccess.open(temporary, FileAccess.WRITE)
 	if file == null:
 		return FileAccess.get_open_error()
-	file.store_string(JSON.stringify(data))
+	file.store_string(JSON.stringify(data, "", true, true))
 	file.flush()
 	var result := file.get_error()
 	file.close()

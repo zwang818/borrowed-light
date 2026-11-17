@@ -185,6 +185,9 @@ func _finish_loading() -> void:
 	await get_tree().create_timer(0.15,true).timeout
 	FRAME_CACHE.release_loading_sources()
 	get_tree().paused = previous_pause
+	var destination := get_tree().current_scene
+	if destination != null and destination.has_method("on_entry_revealed"):
+		destination.on_entry_revealed()
 	queue_free()
 
 func _fail() -> void:
