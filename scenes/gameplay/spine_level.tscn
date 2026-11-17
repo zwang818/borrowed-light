@@ -5,4 +5,5 @@
 script = ExtResource("2")
 dynamic_walk_preview = true
 scatter_a_preview = true
+hot_scatter_preview = false
 metadata/test_only = false

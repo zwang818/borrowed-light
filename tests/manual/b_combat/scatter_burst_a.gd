@@ -4,6 +4,7 @@ extends "res://tests/manual/b_combat/scatter_burst.gd"
 var embers: Array[Dictionary] = []
 var fading_trails: Array[Dictionary] = []
 var ember_distance: Array[float] = []
+var max_trail_length := 26.0
 
 func _ready() -> void:
 	super._ready()
@@ -26,7 +27,7 @@ func _physics_process(delta: float) -> void:
 			remaining += 10.0
 		ember_distance[i] = fmod(ember_distance[i]+travel,10.0)
 		if spent[i]:
-			fading_trails.append({"point":points[i],"axis":directions[i],"born":age,"length":minf(points[i].length(),26.0)})
+			fading_trails.append({"point":points[i],"axis":directions[i],"born":age,"length":minf(points[i].length(),max_trail_length)})
 	for i in range(embers.size()-1,-1,-1):
 		if age-embers[i].born >= 0.16: embers.remove_at(i)
 	for i in range(fading_trails.size()-1,-1,-1):
@@ -50,27 +51,29 @@ func _draw() -> void:
 	for i in range(pellet_count):
 		if spent[i] or distances[i] <= 0.0: continue
 		var fade := clampf((RANGE-distances[i])/25.0,0.0,1.0)
-		var tip := points[i]
-		var axis := directions[i]
-		var length := minf(distances[i],26.0)
-		var lateral := axis.orthogonal()
-		_draw_pellet_trail(tip,axis,length,fade)
-		# Faceted gold head with a white-hot centre, one head per real pellet.
-		var head := PackedVector2Array([tip,tip-axis*2.0+lateral*1.9,
-			tip-axis*5.0+lateral,tip-axis*7.0,tip-axis*5.0-lateral,
-			tip-axis*2.0-lateral*1.9])
-		draw_colored_polygon(head,Color(1.0,0.74,0.22,fade))
-		draw_line(tip-axis*4.5,tip-axis*0.8,Color(1.0,0.98,0.82,fade),1.5)
+		_draw_live_pellet(points[i], directions[i], minf(distances[i], max_trail_length), fade)
 
 	for impact in impacts:
-		var life: float = age-impact.born
-		if life > 0.16: continue
-		var fade := 1.0-life/0.16
-		var center: Vector2 = impact.point
-		for i in range(5):
-			var axis := Vector2(impact.normal).rotated(lerpf(-1.3,1.3,i/4.0))
-			draw_line(center+axis*life*25.0,center+axis*(2.0+life*55.0),Color(1.0,0.62,0.14,fade),1.2)
-		draw_circle(center,2.6*fade,Color(1.0,0.93,0.62,fade))
+		_draw_impact(impact, age - impact.born)
+
+func _draw_live_pellet(tip: Vector2, axis: Vector2, length: float, fade: float) -> void:
+	var lateral := axis.orthogonal()
+	_draw_pellet_trail(tip,axis,length,fade)
+	# Faceted gold head with a white-hot centre, one head per real pellet.
+	var head := PackedVector2Array([tip,tip-axis*2.0+lateral*1.9,
+		tip-axis*5.0+lateral,tip-axis*7.0,tip-axis*5.0-lateral,
+		tip-axis*2.0-lateral*1.9])
+	draw_colored_polygon(head,Color(1.0,0.74,0.22,fade))
+	draw_line(tip-axis*4.5,tip-axis*0.8,Color(1.0,0.98,0.82,fade),1.5)
+
+func _draw_impact(impact: Dictionary, life: float) -> void:
+	if life > 0.16: return
+	var fade := 1.0-life/0.16
+	var center: Vector2 = impact.point
+	for i in range(5):
+		var axis := Vector2(impact.normal).rotated(lerpf(-1.3,1.3,i/4.0))
+		draw_line(center+axis*life*25.0,center+axis*(2.0+life*55.0),Color(1.0,0.62,0.14,fade),1.2)
+	draw_circle(center,2.6*fade,Color(1.0,0.93,0.62,fade))
 
 func _draw_pellet_trail(tip: Vector2, axis: Vector2, length: float, fade: float) -> void:
 	# A bright inner filament, amber taper and faint outer glow; rear segments

@@ -28,6 +28,9 @@ const TERMINAL_CLUES := {&"pulse_blueprint": "04", &"workshop_origin": "17"}
 
 const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
 const CLEANER_SCENE := preload("res://scenes/enemies/cleaner/cleaner.tscn")
+const WEB_CLEANER := preload("res://tests/manual/b_combat/web_cleaner.gd")
+const EXIT_CLEANER := preload("res://scenes/gameplay/abdomen_exit_cleaner.gd")
+const EXIT_CLEANER_IDS := [&"abdomen_cleaner_02", &"abdomen_cleaner_03"]
 const SENTRY_SCENE := preload("res://scenes/enemies/sentry/sentry.tscn")
 const PAUSE_INPUT_SCRIPT := preload("res://scenes/gameplay/pause_input.gd")
 const GAME_MENUS_SCRIPT := preload("res://scenes/gameplay/game_menus.gd")
@@ -68,10 +71,14 @@ const C := {
 @onready var bullets_parent := $Bullets as Node2D
 @onready var interactables_parent := $Interactables as Node2D
 @onready var camera := $Camera2D as Camera2D
+@onready var exit_combat_zone: Polygon2D = $AbdomenGraybox/ExplorationRegions/ExitCombat
+@onready var exit_approach_zone: Polygon2D = $AbdomenGraybox/ExplorationRegions/UpperPassage
 
 var robot_visual: Node2D
 var player: CharacterBody2D
 var enemies: Array[Node] = []
+var exit_cleaners: Array[EXIT_CLEANER] = []
+var exit_encounter_active := false
 var interactables: Array[Node] = []
 var is_level_complete := false
 var exit_retry_blocked := false
@@ -235,6 +242,7 @@ func _physics_process(delta: float) -> void:
 	if get_tree().paused:
 		return
 	if player != null and not player.is_dead:
+		_update_exit_encounter()
 		camera.global_position = player.global_position
 		last_memory_record_time += delta
 		if last_memory_record_time >= 0.5:
@@ -519,10 +527,11 @@ func _match_marker(marker: Marker2D) -> void:
 				weapon_pickup = _add_weapon_pickup(marker.global_position, marker.content_id)
 		"cleaner":
 			var cleaner := CLEANER_SCENE.instantiate()
-			cleaner.set_script(preload("res://tests/manual/b_combat/web_cleaner.gd"))
+			var id := StringName(marker.object_id)
+			cleaner.set_script(EXIT_CLEANER if id in EXIT_CLEANER_IDS else WEB_CLEANER)
 			cleaner.persistent_projectiles = true
 			cleaner.global_position = pos
-			cleaner.entity_id = StringName(marker.object_id)
+			cleaner.entity_id = id
 			cleaner.name = marker.object_id
 			add_child(cleaner)
 			cleaner.get_node("Facing/Body").hide()
@@ -535,6 +544,8 @@ func _match_marker(marker: Marker2D) -> void:
 			cleaner_model.show()
 			marker.hide()
 			enemies.append(cleaner)
+			if cleaner is EXIT_CLEANER:
+				exit_cleaners.append(cleaner)
 			total_enemies += 1
 		"sentry":
 			var sentry := SENTRY_SCENE.instantiate()
@@ -691,6 +702,32 @@ func _configure_enemies() -> void:
 				enemy.configure(player, _cleaner_visible_query, _in_protocol_query)
 		enemy.died.connect(_on_enemy_died)
 		enemy_baselines[enemy.entity_id] = enemy.get_combat_state().duplicate(true)
+	if exit_cleaners.size() == 2:
+		var machine: Node2D = map.get_node("Walls/ExitMachine")
+		var passage: Node2D = map.get_node("Floors/UpperPassage")
+		var retreat_point := passage.to_global(Vector2(passage.size.x * 0.5, 56.0))
+		exit_cleaners[0].configure_pair(exit_cleaners[1], machine, retreat_point)
+		exit_cleaners[1].configure_pair(exit_cleaners[0], machine, retreat_point)
+
+func _update_exit_encounter() -> void:
+	if not entry_ready or not player.controls_enabled or exit_cleaners.size() != 2:
+		return
+	var inside := Geometry2D.is_point_in_polygon(exit_combat_zone.to_local(player.global_position), exit_combat_zone.polygon)
+	if exit_encounter_active:
+		if not inside and not Geometry2D.is_point_in_polygon(exit_approach_zone.to_local(player.global_position), exit_approach_zone.polygon):
+			_reset_exit_encounter()
+	elif inside:
+		var west := exit_cleaners[0]
+		var east := exit_cleaners[1]
+		var west_covers := west.global_position.distance_squared_to(player.global_position) >= east.global_position.distance_squared_to(player.global_position)
+		west.engage(west_covers)
+		east.engage(not west_covers)
+		exit_encounter_active = true
+
+func _reset_exit_encounter() -> void:
+	exit_encounter_active = false
+	for cleaner in exit_cleaners:
+		cleaner.disengage()
 
 func _configure_camera() -> void:
 	camera.position_smoothing_enabled = true
@@ -889,6 +926,8 @@ func _sentry_visible_query(enemy: Node) -> bool:
 	return enemy.is_model_on_screen()
 
 func _cleaner_visible_query(enemy: Node) -> bool:
+	if enemy is EXIT_CLEANER:
+		return enemy.engaged
 	return enemy.is_on_screen()
 
 func _in_protocol_query() -> bool:
@@ -961,6 +1000,7 @@ func _retry_level() -> void:
 			visual.set_status(false)
 			visual.open_amount = 0.0
 	dead_enemies = 0
+	_reset_exit_encounter()
 	_show_notification(C.t_retry, 2.0)
 	for enemy in enemies:
 		if not is_instance_valid(enemy):

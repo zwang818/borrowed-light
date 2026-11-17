@@ -12,10 +12,11 @@ func run():
 	var burst=get_nodes_in_group("b_scatter_flashes")[0]
 	assert(burst.get_script().resource_path.ends_with("scatter_burst_a.gd"))
 	var second = load("res://tests/manual/b_combat/spine_combat_test.tscn").instantiate()
-	assert(second.scatter_a_preview)
+	assert(second.scatter_a_preview and second.hot_scatter_preview)
 	second.free()
 	var production = load("res://scenes/gameplay/spine_level.tscn").instantiate()
 	assert(production.scatter_a_preview and production.dynamic_walk_preview)
+	assert(not production.hot_scatter_preview)
 	production.free()
 	var main_player = load("res://scenes/player/xiaoyi_journey_player.gd").new()
 	assert(main_player.scatter_burst_script.resource_path.ends_with("/scatter_burst_a.gd"))

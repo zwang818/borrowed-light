@@ -1,5 +1,6 @@
 extends "res://tests/manual/b_combat/combat_test.gd"
 ## B-only 1:1 wrapper of A's spine terrain. No story/charging-device rules.
+@export var hot_scatter_preview := false
 var enemies: Array[Node2D] = []
 var baselines: Array[Dictionary] = []
 var doors: Array[Node2D] = []
@@ -68,6 +69,8 @@ func _ready() -> void:
 		unit.configure($SpawnPoints/PlayerSpawn/Player,_cleaner_on_screen,_test_protocol_active)
 		_register_enemy(unit)
 	var player = $SpawnPoints/PlayerSpawn/Player
+	if hot_scatter_preview:
+		player.scatter_burst_script = preload("res://tests/manual/b_combat/spine_scatter_burst.gd")
 	player.scatter_unlocked = false
 	player.selected_mode = player.AttackMode.LASER
 	player.update_combat_mode()

@@ -69,7 +69,7 @@ func _physics_process(delta: float) -> void:
 				state = State.CHASE
 		update_visuals()
 		return
-	if state == State.CHASE and web_cooldown <= 0.0 and can_detect() and global_position.distance_to(target.global_position) > WEB_MIN_DISTANCE:
+	if state == State.CHASE and web_cooldown <= 0.0 and can_detect() and global_position.distance_to(target.global_position) > WEB_MIN_DISTANCE and _can_start_web():
 		velocity = Vector2.ZERO
 		web_phase = 1
 		web_remaining = WEB_WARNING
@@ -78,9 +78,15 @@ func _physics_process(delta: float) -> void:
 		var visual := combat_visual()
 		visual.face_left = target.global_position.x < global_position.x
 		visual.walked_this_tick = false
-		web_direction = eye_origin().direction_to(target.global_position)
+		web_direction = eye_origin().direction_to(_web_aim_point())
 		return
 	super._physics_process(delta)
+
+func _can_start_web() -> bool:
+	return has_clear_line(eye_origin(), _web_aim_point())
+
+func _web_aim_point() -> Vector2:
+	return target.global_position
 
 func eye_origin() -> Vector2:
 	var visual := combat_visual()
@@ -114,6 +120,8 @@ func restore_combat_state(snapshot: Dictionary) -> void:
 
 func try_melee_hit() -> void:
 	if state != State.ATTACK or attack_hit or not can_detect():
+		return
+	if not has_clear_line(global_position, target.global_position):
 		return
 	var query := PhysicsShapeQueryParameters2D.new()
 	query.shape = attack_shape
