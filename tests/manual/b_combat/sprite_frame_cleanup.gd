@@ -1,8 +1,17 @@
 extends RefCounted
+const PREPARED := preload("res://scenes/gameplay/prepared_sprite_frames.gd")
 ## Runtime-only cleanup: source PNGs remain intact. Keep the connected robot,
 ## discard neighbouring-frame fragments and low-alpha fringe pixels.
 
 static func clean_frame(source: Image) -> Image:
+	var prepared := PREPARED.find(source)
+	if prepared != null:
+		return prepared
+	var result := _clean_frame_uncached(source)
+	PREPARED.record(source, result)
+	return result
+
+static func _clean_frame_uncached(source: Image) -> Image:
 	var width := source.get_width()
 	var height := source.get_height()
 	var visited := PackedByteArray()

@@ -1,18 +1,27 @@
 extends "res://tests/manual/b_combat/spine_combat_test.gd"
 ## Production wrapper shares the approved geometry and combat, not debug controls.
 const JOURNEY = preload("res://scenes/gameplay/journey_save.gd")
+var entry_ready := false
+var entry_progress := 0.0
 var menus
 var health_display
 var save_path := ""
 var save_data: Dictionary = {}
 var notice: Label
 
+func is_entry_ready() -> bool:
+	return entry_ready
+
+func get_entry_progress() -> float:
+	return entry_progress
+
 func _enter_tree() -> void:
 	super._enter_tree()
 	$SpawnPoints/PlayerSpawn/Player.set_script(preload("res://scenes/player/xiaoyi_journey_player.gd"))
 
 func _ready() -> void:
-	super._ready()
+	await super._ready()
+	entry_progress = 0.75
 	_set_art(true)
 	$TestOverlay.hide()
 	$BackgroundMusic.stop()
@@ -55,6 +64,8 @@ func _ready() -> void:
 	pause_input.target = self
 	pause_input.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(pause_input)
+	entry_progress = 1.0
+	entry_ready = true
 
 func _process(_delta: float) -> void:
 	_update_camera()
@@ -102,5 +113,6 @@ func _return_title() -> void:
 	if not save_path.is_empty() and not _save_progress(): return
 	menus.close_and_resume()
 	var loading := preload("res://scenes/ui/intro_cutscene/entry_loading.gd").new()
+	loading.name = "EntryLoading"
 	get_tree().root.add_child(loading)
 	loading.begin("res://scenes/main.tscn")

@@ -39,14 +39,20 @@ func _ready() -> void:
 	visual.dust_color = Color(0.48,0.48,0.48,0.65)
 	visual.enhanced_gait = true
 	visual.face_firing_beam = true
+	visual.hide()
 	$SpawnPoints/PlayerSpawn/Player/Facing.add_child(visual)
+	while not visual.preparation_complete: await get_tree().process_frame
+	visual.show()
 	var hurtbox := preload("res://tests/manual/b_combat/player_model_hurtbox.gd").new()
 	hurtbox.name = "PlayerModelHurtbox"
 	$SpawnPoints/PlayerSpawn/Player.add_child(hurtbox)
 	var cleaner_visual := preload("res://tests/manual/b_combat/web_cleaner_visual.gd").new()
 	cleaner_visual.name = "CleanerVisual"
 	cleaner_visual.match_hurtbox = true
+	cleaner_visual.hide()
 	$SpawnPoints/CleanerSpawn/Cleaner.add_child(cleaner_visual)
+	while not cleaner_visual.preparation_complete: await get_tree().process_frame
+	cleaner_visual.show()
 	$SpawnPoints/CleanerSpawn/Cleaner.configure($SpawnPoints/PlayerSpawn/Player, _cleaner_on_screen, _test_protocol_active)
 	$SpawnPoints/PlayerSpawn/Player/Facing/PulseGun.configure_space(Rect2(0, 0, 960, 640), _test_enemy_readable)
 	$SpawnPoints/SentrySpawn/Sentry.configure($SpawnPoints/PlayerSpawn/Player, _test_enemy_readable, $EnemyProjectiles)

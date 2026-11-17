@@ -14,8 +14,8 @@ const REST_ARM_LENGTH := 21.0
 const ARM_THICKNESS := 1.12
 
 func _ready() -> void:
-	_load_rig()
-	super._ready()
+	await _load_rig()
+	await super._ready()
 	sprite.z_index = 1
 	for i in range(2):
 		var pivot := Node2D.new()
@@ -34,7 +34,7 @@ func _ready() -> void:
 	_show_frame()
 
 func _load_rig() -> void:
-	var source := BODY_SHEET.get_image()
+	var source := FRAME_CLEANUP.PREPARED.source_image(BODY_SHEET)
 	var maximum := 1.0
 	for row in range(8):
 		for column in range(4):
@@ -49,11 +49,13 @@ func _load_rig() -> void:
 			head.region = Rect2(tex.region.position, Vector2(tex.region.size.x, floorf(tex.region.size.y*0.56)))
 			head_frames.append(head)
 			maximum = maxf(maximum,tex.get_height())
+		await FRAME_CLEANUP.PREPARED.yield_loading_frame(self)
 	body_scale = display_height/maximum
-	source = ARM_SHEET.get_image()
+	source = FRAME_CLEANUP.PREPARED.source_image(ARM_SHEET)
 	var cell := Vector2i(source.get_width()/2,source.get_height()/2)
 	for i in range(4):
 		arm_textures.append(_part(source,Rect2i(Vector2i(i%2,i/2)*cell,cell)))
+		await FRAME_CLEANUP.PREPARED.yield_loading_frame(self)
 
 func _part(source: Image, rect: Rect2i) -> AtlasTexture:
 	var pixels := FRAME_CLEANUP.clean_frame(source.get_region(rect))

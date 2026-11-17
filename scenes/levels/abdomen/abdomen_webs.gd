@@ -6,8 +6,11 @@ const CATALOG = preload("res://scenes/levels/abdomen/abdomen_web_catalog.gd")
 var webs: Array[Node2D] = []
 var _floor_polygons: Array[PackedVector2Array] = []
 var _solid_polygons: Array[PackedVector2Array] = []
+var preparation_complete := false
 
 func _ready() -> void:
+	var staged := not Engine.is_editor_hint() and get_tree().root.has_node("EntryLoading")
+	var slice_started := Time.get_ticks_usec()
 	var map := get_parent()
 	if map.has_node("Floors"):
 		for floor_node in map.get_node("Floors").get_children():
@@ -41,6 +44,10 @@ func _ready() -> void:
 				webs.append(web)
 				if not Engine.is_editor_hint():
 					_clip_hidden_hit_shapes(web)
+				if staged and Time.get_ticks_usec() - slice_started >= 3000:
+					await get_tree().process_frame
+					slice_started = Time.get_ticks_usec()
+	preparation_complete = true
 
 func _rectangle(size: Vector2) -> PackedVector2Array:
 	return PackedVector2Array([Vector2.ZERO, Vector2(size.x, 0), size, Vector2(0, size.y)])

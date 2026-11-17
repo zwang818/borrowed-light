@@ -5,7 +5,7 @@ var sparks_enabled := true
 var dust_color := Color(0.46,0.48,0.37,0.65)
 var trail: Node2D
 func _ready() -> void:
-	super._ready()
+	await super._ready()
 	trail = preload("res://tests/manual/b_combat/sprint_sparks.gd").new()
 	trail.player = player
 	trail.spark_length_scale = spark_length_scale

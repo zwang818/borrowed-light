@@ -2,10 +2,15 @@ extends RefCounted
 ## Autonomous greeting; archive input stays on the existing sibling button.
 const SHEET = preload("res://assets/sprites/title/xiaoyi_greeting.png")
 const CLEANUP = preload("res://tests/manual/b_combat/sprite_frame_cleanup.gd")
+static var shared_frames: Array[AtlasTexture] = []
 var frames: Array[AtlasTexture] = []
 var factor := 1.0
 
 func _init() -> void:
+	if not shared_frames.is_empty():
+		frames.assign(shared_frames)
+		factor = 124.0/frames[0].get_height()
+		return
 	var source := SHEET.get_image()
 	var cell := Vector2i(source.get_width()/4, source.get_height()/2)
 	for i in range(8):
@@ -14,6 +19,7 @@ func _init() -> void:
 		frame.atlas = ImageTexture.create_from_image(image)
 		frame.region = Rect2(image.get_used_rect())
 		frames.append(frame)
+	shared_frames.assign(frames)
 	factor = 124.0 / frames[0].get_height()
 
 func update(robot: TextureRect, elapsed: float, enabled: bool) -> void:
