@@ -25,6 +25,11 @@ var art_colors: Array[Color] = []
 var finishes: Array[ShaderMaterial] = []
 var blockout_lines: Array[Line2D] = []
 var rim_fittings: Node2D
+var service_open: Node2D
+var service_covers: Node2D
+var service_hint: Node2D
+var service_rims: Node2D
+var service_skirts: Node2D
 var metal: Array[ShaderMaterial] = []
 var pipe_uv: GradientTexture2D
 var drive_finish: ShaderMaterial
@@ -53,8 +58,15 @@ func _ready() -> void:
 	drive_finish.set_shader_parameter("pixel_world", PIXELS.ART_PIXEL_WORLD)
 
 	_build_background()
+	var service := _group("ServicePassageArt", 0)
+	service_open = _group("Open", 0, service)
+	service_covers = _group("ArmorCovers", 2, service)
+	service_hint = _group("HatchHint", 3, service)
+	service_rims = _group("Rims", 1, service_open)
+	service_skirts = _group("Skirts", -3, service_open)
 	_build_shell()
 	_build_fittings()
+	update_service_passage()
 	set_art_enabled(true)
 
 func _process(delta: float) -> void:
@@ -84,6 +96,16 @@ func set_depth_enabled(value: bool) -> void:
 	if is_instance_valid(depth_fittings):
 		depth_fittings.visible = enabled and value
 		rim_fittings.visible = enabled and value
+		service_rims.visible = value
+		service_skirts.visible = value
+
+func update_service_passage() -> void:
+	if not is_instance_valid(service_open):
+		return
+	var state: int = map.service_passage_state
+	service_open.visible = state == map.ServicePassage.OPEN
+	service_covers.visible = not service_open.visible
+	service_hint.visible = state == map.ServicePassage.REVEALED
 
 func _paint(face: Polygon2D, paint: Color, finish: int) -> void:
 	painted_faces.append(face)
@@ -91,12 +113,15 @@ func _paint(face: Polygon2D, paint: Color, finish: int) -> void:
 	art_colors.append(paint)
 	finishes.append(metal[finish])
 
-func _group(label: String, layer: int) -> Node2D:
+func _group(label: String, layer: int, parent: Node2D = null) -> Node2D:
 	var group := Node2D.new()
 	group.name = label
 	group.z_index = layer
-	add_child(group)
-	fittings.append(group)
+	if parent == null:
+		add_child(group)
+		fittings.append(group)
+	else:
+		parent.add_child(group)
 	return group
 
 func _ribbon(parent: Node2D, label: String, points: PackedVector2Array, width: float, tint: Color, pitch: float, profile: Tube) -> Line2D:
@@ -134,6 +159,22 @@ func _build_background() -> void:
 	var track: Vector2 = map.get_node("Markers/PlayerSpawn").position
 	_build_circulation(track)
 	_build_bundles(track)
+	_shade_upper_background(track)
+
+func _shade_upper_background(track: Vector2) -> void:
+	var shade := _group("UpperBackgroundShade", -13)
+	var stations := [8110.0, 8690.0, 10510.0, 10960.0]
+	var density := [0.0, 0.31, 0.33, 0.0]
+	for index in range(stations.size() - 1):
+		var left := track + FORWARD * float(stations[index])
+		var right := track + FORWARD * float(stations[index + 1])
+		var extent := DOWN * 1850.0
+		var tint_left := Color(0.07, 0.032, 0.046, density[index])
+		var tint_right := Color(0.07, 0.032, 0.046, density[index + 1])
+		var band := Polygon2D.new()
+		band.polygon = PackedVector2Array([left - extent, right - extent, right + extent, left + extent])
+		band.vertex_colors = PackedColorArray([tint_left, tint_right, tint_right, tint_left])
+		shade.add_child(band)
 
 func _build_circulation(track: Vector2) -> void:
 	var deep := _group("RecessedVessels", -43)
@@ -403,9 +444,16 @@ func _build_shell() -> void:
 		var coat := Color("94736c")
 		if part.name == &"BlueprintWing":
 			coat = Color("806b69")
+		elif part.name == &"DefenseSafeBay":
+			coat = Color("78605a")
+		elif part.name == &"ServiceCatwalk":
+			coat = Color("50464b")
+		elif part.name == &"ProtocolObservationBay":
+			coat = Color("79696a")
 		elif branch:
 			coat = Color("695a61")
-		_paint(top, coat, 3 if part.name == &"RecordBranch" else 0)
+		var grated := part.name in [&"RecordBranch", &"ServiceCatwalk"]
+		_paint(top, coat, 3 if grated else 0)
 		_paint(part.get_node("Volume/Underside"), Color("422930"), 1)
 		blockout_lines.append(top.get_node("Rim"))
 		for seam in top.get_node("Ribs").get_children():
@@ -419,10 +467,12 @@ func _build_shell() -> void:
 		_build_rim(boundary.get_node("Collision").polygon, cladding)
 	for cover in map.get_node("Covers").get_children():
 		_paint(cover.get_node("Volume/Side"), Color("4a2d2c"), 1)
-		_paint(cover.get_node("Volume/Top"), Color("80625a"), 0)
+		var coat := Color("70514b") if cover.name == &"DefenseBayShield" else Color("80625a")
+		_paint(cover.get_node("Volume/Top"), coat, 0)
 		blockout_lines.append(cover.get_node("Volume/Edge"))
 
 func _build_rim(perimeter: PackedVector2Array, cladding: Node2D) -> void:
+	var service_top: Polygon2D = map.get_node("Floors/ServiceCatwalk/Top")
 	for i in range(perimeter.size()):
 		var from := perimeter[i]
 		var to := perimeter[(i + 1) % perimeter.size()]
@@ -431,8 +481,13 @@ func _build_rim(perimeter: PackedVector2Array, cladding: Node2D) -> void:
 			continue
 		var edge := from.direction_to(to)
 		var inside := Vector2(-edge.y, edge.x)
-		if not map.is_walkable_point((from + to) * 0.5 + inside * 3.0):
+		var midpoint := (from + to) * 0.5
+		if not map.is_walkable_point(midpoint + inside * 3.0):
 			inside = -inside
+		var beside_service := Geometry2D.is_point_in_polygon(
+			service_top.to_local(map.to_global(midpoint + inside * 3.0)), service_top.polygon)
+		var rims := service_rims if beside_service else rim_fittings
+		var skirts := service_skirts if beside_service else cladding
 		var count := maxi(1, roundi(length / 124.0))
 		for section in range(count):
 			var a := from.lerp(to, float(section) / count)
@@ -446,29 +501,31 @@ func _build_rim(perimeter: PackedVector2Array, cladding: Node2D) -> void:
 				var lower_b := b.lerp(a, 0.12) + drop * 0.75
 				var shoulder := a.lerp(lower_a, 0.49)
 				var heel := b.lerp(lower_b, 0.52)
-				_shape(cladding, PackedVector2Array([a, b, heel, shoulder]), Color("74514c"), 1)
-				_shape(cladding, PackedVector2Array([shoulder, heel, lower_b, lower_a]), Color("503337"), 1)
-				_stroke(cladding, PackedVector2Array([shoulder, heel]), 1.0, Color("8e5b50"))
-				_stroke(cladding, PackedVector2Array([lower_a, lower_b]), 3.0, Color("2f2028"))
-				_stroke(cladding, PackedVector2Array([a.lerp(lower_a, 0.89), b.lerp(lower_b, 0.89)]), 2.0, Color("996b59"))
-			_shape(rim_fittings, PackedVector2Array([a, b, b + lip, a + lip]), Color("957064"), 1)
-			_stroke(rim_fittings, PackedVector2Array([a + inside, b + inside]), 2.0, Color("c59b7d"))
+				_shape(skirts, PackedVector2Array([a, b, heel, shoulder]), Color("74514c"), 1)
+				_shape(skirts, PackedVector2Array([shoulder, heel, lower_b, lower_a]), Color("503337"), 1)
+				_stroke(skirts, PackedVector2Array([shoulder, heel]), 1.0, Color("8e5b50"))
+				_stroke(skirts, PackedVector2Array([lower_a, lower_b]), 3.0, Color("2f2028"))
+				_stroke(skirts, PackedVector2Array([a.lerp(lower_a, 0.89), b.lerp(lower_b, 0.89)]), 2.0, Color("996b59"))
+			_shape(rims, PackedVector2Array([a, b, b + lip, a + lip]), Color("957064"), 1)
+			_stroke(rims, PackedVector2Array([a + inside, b + inside]), 2.0, Color("c59b7d"))
 			if length > 24.0:
 				for along in [0.17, 0.81]:
 					var center := a.lerp(b, along) + inside * 3.0
-					_shape(rim_fittings, _quad(center, edge, Vector2(4, 3)), Color("332e2b"))
+					_shape(rims, _quad(center, edge, Vector2(4, 3)), Color("332e2b"))
 
 
 func _build_fittings() -> void:
 	var fixtures := _group("Fittings", 2)
 	var paint := _group("RoutePaint", 1)
 	var marks := map.get_node("Markers")
-	for item in [["ProtocolTerminal", "terminal"], ["OptionalRecord", "record"],
+	for item in [["OptionalRecord", "record"],
 			["ScatterEvolution", "blueprint"], ["BlueprintDuct", "duct"], ["ExitTerminal", "terminal"]]:
 		_fixture(fixtures, item[1], marks.get_node(item[0]).position)
 	var seam: Node2D = map.get_node("Reservations/ElectricFloor")
-	_fixture(fixtures, "seam", seam.position, seam.rotation, seam.size)
+	_fixture(fixtures, "seam", seam.position, seam.rotation, seam.size).name = "ElectricSeam"
 	for cover in map.get_node("Covers").get_children():
+		if cover.name in [&"DefenseBayShield", &"ProtocolBayScreen", &"ProtocolGateCover", &"SpinalFluidPlinth"]:
+			continue
 		var top: Polygon2D = cover.get_node("Volume/Top")
 		var center := (top.polygon[0] + top.polygon[2]) * 0.5
 		if cover.name == &"BlockedRecordEnd":
@@ -478,15 +535,250 @@ func _build_fittings() -> void:
 	var spawn: Vector2 = marks.get_node("PlayerSpawn").position
 	var exit: Vector2 = marks.get_node("ToThorax").position
 	_build_entry_tunnel(spawn)
-	_fixture(depth_fittings, "socket", exit + FORWARD * 23, FORWARD.angle(), Vector2(126, 292))
-	for side: int in [-1, 1]:
-		var outlet := exit + FORWARD * 13.0 + DOWN * (side * (173.0 if side < 0 else 206.0))
-		_fixture(depth_fittings, "dock_flange", outlet, FORWARD.angle(), Vector2(30, 63))
-	_fixture(fixtures, "entry", exit - FORWARD * 5, FORWARD.angle(), Vector2(28, 244))
+	_build_entry_defense(spawn)
+	_build_protocol_dressing(marks)
+	_build_spinal_fluid_tap(marks)
+	_build_upper_lane_edges(spawn)
+	_build_thorax_receiver(marks)
 	_build_collars(spawn, exit)
 	_build_route_paint(paint, "MainRoute", BRASS)
+	_build_record_fork_paint()
 	_build_route_paint(paint, "RecordRoute", BLUE)
 	_build_route_paint(paint, "DuctRoute", BRASS)
+
+func _build_spinal_fluid_tap(marks: Node) -> void:
+	var dressing := _group("SpinalFluidStation", 2)
+	var tap: Node2D = marks.get_node("SpinalFluidTap")
+	var at := tap.position
+	var pump_line: Line2D = get_node("ReturnVessels/Pump-1_9-1")
+	var inlet := pump_line.points[0]
+	var deck_edge := at - DOWN * 53.0
+	var junction := inlet + FORWARD * 82.0 + DOWN * 38.0
+	var pipe := _group("SpinalFluidFeed", -23)
+	var path := PackedVector2Array([inlet, junction, junction + DOWN * 98.0,
+		deck_edge - DOWN * 67.0 - FORWARD * 112.0, deck_edge - DOWN * 26.0, deck_edge])
+	_ribbon(pipe, "PumpBranch", _curved_path(path), 22.0, Color("a15841"), 78.0, Tube.COPPER)
+	_ribbon(dressing, "TapInlet", PackedVector2Array([deck_edge, at - DOWN * 22.0]),
+		13.0, Color("ae694a"), 38.0, Tube.COPPER)
+	_fixture(dressing, "spinal_fluid_tap", at, tap.rotation, tap.footprint).name = "SpinalFluidTap"
+	var operator: Vector2 = marks.get_node("SpinalFluidTapUse").position
+	for side: float in [-1.0, 1.0]:
+		var stripe := operator + FORWARD * side * 21.0
+		_stroke(dressing, PackedVector2Array([stripe - DOWN * 8.0, stripe + DOWN * 8.0]),
+			2.0, Color("b19779"))
+
+func _build_upper_lane_edges(spawn: Vector2) -> void:
+	var paint := _group("UpperLaneEdges", 1)
+	for side: float in [-1.0, 1.0]:
+		for distance: float in [8860.0, 9170.0, 9450.0, 9750.0, 10020.0, 10310.0]:
+			var at := spawn + FORWARD * (distance - 96.0) + DOWN * side * 166.0
+			_stroke(paint, PackedVector2Array([at, at + FORWARD * 150.0]), 3, Color("594344"))
+			_stroke(paint, PackedVector2Array([at, at + FORWARD * 112.0]), 1.5, Color("a4866f"))
+
+func _build_thorax_receiver(marks: Node) -> void:
+	var body := _group("ThoraxReceiver", -8)
+	var trim := _group("ThoraxThreshold", 1)
+	var exit: Vector2 = marks.get_node("ToThorax").position
+	var along := func(x: float, y: float) -> Vector2:
+		return exit + FORWARD * x + DOWN * y
+	_shape(body, PackedVector2Array([along.call(-32, -184), along.call(78, -247),
+		along.call(243, -247), along.call(311, -189), along.call(311, 189),
+		along.call(243, 247), along.call(78, 247), along.call(-32, 184)]), Color("38262e"), 1)
+	_shape(body, _quad(exit + FORWARD * 137.0, FORWARD, Vector2(260, 291)), Color("1d151d"))
+	_shape(body, _quad(exit + FORWARD * 162.0, FORWARD, Vector2(213, 242)), Color("2a1f28"))
+	for y: float in [-92.0, -46.0, 0.0, 46.0, 92.0]:
+		var channel: Vector2 = along.call(153, y)
+		_shape(body, _quad(channel, FORWARD, Vector2(188, 24)), Color("1c141c"))
+		_stroke(body, PackedVector2Array([channel - FORWARD * 85.0 - DOWN * 12.0,
+			channel + FORWARD * 91.0 - DOWN * 12.0]), 2, Color("4b323a"))
+	for side: float in [-1.0, 1.0]:
+		var shoulder := PackedVector2Array([along.call(-30, side * 141), along.call(72, side * 154),
+			along.call(246, side * 154), along.call(279, side * 183),
+			along.call(242, side * 222), along.call(79, side * 222)])
+		_shape(body, shoulder, Color("694950"), 1)
+		_stroke(body, PackedVector2Array([shoulder[0], shoulder[1], shoulder[2], shoulder[3]]),
+			5, Color("b4846c"))
+		for offset in [75.0, 138.0, 204.0]:
+			var band: Vector2 = along.call(offset, side * 191)
+			_shape(body, _quad(band, FORWARD, Vector2(18, 56)), Color("4e343d"), 1)
+			_stroke(body, PackedVector2Array([band - DOWN * 23.0, band + DOWN * 23.0]), 2, BRASS)
+		for lane: int in range(2):
+			var lateral := side * (153.0 + lane * 35.0)
+			var lead := PackedVector2Array([along.call(-118, lateral), along.call(-14, lateral),
+				along.call(63, lateral + side * 17), along.call(194, lateral + side * 17),
+				along.call(227, lateral)])
+			_ribbon(body, "ReceiverFeed%d_%d" % [int(side), lane], _curved_path(lead),
+				23.0, Color("a36046").darkened(float(lane) * 0.16), 58.0, Tube.COPPER)
+		_fixture(body, "dock_flange", along.call(27, side * 165), FORWARD.angle(), Vector2(26, 80))
+		for x in [9.0, 70.0, 149.0]:
+			var lamp: Vector2 = along.call(x, side * 130)
+			_shape(trim, _quad(lamp, FORWARD, Vector2(19, 9)), Color("382e33"))
+			_shape(trim, _quad(lamp, FORWARD, Vector2(12, 4)), Color("dfa975"))
+	var back: Vector2 = along.call(262, 0)
+	_fixture(body, "socket", back, FORWARD.angle(), Vector2(61, 319))
+	var landing_edge: Vector2 = along.call(37, 0)
+	var lip := PackedVector2Array([landing_edge - DOWN * 125.0, landing_edge + DOWN * 125.0])
+	var lower := Vector2(6, 24)
+	_shape(trim, PackedVector2Array([lip[0], lip[1], lip[1] + lower, lip[0] + lower]), Color("32242d"))
+	_stroke(trim, lip, 3, Color("a58170"))
+	_fixture(trim, "entry", exit - FORWARD * 5.0, FORWARD.angle(), Vector2(27, 244))
+	for distance in [-44.0, -20.0]:
+		var point: Vector2 = along.call(distance, 0)
+		_stroke(trim, PackedVector2Array([point - FORWARD * 10.0 - DOWN * 16.0,
+			point, point - FORWARD * 10.0 + DOWN * 16.0]), 3.0, BRASS)
+
+func _build_protocol_dressing(marks: Node) -> void:
+	var hardware := _group("ProtocolFittings", 2)
+	for entry in [["ProtocolTerminal", "protocol_dials"], ["ProtocolDemoReader", "protocol_reader"],
+			["ProtocolGateReader", "protocol_reader"], ["AuthorizedDoor", "protocol_gate_frame"]]:
+		var mark: Node2D = marks.get_node(entry[0])
+		_fixture(hardware, entry[1], mark.position, mark.rotation, mark.footprint).name = mark.name
+
+	var screen: Polygon2D = map.get_node("Covers/ProtocolBayScreen/Volume/Top")
+	var rail_start := (screen.polygon[0] + screen.polygon[5]) * 0.5
+	var rail_end := (screen.polygon[1] + screen.polygon[4]) * 0.5
+	var glass := _fixture(hardware, "protocol_window", rail_start.lerp(rail_end, 0.57),
+		FORWARD.angle(), Vector2(192, 20))
+	glass.name = "ObservationWindow"
+	_stroke(hardware, screen.polygon, 2, Color("94766b"))
+
+	var cover: Polygon2D = map.get_node("Covers/ProtocolGateCover/Volume/Top")
+	var center := (cover.polygon[0] + cover.polygon[2]) * 0.5
+	var size := Vector2(cover.polygon[0].distance_to(cover.polygon[1]),
+		cover.polygon[1].distance_to(cover.polygon[2]))
+	_fixture(hardware, "protocol_cover", center, FORWARD.angle(), size).name = "GateCover"
+
+	var paint := _group("ProtocolFloorMarks", 1)
+	for label in ["ProtocolYieldRear", "ProtocolYieldFront"]:
+		var stop: Vector2 = marks.get_node(label).position
+		var boundary := _quad(stop, FORWARD, Vector2(32, 26))
+		_stroke(paint, PackedVector2Array([boundary[0], boundary[1], boundary[2]]), 2, Color("8d7560"))
+		_stroke(paint, PackedVector2Array([boundary[2], boundary[3], boundary[0]]), 2, Color("8d7560"))
+	var shelter: Vector2 = marks.get_node("ProtocolExit").position
+	for side: float in [-1.0, 1.0]:
+		var edge := shelter + DOWN * side * 26.0
+		_stroke(paint, PackedVector2Array([edge - FORWARD * 46.0, edge - FORWARD * 18.0]),
+			2.5, Color("b19874"))
+
+func _build_entry_defense(spawn: Vector2) -> void:
+	var fixtures := _group("EntranceFittings", 2)
+	var feeds := _group("DefenseFeeds", -8)
+	var shield: Polygon2D = map.get_node("Covers/DefenseBayShield/Volume/Top")
+	var shield_edge := shield.polygon.duplicate()
+	shield_edge.append(shield_edge[0])
+	_stroke(fixtures, shield_edge, 2, Color("ae8069"))
+	var marks := map.get_node("Markers")
+	# The new service deck and its anchors use the same 25-degree axis as the spine.
+	var at := func(distance: float, offset: float) -> Vector2:
+		return spawn + FORWARD * (distance - 96.0) + DOWN * offset
+	for side: int in [-1, 1]:
+		var feed := PackedVector2Array([at.call(1160, side * 170), at.call(1250, side * 205),
+			at.call(1530, side * 204), at.call(1790, side * 178), at.call(2020, side * 204),
+			at.call(2130, side * 223), at.call(2220, side * 180)])
+		_ribbon(feeds, "DefenseSupply%d" % side, _curved_path(feed), 23, Color("a35639"), 60, Tube.COPPER)
+
+	for marker in marks.get_children():
+		var role: String = marker.get_meta("role", "")
+		if role == "wall_emitter":
+			var muzzle := Vector2.from_angle(marker.rotation)
+			var base: Vector2 = marker.position - muzzle * 25.0
+			var relative: Vector2 = marker.position - spawn
+			var distance := relative.dot(FORWARD) + 96.0
+			var side := signf(relative.dot(DOWN))
+			var supply: Vector2 = at.call(distance + 28, side * 196)
+			var exposed := base + DOWN * side * 25.0
+			_ribbon(feeds, marker.name + "Supply", _curved_path(PackedVector2Array([supply,
+				supply - FORWARD * 20, exposed, base])), 15, Color("9e513a"), 42, Tube.COPPER)
+			_ribbon(fixtures, marker.name + "Inlet", PackedVector2Array([exposed, base]),
+				9, Color("8c553e"), 35, Tube.COPPER)
+			_fixture(fixtures, "wall_emitter", marker.position, marker.rotation).name = marker.name
+		elif role == "recessed_electrode":
+			_fixture(fixtures, "ground_electrode", marker.position, marker.rotation, marker.footprint).name = marker.name
+			var local_offset: Vector2 = marker.position - spawn
+			var distance := local_offset.dot(FORWARD) + 96.0
+			var lateral := local_offset.dot(DOWN)
+			var side := -1.0 if lateral < 0.0 else 1.0
+			var edge := 124.0 if distance < 1852.0 else 156.0
+			var inlet: Vector2 = at.call(distance, side * edge)
+			var conduit := PackedVector2Array([at.call(distance + 34, side * 192),
+				at.call(distance + 9, side * (edge + 7.0)), inlet])
+			_ribbon(feeds, marker.name + "Feed", _curved_path(conduit),
+				11, Color("ad6947"), 43, Tube.COPPER)
+			var lead := PackedVector2Array([inlet, marker.position + DOWN * side * marker.footprint.x * 0.46])
+			_stroke(fixtures, lead, 9, Color("3c2c31"))
+			_stroke(fixtures, lead, 3, Color("b77854"))
+
+	var shutter: Node2D = marks.get_node("IsolationGate")
+	_fixture(fixtures, "isolation_gate", shutter.position, shutter.rotation, shutter.footprint).name = shutter.name
+	_build_service_passage(at, fixtures)
+
+	var warnings := _group("DefenseWarningPaint", 1)
+	for side: int in [-1, 1]:
+		var rail := PackedVector2Array([at.call(1545, side * 117), at.call(1848, side * 117)])
+		_stroke(warnings, rail, 9, Color("342830"))
+		_stroke(warnings, rail, 3, Color("c19056"))
+		for distance in range(1552, 1848, 28):
+			_shape(warnings, _quad(at.call(distance, side * 118), FORWARD.rotated(PI * 0.25), Vector2(12, 5)), Color("d8a665"))
+	var threshold := PackedVector2Array([at.call(1264, -96), at.call(1264, 96)])
+	_stroke(warnings, threshold, 7, Color("4d3332"))
+	for lateral in range(-92, 94, 16):
+		_shape(warnings, _quad(at.call(1264, lateral), FORWARD.rotated(PI * 0.3), Vector2(10, 4)), Color("bf8d55"))
+
+func _build_service_passage(at: Callable, bay_fixtures: Node2D) -> void:
+	var fixtures := _group("Interior", 2, service_open)
+	var feeds := _group("Pipes", -8, service_open)
+	var marks := map.get_node("Markers")
+	# The maintenance run follows a separate, darker low-pressure return line.
+	var return_pipe := PackedVector2Array([at.call(1110, -473), at.call(1270, -465),
+		at.call(1390, -455), at.call(1920, -455), at.call(2140, -455),
+		at.call(2270, -418), at.call(2460, -368)])
+	_ribbon(feeds, "ServiceReturn", _curved_path(return_pipe), 26, Color("73303a"), 78, Tube.VESSEL)
+	for wall: Polygon2D in map.get_node("EntranceDefense/ServiceWalls").get_children():
+		_paint(wall, Color("5b3d43"), 1)
+		_stroke(fixtures, PackedVector2Array([wall.polygon[0], wall.polygon[1]]), 2, Color("8e615b"))
+	# A partial roof reads as an enclosed service passage while leaving the walking line visible.
+	var canopy := _group("Canopy", 1, service_open)
+	for section in range(8):
+		var length := 86.0 if section == 7 else 90.0
+		var center: Vector2 = at.call(1422.0 + section * 92.0, -421)
+		_shape(canopy, _quad(center + DOWN * 9.0, FORWARD, Vector2(length, 35)), Color("34252d"))
+		var panel := _quad(center, FORWARD, Vector2(length, 27))
+		_shape(canopy, panel, Color("634148"), 0)
+		_stroke(canopy, PackedVector2Array([panel[2], panel[3]]), 2, Color("98685d"))
+	var lamp_glow := GradientTexture2D.new()
+	lamp_glow.gradient = Gradient.new()
+	lamp_glow.gradient.colors = PackedColorArray([Color.WHITE, Color(1, 1, 1, 0)])
+	lamp_glow.fill = GradientTexture2D.FILL_RADIAL
+	lamp_glow.fill_from = Vector2(0.5, 0.5)
+	lamp_glow.fill_to = Vector2(1.0, 0.5)
+	lamp_glow.width = 64
+	lamp_glow.height = 64
+	for distance in [1438, 1534, 1630, 1818, 1914, 2010, 2106]:
+		_service_lamp(fixtures, at.call(distance, -408), FORWARD.angle(), lamp_glow)
+	_service_lamp(bay_fixtures, at.call(1305, -158), FORWARD.angle() + PI, lamp_glow)
+	_service_lamp(fixtures, at.call(1310, -244), FORWARD.angle(), lamp_glow)
+	_service_lamp(fixtures, at.call(2322, -269), FORWARD.angle() + PI * 0.5, lamp_glow)
+	for item in [["MaintenanceHatch", "service_hatch"], ["MaintenanceExit", "service_exit"]]:
+		var mark: Node2D = marks.get_node(item[0])
+		_fixture(fixtures, item[1], mark.position, mark.rotation, mark.footprint).name = mark.name
+		_fixture(service_covers, "service_cover", mark.position, mark.rotation, mark.footprint).name = mark.name
+		var axis := Vector2.from_angle(mark.rotation)
+		var plate := _quad(mark.position - axis * 6.0, axis, Vector2(32, mark.footprint.y - 22.0))
+		_shape(service_covers, plate, Color("80625a"), 1)
+	var hatch: Node2D = marks.get_node("MaintenanceHatch")
+	_fixture(service_hint, "service_seam_hint", hatch.position, hatch.rotation)
+	var window: Node2D = marks.get_node("MaintenanceWindow")
+	_fixture(fixtures, "inspection_window", window.position + DOWN * 30.0, FORWARD.angle(), window.footprint)
+
+
+func _service_lamp(group: Node2D, position: Vector2, angle: float, texture: Texture2D) -> void:
+	var mount := _fixture(group, "service_lamp", position, angle)
+	var light := PointLight2D.new()
+	light.position = Vector2(0, 16)
+	light.texture = texture
+	light.color = Color("edb682")
+	light.energy = 0.44
+	mount.add_child(light)
 
 func _build_entry_tunnel(spawn: Vector2) -> void:
 	var top: Polygon2D = map.get_node("Floors/SpineSegment00/Top")
@@ -544,12 +836,32 @@ func _build_collars(start: Vector2, end: Vector2) -> void:
 
 func make_door_skin(door: Node2D, authorized: bool) -> Node2D:
 	var skin = FIXTURE.new()
-	skin.kind = "door"
-	skin.door = door
+	skin.kind = "protocol_gate_leaf" if authorized else "door"
 	skin.span = door.size
 	skin.tint = Color("a2d6bf") if authorized else Color("ffe1a1")
 	door.add_child(skin)
+	skin.track_door(door)
 	return skin
+
+func _build_record_fork_paint() -> void:
+	var group := _group("RecordForkPaint", 1)
+	var fork := map.get_node("RouteWaypoints/RecordRoute")
+	var junction: Vector2 = fork.get_node("Point00").position
+	var into_branch := junction.direction_to(fork.get_node("Point01").position)
+	var across := Vector2(-into_branch.y, into_branch.x)
+	for distance: float in [45.0, 78.0]:
+		var tip := junction + into_branch * distance
+		var back := tip - into_branch * 13.0
+		var arrow := PackedVector2Array([back + across * 15.0, tip, back - across * 15.0])
+		_stroke(group, arrow, 9.0, Color("394650"))
+		_stroke(group, arrow, 4.0, BLUE.lightened(0.19))
+	# Carry the deck markings across the throat of the exposed grate.
+	for side: float in [-1.0, 1.0]:
+		var edge := across * (31.0 * side)
+		var stripe := PackedVector2Array([junction + into_branch * 145.0 + edge,
+			junction + into_branch * 187.0 + edge])
+		_stroke(group, stripe, 7.0, Color("3f4c56"))
+		_stroke(group, stripe, 2.5, BLUE)
 
 func _build_route_paint(group: Node2D, route: String, color: Color) -> void:
 	var waypoints := map.get_node("RouteWaypoints/" + route).get_children()
@@ -560,6 +872,7 @@ func _build_route_paint(group: Node2D, route: String, color: Color) -> void:
 		var count := maxi(1, roundi(from.distance_to(to) / 225.0))
 		for j in range(count):
 			var center := from.lerp(to, (j + 0.5) / count)
+			var advance := (center - Vector2(waypoints[0].position)).dot(FORWARD)
 			var near_fixture := center.distance_squared_to(map.get_node("Reservations/ElectricFloor").position) < 150.0 * 150.0
 			for marker in map.get_node("Markers").get_children():
 				if marker.position.distance_squared_to(center) < 72.0 * 72.0:
@@ -577,6 +890,8 @@ func _build_route_paint(group: Node2D, route: String, color: Color) -> void:
 				var lateral := Vector2(-direction.y, direction.x)
 				_stroke(group, PackedVector2Array([reverse + direction * 7.0 + lateral * 8.0, reverse,
 					reverse + direction * 7.0 - lateral * 8.0]), 2.0, color.darkened(0.17))
+				continue
+			if route == "MainRoute" and advance >= 8550.0 and advance < 10480.0:
 				continue
 			for side: int in [-1, 1]:
 				var grate_center: Vector2 = center + DOWN * side * 55

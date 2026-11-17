@@ -79,6 +79,210 @@ func reachable(start: Vector2, target: Vector2) -> bool:
 					queue.append(next)
 	return false
 
+func check_hazard_prototype() -> void:
+	var hazards: Node2D = preview.get_node("EntranceHazards")
+	check(hazards.emitters.size() == 8 and hazards.electrodes.size() == 7, "Missing entry devices")
+	var axis := Vector2.from_angle(-0.43633231)
+	var across := Vector2(-axis.y, axis.x)
+	var center: Vector2 = map.get_node("Markers/DefenseElectrode05").position + across * 48.0
+	var left := center - across * 109.0
+	var right := center + across * 109.0
+	var ray := PhysicsRayQueryParameters2D.create(left, right, 1)
+	check(map.is_walkable_point(left) and map.is_walkable_point(right) and
+		root.world_2d.direct_space_state.intersect_ray(ray).is_empty(), "Former narrow deck still blocks lateral movement")
+
+	var start := actor.position
+	var hits := {}
+	var record_hit := func(device: String) -> void:
+		hits[device] = true
+	hazards.actor_hit.connect(record_hit)
+	var emitter: Marker2D = hazards.emitters[0]
+	actor.position = emitter.position + Vector2.from_angle(emitter.rotation) * 96.0
+	hazards.reset_motion()
+	for frame in range(255):
+		if hits.has("激光球"):
+			break
+		await physics_frame
+	check(hits.has("激光球"), "The wall emitter never hits the preview actor")
+	var electrode: Marker2D = hazards.electrodes[0]
+	actor.position = electrode.position + axis * 40.0
+	hazards.reset_motion()
+	for frame in range(120):
+		if hits.has("扩散电圈"):
+			break
+		await physics_frame
+	check(hits.has("扩散电圈"), "The spreading ring never hits the preview actor")
+	actor.position = map.get_node("Markers/DefenseSafePocket").position
+	hazards.reset_motion()
+	hits.clear()
+	for frame in range(300):
+		await physics_frame
+	check(hits.is_empty(), "Prototype attacks hit inside the safe observation bay")
+	hazards.actor_hit.disconnect(record_hit)
+	await press_key(KEY_R)
+	actor.position = start
+
+func check_entrance_defense(ids: Dictionary) -> void:
+	var art: Node2D = map.get_node("SpineArt/ServicePassageArt")
+	var catwalk: Node2D = map.get_node("Floors/ServiceCatwalk")
+	var seals := map.get_node("EntranceDefense/ServiceSeals").get_children()
+	var shutter: Node2D = preview.doors[preview.TestDoor.ISOLATION]
+	var pocket: Vector2 = ids["p2_defense_safe_pocket"].position
+	var window: Vector2 = ids["p2_maintenance_window"].position
+	var service := route("ServiceRoute")
+	var start := actor.position
+	check(map.get_node("Boundaries").get_child_count() == 2, "Service route lost an edge contour")
+	check(art.get_node("ArmorCovers").visible and not art.get_node("Open").visible and not catwalk.visible,
+		"Concealed passage art is visible")
+	check(not art.get_node("HatchHint").visible, "Hatch reveals itself before dialogue")
+	check(not reachable(pocket, service[-1]), "Closed hatch and shutter allow a bypass")
+	check(not reachable(pocket, window), "Closed hatch fails to seal the service entry")
+	check(not reachable(service[-1], window), "Hidden exit allows entry from the far side")
+	await walk(service.slice(0, 4))
+	await press_key(KEY_E)
+	check(map.service_passage_state == map.ServicePassage.CONCEALED, "Hatch opened before dialogue")
+	await press_key(KEY_K)
+	check(map.service_passage_state == map.ServicePassage.REVEALED and art.get_node("HatchHint").visible,
+		"Dialogue simulation did not reveal the hatch")
+	check(art.get_node("ArmorCovers").visible and not catwalk.visible, "Reveal opened the tunnel early")
+	for seal in seals:
+		check(not seal.get_node("Collision").disabled and seal.get_node("Occluder").visible,
+			"Reveal removed a closed seal")
+	await press_key(KEY_E)
+	await physics_frame
+	await physics_frame
+	check(map.service_passage_state == map.ServicePassage.OPEN and not shutter.is_open,
+		"Opening the hatch did not leave the isolation gate closed")
+	check(art.get_node("Open").visible and not art.get_node("ArmorCovers").visible and catwalk.visible,
+		"Passage did not reveal its interior")
+	for seal in seals:
+		check(seal.get_node("Collision").disabled and not seal.get_node("Occluder").visible,
+			"An opened seal still blocks its entrance")
+	var axis := Vector2.from_angle(shutter.rotation) * 70.0
+	var direct := PhysicsRayQueryParameters2D.create(shutter.position - axis, shutter.position + axis, 1)
+	var stopped := root.world_2d.direct_space_state.intersect_ray(direct)
+	check(not stopped.is_empty() and stopped.collider == shutter.get_node("Body"), "Closed isolation gate does not block the main route")
+	await walk(service.slice(4))
+	check(reachable(actor.position, window), "Service route cannot be revisited from the safe rejoin")
+	check(not reachable(actor.position, ids["p2_scatter_evolution"].position), "Service route bypasses protocol")
+	var ray := PhysicsRayQueryParameters2D.create(ids["p2_defense_electrode_02"].position, window, 1)
+	var hit := root.world_2d.direct_space_state.intersect_ray(ray)
+	check(not hit.is_empty(), "Inspection slit does not stop shots across the shaft")
+	for marker in ids.values():
+		if marker.get_meta("role", "") != "wall_emitter":
+			continue
+		ray.from = marker.position
+		ray.to = pocket
+		var shield := root.world_2d.direct_space_state.intersect_ray(ray)
+		check(not shield.is_empty(), "Unshielded story return point from " + marker.object_id)
+		if marker.name in [&"DefenseEmitter01", &"DefenseEmitter02"]:
+			check(not shield.is_empty() and shield.collider.get_parent().name == &"DefenseBayShield",
+				"Safe bay partition does not screen " + marker.object_id)
+	for wall in map.get_node("EntranceDefense/ServiceWalls").get_children():
+		var shadow: LightOccluder2D = wall.get_node("Occluder")
+		check(shadow.occluder.polygon == wall.polygon, "Service wall shadow is misaligned")
+	await press_key(KEY_R)
+	await physics_frame
+	await physics_frame
+	check(map.service_passage_state == map.ServicePassage.CONCEALED and not catwalk.visible,
+		"Preview reset did not hide the passage")
+	for seal in seals:
+		check(not seal.get_node("Collision").disabled and seal.get_node("Occluder").visible,
+			"Preview reset did not reseal the passage")
+	shutter.set_open(true)
+	await physics_frame
+	await physics_frame
+	actor.position = start
+
+func check_first_sentry_cover(sentry: Node2D) -> void:
+	var body: StaticBody2D = map.get_node("Covers/Valve0/Body")
+	var shape: CollisionPolygon2D = body.get_node("Collision")
+	var center := (shape.polygon[0] + shape.polygon[2]) * 0.5
+	var axis := Vector2(0.9063078, -0.4226183)
+	var shelter := center - axis * 96.0
+	check(map.is_walkable_point(shelter), "First valve has no approach-side shelter")
+	var shot := PhysicsRayQueryParameters2D.create(sentry.position + Vector2(0, -78), shelter, 1)
+	var hit := root.world_2d.direct_space_state.intersect_ray(shot)
+	check(not hit.is_empty() and hit.collider == body, "First valve does not screen the sentry approach")
+	var shadow: LightOccluder2D = map.get_node("Covers/Valve0/Occluder")
+	check(shadow.occluder.polygon == shape.polygon, "First valve collision and shadow have drifted")
+
+func check_protocol_bay(ids: Dictionary) -> void:
+	var start := actor.position
+	var approach := route("ProtocolBayRoute")
+	actor.position = approach[0]
+	await walk(approach)
+	var terminal: Node2D = ids["p2_protocol_terminal"]
+	check(actor.position.distance_to(terminal.position) < float(terminal.get_meta("interaction_range")),
+		"Operator cannot reach the three-dial console")
+	var observer: Node2D = ids["p2_protocol_observation"]
+	var spider: Node2D = ids["p2_cleaner_01"]
+	var crossing := PhysicsRayQueryParameters2D.create(observer.position, spider.position, 1)
+	var hit := root.world_2d.direct_space_state.intersect_ray(crossing)
+	check(not hit.is_empty() and hit.collider == map.get_node("Covers/ProtocolBayScreen/Body"),
+		"Observation pane does not separate the spider lane")
+	approach.reverse()
+	await walk(approach)
+	actor.position = start
+
+func check_gate_shelter(ids: Dictionary) -> void:
+	var start := actor.position
+	var door: Node2D = ids["p2_authorized_door"]
+	var exit: Node2D = ids["p2_protocol_exit"]
+	var axis := Vector2.from_angle(door.rotation)
+	var threshold: Vector2 = exit.position - axis * (exit.position - door.position).dot(axis)
+	actor.position = threshold - axis * 45.0
+	await walk(PackedVector2Array([threshold, exit.position]))
+	var zone: Node2D = map.get_node("Reservations/ProtocolZone")
+	var region := Rect2(Vector2.ZERO, zone.size)
+	check(region.has_point(zone.to_local(threshold + axis * 25.0)),
+		"Protocol range ends before clearing the gate")
+	check(not region.has_point(zone.to_local(exit.position)), "Protocol exit remains inside the range")
+	var sentry: Node2D = ids["p2_protocol_gate_sentry"]
+	var shot := PhysicsRayQueryParameters2D.create(sentry.position + Vector2(0, -78), exit.position, 1)
+	var stop := root.world_2d.direct_space_state.intersect_ray(shot)
+	check(not stop.is_empty() and stop.collider == map.get_node("Covers/ProtocolGateCover/Body"),
+		"Protocol exit is exposed to the proposed sentry")
+	for id in ["p2_protocol_yield_rear", "p2_protocol_yield_front"]:
+		var point: Vector2 = ids[id].position
+		check(point.distance_to(threshold) >= 43.0, "Cleaner yield pad intrudes on the approach lane")
+	actor.position = start
+
+func check_upper_spine(ids: Dictionary) -> void:
+	var start := actor.position
+	var tap_route := route("FluidReturnRoute")
+	actor.position = ids["p2_scatter_return_entry"].position
+	await walk(tap_route.slice(0, 5))
+	var tap: Node2D = ids["p2_spinal_fluid_tap"]
+	check(actor.position.distance_to(tap.position) <= float(tap.get_meta("interaction_range")),
+		"Return route does not reach the spinal fluid tap")
+	await walk(tap_route.slice(5))
+	check(actor.position.distance_to(tap_route[-1]) < 3.0,
+		"Cannot return to the main deck from the tap")
+
+	var laser := route("UpperLaserRoute")
+	var cover := route("UpperCoverRoute")
+	var ray := PhysicsRayQueryParameters2D.create(laser[0], laser[-1], 1)
+	var space := root.world_2d.direct_space_state
+	check(space.intersect_ray(ray).is_empty(), "Upper laser lane is obstructed")
+	actor.position = laser[0]
+	await walk(laser)
+	actor.position = cover[0]
+	await walk(cover)
+	var sentries := ["p2_sentry_03", "p2_sentry_04", "p2_sentry_05", "p2_sentry_06"]
+	var axis := Vector2(0.9063078, -0.4226183)
+	for index in range(sentries.size()):
+		var body: StaticBody2D = map.get_node("Covers/Valve%d/Body" % (index + 1))
+		var shape: CollisionPolygon2D = body.get_node("Collision")
+		var center := (shape.polygon[0] + shape.polygon[2]) * 0.5
+		ray.from = ids[sentries[index]].position + Vector2(0, -78)
+		ray.to = center - axis * 61.0
+		var hit := space.intersect_ray(ray)
+		check(not hit.is_empty() and hit.collider == body, "Upper shelter does not screen " + sentries[index])
+	var exit: Vector2 = ids["p2_exit_to_thorax"].position
+	check(not map.is_walkable_point(exit + axis * 72.0), "Recessed receiver adds a false walking surface")
+	actor.position = start
+
 func run() -> void:
 	preview = load("res://tests/manual/a_map/spine_preview.tscn").instantiate()
 	root.add_child(preview)
@@ -96,20 +300,27 @@ func run() -> void:
 		check(not marker.object_id.is_empty() and not ids.has(marker.object_id), "Duplicate ID")
 		ids[marker.object_id] = marker
 		if counts.has(marker.object_type): counts[marker.object_type] += 1
+		var fixture_role: String = marker.get_meta("role", "")
 		if marker.object_type != "door":
 			check(map.is_walkable_point(marker.position), "Marker off terrain: " + marker.object_id)
+		if marker.object_type != "door" and fixture_role not in ["wall_emitter", "isolation_gate", "service_hatch", "service_rejoin", "spinal_fluid_tap"]:
 			query.transform = Transform2D(0,marker.position)
 			check(root.world_2d.direct_space_state.intersect_shape(query,1).is_empty(), "Blocked marker: " + marker.object_id)
 	for marker in ids.values():
 		for link in marker.linked_ids: check(ids.has(link), "Missing linked ID")
-	check(ids.size()==26 and counts.sentry==6 and counts.cleaner==6, "Enemy reservations mismatch")
+	check(ids.size()==56 and counts.sentry==6 and counts.cleaner==6, "Marker reservations mismatch")
 	check(not ids["p2_scatter_evolution"].get_meta("grants_ability"), "Blueprint grants scatter")
 	check(ids["duct_spine_blueprint"].target_entry_id=="duct_arrival", "Wrong return destination")
 	check(ids["p2_shortcut_door"].get_meta("role")=="blocked_maintenance_end", "Branch is still a forward shortcut")
+	await check_hazard_prototype()
+	await check_entrance_defense(ids)
+	check_first_sentry_cover(ids["p2_sentry_01"])
+	await check_protocol_bay(ids)
 	check(not reachable(actor.position,ids["p2_scatter_evolution"].position), "Protocol gate bypass")
 	check(reachable(actor.position,ids["p2_maintenance_record"].position), "Record unavailable before protocol")
 	preview.doors[0].set_open(true)
 	await physics_frame; await physics_frame
+	await check_gate_shelter(ids)
 	check(reachable(actor.position,ids["p2_scatter_evolution"].position), "Blueprint unreachable after open")
 	check(not reachable(actor.position,ids["p2_thorax_entry"].position), "Exit gate bypass")
 	preview.doors[1].set_open(true)
@@ -131,9 +342,14 @@ func run() -> void:
 	await walk(points)
 	var branch := route("RecordRoute")
 	await walk(branch); branch.reverse(); await walk(branch)
-	# The dead-end must block direct continuation beyond its record console.
+	# Check the physical stop behind the console as well as the missing onward floor.
 	var end: Vector2 = ids["p2_shortcut_door"].position
-	check(not map.is_walkable_point(end + Vector2(160,-75)), "Record branch connects forward")
+	var beyond := end + Vector2(160, -75)
+	var record_stop := PhysicsRayQueryParameters2D.create(ids["p2_maintenance_record"].position, beyond, 1)
+	var stop_hit := root.world_2d.direct_space_state.intersect_ray(record_stop)
+	check(not stop_hit.is_empty() and stop_hit.collider == map.get_node("Covers/BlockedRecordEnd/Body"),
+		"Record branch no longer has its physical end stop")
+	check(not map.is_walkable_point(beyond), "Record branch connects forward")
 	points = PackedVector2Array()
 	var found := false
 	for point in route("MainRoute"):
@@ -143,8 +359,10 @@ func run() -> void:
 	await walk(points)
 	var duct := route("DuctRoute")
 	await walk(duct); duct.reverse(); await walk(duct)
-	for i in range(2):
-		preview.selected_door=i; actor.position=preview.doors[i].position
+	await check_upper_spine(ids)
+	for i in range(preview.doors.size()):
+		preview.selected_door = i
+		actor.position = preview.doors[i].position
 		check(not preview.toggle_selected_door(), "Rotated door crush protection failed")
 	actor.position = route("MainRoute")[4]
 	for i in range(30):
@@ -162,16 +380,11 @@ func run() -> void:
 	paused = true
 	for i in range(3): await process_frame
 	check(is_equal_approx(machine.clock,clock_before), "Background motion ignores pause")
-	var seam: Node2D
-	for fixture in art.get_node("Fittings").get_children():
-		if fixture.kind == "seam":
-			seam = fixture
-	check(is_instance_valid(seam) and seam.arc_preview, "Missing visual electric seam")
-	if is_instance_valid(seam):
-		var arc_before: float = seam.seconds
-		for i in range(3):
-			await process_frame
-		check(is_equal_approx(seam.seconds, arc_before), "Electric arc ignores pause")
+	var hazards: Node2D = preview.get_node("EntranceHazards")
+	var clock: float = hazards.elapsed
+	for i in range(3):
+		await process_frame
+	check(is_equal_approx(hazards.elapsed, clock), "Entrance hazards ignore pause")
 	paused = false
 	var sample_top: Polygon2D = map.get_node("Floors/SpineSegment00/Top")
 	var finish: ShaderMaterial = sample_top.material
@@ -199,5 +412,5 @@ func run() -> void:
 	check(preview.get_node("Camera").zoom.x<.65, "Overview failed")
 	for top in map.get_walk_surfaces(): check(not Geometry2D.triangulate_polygon(top.polygon).is_empty(), "Invalid terrain")
 	preview.queue_free(); await process_frame
-	print("SPINE_DIAGONAL: %s | 26 IDs, 6 sentries/6 cleaners reserved, main return walk, dead-end out/back, duct walk, gate isolation, rotated door safety, raised 2D camera, circulation art toggle and paused arc" % ("PASS" if failures.is_empty() else "FAIL"))
+	print("SPINE_DIAGONAL: %s | 56 IDs, fluid station and upper routes, protocol bay and sheltered gate, wide entry hazards, inspection route and first sentry cover, 6 sentries/6 cleaners reserved, main return walk, dead-end out/back, duct walk, gate isolation, rotated door safety, raised 2D camera, circulation art toggle and paused hazards" % ("PASS" if failures.is_empty() else "FAIL"))
 	quit(0 if failures.is_empty() else 1)
