@@ -11,21 +11,23 @@ var upper_bodies: Dictionary = {}
 var leg_scales: Dictionary = {}
 var leg_offsets: Dictionary = {}
 var leg_sprite: Sprite2D
+var preparation_complete := false
 
 func _ready() -> void:
-	super._ready()
-	_load_diagonal_legs()
+	await super._ready()
+	await _load_diagonal_legs()
 	leg_sprite = Sprite2D.new()
 	leg_sprite.centered = false
 	leg_sprite.z_index = 1
 	add_child(leg_sprite)
 	_show_frame()
+	preparation_complete = true
 
 func _load_diagonal_legs() -> void:
 	# Use an imported resource so the sheet is also included in exports.
-	_load_leg_sheet(WALK_SHEET.get_image(), DIAGONAL_ROWS)
-	_load_leg_sheet(SIDE_WALK_SHEET.get_image(), [2, 6])
-	_load_leg_sheet(VERTICAL_WALK_SHEET.get_image(), [0, 4])
+	await _load_leg_sheet(FRAME_CLEANUP.PREPARED.source_image(WALK_SHEET), DIAGONAL_ROWS)
+	await _load_leg_sheet(FRAME_CLEANUP.PREPARED.source_image(SIDE_WALK_SHEET), [2, 6])
+	await _load_leg_sheet(FRAME_CLEANUP.PREPARED.source_image(VERTICAL_WALK_SHEET), [0, 4])
 
 func _load_leg_sheet(source: Image, directions: Array) -> void:
 	for row_index in range(directions.size()):
@@ -53,6 +55,8 @@ func _load_leg_sheet(source: Image, directions: Array) -> void:
 			tex.region = Rect2(0,hip_y,cell.x,cell.y-hip_y)
 			bank.append(tex)
 			offsets.append(Vector2(-(frame_bounds.position.x+frame_bounds.size.x*0.5)*scale_factor,0))
+			if column % 4 == 3:
+				await FRAME_CLEANUP.PREPARED.yield_loading_frame(self)
 		diagonal_legs[direction] = bank
 		leg_offsets[direction] = offsets
 

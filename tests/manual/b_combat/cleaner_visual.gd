@@ -14,13 +14,14 @@ var walked_this_tick := false
 var previous := Vector2.ZERO
 var frame_scale := 1.0
 var face_left := false
+var preparation_complete := false
 
 func _ready() -> void:
 	enemy = get_parent() as CharacterBody2D
 	process_physics_priority = 11
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	previous = enemy.position
-	var source := animation_sheet.get_image()
+	var source := preload("res://scenes/gameplay/prepared_sprite_frames.gd").source_image(animation_sheet)
 	var cell := source.get_size() / 4
 	for i in range(16):
 		var section := source.get_region(Rect2i(Vector2i(i % 4, i / 4) * cell, cell))
@@ -50,6 +51,7 @@ func _ready() -> void:
 					center += Vector2(x,y)
 					count += 1
 		eye_anchors.append(center / count - tex.region.position if count > 0 else tex.region.size/2)
+		await preload("res://scenes/gameplay/prepared_sprite_frames.gd").yield_loading_frame(self)
 
 	var largest := 1.0
 	for piece in pieces:
@@ -73,6 +75,7 @@ func _ready() -> void:
 		hurtbox.add_child(hurt_shape)
 		enemy.add_child(hurtbox)
 		_update_hurtbox()
+	preparation_complete = true
 
 func _physics_process(_delta: float) -> void:
 	var distance := enemy.position.distance_to(previous)

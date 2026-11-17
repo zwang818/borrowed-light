@@ -1,6 +1,6 @@
 extends SceneTree
 const SAVE=preload("res://scenes/gameplay/journey_save.gd")
-const PATH="/tmp/borrowed-light-spine-save-check.json"
+const PATH="user://test_loading_spine_save_check.json"
 func _initialize(): call_deferred("run")
 func run():
 	var data={"first_level_cleared":true,"scatter_unlocked":true,"blueprint_known":true,"pulse_learned":true,"workshop_seen":true,"ducts":[],"explored":[]}

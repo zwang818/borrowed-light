@@ -14,6 +14,14 @@ const HEALTH_SCRIPT := preload("res://scenes/gameplay/health_hearts.gd")
 const JOURNEY_SAVE := preload("res://scenes/gameplay/journey_save.gd")
 var journey_save_path := ""
 var first_level_cleared := false
+var entry_ready := false
+var entry_progress := 0.0
+
+func is_entry_ready() -> bool:
+	return entry_ready
+
+func get_entry_progress() -> float:
+	return entry_progress
 const TERMINAL_REQUEST := &"terminal_access"
 const TERMINAL_CODE := "0417"
 const TERMINAL_CLUES := {&"pulse_blueprint": "04", &"workshop_origin": "17"}
@@ -133,8 +141,14 @@ func _ready() -> void:
 	pause_input.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(pause_input)
 	print("[C-MODULE] abdomen_level.gd 已加载 - v4")
-	_spawn_from_markers()
-	_configure_player()
+	await _spawn_from_markers()
+	entry_progress = 0.35
+	await _configure_player()
+	entry_progress = 0.60
+	var environment := map.get_node_or_null("Environment")
+	if environment != null:
+		while not environment.preparation_complete: await get_tree().process_frame
+	entry_progress = 0.75
 	_configure_enemies()
 	_configure_camera()
 	_setup_hud()
@@ -157,6 +171,8 @@ func _ready() -> void:
 	_setup_ducts()
 	_setup_achievement_events()
 	_restore_journey()
+	entry_progress = 1.0
+	entry_ready = true
 
 func _restore_journey() -> void:
 	if not get_tree().has_meta("journey_session"):
@@ -483,7 +499,7 @@ func _spawn_from_markers() -> void:
 		return
 	for marker in markers.get_children():
 		if marker is Marker2D:
-			_match_marker(marker)
+			await _match_marker(marker)
 
 func _match_marker(marker: Marker2D) -> void:
 	var otype: String = marker.object_type
@@ -513,7 +529,10 @@ func _match_marker(marker: Marker2D) -> void:
 			var cleaner_model := preload("res://tests/manual/b_combat/web_cleaner_visual.gd").new()
 			cleaner_model.name = "CleanerModel"
 			cleaner_model.match_hurtbox = true
+			cleaner_model.hide()
 			cleaner.add_child(cleaner_model)
+			while not cleaner_model.preparation_complete: await get_tree().process_frame
+			cleaner_model.show()
 			marker.hide()
 			enemies.append(cleaner)
 			total_enemies += 1
@@ -652,7 +671,10 @@ func _configure_player() -> void:
 	robot_visual.sparks_enabled = false
 	robot_visual.enhanced_gait = true
 	robot_visual.face_firing_beam = true
+	robot_visual.hide()
 	player.get_node("Facing").add_child(robot_visual)
+	while not robot_visual.preparation_complete: await get_tree().process_frame
+	robot_visual.show()
 	var hurtbox := preload("res://tests/manual/b_combat/player_model_hurtbox.gd").new()
 	hurtbox.name = "PlayerModelHurtbox"
 	player.add_child(hurtbox)

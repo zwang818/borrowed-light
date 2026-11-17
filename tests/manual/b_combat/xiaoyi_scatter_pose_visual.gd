@@ -22,13 +22,13 @@ const HEAD_EDGES := [
 ]
 
 func _load_rig() -> void:
-	super._load_rig()
+	await super._load_rig()
 	for i in range(body_frames.size()):
 		# The shader now selects the head silhouette, not a fixed-height rectangle.
 		head_frames[i].region = body_frames[i].region
 
 func _ready() -> void:
-	super._ready()
+	await super._ready()
 	# Ordinary arms < charge light < head; explicit foreground-arm poses stay above.
 	player.pulse_gun.charge_glow.z_index = 5
 	head_occluder.z_index = 6
