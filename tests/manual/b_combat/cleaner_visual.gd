@@ -25,7 +25,7 @@ func _ready() -> void:
 	# Immutable frame data is shared; each enemy retains its own collision node/state.
 	var cache_key := str(animation_sheet.get_instance_id())+":"+str(match_hurtbox)
 	if not frame_cache.has(cache_key):
-		_build_frames()
+		await _build_frames()
 		frame_cache[cache_key] = {"pieces":pieces,"hulls":hit_polygons,"eyes":eye_anchors}
 	else:
 		var cached: Dictionary = frame_cache[cache_key]
@@ -55,6 +55,7 @@ func _ready() -> void:
 		hurtbox.add_child(hurt_shape)
 		enemy.add_child(hurtbox)
 		_update_hurtbox()
+	preparation_complete = true
 
 func _build_frames() -> void:
 	var source := animation_sheet.get_image()
