@@ -30,7 +30,7 @@ func run() -> void:
 	root.add_child(empty_title)
 	current_scene = empty_title
 	await process_frame
-	check(menu_labels(empty_title) == ["开始旅程", "退出"], "First visit has exactly two journey actions")
+	check(menu_labels(empty_title) == ["开始旅程", "设置", "退出"], "First visit exposes start, settings and quit")
 	check(not empty_title.has_node("Presentation/SpineReviewButton"), "Default title keeps review shortcut out of the player menu")
 	empty_title.queue_free()
 	await process_frame
@@ -51,7 +51,7 @@ func run() -> void:
 	root.add_child(title)
 	current_scene = title
 	await process_frame
-	check(menu_labels(title) == ["继续旅程", "重新开始旅程", "退出"], "Readable save exposes continue, restart and quit")
+	check(menu_labels(title) == ["继续旅程", "重新开始旅程", "设置", "退出"], "Readable save exposes continue, restart and quit")
 	title._open_archive()
 	check(title.restart_button.focus_mode == Control.FOCUS_NONE, "Archive modal excludes restart from background navigation")
 	title._new_button.pressed.emit()
@@ -135,7 +135,7 @@ func run() -> void:
 		title._delete_button.pressed.emit()
 		title._delete_button.pressed.emit()
 		check(SAVE.read_save(PATH).is_empty() and not FileAccess.file_exists(PATH + ".bak"), "Confirmed delete clears checkpoint and backup")
-		check(menu_labels(title) == ["开始旅程", "退出"] and title._load_button.disabled, "Deleting restores two-button first-visit menu")
+		check(menu_labels(title) == ["开始旅程", "设置", "退出"] and title._load_button.disabled, "Deleting restores two-button first-visit menu")
 	current_scene.queue_free()
 	await process_frame
 	SAVE.erase(PATH)

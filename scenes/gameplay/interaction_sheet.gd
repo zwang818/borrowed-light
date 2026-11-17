@@ -1,4 +1,5 @@
 extends CanvasLayer
+const INPUT_BINDINGS := preload("res://scenes/gameplay/input_bindings.gd")
 ## Functional C fallback. D supplies dialogue and final presentation separately.
 signal finished(token: int, completed: bool)
 signal destination_selected(token: int, destination: StringName)
@@ -9,6 +10,7 @@ const PULSE_XIAOYI_SHEET := preload("res://tests/manual/b_combat/art/xiaoyi/xiao
 const FRAME_CLEANUP := preload("res://tests/manual/b_combat/sprite_frame_cleanup.gd")
 const PULSE_ROW_EDGES := [0, 213, 428, 644, 867, 1082, 1302, 1516, 1774]
 const PULSE_SPIN_DURATION := 3.0
+var presentation_theme: Theme = UI_THEME
 var token := 0
 var overlay: Control
 var panel: PanelContainer
@@ -59,7 +61,7 @@ func present(request_token: int, payload: Dictionary) -> void:
 	line_index = 0
 	_last_action = payload.confirm
 	overlay = Control.new()
-	overlay.theme = UI_THEME
+	overlay.theme = presentation_theme
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(overlay)
 	overlay.set_meta("card_width", payload.get("card_width", 660.0))
@@ -172,7 +174,7 @@ func present(request_token: int, payload: Dictionary) -> void:
 		destination.pressed.connect(_select_destination.bind(request_token, StringName(choice.id)))
 		content.add_child(destination)
 	if payload.get("input_mode", "") == "terminal_code":
-		var console_font := UI_THEME.default_font
+		var console_font := presentation_theme.default_font
 		for label in [category, title]:
 			label.add_theme_font_override("font", console_font)
 			label.add_theme_color_override("font_color", Color("a5e8ae"))
@@ -185,7 +187,7 @@ func present(request_token: int, payload: Dictionary) -> void:
 	content.add_child(actions)
 	var confirm := Button.new()
 	_confirm = confirm
-	confirm.text = "[E]  " + payload.confirm
+	confirm.text = ("[" + INPUT_BINDINGS.action_label(&"interact") + "]  ") + payload.confirm
 	if is_instance_valid(_code_input):
 		confirm.text = payload.confirm
 	confirm.disabled = payload.get("disable_confirm", false)
@@ -305,7 +307,7 @@ func show_code_success(request_token: int) -> void:
 		control.visible = control == _code_status
 	_code_status.text = "SUCCESSFULLY ENTERED！"
 	_code_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_code_status.add_theme_font_override("font", UI_THEME.default_font)
+	_code_status.add_theme_font_override("font", presentation_theme.default_font)
 	_code_status.add_theme_font_size_override("font_size", 30)
 	_code_status.add_theme_color_override("font_color", Color("a5e8ae"))
 
@@ -323,7 +325,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _show_line() -> void:
 	_speaker.text = dialogue[line_index].speaker
 	_body.text = dialogue[line_index].text
-	_confirm.text = "[E]  " + ("继续" if line_index < dialogue.size() - 1 else _last_action)
+	_confirm.text = ("[" + INPUT_BINDINGS.action_label(&"interact") + "]  ") + ("继续" if line_index < dialogue.size() - 1 else _last_action)
 
 func _advance_or_finish() -> void:
 	if not is_instance_valid(overlay):

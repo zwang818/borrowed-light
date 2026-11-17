@@ -1,4 +1,5 @@
 extends Node2D
+const INPUT_BINDINGS := preload("res://scenes/gameplay/input_bindings.gd")
 ## 腹腔关卡运行场景：组装地图、玩家、敌人、交互对象
 ## First-level C flow: blueprint → workbench → combat → terminal → exit
 ## C 模块集成：引导 HUD、终端门禁、房间重试、场景切换、空间记忆
@@ -910,7 +911,7 @@ func _terminal_prompt() -> String:
 	var remaining := _remaining_cleaners()
 	if terminal_activated:
 		return "终端已激活 · 出口门已开启"
-	return "终端锁定 · 剩余 %d 台清扫者" % remaining if remaining > 0 else ("[E] 接入终端" if terminal.get_node("FacilityVisual").powered else "[E] 拉下电闸")
+	return "终端锁定 · 剩余 %d 台清扫者" % remaining if remaining > 0 else (("[" + INPUT_BINDINGS.action_label(&"interact") + "] 接入终端") if terminal.get_node("FacilityVisual").powered else ("[" + INPUT_BINDINGS.action_label(&"interact") + "] 拉下电闸"))
 
 func _try_interact() -> void:
 	if player.is_dead or get_tree().paused:
@@ -1216,18 +1217,18 @@ func _add_listening_glow(grate_size: Vector2) -> void:
 
 func _point_prompt(id: StringName) -> String:
 	if ducts.has(id):
-		return "[E] 打开管道 · " + ducts[id].title if unlocked_ducts.has(id) else "[E] 解锁管道 · " + ducts[id].title
+		return ("[" + INPUT_BINDINGS.action_label(&"interact") + "] 打开管道 · ") + ducts[id].title if unlocked_ducts.has(id) else ("[" + INPUT_BINDINGS.action_label(&"interact") + "] 解锁管道 · ") + ducts[id].title
 	match id:
 		VOICE_POINT:
-			return "[E] 听一听"
+			return ("[" + INPUT_BINDINGS.action_label(&"interact") + "] 听一听")
 		&"pulse_blueprint":
-			return "[E] 重看图纸" if blueprint_known else "[E] 查看图纸"
+			return ("[" + INPUT_BINDINGS.action_label(&"interact") + "] 重看图纸") if blueprint_known else ("[" + INPUT_BINDINGS.action_label(&"interact") + "] 查看图纸")
 		&"pulse_workbench":
 			if pulse_learned:
 				return "脉冲机械臂已制造完成"
-			return "[E] 接入制造台" if blueprint_known else "[E] 查看制造台"
+			return ("[" + INPUT_BINDINGS.action_label(&"interact") + "] 接入制造台") if blueprint_known else ("[" + INPUT_BINDINGS.action_label(&"interact") + "] 查看制造台")
 		&"workshop_origin":
-			return "[E] 查看操作台记录" if not workshop_seen else "[E] 重读操作台记录"
+			return ("[" + INPUT_BINDINGS.action_label(&"interact") + "] 查看操作台记录") if not workshop_seen else ("[" + INPUT_BINDINGS.action_label(&"interact") + "] 重读操作台记录")
 	return ""
 
 func get_interaction_state() -> Dictionary:

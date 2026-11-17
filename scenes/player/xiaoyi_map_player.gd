@@ -1,6 +1,7 @@
 extends "res://scenes/player/player.gd"
 ## Keep acquisition separate from the currently raised arm.
 enum AttackMode { LASER = 1, UNARMED = 2, SCATTER = 3 }
+const INPUT_BINDINGS := preload("res://scenes/gameplay/input_bindings.gd")
 const PELLET := preload("res://tests/manual/b_combat/scatter_pellet.gd")
 @export var scatter_unlocked := false
 var attack_mode: int = AttackMode.UNARMED
@@ -14,6 +15,9 @@ const INSPECTION_DURATION := 1.2
 var mouse_facing: Vector2:
 	get:
 		return global_position.direction_to(get_global_mouse_position())
+
+func _enter_tree() -> void:
+	INPUT_BINDINGS.ensure_actions()
 
 func _ready() -> void:
 	# Reuse the tested muzzle adapter without granting either ability.
@@ -95,12 +99,10 @@ func set_attack_mode(mode: int) -> bool:
 
 func _unhandled_input(event: InputEvent) -> void:
 	update_combat_mode()
-	if event is InputEventKey and event.pressed and not event.echo:
-		var key: int = event.physical_keycode if event.physical_keycode != 0 else event.keycode
-		if key in [KEY_1, KEY_2]:
-			set_attack_mode(AttackMode.LASER if key == KEY_1 else AttackMode.SCATTER)
-			get_viewport().set_input_as_handled()
-			return
+	if not event.is_echo() and (event.is_action_pressed("arm_pulse") or event.is_action_pressed("arm_scatter")):
+		set_attack_mode(AttackMode.LASER if event.is_action_pressed("arm_pulse") else AttackMode.SCATTER)
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed(shoot_action) and controls_enabled and not is_dead and not has_protocol and has_arm_module(0 if selected_mode == AttackMode.LASER else 1):
 		inspection_remaining = 0.0
 		holster_remaining = HOLSTER_DELAY

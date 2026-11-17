@@ -3,8 +3,14 @@ extends Control
 
 signal start_requested
 signal archive_opened
+const BUTTON_FEEDBACK := preload("res://scenes/ui/ui_button_feedback.gd")
+const PREFS := preload("res://scenes/ui/user_settings.gd")
+const SETTINGS_PANEL := preload("res://scenes/ui/title_screen/settings_panel.gd")
 const JOURNEY_SAVE := preload("res://scenes/gameplay/journey_save.gd")
 @export var game_save_path := JOURNEY_SAVE.DEFAULT_PATH
+@export var settings_path := PREFS.DEFAULT_PATH
+var _preferences: Dictionary = {}
+var _settings_panel: Control
 var _save_data: Dictionary = {}
 var _archive_action := ""
 var _load_button: Button
@@ -35,6 +41,7 @@ var _delete_button: Button
 @onready var archive_close: Button = $Presentation/SaveOverlay/ArchivePanel/CloseButton
 @onready var start_button: Button = $Presentation/Menu/Buttons/StartButton
 @onready var restart_button: Button = $Presentation/Menu/Buttons/RestartButton
+@onready var settings_button: Button = $Presentation/Menu/Buttons/SettingsButton
 @onready var quit_button: Button = $Presentation/Menu/Buttons/QuitButton
 @onready var status_label: Label = $Presentation/Menu/Status
 @onready var restart_overlay: Control = $Presentation/RestartOverlay
@@ -59,6 +66,7 @@ func _ready() -> void:
 	restart_confirm.pressed.connect(_confirm_restart)
 	restart_cancel.pressed.connect(_close_restart_confirmation)
 	quit_button.pressed.connect(_on_quit_pressed)
+	settings_button.pressed.connect(_open_settings)
 	archive_button.pressed.connect(_open_archive)
 	archive_close.pressed.connect(_close_archive)
 	archive_button.mouse_entered.connect(func(): _robot_hovered = true)
@@ -66,9 +74,18 @@ func _ready() -> void:
 	start_button.disabled = start_scene == null
 	status_label.visible = start_scene == null
 	_fit_presentation()
+	_init_preferences()
 	_init_bgm()
+	_build_settings()
 	_build_archive_actions()
 	_refresh_archive()
+	_setup_button_feedback()
+
+func _setup_button_feedback() -> void:
+	for control in presentation.find_children("*","Button",true,false):
+		if control is OptionButton: continue
+		BUTTON_FEEDBACK.attach(control,control == archive_button,control.get_parent() == $Presentation/Menu/Buttons)
+	BUTTON_FEEDBACK.reveal($Presentation/Menu/Buttons)
 
 func _build_archive_actions() -> void:
 	var panel: Control = archive_close.get_parent()
@@ -79,7 +96,7 @@ func _build_archive_actions() -> void:
 		label.add_theme_font_override("font", font)
 	var description: Label = panel.get_node("Description")
 	description.size.y = 48
-	description.text = "自动保存图纸、能力、记录与管道解锁。\n读档从房间入口继续，敌人和门禁重新开始。"
+	description.text = "自动保存图纸、能力、记录与管道解锁。\n保存小一位置与耐久，恢复上次进度。"
 	archive_close.position.y = 350
 	archive_close.add_theme_font_override("font", font)
 	var actions := HBoxContainer.new()
@@ -107,15 +124,13 @@ func _refresh_archive() -> void:
 	start_button.text = "继续旅程" if has_save else "开始旅程"
 	restart_button.visible = has_save
 	restart_button.disabled = start_scene == null
-	status_label.position.y = 646.0 if has_save else 596.0
+	status_label.position.y = 669.0 if has_save else 612.0
 	var cleared: bool = has_save and _save_data.get("first_level_cleared", false)
 	var in_spine := has_save and JOURNEY_SAVE.resume_scene(_save_data) == JOURNEY_SAVE.SPINE
-	if in_spine:
-		start_button.text = "继续第二关"
 	status_label.visible = cleared or start_scene == null
 	if cleared:
 		status_label.add_theme_font_override("font", preload("res://scenes/gameplay/gameplay_ui_theme.tres").default_font)
-		status_label.text = "第一关已通关"
+		status_label.text = "第二关 · 输能脊柱" if in_spine else "第一关已通关"
 	_load_button.text = "继续旅程"
 	_load_button.disabled = not has_save
 	_new_button.text = "确认新旅程" if _archive_action == "new" else ("重新开始旅程" if has_save else "开始旅程")
@@ -123,7 +138,7 @@ func _refresh_archive() -> void:
 	_delete_button.disabled = not FileAccess.file_exists(game_save_path) and not FileAccess.file_exists(game_save_path + ".bak")
 	var slot: Node = archive_close.get_parent().get_node("EmptySlot")
 	if has_save:
-		slot.get_node("EmptyTitle").text = "第二关 · 脊柱" if in_spine else "腹腔 · " + ("脉冲机械臂已解锁" if _save_data.pulse_learned else ("已记录图纸" if _save_data.blueprint_known else "旅程起点"))
+		slot.get_node("EmptyTitle").text = "第二关 · 输能脊柱" if in_spine else "腹腔 · " + ("脉冲机械臂已解锁" if _save_data.pulse_learned else ("已记录图纸" if _save_data.blueprint_known else "旅程起点"))
 		slot.get_node("EmptyHint").text = "%s · 管道 %d/3%s" % [_save_data.saved_at, _save_data.ducts.size(), " · 备份恢复" if _save_data.get("recovered", false) else ""]
 	else:
 		slot.get_node("EmptyTitle").text = "尚无存档" if _delete_button.disabled else "存档无法读取"
@@ -147,7 +162,8 @@ func _continue_journey() -> void:
 		_is_starting = false
 		get_tree().remove_meta("journey_session"))
 	get_tree().root.add_child(loading)
-	loading.begin(JOURNEY_SAVE.resume_scene(data))
+	var destination := JOURNEY_SAVE.resume_scene(data)
+	loading.begin(destination)
 
 func _new_journey() -> void:
 	if _is_starting:
@@ -170,8 +186,34 @@ func _delete_journey() -> void:
 		archive_close.get_parent().get_node("EmptySlot/EmptyHint").text = "删除失败，请检查文件权限。"
 
 
+func _init_preferences() -> void:
+	_preferences = PREFS.read_preferences(settings_path)
+	PREFS.apply_audio(_preferences)
+	PREFS.BINDINGS.apply(_preferences.bindings)
+	# Returning to the title should not undo a manual window resize.
+	if not get_tree().has_meta("display_preferences_initialized"):
+		get_tree().set_meta("display_preferences_initialized",true)
+		if FileAccess.file_exists(settings_path): PREFS.apply_display(_preferences,get_window())
+
+func _build_settings() -> void:
+	_settings_panel = SETTINGS_PANEL.new()
+	_settings_panel.save_path = settings_path
+	presentation.add_child(_settings_panel)
+	_settings_panel.closed.connect(func():
+		_preferences = _settings_panel.values.duplicate(true)
+		_restore_menu_focus())
+	settings_button.add_theme_font_override("font",preload("res://assets/fonts/noto_sans_sc_settings.ttf"))
+
+func _open_settings() -> void:
+	if _is_starting or _modal_open(): return
+	_previous_focus = get_viewport().gui_get_focus_owner()
+	_set_menu_focus_enabled(false)
+	presentation.move_child(_settings_panel,-1)
+	_settings_panel.open(_preferences)
+
 func _init_bgm() -> void:
 	add_child(_bgm_player)
+	_bgm_player.bus = PREFS.MUSIC_BUS
 	_bgm_player.volume_db = linear_to_db(title_bgm_volume)
 	# Godot 4: loop 必须在 .import 的 edit/loop_mode 上设置，AudioStreamPlayer 本身没有 loop 属性
 	_bgm_player.stream = title_bgm
@@ -194,8 +236,14 @@ func _process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if is_instance_valid(_settings_panel) and _settings_panel.visible and _settings_panel.capture_event(event):
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("ui_cancel") and _modal_open():
-		if restart_overlay.visible:
+		if _settings_panel.visible:
+			if _settings_panel.popup_visible(): return
+			_settings_panel.save_and_close()
+		elif restart_overlay.visible:
 			_close_restart_confirmation()
 		else:
 			_close_archive()
@@ -203,11 +251,11 @@ func _input(event: InputEvent) -> void:
 
 
 func _modal_open() -> bool:
-	return archive_overlay.visible or restart_overlay.visible
+	return archive_overlay.visible or restart_overlay.visible or (is_instance_valid(_settings_panel) and _settings_panel.visible)
 
 
 func _set_menu_focus_enabled(enabled: bool) -> void:
-	for control in [archive_button, start_button, restart_button, quit_button]:
+	for control in [archive_button, start_button, restart_button, settings_button, quit_button]:
 		if control != null:
 			control.focus_mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
 
@@ -225,6 +273,7 @@ func _open_restart_confirmation() -> void:
 		return
 	_previous_focus = get_viewport().gui_get_focus_owner()
 	restart_overlay.show()
+	BUTTON_FEEDBACK.reveal($Presentation/RestartOverlay/Panel,true)
 	_set_menu_focus_enabled(false)
 	restart_cancel.grab_focus()
 
@@ -248,6 +297,7 @@ func _open_archive() -> void:
 	_refresh_archive()
 	_previous_focus = get_viewport().gui_get_focus_owner()
 	archive_overlay.show()
+	BUTTON_FEEDBACK.reveal(archive_close.get_parent(),true)
 	# Prevent keyboard focus from leaving the modal and triggering background actions.
 	_set_menu_focus_enabled(false)
 	archive_close.grab_focus()
