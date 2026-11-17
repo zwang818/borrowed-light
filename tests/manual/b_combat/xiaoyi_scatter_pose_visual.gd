@@ -3,6 +3,7 @@ extends "res://tests/manual/b_combat/xiaoyi_spark_visual.gd"
 var scatter_body_row := -1
 var scatter_flip := false
 var relaxed_walk_arms := false
+var dynamic_walk_preview := false
 var relaxed_walk_strength := 0.0
 var relaxed_walk_phase := 0.0
 const TURN_MARGIN := 0.07
@@ -38,11 +39,26 @@ func _ready() -> void:
 	_show_frame()
 
 func _show_frame() -> void:
+	if dynamic_walk_preview and relaxed_walk_arms and walk_distance > 0.0:
+		# Use the displayed foot row, including intermediate rows during a turn.
+		var cycle: float = CYCLE_DISTANCE.get(facing_row,STRIDE_PIXELS*4.0)
+		relaxed_walk_phase = walk_distance/cycle*TAU
 	super._show_frame()
 	if relaxed_walk_arms and head_occluder != null and player.attack_mode == 2 and not _inspecting():
 		# Replace the old vertical bounce; move the complete rig together, not its shadow.
 		var bob := -absf(sin(relaxed_walk_phase))*0.5*relaxed_walk_strength
 		var correction := Vector2(0,bob-gait_offset.y)
+		if dynamic_walk_preview:
+			# Two weight transfers per stride; the support leg compresses at contact.
+			var step := sin(relaxed_walk_phase)
+			var sway := step*0.5*relaxed_walk_strength
+			bob = (0.25-absf(step)*1.15)*relaxed_walk_strength
+			correction = Vector2(sway,bob)-gait_offset
+			if leg_sprite != null and leg_sprite.visible:
+				# Keep the feet at the original ground plane while the hip follows the
+				# torso. Small leg compression prevents a floating whole-sprite bounce.
+				var height := leg_sprite.texture.get_height()*leg_sprite.scale.y
+				leg_sprite.scale.y *= (height-bob)/height
 		gait_offset += correction
 		sprite.position += correction
 		head_occluder.position += correction
@@ -209,7 +225,7 @@ func _refresh_walking_arms() -> void:
 		# so it leans into travel, retaining the same swing range and shoulder anchor.
 		if (facing_row in [2,3] and side == 0) or (facing_row in [5,6] and side == 1):
 			pivot.rotation = PI-pivot.rotation
-		if relaxed_walk_arms:
+		if relaxed_walk_arms and not dynamic_walk_preview:
 			# Slightly delayed shoulders follow the step; modules have different weight.
 			var phase := sin(relaxed_walk_phase-0.12) * (1.0 if side == 0 else -1.0)
 			var carry := deg_to_rad(WALK_CARRY_ANGLES[row])
@@ -228,3 +244,34 @@ func _refresh_walking_arms() -> void:
 		if relaxed_walk_arms:
 			length = WALK_CARRY_LENGTHS[row] if _installed(side) else 20.0
 		art.scale.x = length/art.texture.get_width()
+		if relaxed_walk_arms and dynamic_walk_preview:
+			_project_alternating_walk_arm(side,pivot,art,length,row)
+
+# Match the authored foot banks, not screen-left/screen-right. Right/down-right
+# use mirrored left/down-left legs, which swaps the anatomical leading foot.
+# Vertical banks mirror at half-cycle; up-right retains its original four poses.
+const WALK_ARM_PHASE_OFFSETS := [0.0,-PI/2.0,-PI/2.0,-PI/2.0,0.0,-PI/2.0,PI/2.0,PI/2.0]
+
+func _walk_arm_phase(side: int) -> float:
+	var left := sin(relaxed_walk_phase+WALK_ARM_PHASE_OFFSETS[facing_row]-0.12)
+	return left if side == 0 else -left
+
+func _project_alternating_walk_arm(side: int, pivot: Node2D, art: Sprite2D, length: float, row: int) -> void:
+	# A single anatomical phase drives both arms in exact opposition. Only the
+	# projection changes with facing; never mirror the swing sign a second time.
+	var phase := _walk_arm_phase(side)
+	var weight := 0.85+0.15*absf(phase)
+	var swing := phase*weight*deg_to_rad(22.0 if side == 0 else 19.0)*relaxed_walk_strength
+	var carry := deg_to_rad(WALK_CARRY_ANGLES[row])
+	var base := carry if side == 0 else PI-carry
+	var forward := Vector2.DOWN.rotated(facing_row*PI/4.0)
+	var reach := sin(swing)
+	var projected := Vector2.from_angle(base)*cos(swing)+Vector2(forward.x,forward.y*0.75)*reach
+	pivot.rotation = projected.angle()
+	art.scale.x = length*projected.length()/art.texture.get_width()
+	# Fixed shoulder and draw order prevent popping through the torso or head.
+	var depth := forward.y*reach
+	art.scale.y *= 1.0+depth*0.10
+	art.position.y = -art.texture.get_height()*art.scale.y/2.0
+	var shade := 1.0+minf(depth,0.0)*0.18
+	art.modulate = Color(shade,shade,shade)

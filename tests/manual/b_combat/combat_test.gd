@@ -2,6 +2,7 @@ extends Node2D
 
 @export var scatter_pose_preview := true
 @export var relaxed_walk_arms := false
+@export var dynamic_walk_preview := false
 
 ## Test-only bindings, installed before the Player enters the tree.
 ## Shared project Input Map remains owned by the integration module.
@@ -34,6 +35,7 @@ func _ready() -> void:
 	visual.set_script(preload("res://tests/manual/b_combat/xiaoyi_scatter_pose_visual.gd") if scatter_pose_preview else preload("res://tests/manual/b_combat/xiaoyi_spark_visual.gd"))
 	if scatter_pose_preview:
 		visual.relaxed_walk_arms = relaxed_walk_arms
+		visual.dynamic_walk_preview = dynamic_walk_preview
 	visual.display_height = 60.0
 	visual.sparks_enabled = false
 	visual.dust_color = Color(0.48,0.48,0.48,0.65)

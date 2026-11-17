@@ -4,7 +4,7 @@ var enemies: Array[Node2D] = []
 var baselines: Array[Dictionary] = []
 var doors: Array[Node2D] = []
 var overview := false
-var art_enabled := false
+var art_enabled := true
 var doors_open := true
 var follow_zoom := 0.9
 var electric_seams: Array[Node2D] = []
@@ -12,12 +12,24 @@ var scatter_prompt: Label
 var scatter_station: Polygon2D
 @onready var map: Node2D = $Map
 
+func _enter_tree() -> void:
+	super._enter_tree()
+	# Keep A's geometry/anchors; discard only unused blockout decoration before
+	# its machinery can construct skins and start processing.
+	for path in ["Map/DeepStructure", "Map/BackgroundMachines"]:
+		for child in get_node(path).get_children():
+			child.free()
+	for path in ["Floor", "Grid", "Walls"]:
+		get_node(path).free()
+
 func _ready() -> void:
+	# The spine corridor runs 25 degrees above horizontal. This wrapper is
+	# shared only by the second-level graybox and its production scene.
+	$SpawnPoints/PlayerSpawn/Player.up_right_movement_axis = map.global_transform.basis_xform(Vector2(0.9063078,-0.4226183)).normalized()
+	$SpawnPoints/PlayerSpawn/Player.sprint_multiplier = 1.5
 	# Isolate A terrain/decorative layers from B combat rendering.
 	map.z_index = -100
 	$EnemyProjectiles.z_index = 12
-	for path in ["Floor","Grid","Walls"]:
-		get_node(path).free()
 	var sentry_markers: Array[Node2D] = []
 	var cleaner_markers: Array[Node2D] = []
 	for marker in map.get_node("Markers").get_children():
@@ -60,7 +72,7 @@ func _ready() -> void:
 	player.pulse_gun.z_index = 5
 	player.pulse_gun.configure_space(map.get_meta("map_bounds"),_test_enemy_readable)
 	map.get_node("Reservations").hide()
-	_set_art(false)
+	_set_art(true)
 	_install_electric_seams(map.get_node("SpineArt"))
 	_update_camera()
 
@@ -94,10 +106,10 @@ func _make_door(marker: Node2D) -> void:
 	door.set_open(true)
 	doors.append(door)
 
-func _set_art(value: bool) -> void:
-	art_enabled = value
-	map.get_node("SpineArt").set_art_enabled(value)
-	map.set_depth_enabled(value)
+func _set_art(_value: bool) -> void:
+	art_enabled = true
+	map.get_node("SpineArt").set_art_enabled(true)
+	map.set_depth_enabled(true)
 
 func _test_enemy_readable(enemy: Node2D) -> bool:
 	return not overview and super._test_enemy_readable(enemy)
@@ -125,7 +137,7 @@ func _process(_delta: float) -> void:
 	var alive := 0
 	for enemy in enemies:
 		if enemy.health > 0: alive += 1
-	$TestOverlay/WeaponStatus.text = "B · 脊柱等比例战斗灰盒（地图1:1）\nWASD移动 / Shift疾走 / 1激光 / 2散弹 / 左键攻击\n滚轮缩放 / Tab全图 / F美术切换 / O测试开关门 / P协议 / R全部重置\n生命 %d/%d · 敌人 %d/%d · 门%s%s" % [player.health,player.max_health,alive,enemies.size(),"开启" if doors_open else "关闭"," · 已死亡，请按R" if player.is_dead else ""]
+	$TestOverlay/WeaponStatus.text = "B · 脊柱等比例战斗灰盒（地图1:1）\nWASD移动 / Shift疾走 / 1激光 / 2散弹 / 左键攻击\n滚轮缩放 / Tab全图 / O测试开关门 / P协议 / R全部重置\n生命 %d/%d · 敌人 %d/%d · 门%s%s" % [player.health,player.max_health,alive,enemies.size(),"开启" if doors_open else "关闭"," · 已死亡，请按R" if player.is_dead else ""]
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo: return
@@ -133,7 +145,6 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_E:
 			if try_unlock_scatter(): get_viewport().set_input_as_handled()
 		KEY_TAB: overview = not overview
-		KEY_F: _set_art(not art_enabled)
 		KEY_O:
 			if doors_open:
 				for door in doors:
