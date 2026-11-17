@@ -40,7 +40,7 @@ func _ready() -> void:
 	$SpawnPoints/PlayerSpawn.global_position = map.get_node("Markers/PlayerSpawn").global_position
 	$SpawnPoints/SentrySpawn.global_position = sentry_markers[0].global_position
 	$SpawnPoints/CleanerSpawn.global_position = cleaner_markers[0].global_position
-	super._ready()
+	await super._ready()
 	_register_enemy($SpawnPoints/SentrySpawn/Sentry)
 	_register_enemy($SpawnPoints/CleanerSpawn/Cleaner)
 	for i in range(1,sentry_markers.size()):
@@ -60,7 +60,10 @@ func _ready() -> void:
 		var visual = preload("res://tests/manual/b_combat/web_cleaner_visual.gd").new()
 		visual.name = "CleanerVisual"
 		visual.match_hurtbox = true
+		visual.hide()
 		unit.add_child(visual)
+		while not visual.preparation_complete: await get_tree().process_frame
+		visual.show()
 		unit.configure($SpawnPoints/PlayerSpawn/Player,_cleaner_on_screen,_test_protocol_active)
 		_register_enemy(unit)
 	var player = $SpawnPoints/PlayerSpawn/Player

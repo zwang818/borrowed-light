@@ -41,7 +41,7 @@ func _ready() -> void:
 		gait_material.shader = preload("res://tests/manual/b_combat/xiaoyi_gait.gdshader")
 		sprite.material = gait_material
 	muzzle_points = JSON.parse_string(FileAccess.get_file_as_string("res://tests/manual/b_combat/art/xiaoyi/muzzle_points.json"))
-	_load_frames()
+	await _load_frames()
 	player.get_node("Facing/Body").hide()
 	player.get_node("Facing/DirectionIndicator").hide()
 	player.get_node("Facing/PulseGun/Barrel").hide()
@@ -54,12 +54,12 @@ func _load_frames() -> void:
 	var modes := {1: "laser", 2: "unarmed", 3: "scatter"}
 	for mode in modes:
 		var sheet: Texture2D = load("res://tests/manual/b_combat/art/xiaoyi/xiaoyi_%s_8dir.png" % modes[mode])
-		var pixels := sheet.get_image()
+		var pixels := FRAME_CLEANUP.PREPARED.source_image(sheet)
 		var correction: Texture2D
 		var corrected_pixels: Image
 		if CORRECTED_ROWS.has(mode):
 			correction = load("res://tests/manual/b_combat/art/xiaoyi/xiaoyi_%s_handedness.png" % modes[mode])
-			corrected_pixels = correction.get_image()
+			corrected_pixels = FRAME_CLEANUP.PREPARED.source_image(correction)
 		var bank: Array[AtlasTexture] = []
 		for row in range(8):
 			var corrected: bool = CORRECTED_ROWS.has(mode) and row in CORRECTED_ROWS[mode]
@@ -79,6 +79,7 @@ func _load_frames() -> void:
 				atlas.filter_clip = true
 				bank.append(atlas)
 				largest_height = maxf(largest_height, bounds.size.y)
+			await FRAME_CLEANUP.PREPARED.yield_loading_frame(self)
 		mode_frames[mode] = bank
 	frames = mode_frames[player.attack_mode]
 	display_scale = display_height / largest_height

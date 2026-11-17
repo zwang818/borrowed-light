@@ -5,6 +5,8 @@ var target: Node
 
 
 func _input(event: InputEvent) -> void:
+	# Loading owns input even on its failure/Return screen.
+	if get_tree().root.has_node("EntryLoading"): return
 	if event.is_action_pressed("pause") and is_instance_valid(target):
 		target.call("_toggle_pause")
 		get_viewport().set_input_as_handled()

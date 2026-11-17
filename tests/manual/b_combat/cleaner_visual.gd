@@ -15,6 +15,7 @@ var walked_this_tick := false
 var previous := Vector2.ZERO
 var frame_scale := 1.0
 var face_left := false
+var preparation_complete := false
 
 func _ready() -> void:
 	enemy = get_parent() as CharacterBody2D
@@ -86,6 +87,7 @@ func _build_frames() -> void:
 					center += Vector2(x,y)
 					count += 1
 		eye_anchors.append(center / count - tex.region.position if count > 0 else tex.region.size/2)
+		await preload("res://scenes/gameplay/prepared_sprite_frames.gd").yield_loading_frame(self)
 
 
 func _physics_process(_delta: float) -> void:
