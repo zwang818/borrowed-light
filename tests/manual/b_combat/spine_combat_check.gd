@@ -17,6 +17,9 @@ func run() -> void:
 		var b = source.get_walk_surfaces()[i]
 		assert(a.polygon == b.polygon and a.global_transform == b.global_transform)
 	assert(room.enemies.size() == 12)
+	assert(room.art_enabled)
+	assert(room.map.get_node("DeepStructure").get_child_count() == 0)
+	assert(room.map.get_node("BackgroundMachines").get_child_count() == 0)
 	assert(room.map.z_index == -100)
 	for unit in room.enemies:
 		assert(unit.z_index == 10)
@@ -44,6 +47,7 @@ func run() -> void:
 	assert(player.scatter_unlocked)
 	room._set_art(true)
 	room._set_art(false)
+	assert(room.art_enabled) # B now keeps the art map, without a blockout toggle.
 	room.overview = true
 	assert(not room._test_enemy_readable(room.enemies[0]))
 	room.queue_free()

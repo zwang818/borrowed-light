@@ -12,6 +12,8 @@ var invulnerability_remaining: float = 0.0
 
 ## Prototype speed: 5 tiles/second at the test room's temporary 32 px/tile.
 @export var move_speed: float = 160.0
+## Level-local diagonal axis. Default remains the normal 45-degree direction.
+var up_right_movement_axis := Vector2(1,-1).normalized()
 @export var move_left_action: StringName = &"move_left"
 @export var move_right_action: StringName = &"move_right"
 @export var move_up_action: StringName = &"move_up"
@@ -54,7 +56,7 @@ func _physics_process(delta: float) -> void:
 	var direction := Input.get_vector(
 		move_left_action, move_right_action, move_up_action, move_down_action
 	)
-	velocity = direction * move_speed
+	velocity = map_movement_direction(direction) * move_speed
 	move_and_slide()
 	aim_at(get_global_mouse_position())
 	if can_fire_pulse() and not has_protocol:
@@ -64,6 +66,14 @@ func _physics_process(delta: float) -> void:
 			facing.global_rotation = aim_direction.angle()
 	else:
 		pulse_gun.cancel()
+
+
+func map_movement_direction(direction: Vector2) -> Vector2:
+	# Remap only the two opposite diagonal inputs; preserve cardinal/other
+	# diagonal directions, input magnitude, and all speed/slow/sprint modifiers.
+	if direction.x*direction.y < 0.0 and is_equal_approx(absf(direction.x),absf(direction.y)):
+		return up_right_movement_axis.normalized()*signf(direction.x)*direction.length()
+	return direction
 
 
 func _unhandled_input(event: InputEvent) -> void:

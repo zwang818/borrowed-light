@@ -2,6 +2,7 @@ extends Node2D
 ## Presentation only: attack timings and hit rectangle belong to the shared cleaner.
 @export var animation_sheet: Texture2D = preload("res://tests/manual/b_combat/art/cleaner/side_animation.png")
 @export var match_hurtbox := false
+static var frame_cache: Dictionary = {}
 var hit_polygons: Array[PackedVector2Array] = []
 var hurt_shape: CollisionPolygon2D
 const P = preload("res://scenes/weapons/combat_parameters.gd")
@@ -21,7 +22,42 @@ func _ready() -> void:
 	process_physics_priority = 11
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	previous = enemy.position
-	var source := preload("res://scenes/gameplay/prepared_sprite_frames.gd").source_image(animation_sheet)
+	# Immutable frame data is shared; each enemy retains its own collision node/state.
+	var cache_key := str(animation_sheet.get_instance_id())+":"+str(match_hurtbox)
+	if not frame_cache.has(cache_key):
+		_build_frames()
+		frame_cache[cache_key] = {"pieces":pieces,"hulls":hit_polygons,"eyes":eye_anchors}
+	else:
+		var cached: Dictionary = frame_cache[cache_key]
+		pieces.assign(cached.pieces)
+		hit_polygons.assign(cached.hulls)
+		eye_anchors.assign(cached.eyes)
+
+	var largest := 1.0
+	for piece in pieces:
+		largest = maxf(largest, piece.get_width())
+	frame_scale = 60.0 / largest
+	var height := 0.0
+	for piece in pieces:
+		height = maxf(height, piece.get_height()*frame_scale)
+	var health := enemy.get_node("Health") as ProgressBar
+	health.offset_top = 9.0-height-17.0
+	health.offset_bottom = health.offset_top+6.0
+	health.z_index = 10
+	enemy.get_node("Facing/Body").hide()
+	# Shared code can toggle visibility; transparent self modulation keeps its old fill hidden.
+	enemy.get_node("Facing/AttackZone").self_modulate.a = 0.0
+	if match_hurtbox:
+		var hurtbox := Area2D.new()
+		hurtbox.name = "ModelHurtbox"
+		hurtbox.set_script(preload("res://scenes/enemies/cleaner/cleaner_hurtbox.gd"))
+		hurt_shape = CollisionPolygon2D.new()
+		hurtbox.add_child(hurt_shape)
+		enemy.add_child(hurtbox)
+		_update_hurtbox()
+
+func _build_frames() -> void:
+	var source := animation_sheet.get_image()
 	var cell := source.get_size() / 4
 	for i in range(16):
 		var section := source.get_region(Rect2i(Vector2i(i % 4, i / 4) * cell, cell))
@@ -53,29 +89,6 @@ func _ready() -> void:
 		eye_anchors.append(center / count - tex.region.position if count > 0 else tex.region.size/2)
 		await preload("res://scenes/gameplay/prepared_sprite_frames.gd").yield_loading_frame(self)
 
-	var largest := 1.0
-	for piece in pieces:
-		largest = maxf(largest, piece.get_width())
-	frame_scale = 60.0 / largest
-	var height := 0.0
-	for piece in pieces:
-		height = maxf(height, piece.get_height()*frame_scale)
-	var health := enemy.get_node("Health") as ProgressBar
-	health.offset_top = 9.0-height-17.0
-	health.offset_bottom = health.offset_top+6.0
-	health.z_index = 10
-	enemy.get_node("Facing/Body").hide()
-	# Shared code can toggle visibility; transparent self modulation keeps its old fill hidden.
-	enemy.get_node("Facing/AttackZone").self_modulate.a = 0.0
-	if match_hurtbox:
-		var hurtbox := Area2D.new()
-		hurtbox.name = "ModelHurtbox"
-		hurtbox.set_script(preload("res://scenes/enemies/cleaner/cleaner_hurtbox.gd"))
-		hurt_shape = CollisionPolygon2D.new()
-		hurtbox.add_child(hurt_shape)
-		enemy.add_child(hurtbox)
-		_update_hurtbox()
-	preparation_complete = true
 
 func _physics_process(_delta: float) -> void:
 	var distance := enemy.position.distance_to(previous)

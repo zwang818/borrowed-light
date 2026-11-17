@@ -14,39 +14,57 @@ static func clean_frame(source: Image) -> Image:
 static func _clean_frame_uncached(source: Image) -> Image:
 	var width := source.get_width()
 	var height := source.get_height()
-	var visited := PackedByteArray()
-	visited.resize(width * height)
+	# Work on contiguous bytes instead of making Image.get_pixel calls and
+	# allocating four Vector2 neighbours for every visited pixel.
+	var rgba := source.duplicate() as Image
+	rgba.convert(Image.FORMAT_RGBA8)
+	var pixels := rgba.get_data()
+	var total := width*height
+	var opaque := PackedByteArray()
+	opaque.resize(total)
+	for i in range(total):
+		opaque[i] = 1 if pixels[i*4+3] >= 128 else 0
+	var queue := PackedInt32Array()
+	queue.resize(total)
 	var largest := PackedInt32Array()
-	for y in range(height):
-		for x in range(width):
-			var start := y * width + x
-			if visited[start] != 0 or source.get_pixel(x, y).a < 0.5:
-				continue
-			var component := PackedInt32Array([start])
-			visited[start] = 1
-			var cursor := 0
-			while cursor < component.size():
-				var index := component[cursor]
-				cursor += 1
-				var px := index % width
-				var py := index / width
-				for offset in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-					var nx: int = px + offset.x
-					var ny: int = py + offset.y
-					if nx < 0 or nx >= width or ny < 0 or ny >= height:
-						continue
-					var next := ny * width + nx
-					if visited[next] == 0 and source.get_pixel(nx, ny).a >= 0.5:
-						visited[next] = 1
-						component.append(next)
-			if component.size() > largest.size():
-				largest = component
-	var output := Image.create(width, height, false, Image.FORMAT_RGBA8)
-	output.fill(Color.TRANSPARENT)
+	for start in range(total):
+		if opaque[start] == 0:
+			continue
+		queue[0] = start
+		opaque[start] = 0
+		var read := 0
+		var count := 1
+		while read < count:
+			var index := queue[read]
+			read += 1
+			var x := index % width
+			if x > 0 and opaque[index-1] != 0:
+				opaque[index-1] = 0
+				queue[count] = index-1
+				count += 1
+			if x+1 < width and opaque[index+1] != 0:
+				opaque[index+1] = 0
+				queue[count] = index+1
+				count += 1
+			if index >= width and opaque[index-width] != 0:
+				opaque[index-width] = 0
+				queue[count] = index-width
+				count += 1
+			if index+width < total and opaque[index+width] != 0:
+				opaque[index+width] = 0
+				queue[count] = index+width
+				count += 1
+		if count > largest.size():
+			largest = queue.slice(0,count)
+	var output := PackedByteArray()
+	output.resize(total*4)
+	output.fill(255) # Match Color.TRANSPARENT's white RGB with zero alpha.
+	for i in range(total):
+		output[i*4+3] = 0
 	for index in largest:
-		var x := index % width
-		var y := index / width
-		var color := source.get_pixel(x, y)
-		color.a = 1.0
-		output.set_pixel(x, y, color)
-	return output
+		var offset := index*4
+		output[offset] = pixels[offset]
+		output[offset+1] = pixels[offset+1]
+		output[offset+2] = pixels[offset+2]
+		output[offset+3] = 255
+	return Image.create_from_data(width,height,false,Image.FORMAT_RGBA8,output)
