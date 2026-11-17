@@ -193,8 +193,19 @@ func _ready() -> void:
 	_setup_ducts()
 	_setup_achievement_events()
 	_restore_journey()
+	if not journey_save_path.is_empty():
+		var window_close := preload("res://scenes/gameplay/journey_window_close.gd").new()
+		window_close.save_before_exit = func() -> bool:
+			return is_level_complete or _save_journey() == OK
+		add_child(window_close)
 	entry_progress = 1.0
 	entry_ready = true
+	if not get_tree().root.has_node("EntryLoading"):
+		on_entry_revealed()
+
+func on_entry_revealed() -> void:
+	if player.is_dead:
+		_on_player_died()
 
 func _restore_journey() -> void:
 	if not get_tree().has_meta("journey_session"):
@@ -219,12 +230,77 @@ func _restore_journey() -> void:
 			explored_positions.append(Vector2(point[0], point[1]))
 		player.restore_player(_find_spawn_position(), player.max_health, ["pulse_gun"] if pulse_learned else [])
 		current_objective = Objective.KILL_ENEMIES if pulse_learned else (Objective.CRAFT_ARM if blueprint_known else Objective.GET_WEAPON)
+		if data.has("snapshot"):
+			_restore_room_snapshot(data.snapshot)
 		game_menus.set_achievement_progress("duct_network", unlocked_ducts.size(), ducts.size())
 		camera.global_position = player.global_position
 		camera.reset_smoothing()
 		_update_hud()
 	else:
 		_save_journey(false)
+
+func _capture_room_snapshot() -> Dictionary:
+	var webs: Array = map.get_node("Environment").webs
+	var snapshot := JOURNEY_SAVE.SNAPSHOT.capture(self, player, enemies, bullets_parent, webs)
+	# A lift is an in-progress interaction, so resume it from its legal approach.
+	if pending_interaction == &"arrival_gripper":
+		snapshot.player.global_position = JOURNEY_SAVE.SNAPSHOT.pack_vector(arrival_grip_origin)
+	var broken_webs := {}
+	for web in webs:
+		if web.broken:
+			broken_webs[String(web.name)] = web._age
+	var open_doors := {}
+	for door in interactables:
+		if door.get_meta("is_open", false):
+			open_doors[String(door.get_meta("door_id"))] = door.get_node("FacilityVisual").open_amount
+	snapshot["room"] = {"broken_webs": broken_webs, "open_doors": open_doors,
+		"terminal_powered": terminal.get_node("FacilityVisual").powered,
+		"terminal_activated": terminal_activated, "exit_encounter_active": exit_encounter_active,
+		"room_damage_taken": room_damage_taken, "exit_retry_blocked": exit_retry_blocked}
+	return snapshot
+
+func _restore_room_snapshot(snapshot: Dictionary) -> void:
+	var state: Dictionary = snapshot.room
+	var webs: Array = map.get_node("Environment").webs
+	var broken_webs = state.get("broken_webs")
+	if broken_webs is Dictionary:
+		for web in webs:
+			var age = broken_webs.get(String(web.name))
+			if JOURNEY_SAVE.SNAPSHOT.number(age):
+				web.restore_broken(float(age))
+	var open_doors = state.get("open_doors")
+	if open_doors is Dictionary:
+		for door in interactables:
+			var id: String = door.get_meta("door_id", "")
+			var amount = open_doors.get(id)
+			if id.is_empty() or not JOURNEY_SAVE.SNAPSHOT.number(amount):
+				continue
+			door.set_meta("is_open", true)
+			door.collision_layer = 0
+			var visual = door.get_node("FacilityVisual")
+			visual.open_amount = clampf(amount, 0.0, 1.0)
+			_door_flash_animation(door)
+	terminal_activated = state.get("terminal_activated") == true
+	terminal.set_meta("activated", terminal_activated)
+	var console = terminal.get_node("FacilityVisual")
+	console.powered = state.get("terminal_powered") == true
+	console.lever = 1.0 if console.powered else 0.0
+	console.set_status(false, false, terminal_activated)
+	if console.powered:
+		terminal.get_node("InteractionMarker").position = Vector2(-12, 14)
+	exit_encounter_active = state.get("exit_encounter_active") == true
+	exit_retry_blocked = state.get("exit_retry_blocked") == true
+	JOURNEY_SAVE.SNAPSHOT.restore(player, enemies, bullets_parent, snapshot, webs)
+	room_damage_taken = state.get("room_damage_taken") == true
+	dead_enemies = 0
+	for enemy in enemies:
+		if enemy.health <= 0:
+			dead_enemies += 1
+	if terminal_activated:
+		current_objective = Objective.REACH_EXIT
+	elif pulse_learned and _remaining_cleaners() == 0:
+		current_objective = Objective.ACTIVATE_TERMINAL
+	_refresh_web_achievement(false)
 
 func _save_journey(show_result: bool = false) -> Error:
 	if journey_save_path.is_empty():
@@ -237,11 +313,12 @@ func _save_journey(show_result: bool = false) -> Error:
 	var error := JOURNEY_SAVE.write_save(journey_save_path, {
 		"first_level_cleared": first_level_cleared,
 		"blueprint_known": blueprint_known, "pulse_learned": pulse_learned,
-		"workshop_seen": workshop_seen, "ducts": unlocked_ducts.keys(), "explored": explored})
+		"workshop_seen": workshop_seen, "ducts": unlocked_ducts.keys(), "explored": explored,
+		"snapshot": _capture_room_snapshot()})
 	if error != OK:
 		_show_notification("存档失败，请检查磁盘空间或文件权限。", 4.0)
 	elif show_result:
-		_show_notification("旅程已保存，读档后从房间入口继续。", 3.0)
+		_show_notification("旅程已保存。", 3.0)
 	return error
 
 func _process(delta: float) -> void:
@@ -1007,6 +1084,8 @@ func _show_level_complete() -> void:
 	transition.cancelled.connect(func():
 		is_level_complete = false
 		exit_retry_blocked = true
+		first_level_cleared = previously_cleared
+		get_tree().remove_meta("spine_entry")
 		player.controls_enabled = true)
 	get_tree().root.add_child(transition)
 
@@ -1465,11 +1544,11 @@ func _on_achievement_web_broken(_web: Area2D) -> void:
 	game_menus.unlock_achievement("first_web")
 	_refresh_web_achievement()
 
-func _refresh_web_achievement() -> void:
+func _refresh_web_achievement(allow_unlock: bool = true) -> void:
 	var broken_count := 0
 	for web in achievement_webs:
 		if is_instance_valid(web) and web.broken:
 			broken_count += 1
 	game_menus.set_achievement_progress("web_sweeper", broken_count, achievement_webs.size())
-	if not achievement_webs.is_empty() and broken_count == achievement_webs.size():
+	if allow_unlock and not achievement_webs.is_empty() and broken_count == achievement_webs.size():
 		game_menus.unlock_achievement("web_sweeper")
