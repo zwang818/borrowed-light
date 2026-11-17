@@ -492,7 +492,7 @@ func _match_marker(marker: Marker2D) -> void:
 		"spawn":
 			if player == null:
 				player = PLAYER_SCENE.instantiate()
-				player.set_script(preload("res://scenes/player/xiaoyi_field_player.gd"))
+				player.set_script(preload("res://scenes/player/xiaoyi_journey_player.gd"))
 				player.global_position = pos
 				player.pulse_gun_equipped = false
 				add_child(player)
@@ -504,6 +504,7 @@ func _match_marker(marker: Marker2D) -> void:
 		"cleaner":
 			var cleaner := CLEANER_SCENE.instantiate()
 			cleaner.set_script(preload("res://tests/manual/b_combat/web_cleaner.gd"))
+			cleaner.persistent_projectiles = true
 			cleaner.global_position = pos
 			cleaner.entity_id = StringName(marker.object_id)
 			cleaner.name = marker.object_id
@@ -518,6 +519,10 @@ func _match_marker(marker: Marker2D) -> void:
 			total_enemies += 1
 		"sentry":
 			var sentry := SENTRY_SCENE.instantiate()
+			sentry.set_script(preload("res://tests/manual/b_combat/floating_sentry.gd"))
+			sentry.alternating_attacks = true
+			sentry.screen_detection = true
+			sentry.persistent_projectiles = true
 			sentry.global_position = pos
 			sentry.entity_id = StringName(marker.object_id)
 			sentry.name = marker.object_id
@@ -639,8 +644,10 @@ func _configure_player() -> void:
 	var map_bounds: Rect2 = map.get_meta("map_bounds", Rect2(128, 32, 1120, 2688))
 	player.get_node("Facing/Body").hide()
 	player.get_node("Facing/DirectionIndicator").hide()
-	robot_visual = preload("res://tests/manual/b_combat/xiaoyi_spark_visual.gd").new()
+	robot_visual = preload("res://tests/manual/b_combat/xiaoyi_scatter_pose_visual.gd").new()
 	robot_visual.name = "XiaoyiCombatVisual"
+	robot_visual.relaxed_walk_arms = true
+	robot_visual.dust_color = Color(0.48,0.48,0.48,0.65)
 	robot_visual.display_height = 60.0
 	robot_visual.sparks_enabled = false
 	robot_visual.enhanced_gait = true
@@ -656,7 +663,7 @@ func _configure_enemies() -> void:
 	for enemy in enemies:
 		if enemy.has_method("configure"):
 			if enemy is StaticBody2D:
-				enemy.configure(player, _enemy_visible_query, bullets_parent)
+				enemy.configure(player, _sentry_visible_query, bullets_parent)
 			else:
 				enemy.configure(player, _cleaner_visible_query, _in_protocol_query)
 		enemy.died.connect(_on_enemy_died)
@@ -855,6 +862,9 @@ func _enemy_visible_query(enemy: Node) -> bool:
 	var bounds: Rect2 = map.get_meta("map_bounds", Rect2())
 	return bounds.has_point(enemy.global_position)
 
+func _sentry_visible_query(enemy: Node) -> bool:
+	return enemy.is_model_on_screen()
+
 func _cleaner_visible_query(enemy: Node) -> bool:
 	return enemy.is_on_screen()
 
@@ -874,14 +884,13 @@ func _show_level_complete() -> void:
 	player.controls_enabled = false
 	player.velocity = Vector2.ZERO
 	player.pulse_gun.cancel()
-	var loading := preload("res://scenes/ui/intro_cutscene/entry_loading.gd").new()
-	loading.name = "EntryLoading"
-	loading.cancelled.connect(func():
+	get_tree().set_meta("spine_entry", {"health": player.health, "path": journey_save_path})
+	var transition := preload("res://scenes/ui/intro_cutscene/level_transition.gd").new()
+	transition.cancelled.connect(func():
 		is_level_complete = false
 		exit_retry_blocked = true
 		player.controls_enabled = true)
-	get_tree().root.add_child(loading)
-	loading.begin("res://scenes/main.tscn")
+	get_tree().root.add_child(transition)
 
 func _fade_to_black() -> ColorRect:
 	var canvas := CanvasLayer.new()
