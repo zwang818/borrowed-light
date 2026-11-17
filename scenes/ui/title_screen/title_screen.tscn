@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/title_screen/title_screen.gd" id="1_script"]
 [ext_resource type="Theme" path="res://scenes/ui/title_screen/title_theme.tres" id="2_theme"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" path="res://assets/backgrounds/title/title_foreground.svg" id="5_foreground"]
 [ext_resource type="Texture2D" path="res://assets/sprites/title/title_robot.svg" id="6_robot"]
 [ext_resource type="FontFile" path="res://assets/fonts/noto_serif_sc_title.ttf" id="7_title_font"]
+[ext_resource type="Theme" path="res://scenes/gameplay/gameplay_ui_theme.tres" id="8_ui_theme"]
 
 [sub_resource type="Gradient" id="Gradient_lamp"]
 offsets = PackedFloat32Array(0, 0.28, 0.65, 1)
@@ -395,7 +396,7 @@ layout_mode = 0
 offset_left = 99.0
 offset_top = 465.0
 offset_right = 331.0
-offset_bottom = 581.0
+offset_bottom = 633.0
 theme_override_constants/separation = 12
 
 [node name="StartButton" type="Button" parent="Presentation/Menu/Buttons"]
@@ -403,7 +404,14 @@ layout_mode = 2
 custom_minimum_size = Vector2(232, 50)
 theme_override_styles/disabled = SubResource("Style_start_disabled")
 disabled = true
-text = "开始游戏"
+text = "开始旅程"
+alignment = 0
+
+[node name="RestartButton" type="Button" parent="Presentation/Menu/Buttons"]
+visible = false
+layout_mode = 2
+custom_minimum_size = Vector2(232, 46)
+text = "重新开始旅程"
 alignment = 0
 
 [node name="QuitButton" type="Button" parent="Presentation/Menu/Buttons"]
@@ -519,3 +527,66 @@ offset_top = 274.0
 offset_right = 582.0
 offset_bottom = 318.0
 text = "关闭"
+
+[node name="RestartOverlay" type="Control" parent="Presentation"]
+visible = false
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+theme = ExtResource("8_ui_theme")
+
+[node name="Dim" type="ColorRect" parent="Presentation/RestartOverlay"]
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.02, 0.04, 0.06, 0.84)
+
+[node name="Panel" type="Panel" parent="Presentation/RestartOverlay"]
+layout_mode = 0
+offset_left = 370.0
+offset_top = 228.0
+offset_right = 910.0
+offset_bottom = 492.0
+theme_override_styles/panel = SubResource("Style_archive")
+
+[node name="Heading" type="Label" parent="Presentation/RestartOverlay/Panel"]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 28.0
+offset_right = 508.0
+offset_bottom = 65.0
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(0.95, 0.86, 0.65, 1)
+text = "重新开始旅程"
+
+[node name="Description" type="Label" parent="Presentation/RestartOverlay/Panel"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 88.0
+offset_right = 506.0
+offset_bottom = 146.0
+text = "当前旅程进度将被覆盖。\n已解锁的成就保留。"
+
+[node name="CancelButton" type="Button" parent="Presentation/RestartOverlay/Panel"]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 184.0
+offset_right = 248.0
+offset_bottom = 232.0
+text = "返回"
+focus_neighbor_left = NodePath("../ConfirmButton")
+focus_neighbor_right = NodePath("../ConfirmButton")
+focus_next = NodePath("../ConfirmButton")
+focus_previous = NodePath("../ConfirmButton")
+
+[node name="ConfirmButton" type="Button" parent="Presentation/RestartOverlay/Panel"]
+layout_mode = 0
+offset_left = 264.0
+offset_top = 184.0
+offset_right = 508.0
+offset_bottom = 232.0
+text = "确认重新开始"
+focus_neighbor_left = NodePath("../CancelButton")
+focus_neighbor_right = NodePath("../CancelButton")
+focus_next = NodePath("../CancelButton")
+focus_previous = NodePath("../CancelButton")

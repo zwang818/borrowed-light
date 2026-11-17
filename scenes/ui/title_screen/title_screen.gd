@@ -34,8 +34,12 @@ var _delete_button: Button
 @onready var archive_overlay: Control = $Presentation/SaveOverlay
 @onready var archive_close: Button = $Presentation/SaveOverlay/ArchivePanel/CloseButton
 @onready var start_button: Button = $Presentation/Menu/Buttons/StartButton
+@onready var restart_button: Button = $Presentation/Menu/Buttons/RestartButton
 @onready var quit_button: Button = $Presentation/Menu/Buttons/QuitButton
 @onready var status_label: Label = $Presentation/Menu/Status
+@onready var restart_overlay: Control = $Presentation/RestartOverlay
+@onready var restart_confirm: Button = $Presentation/RestartOverlay/Panel/ConfirmButton
+@onready var restart_cancel: Button = $Presentation/RestartOverlay/Panel/CancelButton
 
 var _bgm_player := AudioStreamPlayer.new()
 var _elapsed := 0.0
@@ -51,6 +55,9 @@ func _ready() -> void:
 	_robot_animation.update(robot, 0.0, robot_motion_enabled)
 	resized.connect(_fit_presentation)
 	start_button.pressed.connect(_on_start_pressed)
+	restart_button.pressed.connect(_open_restart_confirmation)
+	restart_confirm.pressed.connect(_confirm_restart)
+	restart_cancel.pressed.connect(_close_restart_confirmation)
 	quit_button.pressed.connect(_on_quit_pressed)
 	archive_button.pressed.connect(_open_archive)
 	archive_close.pressed.connect(_close_archive)
@@ -91,11 +98,16 @@ func _build_archive_actions() -> void:
 	_new_button.pressed.connect(_new_journey)
 	_delete_button.pressed.connect(_delete_journey)
 	start_button.add_theme_font_override("font", font)
+	restart_button.add_theme_font_override("font", font)
+	quit_button.add_theme_font_override("font", font)
 
 func _refresh_archive() -> void:
 	_save_data = JOURNEY_SAVE.read_save(game_save_path)
 	var has_save := not _save_data.is_empty()
-	start_button.text = "继续游戏" if has_save else "开始游戏"
+	start_button.text = "继续旅程" if has_save else "开始旅程"
+	restart_button.visible = has_save
+	restart_button.disabled = start_scene == null
+	status_label.position.y = 646.0 if has_save else 596.0
 	var cleared: bool = has_save and _save_data.get("first_level_cleared", false)
 	if cleared:
 		start_button.text = "继续第二关"
@@ -103,11 +115,9 @@ func _refresh_archive() -> void:
 	if cleared:
 		status_label.add_theme_font_override("font", preload("res://scenes/gameplay/gameplay_ui_theme.tres").default_font)
 		status_label.text = "第一关已通关"
-	_load_button.text = "读取存档"
-	if cleared:
-		_load_button.text = "继续第二关"
+	_load_button.text = "继续旅程"
 	_load_button.disabled = not has_save
-	_new_button.text = "确认新旅程" if _archive_action == "new" else "开启新旅程"
+	_new_button.text = "确认新旅程" if _archive_action == "new" else ("重新开始旅程" if has_save else "开始旅程")
 	_delete_button.text = "确认删除" if _archive_action == "delete" else "删除存档"
 	_delete_button.disabled = not FileAccess.file_exists(game_save_path) and not FileAccess.file_exists(game_save_path + ".bak")
 	var slot: Node = archive_close.get_parent().get_node("EmptySlot")
@@ -172,7 +182,7 @@ func _init_bgm() -> void:
 
 func _process(delta: float) -> void:
 	_elapsed += delta
-	var emphasized := (_robot_hovered or archive_button.has_focus()) and not archive_overlay.visible
+	var emphasized := (_robot_hovered or archive_button.has_focus()) and not _modal_open()
 	_robot_emphasis = move_toward(_robot_emphasis, 1.0 if emphasized else 0.0, delta * 5.0)
 	var pulse := sin(_elapsed * lamp_pulse_speed) * lamp_pulse_amount if lamp_pulse_enabled else 0.0
 	lamp_glow.modulate.a = 0.78 + pulse + _robot_emphasis * 0.12
@@ -183,20 +193,62 @@ func _process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if archive_overlay.visible and event.is_action_pressed("ui_cancel"):
-		_close_archive()
+	if event.is_action_pressed("ui_cancel") and _modal_open():
+		if restart_overlay.visible:
+			_close_restart_confirmation()
+		else:
+			_close_archive()
 		get_viewport().set_input_as_handled()
 
 
+func _modal_open() -> bool:
+	return archive_overlay.visible or restart_overlay.visible
+
+
+func _set_menu_focus_enabled(enabled: bool) -> void:
+	for control in [archive_button, start_button, restart_button, quit_button]:
+		if control != null:
+			control.focus_mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
+
+
+func _restore_menu_focus() -> void:
+	_set_menu_focus_enabled(true)
+	if is_instance_valid(_previous_focus) and _previous_focus.is_visible_in_tree():
+		_previous_focus.grab_focus()
+	else:
+		start_button.grab_focus()
+
+
+func _open_restart_confirmation() -> void:
+	if _is_starting or _modal_open() or start_scene == null:
+		return
+	_previous_focus = get_viewport().gui_get_focus_owner()
+	restart_overlay.show()
+	_set_menu_focus_enabled(false)
+	restart_cancel.grab_focus()
+
+
+func _close_restart_confirmation() -> void:
+	restart_overlay.hide()
+	_restore_menu_focus()
+
+
+func _confirm_restart() -> void:
+	if _is_starting or not restart_overlay.visible:
+		return
+	_close_restart_confirmation()
+	_start_new_journey()
+
+
 func _open_archive() -> void:
+	if _is_starting or _modal_open():
+		return
 	_archive_action = ""
 	_refresh_archive()
 	_previous_focus = get_viewport().gui_get_focus_owner()
 	archive_overlay.show()
 	# Prevent keyboard focus from leaving the modal and triggering background actions.
-	archive_button.focus_mode = Control.FOCUS_NONE
-	quit_button.focus_mode = Control.FOCUS_NONE
-	start_button.focus_mode = Control.FOCUS_NONE
+	_set_menu_focus_enabled(false)
 	archive_close.grab_focus()
 	archive_opened.emit()
 
@@ -204,13 +256,7 @@ func _open_archive() -> void:
 func _close_archive() -> void:
 	_archive_action = ""
 	archive_overlay.hide()
-	archive_button.focus_mode = Control.FOCUS_ALL
-	quit_button.focus_mode = Control.FOCUS_ALL
-	start_button.focus_mode = Control.FOCUS_ALL
-	if is_instance_valid(_previous_focus):
-		_previous_focus.grab_focus()
-	else:
-		archive_button.grab_focus()
+	_restore_menu_focus()
 
 
 func _fit_presentation() -> void:
@@ -225,7 +271,7 @@ func _fit_presentation() -> void:
 
 
 func _on_start_pressed() -> void:
-	if start_scene == null or _is_starting or archive_overlay.visible:
+	if start_scene == null or _is_starting or _modal_open():
 		return
 	if not JOURNEY_SAVE.read_save(game_save_path).is_empty():
 		_continue_journey()
@@ -246,5 +292,5 @@ func _start_new_journey() -> void:
 
 
 func _on_quit_pressed() -> void:
-	if not archive_overlay.visible:
+	if not _is_starting and not _modal_open():
 		get_tree().quit()
