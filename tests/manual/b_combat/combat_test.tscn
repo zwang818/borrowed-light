@@ -43,6 +43,7 @@ size = Vector2(16, 128)
 
 [node name="CombatTest" type="Node2D"]
 script = ExtResource("1_test")
+scatter_a_preview = true
 metadata/test_only = true
 metadata/temporary_tile_size = 32
 

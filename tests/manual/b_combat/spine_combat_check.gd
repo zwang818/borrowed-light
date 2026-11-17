@@ -17,6 +17,9 @@ func run() -> void:
 		var b = source.get_walk_surfaces()[i]
 		assert(a.polygon == b.polygon and a.global_transform == b.global_transform)
 	assert(room.enemies.size() == 12)
+	assert(room.entrance_hazards.emitters.size() == 8)
+	assert(room.entrance_hazards.electrodes.size() == 7)
+	assert(room.map.get_walk_surfaces().size() == 13)
 	assert(room.art_enabled)
 	assert(room.map.get_node("DeepStructure").get_child_count() == 0)
 	assert(room.map.get_node("BackgroundMachines").get_child_count() == 0)
@@ -34,8 +37,10 @@ func run() -> void:
 	for enemy in room.enemies:
 		assert(room.map.is_walkable_point(enemy.global_position))
 	room.enemies[0].apply_damage(999)
+	room.entrance_hazards.elapsed = 3.0
 	player.global_position += Vector2(20,0)
 	room.reset_test_combat()
+	assert(room.entrance_hazards.elapsed == 0.0 and room.entrance_hazards.orbs.is_empty())
 	assert(room.enemies[0].health == room.enemies[0].max_health)
 	assert(player.global_position == room.map.get_node("Markers/PlayerSpawn").global_position)
 	player.global_position = room.map.get_node("Markers/ScatterEvolution").global_position+Vector2(0,40)

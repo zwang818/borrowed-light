@@ -666,6 +666,7 @@ func _configure_player() -> void:
 	robot_visual = preload("res://tests/manual/b_combat/xiaoyi_scatter_pose_visual.gd").new()
 	robot_visual.name = "XiaoyiCombatVisual"
 	robot_visual.relaxed_walk_arms = true
+	robot_visual.dynamic_walk_preview = true
 	robot_visual.dust_color = Color(0.48,0.48,0.48,0.65)
 	robot_visual.display_height = 60.0
 	robot_visual.sparks_enabled = false
