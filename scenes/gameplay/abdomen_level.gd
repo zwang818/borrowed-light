@@ -6,6 +6,10 @@ extends Node2D
 signal interaction_requested(content_id: StringName, payload: Dictionary, token: int)
 signal interaction_finished(token: int, completed: bool)
 ## D may connect this signal and complete/cancel via finish_interaction(token, bool).
+const ABDOMEN_VOICE := preload("res://scenes/gameplay/abdomen_voice.gd")
+const LISTENING_GLOW := preload("res://scenes/levels/abdomen/abdomen_listening_glow.gdshader")
+const VOICE_POINT := &"abdomen_voice"
+const ARRIVAL_GRIP_RADIUS := 172.0
 const POINT_SCRIPT := preload("res://scenes/gameplay/interaction_point.gd")
 const SHEET_SCRIPT := preload("res://scenes/gameplay/interaction_sheet.gd")
 const FACILITY_SCRIPT := preload("res://scenes/gameplay/facility_visual.gd")
@@ -65,6 +69,7 @@ const C := {
 }
 
 @onready var map := $AbdomenGraybox as Node2D
+@onready var entry_grate = $AbdomenGraybox/Floors/EntryThreshold
 @onready var bullets_parent := $Bullets as Node2D
 @onready var interactables_parent := $Interactables as Node2D
 @onready var camera := $Camera2D as Camera2D
@@ -101,8 +106,11 @@ var pending_interaction: StringName = &"":
 		pending_interaction = value
 		if not value.is_empty() and is_instance_valid(interact_bg):
 			interact_bg.hide()
+			if is_instance_valid(blueprint_socket_light):
+				blueprint_socket_light.hide()
 var interaction_token := 0
 var interaction_sheet
+var abdomen_voice: CanvasLayer
 var terminal_gate: StaticBody2D
 const EXIT_TERMINAL_PLATFORM := preload("res://scenes/gameplay/exit_terminal_platform.gd")
 var health_display: Control
@@ -112,6 +120,7 @@ var arrival_gripper: Node2D
 var arrival_grip_tween: Tween
 var arrival_grip_origin: Vector2
 var arrival_player_z: int
+var arrival_grip_armed := true
 var ducts: Dictionary = {}
 var unlocked_ducts: Dictionary = {}
 var achievement_webs: Array[Node] = []
@@ -130,6 +139,8 @@ var blueprint_transfer: Tween
 var blueprint_transfer_socket: Vector2
 var blueprint_transfer_complete := false
 var blueprint_plug_ready := false
+var blueprint_response_time := 0.0
+var blueprint_socket_light: Polygon2D
 @onready var blueprint_computer: Node2D = $AbdomenGraybox/Walls/GunRackBase/BlueprintComputer
 
 func _ready() -> void:
@@ -166,6 +177,10 @@ func _ready() -> void:
 	interaction_sheet.finished.connect(finish_interaction)
 	interaction_sheet.destination_selected.connect(_travel_duct)
 	interaction_sheet.code_submitted.connect(_submit_terminal_code)
+	abdomen_voice = ABDOMEN_VOICE.new()
+	abdomen_voice.name = "AbdomenVoice"
+	add_child(abdomen_voice)
+	abdomen_voice.finished.connect(finish_interaction)
 	_setup_story_points()
 	_setup_terminal_gate()
 	_setup_ducts()
@@ -222,14 +237,34 @@ func _save_journey(show_result: bool = false) -> Error:
 		_show_notification("旅程已保存，读档后从房间入口继续。", 3.0)
 	return error
 
-func _process(_delta: float) -> void:
-	if get_tree().paused:
+func _process(delta: float) -> void:
+	if not entry_ready or get_tree().paused:
 		return
 	if is_instance_valid(robot_visual):
 		robot_visual.global_rotation = 0
 		robot_visual.global_position = player.global_position
+	_update_automatic_interactions()
+	if get_tree().paused:
+		return
 	_update_interaction()
-	_update_hud()
+	_update_hud(delta)
+
+func _update_automatic_interactions() -> void:
+	if player.is_dead or is_level_complete or not pending_interaction.is_empty():
+		return
+	var arm := map.get_node("Environment/Decor/ArrivalExteriorArm") as Node2D
+	var offset := player.global_position - arm.global_position
+	var inside := offset.x < 0.0 and offset.length_squared() <= ARRIVAL_GRIP_RADIUS * ARRIVAL_GRIP_RADIUS
+	if not inside:
+		arrival_grip_armed = true
+	elif arrival_grip_armed:
+		# Use the inboard reach point so the arm can reach across its own wall,
+		# while a player on the other side of a partition won't be captured.
+		var reach := arm.global_position + Vector2(-128, 0)
+		var query := PhysicsRayQueryParameters2D.create(player.global_position, reach, 1)
+		if get_world_2d().direct_space_state.intersect_ray(query).is_empty():
+			arrival_grip_armed = false
+			_start_arrival_grip()
 
 func _physics_process(delta: float) -> void:
 	if get_tree().paused:
@@ -296,11 +331,12 @@ func _setup_hud() -> void:
 	_update_hp_bar()
 	interact_bg = Panel.new()
 	interact_bg.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	interact_bg.offset_left = -330
-	interact_bg.offset_right = 330
-	interact_bg.offset_top = -96
+	interact_bg.offset_left = -196
+	interact_bg.offset_right = 196
+	interact_bg.offset_top = -68
 	interact_bg.offset_bottom = -34
-	interact_bg.add_theme_stylebox_override("panel", _make_hud_panel_style(Color("78a7aa"), Color("101d25", 0.96)))
+	interact_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	interact_bg.add_theme_stylebox_override("panel", _make_hud_panel_style(Color("48615d"), Color("101d25", 0.87)))
 	root.add_child(interact_bg)
 	interact_label = Label.new()
 	interact_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -314,9 +350,8 @@ func _setup_hud() -> void:
 	interact_label.add_theme_color_override("font_shadow_color", Color("02070a", 0.9))
 	interact_label.add_theme_constant_override("shadow_offset_x", 1)
 	interact_label.add_theme_constant_override("shadow_offset_y", 2)
-	interact_label.add_theme_font_size_override("font_size", 19)
+	interact_label.add_theme_font_size_override("font_size", 15)
 	interact_bg.add_child(interact_label)
-	_add_hud_panel_reflection(interact_bg, Color("101d25", 0.96))
 	notify_bg = Panel.new()
 	notify_bg.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	notify_bg.offset_left = -390
@@ -415,52 +450,55 @@ func _add_hud_panel_reflection(panel: Panel, fill: Color) -> void:
 
 ## ---------- HUD 更新 ----------
 
-func _update_hud() -> void:
+func _update_hud(delta := 0.0) -> void:
 	_update_hp_bar()
-	_update_world_prompts()
-
+	_update_world_prompts(delta)
 
 func _update_hp_bar() -> void:
 	health_display.set_health(float(player.health), float(player.max_health))
 
-func _update_world_prompts() -> void:
-	# Feet in front of a solid prop must render in front of its raised surface.
-	terminal.get_node("FacilityVisual").z_index = 6
-	for door in interactables:
-		if is_instance_valid(door) and door.has_meta("is_door"):
-			door.get_node("FacilityVisual").z_index = 0 if player.global_position.y > door.global_position.y else 5
-	# One contextual screen prompt. No duplicate labels above world objects.
-	terminal.get_node("FacilityVisual").set_status(terminal_gate.get_meta("is_open", false), nearest_interactable == terminal, terminal_activated)
-	var terminal_marker = terminal.get_node("InteractionMarker")
-	terminal_marker.focused = nearest_interactable == terminal and not terminal_activated
-	terminal_marker.set_status(true, terminal_gate.get_meta("is_open", false) and not terminal_activated, terminal_activated)
+func _update_world_prompts(delta := 0.0) -> void:
+	var origin := player.global_position
+	var active: bool = not player.is_dead and not is_level_complete and pending_interaction.is_empty()
+	var still := player.velocity.length_squared() < 1.0
+	var terminal_open: bool = terminal_gate.get_meta("is_open", false)
+	var terminal_access = terminal.get_node("InteractionMarker")
+	var terminal_selected: bool = active and nearest_interactable == terminal and not terminal_activated
+	terminal_access.update_approach(origin, terminal_selected, still, delta)
+	var terminal_visual = terminal.get_node("FacilityVisual")
+	terminal_visual.z_index = 0 if origin.y > terminal_visual.global_position.y else 6
+	terminal_visual.set_status(terminal_open, active and terminal_access.nearby, terminal_activated)
+
+	var selected_prompt := ""
 	for obj in interactables:
 		if not is_instance_valid(obj):
 			continue
-		var label := obj.get_node_or_null("PromptLabel")
-		if label != null:
-			label.hide()
-		if obj.get_script() == POINT_SCRIPT:
-			obj.focused = obj == nearest_interactable
-			var available: bool = obj.interaction_id != &"pulse_workbench" or (blueprint_known and not pulse_learned)
-			var completed: bool = (obj.interaction_id == &"pulse_blueprint" and blueprint_known) or (obj.interaction_id == &"pulse_workbench" and pulse_learned) or (obj.interaction_id == &"workshop_origin" and workshop_seen)
-			if ducts.has(obj.interaction_id):
-				completed = unlocked_ducts.has(obj.interaction_id)
-				obj.visible = not completed
-			obj.set_status(player.global_position.distance_to(obj.global_position) < 120, available, completed)
-	if not is_instance_valid(nearest_interactable) and not terminal_gate.get_meta("is_open", false) and player.global_position.distance_to(terminal_gate.global_position) < 120:
-		interact_bg.show()
-		interact_label.show()
-		interact_label.text = "终端区域入口锁定 · 剩余 %d 台清扫者" % _remaining_cleaners()
-		return
-	interact_bg.visible = is_instance_valid(nearest_interactable)
-	interact_label.visible = interact_bg.visible
-	if not interact_bg.visible:
-		return
-	if nearest_interactable.has_meta("is_terminal"):
-		interact_label.text = _terminal_prompt()
-	else:
-		interact_label.text = _point_prompt(nearest_interactable.interaction_id)
+		if obj.has_meta("is_door"):
+			obj.get_node("FacilityVisual").z_index = 0 if origin.y > obj.global_position.y else 5
+		if obj.get_script() != POINT_SCRIPT:
+			continue
+		var selected: bool = active and obj == nearest_interactable
+		var ready: bool = obj.interaction_id != &"pulse_workbench" or blueprint_known
+		obj.update_approach(origin, selected, still, delta, ready)
+		if obj.interaction_id == &"pulse_blueprint":
+			_update_blueprint_response(active and obj.nearby, delta)
+		if obj.prompt_ready:
+			selected_prompt = _point_prompt(obj.interaction_id)
+
+	if terminal_access.prompt_ready:
+		selected_prompt = _terminal_prompt()
+	if active and still and selected_prompt.is_empty() and nearest_interactable == null and not terminal_open:
+		if origin.distance_to(terminal_gate.global_position) < 96:
+			selected_prompt = "终端区域入口锁定 · 剩余 %d 台清扫者" % _remaining_cleaners()
+	interact_label.text = selected_prompt
+	interact_label.visible = not selected_prompt.is_empty()
+	interact_bg.visible = interact_label.visible
+
+func _update_blueprint_response(nearby: bool, delta: float) -> void:
+	blueprint_response_time = blueprint_response_time + delta if nearby and not blueprint_known else 0.0
+	blueprint_socket_light.visible = blueprint_response_time > 0.0 and blueprint_response_time < 0.65
+	blueprint_socket_light.modulate.a = 1.0 - smoothstep(0.25, 0.65, blueprint_response_time)
+	blueprint_computer.set_response(blueprint_response_time >= 0.12, blueprint_known)
 
 ## ---------- 通知系统 ----------
 
@@ -566,7 +604,11 @@ func _weapon_display_position() -> Vector2:
 
 func _add_weapon_pickup(_pos: Vector2, _weapon_id: String) -> Node:
 	var rack = map.get_node("Walls/GunRackBase")
-	return _add_story_point(&"pulse_blueprint", rack.to_global(Vector2(rack.size.x * 0.5, rack.size.y + 4)))
+	var point = _add_story_point(&"pulse_blueprint", rack.to_global(Vector2(59.6, 112.8)))
+	point.cue = POINT_SCRIPT.Cue.FLOOR_BUTTON
+	point.z_index = 0
+	point.queue_redraw()
+	return point
 
 func _add_terminal(pos: Vector2, term_id: String, linked: Array) -> Node:
 	var area := Area2D.new()
@@ -604,6 +646,7 @@ func _add_terminal(pos: Vector2, term_id: String, linked: Array) -> Node:
 	# Presentation only: the Area2D remains the sole terminal interaction target.
 	var marker := POINT_SCRIPT.new()
 	marker.name = "InteractionMarker"
+	marker.cue = POINT_SCRIPT.Cue.NONE
 	marker.position = Vector2(40, 14)
 	area.add_child(marker)
 	area.set_meta("terminal_id", term_id)
@@ -675,6 +718,13 @@ func _configure_player() -> void:
 	player.get_node("Facing").add_child(robot_visual)
 	while not robot_visual.preparation_complete: await get_tree().process_frame
 	robot_visual.show()
+	blueprint_socket_light = Polygon2D.new()
+	blueprint_socket_light.polygon = PackedVector2Array([Vector2(-2, -1), Vector2(2, -1), Vector2(2, 1), Vector2(-2, 1)])
+	blueprint_socket_light.position = Vector2(0, -22)
+	blueprint_socket_light.color = Color("a5dfcb")
+	blueprint_socket_light.z_index = 7
+	blueprint_socket_light.hide()
+	robot_visual.add_child(blueprint_socket_light)
 	var hurtbox := preload("res://tests/manual/b_combat/player_model_hurtbox.gd").new()
 	hurtbox.name = "PlayerModelHurtbox"
 	player.add_child(hurtbox)
@@ -707,13 +757,21 @@ func _update_interaction() -> void:
 	nearest_interactable = null
 	if player == null or player.is_dead or get_tree().paused:
 		return
+	if Rect2(Vector2.ZERO, entry_grate.size).has_point(entry_grate.to_local(player.global_position)):
+		nearest_interactable = interaction_points.get(VOICE_POINT)
+		return
 	var nearest_dist: float = C.interaction_range
 	for obj in interactables:
 		if not is_instance_valid(obj):
 			continue
 		if not obj.has_meta("is_terminal") and obj.get_script() != POINT_SCRIPT:
 			continue
-		if obj == terminal and (not terminal_gate.get_meta("is_open", false) or not _on_terminal_landing()):
+		if obj == terminal:
+			if not terminal_gate.get_meta("is_open", false) or not _on_terminal_landing():
+				continue
+		elif obj.interaction_id == VOICE_POINT:
+			continue
+		elif obj.cue == POINT_SCRIPT.Cue.FLOOR_BUTTON and not obj.is_on_button(player.global_position):
 			continue
 		var target: Vector2 = _terminal_access_position() if obj == terminal else obj.global_position
 		var dist: float = player.global_position.distance_to(target)
@@ -746,9 +804,7 @@ func _try_interact() -> void:
 	if nearest_interactable == null:
 		return
 	if nearest_interactable.get_script() == POINT_SCRIPT:
-		if nearest_interactable.interaction_id == &"arrival_gripper":
-			_start_arrival_grip()
-		elif ducts.has(nearest_interactable.interaction_id):
+		if ducts.has(nearest_interactable.interaction_id):
 			_request_duct(nearest_interactable.interaction_id)
 		else:
 			_request_story(nearest_interactable.interaction_id)
@@ -1007,22 +1063,45 @@ func _add_story_point(id: StringName, pos: Vector2) -> Node2D:
 	return point
 
 func _setup_story_points() -> void:
-	var arm := map.get_node("Environment/Decor/ArrivalExteriorArm") as Node2D
-	_add_story_point(&"arrival_gripper", arm.global_position + Vector2(-128, 0))
-	# Attach to existing furniture without modifying A's map or its collision.
+	var grate_size: Vector2 = entry_grate.size
+	var listening_point = _add_story_point(VOICE_POINT, entry_grate.to_global(grate_size * 0.5))
+	listening_point.cue = POINT_SCRIPT.Cue.NONE
+	_add_listening_glow(grate_size)
 	var base = map.get_node("Walls/AssemblyBase")
-	_add_story_point(&"pulse_workbench", base.to_global(Vector2(base.size.x * 0.5, base.size.y + 4)))
+	# Keep the tread outside the solid base and leave clearance for Xiaoyi's head.
+	var assembly_point = _add_story_point(&"pulse_workbench", base.to_global(Vector2(base.size.x * 0.5, base.size.y + 64)))
+	assembly_point.cue = POINT_SCRIPT.Cue.FLOOR_BUTTON
+	assembly_point.z_index = 0
 	var bench = map.get_node("Walls/WorkshopBench")
-	_add_story_point(&"workshop_origin", bench.to_global(Vector2(bench.size.x * 0.5, bench.size.y + 4)))
+	var record_point = _add_story_point(&"workshop_origin", bench.to_global(Vector2(bench.size.x * 0.5, bench.size.y + 4)))
+	record_point.cue = POINT_SCRIPT.Cue.PANEL
+	record_point.cue_offset = Vector2(-bench.size.x * 0.5 + 6, -bench.size.y - 4 + 8)
+	record_point.panel_size = Vector2(bench.size.x - 12, bench.size.y * 0.56)
+
+func _add_listening_glow(grate_size: Vector2) -> void:
+	var glow := ColorRect.new()
+	glow.name = "ListeningGlow"
+	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	glow.position = Vector2(-124, -172)
+	glow.size = grate_size + Vector2(248, 268)
+	var material := ShaderMaterial.new()
+	material.shader = LISTENING_GLOW
+	material.set_shader_parameter("glow_size", glow.size)
+	material.set_shader_parameter("glow_center", grate_size * 0.5 - glow.position)
+	material.set_shader_parameter("floor_size", grate_size)
+	glow.material = material
+	entry_grate.add_child(glow)
+	# This later floor decal otherwise draws over the opaque glow center.
+	map.get_node("Environment/FloorDecals/EntryTread").hide()
 
 func _point_prompt(id: StringName) -> String:
 	if ducts.has(id):
 		return "[E] 打开管道 · " + ducts[id].title if unlocked_ducts.has(id) else "[E] 解锁管道 · " + ducts[id].title
 	match id:
-		&"arrival_gripper":
-			return "[E] 靠近机械臂"
+		VOICE_POINT:
+			return "[E] 听一听"
 		&"pulse_blueprint":
-			return "[E] 查看图纸"
+			return "[E] 重看图纸" if blueprint_known else "[E] 查看图纸"
 		&"pulse_workbench":
 			if pulse_learned:
 				return "脉冲机械臂已制造完成"
@@ -1038,6 +1117,9 @@ func get_interaction_state() -> Dictionary:
 
 func _request_story(id: StringName) -> void:
 	if not pending_interaction.is_empty() or not interaction_points.has(id):
+		return
+	if id == VOICE_POINT:
+		_start_abdomen_voice()
 		return
 	if id == &"pulse_workbench" and (not blueprint_known or pulse_learned):
 		_show_notification("脉冲模块已经装配完成。" if pulse_learned else "这台设备似乎还在等待一份图纸。")
@@ -1072,6 +1154,14 @@ func _request_story(id: StringName) -> void:
 		interaction_sheet.present(interaction_token, payload)
 	else:
 		interaction_requested.emit(id, payload, interaction_token)
+
+func _start_abdomen_voice() -> void:
+	if not pending_interaction.is_empty():
+		return
+	interaction_token += 1
+	pending_interaction = VOICE_POINT
+	get_tree().paused = true
+	abdomen_voice.present(interaction_token)
 
 func _start_arrival_grip() -> void:
 	if not pending_interaction.is_empty():
@@ -1142,7 +1232,7 @@ func finish_interaction(token: int, completed: bool) -> void:
 		return
 	var id := pending_interaction
 	if id == &"pulse_blueprint":
-		if blueprint_transfer == null and completed:
+		if not blueprint_known and blueprint_transfer == null and completed:
 			if blueprint_plug_ready:
 				_play_blueprint_transfer(token)
 			else:
@@ -1165,6 +1255,8 @@ func finish_interaction(token: int, completed: bool) -> void:
 		completed = terminal_activated
 	pending_interaction = &""
 	interaction_sheet.dismiss()
+	if id == VOICE_POINT:
+		abdomen_voice.dismiss()
 	if ducts.has(id):
 		ducts[id].visual.set_open(false)
 		if completed and not unlocked_ducts.has(id):
@@ -1192,7 +1284,7 @@ func finish_interaction(token: int, completed: bool) -> void:
 				workshop_seen = true
 				game_menus.unlock_achievement("workshop_reader")
 	# Finish this event before enabling the world again (prevents input leaking).
-	if completed and id != &"arrival_gripper":
+	if completed and id != &"arrival_gripper" and id != VOICE_POINT:
 		_save_journey(false)
 	interaction_finished.emit(token, completed)
 	_resume_story.call_deferred()
@@ -1231,7 +1323,9 @@ func _setup_ducts() -> void:
 		point.interaction_id = config[0]
 		point.position = decal.to_global(decal.size * 0.5)
 		point.name = String(config[0])
+		point.cue = POINT_SCRIPT.Cue.RECTANGLE
 		interactables_parent.add_child(point)
+		point.z_index = 10
 		interactables.append(point)
 		var visual := DUCT_VISUAL.new()
 		visual.dimensions = decal.size

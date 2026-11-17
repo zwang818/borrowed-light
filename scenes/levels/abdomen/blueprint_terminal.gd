@@ -11,10 +11,20 @@ const CYAN := Color("73e8e0")
 var transfer_time := -1.0
 var receiver := Vector2.ZERO
 var inserting := true
+var responding := false
+var transferred := false
+
+func set_response(active: bool, completed: bool) -> void:
+	if responding == active and transferred == completed:
+		return
+	responding = active
+	transferred = completed
+	queue_redraw()
 
 func show_transfer(seconds: float, socket: Vector2, insert := true) -> void:
 	inserting = insert
 	transfer_time = seconds
+	z_index = 9 if seconds >= 0.0 else 2
 	receiver = to_local(socket)
 	queue_redraw()
 
@@ -34,14 +44,22 @@ func _draw() -> void:
 	draw_line(Vector2(-58, -34), Vector2(52, -34), Color("718786"), 2)
 	draw_line(Vector2(-59, 35), Vector2(52, 35), Color("18232a"), 3)
 	draw_rect(SCREEN.grow(5), INK)
-	draw_texture_rect(BLUEPRINT, SCREEN, false)
-	draw_rect(SCREEN, CYAN, false, 1)
+	var awake := responding or transfer_time >= 0.0
+	draw_rect(SCREEN, Color("111d20"))
+	if awake:
+		draw_texture_rect(BLUEPRINT, SCREEN, false, Color("c2d4c7"))
+		draw_rect(SCREEN, Color("4c7770"), false, 1)
+		if transfer_time < 0.0:
+			var socket := Rect2(-7, -7, 14, 10)
+			draw_rect(socket, INK)
+			draw_rect(socket, Color("a3c9b6"), false, 1)
+			draw_rect(Rect2(-2, -4, 4, 4), Color("c6a477"))
 	draw_rect(Rect2(-39, 19, 56, 11), INK)
 	for column in range(7):
 		draw_rect(Rect2(-36 + column * 7, 21, 4, 2), Color("829995"))
 		draw_rect(Rect2(-36 + column * 7, 26, 4, 2), Color("556e70"))
 	draw_rect(Rect2(28, 20, 12, 10), INK)
-	draw_rect(Rect2(31, 23, 6, 4), CYAN)
+	draw_rect(Rect2(31, 23, 6, 4), Color("a1c1a2") if transferred or awake else Color("515c49"))
 	for bolt in [Vector2(-54, -30), Vector2(47, -30), Vector2(-54, 30), Vector2(47, 30)]:
 		draw_rect(Rect2(bolt, Vector2(3, 3)), Color("b7a782"))
 	if transfer_time >= 0.0:
