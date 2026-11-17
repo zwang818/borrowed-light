@@ -27,6 +27,7 @@ func run() -> void:
 	for unit in room.enemies:
 		assert(unit.z_index == 10)
 	var player = room.get_node("SpawnPoints/PlayerSpawn/Player")
+	assert(player.scatter_burst_script == preload("res://tests/manual/b_combat/spine_scatter_burst.gd"))
 	assert(player.global_position == room.map.get_node("Markers/PlayerSpawn").global_position)
 	assert(not player.scatter_unlocked and not room.try_unlock_scatter())
 	assert(room.map.is_walkable_point(player.global_position))

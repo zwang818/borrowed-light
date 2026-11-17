@@ -42,7 +42,11 @@ func _physics_process(delta: float) -> void:
 		if not hit.is_empty():
 			points[i] = to_local(hit.position)
 			spent[i] = true
-			impacts.append({"point":points[i],"born":age,"normal":Vector2(hit.normal).rotated(-global_rotation)})
+			var wall_hit: bool = hit.collider is CollisionObject2D and hit.collider.get_collision_layer_value(1)
+			impacts.append({
+				"point": points[i], "born": age, "normal": Vector2(hit.normal).rotated(-global_rotation),
+				"axis": directions[i], "pellet": i, "wall": wall_hit,
+			})
 			if hit.collider.has_method("apply_damage"): hit.collider.apply_damage(1)
 		else:
 			points[i] = next
