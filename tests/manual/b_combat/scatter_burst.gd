@@ -47,7 +47,9 @@ func _physics_process(delta: float) -> void:
 				"point": points[i], "born": age, "normal": Vector2(hit.normal).rotated(-global_rotation),
 				"axis": directions[i], "pellet": i, "wall": wall_hit,
 			})
-			if hit.collider.has_method("apply_damage"): hit.collider.apply_damage(1)
+			if hit.collider.has_method("receive_scatter_hit"):
+				hit.collider.receive_scatter_hit(1,get_instance_id())
+			elif hit.collider.has_method("apply_damage"): hit.collider.apply_damage(1)
 		else:
 			points[i] = next
 			distances[i] += distance

@@ -6,6 +6,7 @@ signal archive_opened
 const BUTTON_FEEDBACK := preload("res://scenes/ui/ui_button_feedback.gd")
 const PREFS := preload("res://scenes/ui/user_settings.gd")
 const SETTINGS_PANEL := preload("res://scenes/ui/title_screen/settings_panel.gd")
+const SPINE_FLOW := preload("res://scenes/gameplay/spine_flow_state.gd")
 const JOURNEY_SAVE := preload("res://scenes/gameplay/journey_save.gd")
 @export var game_save_path := JOURNEY_SAVE.DEFAULT_PATH
 @export var settings_path := PREFS.DEFAULT_PATH
@@ -126,11 +127,15 @@ func _refresh_archive() -> void:
 	restart_button.disabled = start_scene == null
 	status_label.position.y = 669.0 if has_save else 612.0
 	var cleared: bool = has_save and _save_data.get("first_level_cleared", false)
+	var spine_flow := SPINE_FLOW.sanitize(_save_data.get("spine_flow",{}))
 	var in_spine := has_save and JOURNEY_SAVE.resume_scene(_save_data) == JOURNEY_SAVE.SPINE
 	status_label.visible = cleared or start_scene == null
 	if cleared:
 		status_label.add_theme_font_override("font", preload("res://scenes/gameplay/gameplay_ui_theme.tres").default_font)
-		status_label.text = "第二关 · 输能脊柱" if in_spine else "第一关已通关"
+		status_label.text = "腹腔 · 散射制造" if spine_flow.room=="workshop" else ("第二关 · 输能脊柱" if in_spine else "第一关已通关")
+		if spine_flow.completed:
+			status_label.add_theme_font_override("font",preload("res://assets/fonts/noto_sans_sc_spine_flow.ttf"))
+			status_label.text = "第二关 · 输能脊柱完成"
 	_load_button.text = "继续旅程"
 	_load_button.disabled = not has_save
 	_new_button.text = "确认新旅程" if _archive_action == "new" else ("重新开始旅程" if has_save else "开始旅程")
@@ -163,6 +168,7 @@ func _continue_journey() -> void:
 		get_tree().remove_meta("journey_session"))
 	get_tree().root.add_child(loading)
 	var destination := JOURNEY_SAVE.resume_scene(data)
+	if SPINE_FLOW.sanitize(data.get("spine_flow",{})).room == "workshop": destination = "res://scenes/gameplay/spine_workshop_visit.tscn"
 	loading.begin(destination)
 
 func _new_journey() -> void:

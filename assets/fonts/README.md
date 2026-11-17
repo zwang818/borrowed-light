@@ -54,3 +54,7 @@ https://pypi.org/project/japanize-matplotlib/1.1.3/#files
 2026-11-09 通关收尾：用户取消第二关进场，字体生成范围恢复为八个游戏运行脚本与标题脚本，补齐“第一关已通关／重玩第一关”文案；准确字形数与哈希以来源 JSON 为准。
 
 2026-11-14 第二关主流程：保留原有 500 字符，补齐标题、正式第二关和脊柱灰盒文案所需的 26 个字符（共 526），修复“继续第二关”“装配右臂散弹”等缺字方框；继续使用官方 Noto Sans SC 400/OFL，来源与哈希更新于 gameplay_ui_source.json。
+
+本地标题设置页恢复 `noto_sans_sc_settings.ttf`，来源、子集字符与SHA-256见`settings_source.json`，按其记录沿用Noto Sans SC / SIL Open Font License 1.1。保留现有许可文件。
+
+第二关交互试玩使用 `noto_sans_sc_spine_flow.ttf`，官方Noto Sans SC 400文本子集；来源、字符集与SHA-256见`spine_flow_source.json`，沿用`OFL-NotoSansSC.txt`（SIL Open Font License 1.1）。不依赖本机系统字体补字。

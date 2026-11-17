@@ -59,13 +59,14 @@ func _ready() -> void:
 	notice.position = Vector2(24,110)
 	hud.add_child(notice)
 	menus = preload("res://scenes/gameplay/game_menus.gd").new()
+	if save_path.is_empty(): menus.achievement_save_path = "user://spine_preview_achievements.cfg"
 	add_child(menus)
 	menus.retry_requested.connect(_retry)
 	menus.title_requested.connect(_return_title)
 	menus.save_requested.connect(func():
 		_save_progress()
 		menus.close_and_resume())
-	player.died.connect(func(): menus.show_death())
+	player.died.connect(_on_player_died)
 	var pause_input := preload("res://scenes/gameplay/pause_input.gd").new()
 	pause_input.target = self
 	pause_input.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -84,6 +85,9 @@ func _ready() -> void:
 func on_entry_revealed() -> void:
 	if $SpawnPoints/PlayerSpawn/Player.is_dead:
 		menus.show_death()
+
+func _on_player_died() -> void:
+	menus.show_death()
 
 func _process(delta: float) -> void:
 	_update_camera()
@@ -117,7 +121,7 @@ func _update_scatter_prompt() -> void:
 	scatter_prompt.add_theme_color_override("font_color", Color("c5decd"))
 	scatter_prompt.add_theme_color_override("font_outline_color", Color("14201e"))
 	scatter_prompt.add_theme_constant_override("outline_size", 3)
-	scatter_prompt.text = "E · 装配右臂散弹"
+	scatter_prompt.text = "%s · 装配右臂散弹" % preload("res://scenes/gameplay/input_bindings.gd").action_label(&"interact")
 
 func _refresh_scatter_response(delta: float) -> void:
 	if not scatter_approach.is_inside_tree():
