@@ -3,6 +3,7 @@ extends Node2D
 var direction := Vector2.RIGHT
 var speed := 220.0
 var lifetime := 1.5
+var persistent_flight := false
 var spent := false
 var source: Node2D
 func _ready() -> void:
@@ -11,10 +12,10 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if spent:
 		return
-	if not is_instance_valid(source) or source.state == source.State.DEAD:
+	if not persistent_flight and (not is_instance_valid(source) or source.state == source.State.DEAD):
 		queue_free()
 		return
-	var travel := speed*minf(delta,lifetime)
+	var travel := speed*(delta if persistent_flight else minf(delta,lifetime))
 	var end := global_position+direction*travel
 	var query := PhysicsRayQueryParameters2D.create(global_position,end,3)
 	query.hit_from_inside = true
@@ -28,7 +29,7 @@ func _physics_process(delta: float) -> void:
 		return
 	global_position = end
 	lifetime -= delta
-	if lifetime <= 0.0:
+	if not persistent_flight and lifetime <= 0.0:
 		queue_free()
 	queue_redraw()
 func _draw() -> void:

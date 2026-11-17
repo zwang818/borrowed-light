@@ -1,0 +1,9 @@
+[gd_scene load_steps=4 format=3]
+[ext_resource type="PackedScene" path="res://tests/manual/b_combat/combat_test.tscn" id="1"]
+[ext_resource type="Script" path="res://tests/manual/b_combat/spine_combat_test.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/levels/spine/spine_graybox.tscn" id="3"]
+[node name="SpineCombatTest" instance=ExtResource("1")]
+script = ExtResource("2")
+scatter_pose_preview = true
+relaxed_walk_arms = true
+[node name="Map" parent="." instance=ExtResource("3")]

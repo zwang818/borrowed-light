@@ -4,11 +4,15 @@ const PARAMETERS := preload("res://scenes/weapons/combat_parameters.gd")
 var direction := Vector2.RIGHT
 var travelled: float = 0.0
 var spent: bool = false
+var speed: float = PARAMETERS.ENEMY_BULLET_SPEED
+var unlimited_range := false
 
 func _physics_process(delta: float) -> void:
 	if spent:
 		return
-	var step := minf(PARAMETERS.ENEMY_BULLET_SPEED * delta, PARAMETERS.ENEMY_BULLET_RANGE - travelled)
+	var step := speed * delta
+	if not unlimited_range:
+		step = minf(step, PARAMETERS.ENEMY_BULLET_RANGE - travelled)
 	var end := global_position + direction * step
 	# Sweep against world and player only: no enemy friendly fire.
 	var query := PhysicsRayQueryParameters2D.create(global_position, end, 3)
@@ -23,6 +27,6 @@ func _physics_process(delta: float) -> void:
 		return
 	global_position = end
 	travelled += step
-	if travelled >= PARAMETERS.ENEMY_BULLET_RANGE:
+	if not unlimited_range and travelled >= PARAMETERS.ENEMY_BULLET_RANGE:
 		spent = true
 		queue_free()
