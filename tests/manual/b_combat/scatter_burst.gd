@@ -3,8 +3,10 @@ extends Node2D
 const COUNT := 12
 const SPEED := 448.0
 const RANGE := 128.0
+var pellet_count := COUNT
 var player: Node2D
 var age := 0.0
+var launch_spacing := 0.009
 var points: Array[Vector2] = []
 var directions: Array[Vector2] = []
 var distances: Array[float] = []
@@ -14,9 +16,9 @@ var impacts: Array[Dictionary] = []
 func _ready() -> void:
 	add_to_group("b_scatter_flashes")
 	z_index = 4
-	for i in range(COUNT):
+	for i in range(pellet_count):
 		points.append(Vector2.ZERO)
-		directions.append(Vector2.RIGHT.rotated(deg_to_rad(lerpf(-14,14,float(i)/(COUNT-1)))))
+		directions.append(Vector2.RIGHT.rotated(deg_to_rad(lerpf(-14,14,float(i)/maxi(1,pellet_count-1)))))
 		distances.append(0.0)
 		spent.append(false)
 
@@ -26,9 +28,9 @@ func _physics_process(delta: float) -> void:
 		return
 	var old_age := age
 	age += delta
-	for i in range(COUNT):
+	for i in range(pellet_count):
 		if spent[i]: continue
-		var launch := (i % 6)*0.009
+		var launch := (i % 6)*launch_spacing
 		var step := maxf(0.0,age-maxf(old_age,launch))
 		if step <= 0: continue
 		var distance := minf(SPEED*step,RANGE-distances[i])
@@ -61,7 +63,7 @@ func _draw() -> void:
 		var flame := PackedVector2Array([Vector2(-2,-3),Vector2(6,-5),Vector2(length*0.65,-2),Vector2(length,0),Vector2(length*0.7,2),Vector2(5,5),Vector2(-2,3)])
 		draw_colored_polygon(flame,Color(1,0.47,0.12,fade))
 		draw_line(Vector2(-1,0),Vector2(length*0.65,0),Color(1,0.91,0.64,fade),3)
-	for i in range(COUNT):
+	for i in range(pellet_count):
 		if spent[i] or distances[i] <= 0: continue
 		var fade := clampf((RANGE-distances[i])/25.0,0,1)
 		var tip := points[i]

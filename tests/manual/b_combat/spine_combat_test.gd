@@ -10,6 +10,7 @@ var follow_zoom := 0.9
 var electric_seams: Array[Node2D] = []
 var scatter_prompt: Label
 var scatter_station: Polygon2D
+var entrance_hazards: Node2D
 @onready var map: Node2D = $Map
 
 func _enter_tree() -> void:
@@ -77,6 +78,10 @@ func _ready() -> void:
 	map.get_node("Reservations").hide()
 	_set_art(true)
 	_install_electric_seams(map.get_node("SpineArt"))
+	entrance_hazards = preload("res://scenes/gameplay/spine_entrance_hazards.gd").new()
+	entrance_hazards.name = "EntranceHazards"
+	entrance_hazards.configure(map,player)
+	add_child(entrance_hazards)
 	_update_camera()
 
 func _register_enemy(unit: Node2D) -> void:
@@ -168,6 +173,7 @@ func reset_test_combat() -> void:
 		enemies[i].restore_combat_state(baselines[i].state)
 	$SpawnPoints/PlayerSpawn/Player.restore_player($SpawnPoints/PlayerSpawn.global_position,3,[&"pulse_gun"])
 	for seam in electric_seams: seam.reset_cycle()
+	entrance_hazards.reset_motion()
 	doors_open = true
 	for door in doors: door.set_open(true)
 	$CombatAudio.reset_audio()

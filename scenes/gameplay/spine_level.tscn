@@ -3,5 +3,6 @@
 [ext_resource type="Script" path="res://scenes/gameplay/spine_level.gd" id="2"]
 [node name="SpineLevel" instance=ExtResource("1")]
 script = ExtResource("2")
-dynamic_walk_preview = false
+dynamic_walk_preview = true
+scatter_a_preview = true
 metadata/test_only = false

@@ -3,6 +3,7 @@ extends Node2D
 @export var scatter_pose_preview := true
 @export var relaxed_walk_arms := false
 @export var dynamic_walk_preview := false
+@export var scatter_a_preview := false
 
 ## Test-only bindings, installed before the Player enters the tree.
 ## Shared project Input Map remains owned by the integration module.
@@ -30,6 +31,8 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	if scatter_a_preview and $SpawnPoints/PlayerSpawn/Player.get("scatter_burst_script") != null:
+		$SpawnPoints/PlayerSpawn/Player.scatter_burst_script = preload("res://tests/manual/b_combat/scatter_burst_a.gd")
 	var visual := Node2D.new()
 	visual.name = "XiaoyiCombatVisual"
 	visual.set_script(preload("res://tests/manual/b_combat/xiaoyi_scatter_pose_visual.gd") if scatter_pose_preview else preload("res://tests/manual/b_combat/xiaoyi_spark_visual.gd"))

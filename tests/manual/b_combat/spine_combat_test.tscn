@@ -7,4 +7,5 @@ script = ExtResource("2")
 scatter_pose_preview = true
 relaxed_walk_arms = true
 dynamic_walk_preview = true
+scatter_a_preview = true
 [node name="Map" parent="." instance=ExtResource("3")]
