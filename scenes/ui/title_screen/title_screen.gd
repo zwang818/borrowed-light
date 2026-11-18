@@ -97,7 +97,7 @@ func _build_archive_actions() -> void:
 		label.add_theme_font_override("font", font)
 	var description: Label = panel.get_node("Description")
 	description.size.y = 48
-	description.text = "自动保存图纸、能力、记录与管道解锁。\n保存小一位置与耐久，恢复上次进度。"
+	description.text = "自动保存图纸、能力、记录与管道解锁。\n从存档点继续，恢复耐久和关卡进度。"
 	archive_close.position.y = 350
 	archive_close.add_theme_font_override("font", font)
 	var actions := HBoxContainer.new()
@@ -149,7 +149,7 @@ func _refresh_archive() -> void:
 		slot.get_node("EmptyTitle").text = "尚无存档" if _delete_button.disabled else "存档无法读取"
 		slot.get_node("EmptyHint").text = "开启新旅程后自动建立记录。"
 	if not _archive_action.is_empty():
-		slot.get_node("EmptyHint").text = "再次点击确认将覆盖当前旅程。" if _archive_action == "new" else "再次点击确认删除，成就记录保留。"
+		slot.get_node("EmptyHint").text = "再次点击确认将覆盖当前旅程，并重置成就。" if _archive_action == "new" else "再次点击确认删除存档。"
 
 func _continue_journey() -> void:
 	if _is_starting:
@@ -160,7 +160,7 @@ func _continue_journey() -> void:
 		_open_archive()
 		return
 	_is_starting = true
-	get_tree().set_meta("journey_session", {"path": game_save_path, "data": data})
+	get_tree().set_meta("journey_session", {"path": game_save_path, "data": data, "resume_at_checkpoint": true})
 	var loading := preload("res://scenes/ui/intro_cutscene/entry_loading.gd").new()
 	loading.name = "EntryLoading"
 	loading.cancelled.connect(func():
@@ -340,7 +340,7 @@ func _on_start_pressed() -> void:
 func _start_new_journey() -> void:
 	_is_starting = true
 	start_requested.emit()
-	get_tree().set_meta("journey_session", {"path": game_save_path})
+	get_tree().set_meta("journey_session", {"path": game_save_path, "new_journey": true})
 	var error := get_tree().change_scene_to_file(_intro_scene_path)
 	if error != OK:
 		get_tree().remove_meta("journey_session")

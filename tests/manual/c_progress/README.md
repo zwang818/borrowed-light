@@ -1,6 +1,6 @@
 # C：暂停、重试和成就检查
 
-2026-11-16：`journey_save_check.gd` 增加首次两按钮、有存档三按钮、重开取消／确认、真实开场和第一关新记录、成就保留检查，使用独立测试文件。
+2026-11-16：`journey_save_check.gd` 增加首次两按钮、有存档三按钮、重开取消／确认、真实开场和第一关新记录、续玩保留和重开清空成就检查，使用独立测试文件。
 
 使用仓库约定的 Godot 4.7.2，在仓库根目录运行：
 
@@ -14,7 +14,7 @@ godot --headless --path . --script res://tests/manual/c_progress/achievement_che
 
 这两个脚本继承 SceneTree，是命令行检查入口，不能用 F6 运行。人工游玩使用 `scenes/gameplay/abdomen_level.tscn`（F6）或 `scenes/main.tscn`（F5）。
 
-检查使用真实玩家、敌人、弹丸和菜单，覆盖冻结／恢复、鼠标穿透、死亡选择、基线恢复、标题／开场转场、成就读写、队列、搜索／筛选及中文字体覆盖。测试成就写入独立的 `user://test_c_ui_*.cfg` 并清理；不清空玩家的 `achievements.cfg`。
+检查使用真实玩家、敌人、弹丸和菜单，覆盖冻结／恢复、鼠标穿透、死亡选择、基线恢复、标题／开场转场、成就内存共享、队列、搜索／筛选及中文字体覆盖。
 
 规则依据、接口、手工复测和未完成项见 [C 模块说明](../../../docs/c_ui_achievements.md)。
 
@@ -22,11 +22,11 @@ godot --headless --path . --script res://tests/manual/c_progress/achievement_che
 
 `godot --headless --path . --script res://tests/manual/c_progress/interaction_check.gd`
 
-覆盖图纸→制造、取消和过期回调、D 展示替换、终端入口真实碰撞和清场开门、终端与出口分离、死亡保留能力和门禁回滚。使用隔离成就文件，结束清理。接入和人工路线见 `docs/c_level_one_interactions.md`。旧 progress_check 的死亡回枪架断言已按 REV-14 更新为保留能力。
+覆盖图纸→制造、取消和过期回调、D 展示替换、终端入口真实碰撞和清场开门、终端与出口分离、死亡保留能力和门禁回滚。接入和人工路线见 `docs/c_level_one_interactions.md`。旧 progress_check 的死亡回枪架断言已按 REV-14 更新为保留能力。
 
 管道检查：`godot --headless --path . --script res://tests/manual/c_progress/duct_check.gd`，使用隔离的 `test_ducts.cfg`，验证解锁、按钮传送、安全落点与重试保留。
 
-成就事件检查：`godot --headless --path . --script res://tests/manual/c_progress/achievement_events_check.gd`。使用独立测试成就文件，覆盖真实击破信号、计数／重试、无伤成功失败及首次通知保存；其他管道与记录成就在各自检查中验证。
+成就事件检查：`godot --headless --path . --script res://tests/manual/c_progress/achievement_events_check.gd`。覆盖真实击破信号、计数／重试、无伤成功失败及首次解锁通知；其他管道与记录成就在各自检查中验证。
 
 C-STORY-01：interaction_check 现通过真实 E 输入打开通讯，验证第一句未跳过、推进中不提前授予图纸、Esc 取消、读完提交，以及没有目标栏／开场导航／“阅读时世界暂停”说明。
 
@@ -34,7 +34,7 @@ C-STORY-01：interaction_check 现通过真实 E 输入打开通讯，验证第�
 
 `godot --headless --path . --script res://tests/manual/c_progress/terminal_password_check.gd`
 
-覆盖两房间线索、取消不记录、重复查看、知识快照隔离、真实 E 打开键盘、键盘／鼠标输入、开头零、清空／退格、空／短／错误密码、正确验证、取消与过期回调、通用完成接口不能绕过、清场与出口门分离、原终端成就、重试知识保留与新关卡清空。另检查 1152×648 和 960×540 布局。使用隔离成就文件 `test_terminal_password.cfg` 并清理，不覆盖玩家存档。非无界面运行时可通过环境变量 `C_TERMINAL_PREVIEW_PATH` 将预览保存到仓库外。
+覆盖两房间线索、取消不记录、重复查看、知识快照隔离、真实 E 打开键盘、键盘／鼠标输入、开头零、清空／退格、空／短／错误密码、正确验证、取消与过期回调、通用完成接口不能绕过、清场与出口门分离、原终端成就、重试知识保留与新关卡清空。另检查 1152×648 和 960×540 布局。非无界面运行时可通过环境变量 `C_TERMINAL_PREVIEW_PATH` 将预览保存到仓库外。
 
 ## 加载、旅程存档与第一关通关（2026-11-09）
 
@@ -43,7 +43,7 @@ godot --headless --path . --script res://tests/manual/c_progress/journey_save_ch
 godot --headless --path . --script res://tests/manual/c_progress/level_clear_check.gd
 ```
 
-分别输出 `JOURNEY SAVE CHECKS: PASS`、`LEVEL CLEAR CHECKS: PASS`。两者使用隔离的旅程与成就路径，覆盖损坏备份回退、覆盖／删除确认、标题读取、知识与房间基线恢复，以及脚底出口判定、先保存通关结果再加载返回标题。`progress_check.gd` 同时检查进入第一关的三秒加载、重复请求保护与场景准备前不填满。
+分别输出 `JOURNEY SAVE CHECKS: PASS`、`LEVEL CLEAR CHECKS: PASS`。两者使用隔离的旅程路径，覆盖损坏备份回退、覆盖／删除确认、标题读取、知识与房间基线恢复，以及脚底出口判定、先保存通关结果再加载返回标题。`progress_check.gd` 同时检查进入第一关的三秒加载、重复请求保护与场景准备前不填满。
 
 `interaction_check.gd` 增加终端正面／侧面及围墙的真实碰撞与遮挡层级检查；终端自己的实体不阻断合法交互射线，其他墙体仍阻挡。机器人动作与界面布局还需实际窗口检查。命令行检查不代表人工 F5 完整路线验收。接口与限制见 [加载说明](../../../docs/entry_loading.md)、[存档说明](../../../docs/journey_save.md)。
 
@@ -52,7 +52,7 @@ godot --headless --path . --script res://tests/manual/c_progress/level_clear_che
 
 `godot --path . --rendering-method gl_compatibility --script res://tests/manual/c_progress/loading_cards_check.gd`
 
-需要实窗，包含完整首关出口视频自然结束。检查30轮三图洗牌、固定42%／世界暂停时两个跑动周期、16:9／4:3、真实标题与开场入口、main最新第二关／返回／续玩和缓存PackedScene，共5次成功加载，阶段进度单调且就绪才100%，失败返回／输入保护及个人文件隔离。使用独立test旅程和成就路径；`LOADING_CARDS_CAPTURE_DIR`可设仓库外截图目录。初次角色像素准备耗时取决于机器，不给实时测试设置过短帧数退出阈值。
+包含完整首关出口视频自然结束。检查第一关、第二关、返程工坊和首页的固定背景，以及续玩、缓存 PackedScene、固定 42% 时的角色动画、16:9／4:3 布局、真实进度和失败返回。使用独立测试旅程路径。`LOADING_CARDS_CAPTURE_DIR` 可在实窗运行时指定截图目录。
 
 `loading_cards_check.gd` 不引用本机未提交的二关Demo或房间缓存代码；该部分不属于本PR。详细验证与已知资源清理警告见 `docs/entry_loading.md`。
 

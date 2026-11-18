@@ -6,7 +6,7 @@
 
 用户三张中文世界观成图原样加入 `assets/loading/abdomen_workshop.png`、`energy_spine.png`、`underground_duct.png`，源文件与复制件SHA-256一致。图片本身含介绍，仅叠加右下角进度组件，不另绘标题／正文。1672×941图像以KEEP_ASPECT_CENTERED完整等比显示，16:9近乎铺满，其他比例留深炭灰边，不裁中文。
 
-`loading_card_bag.gd` 使用静态三张洗牌袋与独立随机发生器；每轮三张各一次，新轮第一张避开上一轮最后一张。状态跨加载器实例保留，不重设AI／战斗随机种子。首次绘制前选图，本次加载保持一张到结束。
+加载页按关卡固定显示成图。进入第一关或返程制造工坊时显示「腹腔工坊」，进入第二关或其试玩场景时显示「输能脊柱」。继续旅程、重开房间和跨区转场使用目标关卡的介绍。「返回首页」使用离开前所在关卡的介绍。未配置成图的场景使用深炭灰背景和进度组件。「地下管道」成图保留在素材目录。
 
 右下组件以1280×720为参考，右32／底24，固定64×64角色画布、约6像素脚底间距、120×5暗灰槽和低亮琥珀填充，下方百分比右对齐。小一图集为768×96、8帧96×96、14fps，按经过时间推进，与百分比独立；同一画布保留原腾空起伏，不逐帧裁框重定位。缩放窗口时整组跟随右下角。
 
@@ -28,7 +28,7 @@
 
 涉及文件：
 
-- `scenes/ui/intro_cutscene/entry_loading.gd`、`loading_card_bag.gd`、`loading_robot_animation.gd`：共用表现、选图和进度。
+- `scenes/ui/intro_cutscene/entry_loading.gd`、`loading_robot_animation.gd`：共用表现、目标场景选图和进度。
 - `scenes/gameplay/prepared_sprite_frames.gd`：仅运行时内存复用、源图预热及完成回调；无预计算资源／新运行依赖。
 - `abdomen_level.gd`、`spine_level.gd`：初始化检查点与就绪门槛；视频、地图、敌人、存档规则保留。
 - `scenes/levels/abdomen/abdomen_webs.gd`：原背景碰撞准备分帧；`pause_input.gd`：覆盖层输入保护。
@@ -37,7 +37,7 @@
 
 未修改 `project.godot`、`scenes/main.tscn`、输入、Autoload、碰撞层、TileSet、玩家／武器／伤害脚本或Bible；未加入本机MCP配置。界面与声音素材仍分别由D维护，C负责加载生命周期与进度接口接入。
 
-## 当前main上的实际验证
+## 2026-11-17 随机选图版本验证
 
 Windows / Godot4.7.2 / Compatibility：
 
@@ -58,7 +58,7 @@ Windows / Godot4.7.2 / Compatibility：
 
 ---
 
-以下为历史版本记录，当前以本节为准。
+以下为早期版本记录，当前选图规则见上文「展示与选图」。
 
 # 进入第一关的加载界面
 

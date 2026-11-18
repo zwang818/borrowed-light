@@ -1,6 +1,5 @@
 extends SceneTree
 ## Real keypad input, clue reads, gate boundaries and retry knowledge separation.
-const SAVE := "user://test_terminal_password.cfg"
 var failures: Array[String] = []
 
 func _initialize() -> void:
@@ -40,10 +39,7 @@ func finish_story(level: Node) -> void:
 	await process_frame
 
 func run_checks() -> void:
-	if FileAccess.file_exists(SAVE):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
 	var level = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
-	level.achievement_save_path = SAVE
 	root.add_child(level)
 	current_scene = level
 	await create_timer(0.15).timeout
@@ -150,7 +146,6 @@ func run_checks() -> void:
 	level.queue_free()
 	await process_frame
 	var fresh = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
-	fresh.achievement_save_path = SAVE
 	root.add_child(fresh)
 	await physics_frame
 	fresh.player.set_physics_process(false)
@@ -166,7 +161,5 @@ func run_checks() -> void:
 	check(fresh.terminal_activated, "A remembered correct password works without artificial read-flag gating")
 	fresh.queue_free()
 	await process_frame
-	if FileAccess.file_exists(SAVE):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
 	print("TERMINAL PASSWORD CHECKS: ", "PASS" if failures.is_empty() else failures)
 	quit(0 if failures.is_empty() else 1)

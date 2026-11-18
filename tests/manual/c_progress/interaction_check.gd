@@ -1,5 +1,4 @@
 extends SceneTree
-const SAVE := "user://test_c_interactions.cfg"
 var failures: Array[String] = []
 var received_token := 0
 
@@ -29,7 +28,6 @@ func receive_story(_id: StringName, _payload: Dictionary, token: int) -> void:
 
 func run_checks() -> void:
 	var level = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
-	level.achievement_save_path = SAVE
 	root.add_child(level)
 	current_scene = level
 	await create_timer(0.15).timeout
@@ -148,7 +146,5 @@ func run_checks() -> void:
 		root.get_texture().get_image().save_png(capture_path)
 	level.queue_free()
 	await process_frame
-	if FileAccess.file_exists(SAVE):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
 	print("INTERACTION CHECKS: ", "PASS" if failures.is_empty() else failures)
 	quit(0 if failures.is_empty() else 1)

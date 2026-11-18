@@ -12,7 +12,6 @@ func press(player: Node, code: Key) -> void:
 
 func run() -> void:
 	var level = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
-	level.achievement_save_path = "user://test_main_auto_mode.cfg"
 	root.add_child(level)
 	current_scene = level
 	await process_frame

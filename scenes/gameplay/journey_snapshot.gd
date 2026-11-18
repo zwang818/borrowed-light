@@ -29,6 +29,18 @@ static func vector(data: Variant, fallback: Vector2 = Vector2.ZERO) -> Vector2:
 static func pack_vector(value: Vector2) -> Array:
 	return [value.x, value.y]
 
+static func with_player_spawn(snapshot: Dictionary, spawn: Vector2) -> Dictionary:
+	var resumed := snapshot.duplicate()
+	var player: Dictionary = snapshot.player.duplicate()
+	if vector(player.global_position) != spawn and player.has("gun"):
+		var gun: Dictionary = player.gun.duplicate()
+		gun.erase("beam_points") # The next physics tick traces from the new position.
+		player.gun = gun
+	player.global_position = pack_vector(spawn)
+	player.velocity = pack_vector(Vector2.ZERO)
+	resumed.player = player
+	return resumed
+
 static func capture_fields(node: Object, fields: Array) -> Dictionary:
 	var data := {}
 	for field in fields:

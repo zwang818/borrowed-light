@@ -1,16 +1,17 @@
 extends SceneTree
 const LOADER := preload("res://scenes/ui/intro_cutscene/entry_loading.gd")
-const BAG := preload("res://scenes/ui/intro_cutscene/loading_card_bag.gd")
 const SAVE := preload("res://scenes/gameplay/journey_save.gd")
 const SPINE_SCENE := "res://scenes/gameplay/spine_level.tscn"
+const WORKSHOP_SCENE := "res://scenes/gameplay/spine_workshop_visit.tscn"
+const ABDOMEN_IMAGE := "res://assets/loading/abdomen_workshop.png"
+const SPINE_IMAGE := "res://assets/loading/energy_spine.png"
 const SAVE_PATH := "user://test_loading_cards_journey.json"
-const ACHIEVEMENTS := "user://test_loading_cards_achievements.cfg"
 class InputProbe extends Node:
 	var events := 0
 	func _unhandled_input(_event: InputEvent) -> void: events += 1
 
 var failures: Array[String] = []
-var cards: Array[int] = []
+var cards: Array[String] = []
 var tracks: Dictionary = {}
 var watching := false
 var largest_frame_ms := 0.0
@@ -43,32 +44,38 @@ func accept(action: String) -> void:
 		event.action = action
 		event.pressed = down
 		root.push_input(event,true)
+func press_return_home(menu: Node) -> void:
+	for action in menu._content.find_children("*", "Button", true, false):
+		if action.text == "返回首页":
+			action.pressed.emit()
+			return
+	check(false, "The current menu offers Return Home")
 func capture(label: String) -> void:
 	var folder := OS.get_environment("LOADING_CARDS_CAPTURE_DIR")
 	if folder.is_empty() or DisplayServer.get_name()=="headless": return
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png(folder.path_join("loading_cards_"+label+".png"))
 func watch(node: Node) -> void:
-	if not watching or not node is CanvasLayer or not node.has_signal("card_selected"): return
+	if not watching or not node is LOADER: return
 	var id := node.get_instance_id()
-	tracks[id] = {"last":0.0,"full":false,"card":-1,"stages":{}}
-	node.card_selected.connect(func(index,path):
-		cards.append(index)
-		tracks[id].card = index
-		print("CARD ",cards.size(),": ",path))
+	tracks[id] = {"last":0.0,"full":false,"card":null,"stages":{}}
 	node.progress_changed.connect(func(value):
 		var track: Dictionary = tracks[id]
+		var image_path: String = node.background.texture.resource_path if node.background.texture != null else ""
+		if track.card == null:
+			track.card = image_path
+			cards.append(image_path)
+			print("CARD ",node.target_path,": ",image_path)
 		check(value>=track.last,"Actual loading progress never moves backward")
 		track.last = value
 		track.stages[node.progress_target] = true
-		check(node.selected_card==track.card,"A loading screen retains its one selected card")
-		check(node.background.texture==BAG.CARDS[track.card],"Background is the selected authored PNG")
+		check(image_path==track.card,"The destination's loading background stays fixed")
 		if value>=1.0:
 			track.full = true
 			check(node.ready_to_finish and current_scene!=null,"100 percent requires a completed handoff")
-			if current_scene.has_method("is_entry_ready"):
+			if current_scene != null and current_scene.has_method("is_entry_ready"):
 				check(current_scene.is_entry_ready(),"Gameplay is entry-ready before 100 percent")
-				var player = current_scene.player if current_scene.scene_file_path==SAVE.SCENE else current_scene.get_node("SpawnPoints/PlayerSpawn/Player")
+				var player = current_scene.hero() if current_scene.has_method("hero") else current_scene.player
 				check(player.controls_enabled,"Gameplay controller is prepared before 100 percent")
 		else:
 			check(node.caption.text!="100%","Percentage label cannot round up to 100 early"))
@@ -92,22 +99,15 @@ func capture_active(label: String) -> void:
 func run() -> void:
 	var personal := [bytes_at(SAVE.DEFAULT_PATH),bytes_at("user://settings.cfg"),bytes_at("user://achievements.cfg")]
 	SAVE.erase(SAVE_PATH)
-	BAG.remaining.clear()
-	BAG.previous = -1
-	var prior := -1
-	for round_index in 30:
-		var drawn: Array[int] = []
-		for i in 3: drawn.append(BAG.take())
-		check(drawn.has(0) and drawn.has(1) and drawn.has(2),"Every shuffle bag contains three different cards")
-		check(drawn[0]!=prior,"New bag never repeats the preceding final card")
-		prior = drawn[2]
 	# Observe two whole run cycles while paused and with progress intentionally held.
 	var probe := InputProbe.new()
 	probe.process_mode = Node.PROCESS_MODE_ALWAYS
 	root.add_child(probe)
 	var preview = LOADER.new()
 	root.add_child(preview)
-	paused = true
+	preview.begin(SPINE_SCENE,load(SAVE.SCENE))
+	check(preview.background.texture.resource_path == ABDOMEN_IMAGE,"Explicit PackedScene uses its actual destination card")
+	preview.switching = true
 	preview.progress_target = 0.42
 	preview.display_progress = 0.42
 	for action in ["interact","pause","shoot","ui_cancel"]: accept(action)
@@ -135,8 +135,6 @@ func run() -> void:
 	probe.queue_free()
 	await process_frame
 	root.size = Vector2i(1152,648)
-	BAG.remaining.clear()
-	BAG.previous = -1
 	watching = true
 	root.child_entered_tree.connect(watch)
 	var title = load("res://scenes/main.tscn").instantiate()
@@ -154,8 +152,6 @@ func run() -> void:
 	await capture_active("entry")
 	check(await wait_room(SAVE.SCENE),"Title / opening reaches playable abdomen through the new loader")
 	var first = current_scene
-	first.achievement_save_path = ACHIEVEMENTS
-	first.game_menus.achievement_save_path = ACHIEVEMENTS
 	first.blueprint_known = true
 	first.pulse_learned = true
 	first.player.learn_pulse()
@@ -172,12 +168,13 @@ func run() -> void:
 	await capture_active("spine_entry")
 	check(await wait_room(SPINE_SCENE),"Normal video ending loads the current production spine scene")
 	var spine = current_scene
-	check(spine.art_enabled and spine.enemies.size()==12,"Current teammate spine art and twelve-enemy layout remain intact")
+	check(spine.art_enabled and spine.story_ready,"The current spine scene has its art and story enabled")
 	var cached_spine: PackedScene = load(SPINE_SCENE)
-	spine._return_title()
+	spine.menus.show_death()
+	press_return_home(spine.menus)
 	await capture_active("title_return")
 	check(await wait_room("res://scenes/main.tscn"),"Production spine Return uses the same loading screen")
-	check(cards.size()==3 and cards.has(0) and cards.has(1) and cards.has(2),"First three production loading screens cover all three authored cards")
+	check(cards == [ABDOMEN_IMAGE, SPINE_IMAGE, SPINE_IMAGE],"Returning home from the spine death menu shows the spine card")
 	title = current_scene
 	title.game_save_path = SAVE_PATH
 	title._refresh_archive()
@@ -186,13 +183,28 @@ func run() -> void:
 	click(title.start_button)
 	await capture_active("spine_cached")
 	check(await wait_room(SPINE_SCENE),"Continue restores production spine with cached scene resources")
-	check(cards.size()==4 and cards[3]!=cards[2],"Fourth actual card differs from the third")
+	spine = current_scene
+	spine._begin_workshop_trip()
+	check(await wait_room(WORKSHOP_SCENE),"Workshop transfer loads the real abdomen workshop")
+	current_scene.game_menus.toggle_pause()
+	press_return_home(current_scene.game_menus)
+	check(await wait_room("res://scenes/main.tscn"),"Workshop Return Home also uses the loader")
+	title = current_scene
+	title.game_save_path = SAVE_PATH
+	title._refresh_archive()
+	title.start_button.pressed.emit()
+	check(await wait_room(WORKSHOP_SCENE),"Continue from the title restores the saved workshop after Return Home")
+	current_scene._return_spine()
+	check(await wait_room(SPINE_SCENE),"Returning from the workshop loads the real spine")
 	var resource_loader = LOADER.new()
 	resource_loader.name = "EntryLoading"
 	root.add_child(resource_loader)
 	resource_loader.begin(SPINE_SCENE,cached_spine)
 	await capture_active("packed_cached")
 	check(await wait_room(SPINE_SCENE),"Explicitly provided cached PackedScene also follows real readiness and full progress")
+	check(cards == [ABDOMEN_IMAGE, SPINE_IMAGE, SPINE_IMAGE, SPINE_IMAGE, ABDOMEN_IMAGE,
+		ABDOMEN_IMAGE, ABDOMEN_IMAGE, SPINE_IMAGE, SPINE_IMAGE],
+		"Return Home uses the source card and gameplay loads use the destination card")
 	for track in tracks.values():
 		check(track.full,"Every successful production loading screen reaches 100 percent")
 		check(track.stages.size()>=3,"Successful progress reflects completed load stages")
@@ -220,6 +232,5 @@ func run() -> void:
 	current_scene.queue_free()
 	await create_timer(0.15,true).timeout
 	SAVE.erase(SAVE_PATH)
-	DirAccess.remove_absolute(ACHIEVEMENTS)
 	print("LOADING CARDS CHECK: ","PASS" if failures.is_empty() else failures)
 	quit(0 if failures.is_empty() else 1)

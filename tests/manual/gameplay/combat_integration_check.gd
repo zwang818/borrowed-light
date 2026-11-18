@@ -4,7 +4,6 @@ func _initialize() -> void:
 	call_deferred("run")
 func run() -> void:
 	var level = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
-	level.achievement_save_path = "user://test_combat_integration.cfg"
 	root.add_child(level)
 	current_scene = level
 	await physics_frame
@@ -77,7 +76,5 @@ func run() -> void:
 			break
 	level.queue_free()
 	await process_frame
-	if FileAccess.file_exists("user://test_combat_integration.cfg"):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_combat_integration.cfg"))
 	print("Main combat integration: unarmed gait/unlocks, sprint, model hitbox, screen detection, eye emission, pause, retry, cleaner gate and exit: PASS")
 	quit()

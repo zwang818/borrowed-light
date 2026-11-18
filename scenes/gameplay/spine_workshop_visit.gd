@@ -28,13 +28,11 @@ func _setup_hud() -> void:
 	(hud_canvas.get_child(0) as Control).theme = visit_theme
 
 func _ready() -> void:
-	achievement_save_path = "user://spine_preview_achievements.cfg" if transfer_payload.get("isolated",true) else "user://achievements.cfg"
 	if transfer_payload.is_empty() and get_tree().has_meta("journey_session"):
 		var session: Dictionary = get_tree().get_meta("journey_session")
 		flow_path = session.path
 		flow_data = session.get("data",{}).duplicate(true)
 		flow_state = FLOW.sanitize(flow_data.get("spine_flow",{}))
-		achievement_save_path = "user://achievements.cfg" if not flow_path.is_empty() else "user://spine_preview_achievements.cfg"
 	else:
 		flow_path = transfer_payload.get("path","")
 		flow_data = transfer_payload.get("data",{}).duplicate(true)
@@ -212,6 +210,14 @@ func _calibration_hit(index: int,burst: int) -> void:
 func _on_exit_entered(_body: Node,_id: String) -> void:
 	pass # Revisit leaves through the same arrival duct, never repeats level one.
 
+func _setup_checkpoint() -> void:
+	pass # The workshop visit belongs to the spine's manufacturing objective.
+
+func _restart_level() -> void:
+	# The workshop is part of the spine's assembly objective.
+	preload("res://scenes/gameplay/spine_flow_loading.gd").restart_level(
+		self, JOURNEY_SAVE.SPINE, flow_path, JOURNEY_SAVE.before_spine(flow_data))
+
 func _retry_level() -> void:
 	game_menus.close_and_resume()
 	var landing = _duct_landing(&"duct_arrival")
@@ -220,7 +226,11 @@ func _retry_level() -> void:
 		player.scatter_unlocked = flow_state.calibrated
 		player.calibration_enabled = calibration_active
 
-func _save_journey(_show_result: bool = false) -> Error:
+func _retry_spawn() -> Vector2:
+	var landing = _duct_landing(&"duct_arrival")
+	return landing if landing != null else _find_spawn_position()
+
+func _save_journey() -> Error:
 	if not visit_ready: return OK
 	flow_state.ammo = player.pressure
 	var candidate := flow_data.duplicate(true)
@@ -237,8 +247,7 @@ func _restore_room_snapshot(snapshot: Dictionary) -> void:
 
 func _return_to_title() -> void:
 	if _save_journey()!=OK: return
-	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/main.tscn")
+	ENTRY_LOADING.return_home(get_tree())
 
 func _return_spine() -> void:
 	visit_busy = true

@@ -4,6 +4,17 @@ signal pressure_changed(remaining: int)
 var pressure_limited := false
 var pressure := 0
 var calibration_enabled := false
+var protocol_after_move: Callable
+
+func _physics_process(delta: float) -> void:
+	super._physics_process(delta)
+	if protocol_after_move.is_valid():
+		protocol_after_move.call()
+
+func update_combat_mode() -> void:
+	super.update_combat_mode()
+	if has_protocol:
+		attack_mode = AttackMode.UNARMED
 
 func has_arm_module(side: int) -> bool:
 	return (side == 1 and calibration_enabled) or super.has_arm_module(side)

@@ -12,7 +12,6 @@ func interact(level: Node, id: StringName) -> void:
 	level._try_interact()
 func run() -> void:
 	var level = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
-	level.achievement_save_path = "user://test_ducts.cfg"
 	root.add_child(level)
 	current_scene = level
 	await create_timer(0.15).timeout
@@ -85,7 +84,5 @@ func run() -> void:
 	check(level.game_menus.achievements.get("duct_network", false), "Third unlocked duct awards full network achievement")
 	level.queue_free()
 	await process_frame
-	if FileAccess.file_exists("user://test_ducts.cfg"):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_ducts.cfg"))
 	print("DUCT CHECKS: ", "PASS" if failures.is_empty() else failures)
 	quit(0 if failures.is_empty() else 1)

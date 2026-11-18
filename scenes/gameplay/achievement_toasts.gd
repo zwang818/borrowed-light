@@ -5,7 +5,6 @@ const UI_THEME := preload("res://scenes/gameplay/gameplay_ui_theme.tres")
 
 var display_seconds := 3.0
 var _queue: Array[Dictionary] = []
-var _seen: Dictionary = {}
 var _active_id := ""
 var _host: Control
 var _card: PanelContainer
@@ -74,12 +73,18 @@ func _ready() -> void:
 
 
 func show_achievement(id: String, definition: Dictionary, completed: int, total: int) -> void:
-	if _seen.has(id):
-		return
-	_seen[id] = true
 	_queue.append({"id": id, "title": definition.title, "description": definition.description, "completed": completed, "total": total})
 	if is_node_ready() and _active_id.is_empty():
 		_show_next()
+
+
+func reset_notifications() -> void:
+	if _animation != null:
+		_animation.kill()
+	_queue.clear()
+	_active_id = ""
+	if is_instance_valid(_card):
+		_card.hide()
 
 
 func _show_next() -> void:

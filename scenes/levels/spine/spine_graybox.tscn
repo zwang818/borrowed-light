@@ -3016,6 +3016,11 @@ polygon = PackedVector2Array(10343.493, -2170.1926, 10546.506, -2264.8596, 10708
 metadata/room_id = "p2_thorax_landing"
 metadata/candidate_only = true
 
+[node name="Checkpoints" type="Node2D" parent="."]
+
+[node name="ServiceExit" type="Marker2D" parent="Checkpoints"]
+position = Vector2(2477.6144, 1613.5819)
+
 [node name="Markers" type="Node2D" parent="." unique_id=1802410421]
 z_index = 16
 
@@ -3252,7 +3257,7 @@ footprint = Vector2(76, 47)
 metadata/role = "protocol"
 metadata/region_id = "p2_protocol_region"
 metadata/interaction_range = 76.0
-metadata/dial_count = 3
+metadata/dial_count = 6
 
 [node name="ProtocolCleaner" type="Marker2D" parent="Markers" unique_id=1660689094]
 position = Vector2(5740.01221, 119.88531)

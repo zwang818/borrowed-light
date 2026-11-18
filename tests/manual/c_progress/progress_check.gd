@@ -36,7 +36,6 @@ func button(menu: Node, text: String) -> Button:
 func run_checks() -> void:
 	var scene := load("res://scenes/gameplay/abdomen_level.tscn") as PackedScene
 	var level = scene.instantiate()
-	level.achievement_save_path = "user://test_c_progress_level.cfg"
 	root.add_child(level)
 	current_scene = level
 	await create_timer(0.15).timeout
@@ -53,6 +52,11 @@ func run_checks() -> void:
 	projectile.position = Vector2(-1000, -1000)
 	escape()
 	check(paused and menus.page == menus.Page.PAUSE, "Esc opens pause menu")
+	var pause_labels := []
+	for action in menus._content.find_children("*", "Button", true, false):
+		pause_labels.append(action.text)
+	check(pause_labels == ["继续游戏", "重试本房间", "成就手册", "返回首页"],
+		"Pause menu has the four actions in the intended order")
 	check(not enemy.can_process() and not player.can_process() and menus.can_process(), "World pauses while menu remains active")
 	var before_position: Vector2 = enemy.global_position
 	var before_projectile: Vector2 = projectile.global_position
@@ -106,7 +110,7 @@ func run_checks() -> void:
 	check(paused and menus.page == menus.Page.DEATH, "Death opens menu and freezes world")
 	await create_timer(0.1, true).timeout
 	check(player.is_dead, "Death waits for a player choice")
-	button(menus, "重试本房间").pressed.emit()
+	button(menus, "重试").pressed.emit()
 	check(not paused and not player.is_dead and player.health == player.max_health, "Retry restores living player")
 	check(player.pulse_gun_equipped, "REV-14: retry preserves learned pulse ability")
 	check(enemy.global_position == level.enemy_baselines[enemy.entity_id].position, "Retry restores enemy baseline position")
@@ -115,26 +119,21 @@ func run_checks() -> void:
 	for label in level.hud_canvas.find_children("*", "Label", true, false):
 		check(not label.text.contains("WASD") and not label.text.contains("目标方向"), "HUD has no controls or navigation card")
 	var menu_script = load("res://scenes/gameplay/game_menus.gd")
-	var isolated = menu_script.new()
-	var save_path := "user://test_c_ui_regression.cfg"
-	if FileAccess.file_exists(save_path):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
-	isolated.achievement_save_path = save_path
-	root.add_child(isolated)
-	check(isolated.unlock_achievement("first_weapon"), "Achievement unlocks once")
-	check(not isolated.unlock_achievement("first_weapon"), "Duplicate achievement is ignored")
+	check(menus.unlock_achievement("first_weapon"), "Achievement unlocks once")
+	check(not menus.unlock_achievement("first_weapon"), "Duplicate achievement is ignored")
 	var reloaded = menu_script.new()
-	reloaded.achievement_save_path = save_path
 	root.add_child(reloaded)
-	check(reloaded.achievements.get("first_weapon", false), "Achievement survives reload")
-	isolated.queue_free()
+	check(reloaded.achievements.get("first_weapon", false), "Achievement survives menu recreation")
 	reloaded.queue_free()
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 	escape()
 	await process_frame
-	button(menus, "返回标题").pressed.emit()
-	await process_frame
-	await process_frame
+	button(menus, "返回首页").pressed.emit()
+	var home_loading = root.get_node_or_null("EntryLoading")
+	check(paused and home_loading != null, "Return Home opens loading while the room stays paused")
+	if home_loading != null:
+		check(home_loading.background.texture.resource_path == "res://assets/loading/abdomen_workshop.png",
+			"Returning from the first level shows the abdomen card")
+		await home_loading.tree_exited
 	check(not paused and current_scene.scene_file_path == "res://scenes/main.tscn", "Return to title clears pause")
 	current_scene.game_save_path = "user://test_c_progress_journey.json"
 	preload("res://scenes/gameplay/journey_save.gd").erase(current_scene.game_save_path)
@@ -161,7 +160,5 @@ func run_checks() -> void:
 			break
 	check(not paused and current_scene.scene_file_path == "res://scenes/gameplay/abdomen_level.tscn", "Intro leads back into gameplay")
 	preload("res://scenes/gameplay/journey_save.gd").erase("user://test_c_progress_journey.json")
-	if FileAccess.file_exists("user://test_c_progress_level.cfg"):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_c_progress_level.cfg"))
 	print("RESTORE CHECKS: ", "PASS" if failures.is_empty() else failures)
 	quit(0 if failures.is_empty() else 1)

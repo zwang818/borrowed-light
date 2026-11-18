@@ -3,7 +3,6 @@ func _initialize() -> void:
 	call_deferred("run")
 func run() -> void:
 	var scene = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
-	scene.achievement_save_path = "user://test_terminal_gate.cfg"
 	root.add_child(scene)
 	scene.player.set_physics_process(false)
 	for enemy in scene.enemies:
@@ -42,7 +41,5 @@ func run() -> void:
 	await create_timer(.15).timeout
 	scene.queue_free()
 	await create_timer(.15).timeout
-	if FileAccess.file_exists("user://test_terminal_gate.cfg"):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_terminal_gate.cfg"))
 	print("Terminal elimination gate: PASS")
 	quit()

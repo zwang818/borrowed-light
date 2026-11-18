@@ -1,6 +1,6 @@
 extends SceneTree
 
-const SAVE := "user://test_c_ui_achievements.cfg"
+const LEGACY_FILE := "user://achievements.cfg"
 var failures: Array[String] = []
 
 
@@ -16,6 +16,8 @@ func check(condition: bool, message: String) -> void:
 
 
 func run_checks() -> void:
+	var legacy_exists := FileAccess.file_exists(LEGACY_FILE)
+	var legacy_bytes := FileAccess.get_file_as_bytes(LEGACY_FILE) if legacy_exists else PackedByteArray()
 	var font: FontFile = load("res://scenes/gameplay/gameplay_ui_theme.tres").default_font
 	check(not font.allow_system_fallback, "Product text uses bundled font without system fallback")
 	var glyphs: Dictionary = {}
@@ -26,16 +28,14 @@ func run_checks() -> void:
 				glyphs[codepoint] = true
 	for codepoint in glyphs:
 		check(font.has_char(codepoint), "Bundled font covers U+%04X" % codepoint)
-	if FileAccess.file_exists(SAVE):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
 	var script = load("res://scenes/gameplay/game_menus.gd")
 	var menus = script.new()
-	menus.achievement_save_path = SAVE
 	root.add_child(menus)
 	await process_frame
 	await process_frame
 	var toasts = root.get_node("AchievementNotifications")
 	toasts.display_seconds = 0.04
+	check(menus.achievements.is_empty(), "Achievement state starts empty")
 	check(menus.unlock_achievement("first_weapon"), "First achievement unlocks")
 	check(not paused and toasts._active_id == "first_weapon", "Toast appears without pausing game")
 	check(menus.unlock_achievement("first_terminal"), "Second achievement unlocks")
@@ -53,7 +53,7 @@ func run_checks() -> void:
 	menus._show_page(menus.Page.ACHIEVEMENTS)
 	await process_frame
 	check(paused and menus._manual_list.get_child_count() == script.DEFINITIONS.size(), "Handbook lists locked and unlocked entries")
-	check(menus._manual_summary.text.contains("2 / %d" % script.DEFINITIONS.size()), "Completion summary counts actual unlocks")
+	check(menus._manual_summary.text == "已完成 2 / %d 项 · 本次旅程" % script.DEFINITIONS.size(), "Summary counts unlocks for the current journey")
 	var filter = menus._content.find_children("*", "OptionButton", true, false)[0]
 	filter.select(1)
 	filter.item_selected.emit(1)
@@ -89,12 +89,16 @@ func run_checks() -> void:
 	await process_frame
 	check(is_instance_valid(toasts) and toasts._active_id == "first_clear", "Toast survives owning scene removal")
 	var reloaded = script.new()
-	reloaded.achievement_save_path = SAVE
 	root.add_child(reloaded)
-	check(reloaded._completed_count() == 3, "Save reload preserves achievements")
-	check(not reloaded.unlock_achievement("first_clear"), "Reloaded unlock does not replay toast")
-	check(toasts._queue.is_empty(), "Loading save adds no notifications")
+	check(reloaded._completed_count() == 3, "A new menu sees the same in-memory achievements")
+	check(not reloaded.unlock_achievement("first_clear"), "Duplicate unlock does not replay on menu recreation")
+	check(reloaded.unlock_achievement("first_exit") and toasts._queue.size() == 1, "Reset fixture has a pending toast")
+	reloaded.reset_journey_achievements()
+	check(reloaded._completed_count() == 0, "New journey resets completed achievements")
+	check(toasts._active_id.is_empty() and not toasts._card.visible and toasts._queue.is_empty(), "New journey discards active and queued toasts")
+	check(reloaded.unlock_achievement("first_clear") and toasts._active_id == "first_clear", "New journey can unlock the same achievement again")
+	check(FileAccess.file_exists(LEGACY_FILE) == legacy_exists
+		and (not legacy_exists or FileAccess.get_file_as_bytes(LEGACY_FILE) == legacy_bytes), "Achievements never write the legacy file")
 	reloaded.queue_free()
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
 	print("ACHIEVEMENT CHECKS: ", "PASS" if failures.is_empty() else failures)
 	quit(0 if failures.is_empty() else 1)

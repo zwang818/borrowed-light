@@ -7,6 +7,8 @@ var menus
 var health_display
 var save_path := ""
 var save_data: Dictionary = {}
+var defer_entry_save := false
+var resume_at_checkpoint := false
 var notice: Label
 var scatter_approach = preload("res://scenes/gameplay/interaction_point.gd").new()
 
@@ -40,6 +42,8 @@ func _ready() -> void:
 		get_tree().remove_meta("journey_session")
 		save_path = session.path
 		save_data = session.get("data", {})
+		defer_entry_save = session.get("defer_save", false)
+		resume_at_checkpoint = session.get("resume_at_checkpoint", false)
 	player.scatter_unlocked = save_data.get("scatter_unlocked", false)
 	player.restore_player($SpawnPoints/PlayerSpawn.global_position,player.health,[&"pulse_gun"])
 	player.update_combat_mode()
@@ -59,13 +63,11 @@ func _ready() -> void:
 	notice.position = Vector2(24,110)
 	hud.add_child(notice)
 	menus = preload("res://scenes/gameplay/game_menus.gd").new()
-	if save_path.is_empty(): menus.achievement_save_path = "user://spine_preview_achievements.cfg"
+	menus.bind_achievement_journey(save_path)
 	add_child(menus)
 	menus.retry_requested.connect(_retry)
+	menus.restart_level_requested.connect(_restart_level)
 	menus.title_requested.connect(_return_title)
-	menus.save_requested.connect(func():
-		_save_progress()
-		menus.close_and_resume())
 	player.died.connect(_on_player_died)
 	var pause_input := preload("res://scenes/gameplay/pause_input.gd").new()
 	pause_input.target = self
@@ -135,6 +137,13 @@ func _refresh_scatter_response(delta: float) -> void:
 func _toggle_pause() -> void:
 	menus.toggle_pause()
 
+func _restart_level() -> void:
+	preload("res://scenes/gameplay/spine_flow_loading.gd").restart_level(
+		self, scene_file_path, save_path, JOURNEY.before_spine(save_data))
+
+func commit_level_restart() -> bool:
+	return save_path.is_empty() or _save_progress(false)
+
 func _retry() -> void:
 	menus.close_and_resume()
 	reset_test_combat()
@@ -186,8 +195,4 @@ func _save_progress(show_result: bool = true) -> bool:
 
 func _return_title() -> void:
 	if not save_path.is_empty() and not _save_progress(): return
-	menus.close_and_resume()
-	var loading := preload("res://scenes/ui/intro_cutscene/entry_loading.gd").new()
-	loading.name = "EntryLoading"
-	get_tree().root.add_child(loading)
-	loading.begin("res://scenes/main.tscn")
+	preload("res://scenes/ui/intro_cutscene/entry_loading.gd").return_home(get_tree())

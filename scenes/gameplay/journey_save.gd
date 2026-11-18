@@ -3,6 +3,7 @@ extends RefCounted
 const DEFAULT_PATH := "user://journey_save.json"
 const SCENE := "res://scenes/gameplay/abdomen_level.tscn"
 const SPINE := "res://scenes/gameplay/spine_level.tscn"
+const ABDOMEN_CHECKPOINT := "p1_first_combat"
 const SNAPSHOT := preload("res://scenes/gameplay/journey_snapshot.gd")
 const FLAGS := ["blueprint_known", "pulse_learned", "workshop_seen"]
 const DUCTS := ["duct_arrival", "duct_weapon", "duct_exit"]
@@ -46,6 +47,8 @@ static func _read(path: String) -> Dictionary:
 	data["first_level_cleared"] = data.get("first_level_cleared", false)
 	if data.has("scatter_unlocked") and not data.scatter_unlocked is bool:
 		return {}
+	if data.get("abdomen_checkpoint", "") not in ["", ABDOMEN_CHECKPOINT]:
+		return {}
 	var seen: Dictionary = {}
 	for id in data.ducts:
 		if not id is String or not (id in DUCTS) or seen.has(id):
@@ -65,6 +68,12 @@ static func resume_scene(data: Dictionary) -> String:
 	if data.get("version") == 2:
 		return data.scene
 	return SPINE if data.get("first_level_cleared", false) else SCENE
+
+static func before_spine(data: Dictionary) -> Dictionary:
+	var previous := data.duplicate(true)
+	for key in ["spine_flow", "scatter_unlocked", "snapshot"]:
+		previous.erase(key)
+	return previous
 
 static func _valid_snapshot(snapshot: Variant) -> bool:
 	if not snapshot is Dictionary or not snapshot.get("player") is Dictionary or not snapshot.get("enemies") is Dictionary:

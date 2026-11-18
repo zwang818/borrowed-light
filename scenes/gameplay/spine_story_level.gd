@@ -2,7 +2,10 @@ extends "res://scenes/gameplay/spine_level.gd"
 ## Interactive v5 flow on A's source map and B's real player/weapons/enemies.
 const FLOW := preload("res://scenes/gameplay/spine_flow_state.gd")
 const INPUT := preload("res://scenes/gameplay/input_bindings.gd")
+const CHECKPOINT_BEACON := preload("res://scenes/gameplay/checkpoint_beacon.gd")
 const F := Vector2(0.9063078,-0.4226183)
+const SHIFTED_CLEANER_LAYOUT := 2
+const SHIFTED_CLEANERS := [&"p2_cleaner_03", &"p2_cleaner_04", &"p2_cleaner_05"]
 @export var isolate_progress := false
 @export_enum("入口", "检修观察位", "图纸返程平台") var playtest_start := 0
 var transfer_payload: Dictionary = {}
@@ -14,30 +17,30 @@ var dialog_action: Callable
 var dialog_token := 0
 var dialog_required := false
 var protocol_panel
+var protocol_draft: Array[int] = []
+var protocol_draft_stop := 0
 var defense
 var signals
+var checkpoint_beacon: CHECKPOINT_BEACON
+var protocol_rail
 var demo_cleaner
 var authorized_gate
 var exit_gate
-var gate_receipting := false
 var baseline_gate := false
 var baseline_exit := false
 var record_cued := false
-var scan_done := false
-var scan_time := 0.0
 var refill_time := -1.0
 var complete_panel: CanvasLayer
 var prompt: Label
 var pressure_label: Label
 var nearest := ""
 var death_pending := false
-var saved_receipt := false
-var protocol_armed := false
-var world_revision := 0
+var protocol_suspended := false
+var protocol_hint_left := 0.0
 var tree_installed := false
-var demo_controlled := false
-var demo_viewed := false
 var pending_live_snapshot: Dictionary = {}
+@onready var protocol_zone: Node2D = map.get_node("Reservations/ProtocolZone")
+@onready var observation_floor: Polygon2D = map.get_node("Floors/ProtocolObservationBay/Top")
 
 func hero(): return $SpawnPoints/PlayerSpawn/Player
 func anchor(key: String) -> Vector2:
@@ -49,6 +52,7 @@ func _enter_tree() -> void:
 	tree_installed = true
 	super._enter_tree()
 	$SpawnPoints/PlayerSpawn/Player.set_script(preload("res://scenes/gameplay/spine_flow_player.gd"))
+	$SpawnPoints/CleanerSpawn/Cleaner.set_script(preload("res://scenes/gameplay/spine_patrol_demo.gd"))
 
 func _ready() -> void:
 	# The base creates menus during _ready: establish the real save owner first.
@@ -82,7 +86,6 @@ func _ready() -> void:
 	$SpawnPoints/SentrySpawn/Sentry.entity_id = "p2_sentry_01"
 	demo_cleaner = $SpawnPoints/CleanerSpawn/Cleaner
 	demo_cleaner.entity_id = "p2_cleaner_01"
-	demo_cleaner.patrol_offsets = PackedVector2Array([Vector2.ZERO, F*36])
 	for i in range(2): baselines[i].state = enemies[i].get_combat_state().duplicate(true)
 	for unit in enemies:
 		if unit is CharacterBody2D:
@@ -102,8 +105,11 @@ func _ready() -> void:
 	add_child(defense)
 	defense.configure(map,hero())
 	signals = preload("res://scenes/gameplay/spine_story_signals.gd").new()
-	signals.flow = self
 	add_child(signals)
+	protocol_rail = preload("res://scenes/gameplay/spine_protocol_rail.gd").new()
+	protocol_rail.name = "MaintenanceRail"
+	add_child(protocol_rail)
+	protocol_rail.configure(self)
 	sheet = preload("res://scenes/gameplay/interaction_sheet.gd").new()
 	add_child(sheet)
 	sheet.finished.connect(_dialog_finished)
@@ -122,8 +128,17 @@ func _ready() -> void:
 	prompt.theme = health_display.theme
 	pressure_label.theme = health_display.theme
 	sheet.presentation_theme = health_display.theme
-	if pending_live_snapshot.is_empty() and (not transfer_payload.is_empty() or state.checkpoint == "return"):
+	_setup_service_checkpoint()
+	if resume_at_checkpoint:
+		var spawn := _retry_spawn()
+		if pending_live_snapshot.is_empty():
+			hero().global_position = spawn
+		else:
+			pending_live_snapshot = JOURNEY.SNAPSHOT.with_player_spawn(pending_live_snapshot, spawn)
+	elif pending_live_snapshot.is_empty() and (not transfer_payload.is_empty() or state.checkpoint == "return"):
 		hero().global_position = anchor("ScatterReturnEntry")
+	elif pending_live_snapshot.is_empty() and checkpoint_beacon.activated:
+		hero().global_position = checkpoint_beacon.global_position
 	elif pending_live_snapshot.is_empty() and state.first_fall:
 		hero().global_position = anchor("DefenseSafePocket")
 	if playtest_start > 0 and isolate_progress:
@@ -136,16 +151,22 @@ func _ready() -> void:
 			authorized_gate.set_open(true)
 			hero().global_position = anchor("ScatterReturnEntry")
 	baseline_gate = authorized_gate.is_open
+	if baseline_gate:
+		_clear_gate_lane()
 	baseline_exit = exit_gate.is_open
 	if not pending_live_snapshot.is_empty():
 		_apply_live_snapshot(pending_live_snapshot)
 		pending_live_snapshot = {}
+	protocol_rail.set_powered(state.receipt_learned)
+	hero().protocol_after_move = _sync_protocol
 	story_ready = true
+	_sync_protocol()
 	entry_ready = true
 	_update_camera()
 	$Camera2D.reset_smoothing()
 	# The base cannot capture story nodes before this asynchronous setup finishes.
-	if not save_path.is_empty() and transfer_payload.is_empty(): _save_progress(false)
+	if not defer_entry_save and not save_path.is_empty() and transfer_payload.is_empty():
+		_save_progress(false)
 	if not get_tree().root.has_node("EntryLoading"): on_entry_revealed()
 
 func _spawn_gate_sentry() -> void:
@@ -192,13 +213,15 @@ func _sentry_on_screen(enemy: Node2D) -> bool:
 	return super._sentry_on_screen(enemy) and _line_clear(hero().global_position,enemy.global_position)
 
 func _cleaner_on_screen(enemy: Node2D) -> bool:
-	return super._cleaner_on_screen(enemy) and _line_clear(hero().global_position,enemy.global_position)
+	return (story_ready and state.receipt_learned and super._cleaner_on_screen(enemy)
+		and _line_clear(hero().global_position,enemy.global_position))
 
 func _line_clear(from: Vector2, to: Vector2) -> bool:
 	return get_world_2d().direct_space_state.intersect_ray(PhysicsRayQueryParameters2D.create(from,to,1)).is_empty()
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not story_ready: return
+	protocol_hint_left = maxf(0.0, protocol_hint_left - delta)
 	_update_camera()
 	health_display.set_health(hero().health,hero().max_health)
 	hero().modulate = Color(0.62,0.83,0.92,0.82) if hero().has_protocol else Color.WHITE
@@ -208,22 +231,14 @@ func _process(_delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	if not story_ready or hero().is_dead or busy: return
-	var zone = map.get_node("Reservations/ProtocolZone")
-	var inside := Rect2(Vector2.ZERO,zone.size).has_point(zone.to_local(hero().global_position))
-	inside = inside or hero().global_position.distance_to(anchor("ProtocolTerminalUse")) < 95
-	if hero().has_protocol and not inside:
-		hero().set_protocol_active(false)
-		scan_done = false
-	if inside and protocol_armed and state.receipt_learned and not hero().has_protocol and not saved_receipt:
-		hero().set_protocol_active(true)
-	if not inside: saved_receipt = false
-	_update_demonstration(delta)
-	_update_scanning(delta)
+	if state.hatch_open and hero().controls_enabled:
+		checkpoint_beacon.check_contact(hero().global_position)
 	if not record_cued and hero().global_position.distance_to(map.get_node("RouteWaypoints/RecordRoute/Point00").global_position) < 110:
 		record_cued = true
 		signals.record_at = anchor("MaintenanceRecord")
 		signals.record_clock = 0
-	if state.calibrated and hero().global_position.distance_to(anchor("ScatterCheckpoint")) < 48:
+	# Keep the old automatic fallback for journeys that have not lit the beacon.
+	if state.checkpoint == "entry" and state.calibrated and hero().global_position.distance_to(anchor("ScatterCheckpoint")) < 48:
 		state.checkpoint = "return"
 	if refill_time >= 0:
 		if hero().global_position.distance_to(anchor("SpinalFluidTapUse")) > 100:
@@ -239,43 +254,40 @@ func _physics_process(delta: float) -> void:
 	if exit_gate.is_open and hero().global_position.distance_to(anchor("ThoraxEntry")) < 76:
 		_finish_level()
 
-func _update_demonstration(_delta: float) -> void:
-	var observe: bool = not state.receipt_learned and demo_cleaner.health>0 and hero().global_position.distance_to(anchor("ProtocolObservation"))<200 and not demo_cleaner.can_detect()
-	if not observe:
-		if demo_controlled: demo_cleaner.set_physics_process(true)
-		demo_controlled = false
-		return
-	if not demo_viewed:
-		demo_viewed = true
-		signals.clock = 0
-	demo_controlled = true
-	demo_cleaner.set_physics_process(false)
-	var phase := fposmod(signals.clock,5)
-	if phase<0.35:
-		demo_cleaner.move_toward_point(anchor("ProtocolCleaner"),128)
-	elif phase<4.3:
-		demo_cleaner.velocity = Vector2.ZERO
-		demo_cleaner.get_node("Facing").rotation = demo_cleaner.global_position.direction_to(anchor("ProtocolDemoReader")).angle()
-	else:
-		demo_cleaner.move_toward_point(anchor("ProtocolCleaner")-F*44,90)
+func _setup_service_checkpoint() -> void:
+	checkpoint_beacon = CHECKPOINT_BEACON.new()
+	checkpoint_beacon.name = "CheckpointBeacon"
+	checkpoint_beacon.activated = state.checkpoint == FLOW.SERVICE_CHECKPOINT
+	map.get_node("Checkpoints/ServiceExit").add_child(checkpoint_beacon)
+	checkpoint_beacon.touched.connect(_activate_service_checkpoint)
 
-func _update_scanning(delta: float) -> void:
-	if not is_instance_valid(demo_cleaner) or demo_cleaner.health<=0: return
-	if not hero().has_protocol:
-		if not demo_controlled: demo_cleaner.set_physics_process(true)
+func _activate_service_checkpoint() -> void:
+	var previous: String = state.checkpoint
+	state.checkpoint = FLOW.SERVICE_CHECKPOINT
+	if not _save_progress(false):
+		state.checkpoint = previous
+		checkpoint_beacon.show_notice("存档失败，请稍后再试")
 		return
-	if scan_done or hero().global_position.distance_to(demo_cleaner.global_position)>160: return
-	demo_cleaner.set_physics_process(false)
-	scan_time += delta
-	demo_cleaner.velocity = Vector2.ZERO
-	if scan_time < 0.55:
-		demo_cleaner.move_toward_point(hero().global_position-F*54,50)
-	elif scan_time < 1.3:
-		demo_cleaner.get_node("Facing").rotation = demo_cleaner.global_position.direction_to(hero().global_position).angle()
-	else:
-		scan_done = true
-		demo_cleaner.patrol_offsets = PackedVector2Array([F*42, -F*42])
-		demo_cleaner.set_physics_process(true)
+	checkpoint_beacon.activated = true
+	checkpoint_beacon.show_notice("存档点已保存")
+
+func _test_protocol_active() -> bool:
+	# Read the regional boundary at the player's current position, including the crossing frame.
+	return story_ready and state.receipt_learned and not hero().is_dead \
+		and not protocol_suspended and _in_protocol_area(hero().global_position)
+
+func _sync_protocol() -> void:
+	if not story_ready:
+		return
+	if protocol_suspended and not _in_protocol_area(hero().global_position):
+		protocol_suspended = false
+	var active := _test_protocol_active()
+	if hero().has_protocol != active:
+		hero().set_protocol_active(active)
+
+func _in_protocol_area(position: Vector2) -> bool:
+	return Rect2(Vector2.ZERO, protocol_zone.size).has_point(protocol_zone.to_local(position)) \
+		or Geometry2D.is_point_in_polygon(observation_floor.to_local(position), observation_floor.polygon)
 
 func _update_scatter_prompt() -> void:
 	if is_instance_valid(scatter_prompt): scatter_prompt.hide()
@@ -286,7 +298,23 @@ func try_unlock_scatter() -> bool:
 	return false
 
 func _interaction_candidates() -> Dictionary:
-	return {"MaintenanceHatch": "开启检修盖板" if state.first_fall else "检查装甲接缝", "MaintenanceRecord":"查看旧记录", "ProtocolTerminalUse":"接入检修终端", "ProtocolDemoReader":"重放维护灯语", "ProtocolGateReader":"发送维护回执", "ScatterEvolution":"重看散射图纸" if state.scatter_blueprint else "读取散射图纸", "ReturnDuct":"进入返程井", "SpinalFluidTapUse":"接入脊液补能", "ExitTerminal":"接入胸腔终端"}
+	var candidates := {
+		"MaintenanceHatch": "开启检修盖板" if state.first_fall else "检查装甲接缝",
+		"MaintenanceRecord": "查看旧记录",
+		"ProtocolTerminalUse": "操作导轨终端",
+		"ScatterEvolution": "重看散射图纸" if state.scatter_blueprint else "读取散射图纸",
+		"ReturnDuct": "进入返程井",
+		"SpinalFluidTapUse": "接入脊液补能",
+		"ExitTerminal": "接入胸腔终端",
+	}
+	if not state.receipt_learned:
+		candidates["ProtocolObservation"] = "观察清扫路线"
+	if not authorized_gate.is_open and not authorized_gate.opening:
+		var reader_prompt := "检查门侧读头"
+		if state.receipt_learned:
+			reader_prompt = "发送维护回执" if _test_protocol_active() else "检查门侧读头"
+		candidates["ProtocolGateReader"] = reader_prompt
+	return candidates
 
 func _update_prompt() -> void:
 	nearest = ""
@@ -299,7 +327,14 @@ func _update_prompt() -> void:
 			nearest = key
 			distance = d
 	prompt.text = "[%s] %s" % [INPUT.action_label(&"interact"),candidates[nearest]] if not nearest.is_empty() and not busy else ""
-	if refill_time >= 0: prompt.text = "脊液接入  %d%%" % int(refill_time/1.6*100)
+	if refill_time >= 0:
+		prompt.text = "脊液接入  %d%%" % int(refill_time/1.6*100)
+	elif authorized_gate.opening:
+		prompt.text = "授权门开启中"
+	elif protocol_hint_left > 0.0 and not busy and not hero().is_dead:
+		prompt.text = "隐身已接通 · 检修区内可自由移动"
+	elif prompt.text.is_empty() and hero().has_protocol:
+		prompt.text = "维护协议已启用"
 
 func _interaction_clear(from: Vector2, to: Vector2, key: String) -> bool:
 	var hit := get_world_2d().direct_space_state.intersect_ray(PhysicsRayQueryParameters2D.create(from,to,1))
@@ -311,7 +346,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if not story_ready or event.is_echo(): return
 	if event.is_action_pressed("protocol_exit") and hero().has_protocol:
 		hero().set_protocol_active(false)
-		saved_receipt = true
+		protocol_suspended = true
 		get_viewport().set_input_as_handled()
 	if event.is_action_pressed("interact") and not busy and not hero().is_dead:
 		_update_prompt()
@@ -336,9 +371,8 @@ func interact(key: String) -> void:
 				_save_progress()
 		"MaintenanceRecord":
 			_talk("旧记录 · 按事件先后排列",["记录|较早：返程路线已预约。", "记录|较晚：收到求救通讯。", "小一|这条返程记录……比那次通话还早。"],func(): state.record_read = true; _save_progress())
-		"ProtocolDemoReader":
-			signals.clock = 0
-			_talk("维护读头",["小一|它的背灯和读头，正在交换同一段信号。"],func(): pass)
+		"ProtocolObservation":
+			_talk("检修窗", ["小一|它总从地面的起点出发。记下 %d 段方向，还有它中间停下的位置。" % demo_cleaner.waypoints.size()], func(): pass)
 		"ProtocolTerminalUse": _open_protocol()
 		"ProtocolGateReader": _authorize_gate()
 		"ScatterEvolution":
@@ -386,51 +420,53 @@ func _dialog_finished(token: int, completed: bool) -> void:
 	if completed and action.is_valid(): action.call()
 
 func _open_protocol() -> void:
-	if state.receipt_learned:
-		protocol_armed = true
-		hero().set_protocol_active(true)
-		saved_receipt = false
+	if state.receipt_learned and protocol_suspended:
+		protocol_suspended = false
+		_sync_protocol()
 		return
 	busy = true
 	hero().pulse_gun.cancel()
 	get_tree().paused = true
 	protocol_panel = preload("res://scenes/gameplay/spine_protocol_panel.gd").new()
-	add_child(protocol_panel)
-	protocol_panel.submitted.connect(func(correct):
-		if correct:
+	protocol_panel.calibrated = state.receipt_learned
+	protocol_panel.expected = protocol_rail.observed_directions()
+	protocol_panel.expected_stop = demo_cleaner.stop_after
+	protocol_panel.directions.assign(protocol_draft)
+	protocol_panel.initial_stop = protocol_draft_stop
+	protocol_panel.board_angle = protocol_rail.board_angle
+	protocol_panel.submitted.connect(func():
+		if not state.receipt_learned:
 			state.receipt_learned = true
-			protocol_armed = true
-			hero().set_protocol_active(true)
+			protocol_rail.set_powered(true)
+			protocol_hint_left = 5.0
+			_sync_protocol()
 			_save_progress())
-	protocol_panel.closed.connect(func(): busy = false; get_tree().paused = false)
+	protocol_panel.closed.connect(func():
+		protocol_draft.assign(protocol_panel.directions)
+		protocol_draft_stop = protocol_panel.stop_picker.get_selected_id()
+		busy = false
+		get_tree().paused = false)
+	add_child(protocol_panel)
 
 func _authorize_gate() -> void:
 	if not state.receipt_learned:
-		_talk("门侧读头",["小一|它在等维护回执。我得先观察检修窗里的信号。"],func(): pass)
+		_talk("门侧读头", ["小一|维护协议还没接通。先到检修终端输入清扫者的路线。"], func(): pass)
 		return
-	if authorized_gate.is_open: return
-	busy = true
-	gate_receipting = true
-	var revision := world_revision
-	hero().set_protocol_active(true)
-	signals.clock = 0
-	await get_tree().create_timer(2.0,false).timeout
-	if hero().is_dead or revision != world_revision:
-		busy = false
-		gate_receipting = false
+	if authorized_gate.is_open or authorized_gate.opening:
 		return
-	for pair in [["p2_cleaner_05","ProtocolYieldRear"],["p2_cleaner_06","ProtocolYieldFront"]]:
+	if not _test_protocol_active():
+		_talk("门侧读头", ["小一|需要接入维护协议，才能发送回执。"], func(): pass)
+		return
+	_clear_gate_lane()
+	authorized_gate.unlock()
+
+func _clear_gate_lane() -> void:
+	for pair in [["p2_cleaner_05", "ProtocolYieldRear"], ["p2_cleaner_06", "ProtocolYieldFront"]]:
 		for unit in enemies:
 			if unit.entity_id == pair[0] and unit.health > 0:
 				unit.home = anchor(pair[1])
 				unit.patrol_offsets = PackedVector2Array([Vector2.ZERO])
 				unit.patrol_index = 0
-				unit.move_toward_point(unit.home,55)
-	authorized_gate.unlock()
-	await authorized_gate.opened
-	if revision != world_revision: return
-	gate_receipting = false
-	busy = false
 
 func _on_player_died() -> void:
 	if death_pending: return
@@ -438,7 +474,7 @@ func _on_player_died() -> void:
 		death_pending = true
 		_recover_first_fall.call_deferred()
 	else:
-		menus.show_death()
+		menus.show_death(state.checkpoint != "entry")
 
 func _recover_first_fall() -> void:
 	busy = true
@@ -466,13 +502,12 @@ func _recover_first_fall() -> void:
 	_talk("通讯重新接通",["神明|等一下……我记得装甲下面有一道检修缝。你顺着那根回流管找找。", "小一|我看见接缝里的灯了。我会从下面过去。"],func(): _save_progress(),true)
 
 func _retry() -> void:
-	world_revision += 1
 	busy = false
-	gate_receipting = false
 	refill_time = -1
-	protocol_armed = false
-	scan_time = 0
-	scan_done = false
+	protocol_suspended = false
+	protocol_hint_left = 0.0
+	protocol_draft.clear()
+	protocol_draft_stop = 0
 	if is_instance_valid(protocol_panel): protocol_panel.queue_free()
 	sheet.dismiss()
 	menus.close_and_resume()
@@ -485,14 +520,24 @@ func _retry() -> void:
 	hero().pressure = state.ammo
 	hero().scatter_unlocked = state.calibrated
 	hero().set_protocol_active(false)
-	var spawn := anchor("ScatterCheckpoint") if state.checkpoint == "return" else (anchor("DefenseSafePocket") if state.first_fall else anchor("PlayerSpawn"))
-	hero().global_position = spawn
+	hero().global_position = _retry_spawn()
+	_update_camera()
+	$Camera2D.reset_smoothing()
 	authorized_gate.set_open(baseline_gate)
+	if baseline_gate:
+		_clear_gate_lane()
 	exit_gate.set_open(baseline_exit)
 	_door("p2_defense_isolation_gate").set_open(false)
 	map.set_service_passage_state(map.ServicePassage.OPEN if state.hatch_open else (map.ServicePassage.REVEALED if state.first_fall else map.ServicePassage.CONCEALED))
 	defense.reset_motion()
 	$BackgroundMusic.stop()
+
+func _retry_spawn() -> Vector2:
+	if checkpoint_beacon.activated:
+		return checkpoint_beacon.global_position
+	if state.checkpoint == "return":
+		return anchor("ScatterCheckpoint")
+	return anchor("DefenseSafePocket") if state.first_fall else anchor("PlayerSpawn")
 
 func _snapshot_world() -> Dictionary:
 	var units: Array = []
@@ -565,10 +610,18 @@ func _capture_room_snapshot(player: Node2D) -> Dictionary:
 		gate_state[gate.get_meta("stable_id","")] = {"open":gate.is_open,"aperture":gate.aperture,"opening":gate.opening}
 	snapshot.room["story_gates"] = gate_state
 	snapshot.room["story_defense"] = defense.capture_journey_state()
-	snapshot.room["story_runtime"] = {"protocol_armed":protocol_armed,"saved_receipt":saved_receipt,"scan_done":scan_done,"scan_time":scan_time,"record_cued":record_cued,"demo_viewed":demo_viewed}
+	snapshot.room["story_runtime"] = {"protocol_suspended": protocol_suspended,
+		"record_cued": record_cued, "demo_loop_time": demo_cleaner.loop_time}
 	return snapshot
 
 func _apply_live_snapshot(snapshot: Dictionary) -> void:
+	var runtime: Dictionary = snapshot.room.get("story_runtime",{})
+	# Restore the original deployment for unsolved saves made with the shifted markers.
+	if not state.receipt_learned and runtime.get("observation_layout", 0) == SHIFTED_CLEANER_LAYOUT:
+		snapshot = snapshot.duplicate(true)
+		for unit in enemies:
+			if unit.entity_id in SHIFTED_CLEANERS and snapshot.enemies.has(String(unit.entity_id)):
+				snapshot.enemies[String(unit.entity_id)].global_position = JOURNEY.SNAPSHOT.pack_vector(unit.home)
 	super._restore_room_snapshot(hero(),snapshot)
 	for gate in doors:
 		var saved: Dictionary = snapshot.room.get("story_gates",{}).get(gate.get_meta("stable_id",""),{})
@@ -578,16 +631,28 @@ func _apply_live_snapshot(snapshot: Dictionary) -> void:
 		gate.opening = saved.get("opening",false)==true and not gate.is_open
 	if snapshot.room.get("story_defense") is Dictionary:
 		defense.restore_journey_state(snapshot.room.story_defense)
-	var runtime: Dictionary = snapshot.room.get("story_runtime",{})
-	protocol_armed = runtime.get("protocol_armed",hero().has_protocol)==true
-	saved_receipt = runtime.get("saved_receipt",false)==true
-	scan_done = runtime.get("scan_done",false)==true
-	if JOURNEY.SNAPSHOT.number(runtime.get("scan_time")): scan_time = maxf(0,float(runtime.scan_time))
-	record_cued = runtime.get("record_cued",false)==true
-	demo_viewed = runtime.get("demo_viewed",false)==true
+	protocol_suspended = runtime.get("protocol_suspended",
+		runtime.get("rail_suspended", runtime.get("saved_receipt", false))) == true
+	var loop_time = runtime.get("demo_loop_time", 0.0)
+	demo_cleaner.restore_loop(float(loop_time) if JOURNEY.SNAPSHOT.number(loop_time) else 0.0)
+	if not state.receipt_learned:
+		for unit in enemies:
+			if (unit is CharacterBody2D and unit.health > 0
+					and (unit.web_phase != 0 or unit.state in [unit.State.CHASE, unit.State.WARNING, unit.State.ATTACK])):
+				unit.web_phase = 0
+				unit.begin_recovery()
+				unit.update_visuals()
+	for silk in get_tree().get_nodes_in_group("b_cleaner_webs"):
+		if silk.source == demo_cleaner or (not state.receipt_learned and is_ancestor_of(silk)):
+			silk.spent = true
+			silk.queue_free()
+	record_cued = runtime.get("record_cued", false) == true
+	if authorized_gate.is_open or authorized_gate.opening:
+		_clear_gate_lane()
 
 func on_entry_revealed() -> void:
-	if story_ready: super.on_entry_revealed()
+	if story_ready and hero().is_dead:
+		menus.show_death(state.checkpoint != "entry")
 
 func _finish_level() -> void:
 	if busy: return

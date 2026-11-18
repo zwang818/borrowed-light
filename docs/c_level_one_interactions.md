@@ -87,7 +87,7 @@ level.interaction_finished.connect(presenter.close_request)
 
 ## 成就、素材与共享影响
 
-完整 11 项条件见 [成就目录](c_achievement_catalog.md)。首次解锁通知、加载不重播，旧四项 ID 与 `user://achievements.cfg` 兼容；全清统计实际可击破的 10 处室内蛛网，不要求清理数百片墙外装饰网。
+完整 11 项条件见 [成就目录](c_achievement_catalog.md)。同一趟旅程中每项成就首次解锁时弹出通知，进入新旅程时清零；全清统计实际可击破的 10 处室内蛛网，不要求清理数百片墙外装饰网。
 
 B 的玩家、小一动画、机械臂和战斗接口直接复用；A 的共享接点仅给 `breakable_web.gd` 加两行一次性 `broken_once(web)` 信号与发送。地图检查同步 B 新发射口并隔离成就保存，未改伤害、蛛网物理或蜘蛛行为。
 

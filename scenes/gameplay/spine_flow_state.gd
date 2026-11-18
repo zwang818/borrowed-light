@@ -1,6 +1,7 @@
 extends RefCounted
 ## Serializable knowledge is separate from room baselines and transient combat.
 const FLAGS := ["first_fall", "hatch_open", "record_read", "receipt_learned", "scatter_blueprint", "assembled", "calibrated", "fluid_tutorial", "completed"]
+const SERVICE_CHECKPOINT := "service_exit"
 static func fresh() -> Dictionary:
 	var state := {"ammo": 0, "capacity": 4, "room": "spine", "baseline": {}, "checkpoint": "entry"}
 	for flag in FLAGS: state[flag] = false
@@ -15,6 +16,8 @@ static func sanitize(raw: Variant) -> Dictionary:
 	if raw.get("ammo") is int or raw.get("ammo") is float: result.ammo = clampi(int(raw.ammo),0,result.capacity)
 	result.room = "workshop" if raw.get("room") == "workshop" else "spine"
 	result.checkpoint = "return" if raw.get("checkpoint") == "return" else "entry"
+	if raw.get("checkpoint") == SERVICE_CHECKPOINT and result.hatch_open:
+		result.checkpoint = SERVICE_CHECKPOINT
 	if raw.get("baseline") is Dictionary:
 		var base: Dictionary = raw.baseline
 		result.baseline = {"gate":base.get("gate",false)==true,"exit":base.get("exit",false)==true,"units":[]}

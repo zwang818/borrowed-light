@@ -168,9 +168,8 @@ func run() -> void:
 	check(intro._frame_index==click_index+1,"Rebound interaction key also advances opening dialogue")
 	intro.queue_free()
 	await process_frame
-	set_meta("journey_session",{"path":JOURNEY_PATH,"achievement_path":"user://test_key_bindings_achievements.cfg"})
+	set_meta("journey_session",{"path":JOURNEY_PATH})
 	var level = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
-	level.achievement_save_path = "user://test_key_bindings_achievements.cfg"
 	root.add_child(level)
 	current_scene = level
 	while not level.entry_ready: await process_frame
@@ -258,6 +257,5 @@ func run() -> void:
 	await create_timer(0.15,true).timeout
 	DirAccess.remove_absolute(PATH)
 	JOURNEY.erase(JOURNEY_PATH)
-	DirAccess.remove_absolute("user://test_key_bindings_achievements.cfg")
 	print("BINDINGS CHECK: ","PASS" if failures.is_empty() else failures)
 	quit(0 if failures.is_empty() else 1)

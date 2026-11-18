@@ -2,13 +2,14 @@ extends CanvasLayer
 ## Menus keep processing while their sibling gameplay nodes are paused.
 
 signal retry_requested
+signal restart_level_requested
 signal title_requested
-signal save_requested
 
 enum Page { CLOSED, PAUSE, ACHIEVEMENTS, DEATH }
 const TOAST_SCRIPT := preload("res://scenes/gameplay/achievement_toasts.gd")
 const UI_THEME := preload("res://scenes/gameplay/gameplay_ui_theme.tres")
 static var _toasts: CanvasLayer
+static var _journey_achievements: Dictionary = {}
 
 const DEFINITIONS := {
 	"first_weapon": {"title": "借来一束光", "description": "首次完成脉冲机械臂制造"},
@@ -24,11 +25,11 @@ const DEFINITIONS := {
 	"clean_clear": {"title": "保修期内", "description": "在一次房间挑战中不受伤并击败全部清扫者", "flavor": "外壳无划痕，售后很满意。", "group": "战斗"},
 }
 
-var achievement_save_path := "user://achievements.cfg"
-var achievements: Dictionary = {}
+var achievements: Dictionary = _journey_achievements.get_or_add("", {})
 var achievement_progress: Dictionary = {}
 
 var page: Page = Page.CLOSED
+var death_at_checkpoint := false
 var _content: VBoxContainer
 var _overlay: Control
 var _panel: PanelContainer
@@ -50,10 +51,18 @@ func set_achievement_progress(id: String, current: int, maximum: int) -> void:
 		_refresh_handbook()
 
 
+func bind_achievement_journey(path: String) -> void:
+	achievements = _journey_achievements.get_or_add(path, {})
+
+
+func reset_journey_achievements() -> void:
+	achievements.clear()
+	_toasts.reset_notifications()
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 20
-	_load_achievements()
 	if not is_instance_valid(_toasts):
 		_toasts = TOAST_SCRIPT.new()
 		_toasts.name = "AchievementNotifications"
@@ -92,7 +101,8 @@ func toggle_pause() -> void:
 			pass
 
 
-func show_death() -> void:
+func show_death(at_checkpoint: bool = false) -> void:
+	death_at_checkpoint = at_checkpoint
 	_show_page(Page.DEATH)
 
 
@@ -106,24 +116,10 @@ func unlock_achievement(id: String) -> bool:
 	if not DEFINITIONS.has(id) or achievements.get(id, false):
 		return false
 	achievements[id] = true
-	var config := ConfigFile.new()
-	for key in DEFINITIONS:
-		config.set_value("achievements", key, achievements.get(key, false))
-	var error := config.save(achievement_save_path)
-	if error != OK:
-		push_warning("成就记录保存失败：%s" % error_string(error))
 	_toasts.show_achievement(id, DEFINITIONS[id], _completed_count(), DEFINITIONS.size())
 	if page == Page.ACHIEVEMENTS:
 		_refresh_handbook()
 	return true
-
-
-func _load_achievements() -> void:
-	var config := ConfigFile.new()
-	if config.load(achievement_save_path) != OK:
-		return
-	for key in DEFINITIONS:
-		achievements[key] = config.get_value("achievements", key, false) == true
 
 
 func _show_page(next_page: Page) -> void:
@@ -139,19 +135,19 @@ func _show_page(next_page: Page) -> void:
 			_label("暂停", 34, Color(0.96, 0.9, 0.73))
 			_label("Esc 继续游戏", 16, Color(0.65, 0.75, 0.77))
 			_button("继续游戏", close_and_resume)
-			_button("保存游戏", func(): save_requested.emit())
+			_button("重试本房间", func(): restart_level_requested.emit())
 			_button("成就手册", func(): _show_page(Page.ACHIEVEMENTS))
-			_button("重试本房间", func(): retry_requested.emit())
-			_button("返回标题", func(): title_requested.emit())
+			_button("返回首页", func(): title_requested.emit())
 		Page.ACHIEVEMENTS:
 			_label("成就手册", 34, Color(0.96, 0.9, 0.73))
 			_build_handbook()
 			_button("返回暂停菜单", func(): _show_page(Page.PAUSE))
 		Page.DEATH:
 			_label("信号中断", 34, Color(0.96, 0.9, 0.73))
-			_label("重试将回到本房间入口", 16, Color(0.65, 0.75, 0.77))
-			_button("重试本房间", func(): retry_requested.emit())
-			_button("返回标题", func(): title_requested.emit())
+			_label("重试将回到存档点" if death_at_checkpoint else "重试将回到本房间入口",
+				16, Color(0.65, 0.75, 0.77))
+			_button("重试", func(): retry_requested.emit())
+			_button("返回首页", func(): title_requested.emit())
 	var first_button := _content.find_children("*", "Button", false, false)
 	if not first_button.is_empty():
 		first_button[0].call_deferred("grab_focus")
@@ -208,7 +204,7 @@ func _build_handbook() -> void:
 
 
 func _refresh_handbook() -> void:
-	_manual_summary.text = "已完成 %d / %d 项 · 记录保存在本机" % [_completed_count(), DEFINITIONS.size()]
+	_manual_summary.text = "已完成 %d / %d 项 · 本次旅程" % [_completed_count(), DEFINITIONS.size()]
 	_manual_progress.value = _completed_count()
 	for child in _manual_list.get_children():
 		_manual_list.remove_child(child)

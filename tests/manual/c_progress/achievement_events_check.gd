@@ -1,5 +1,4 @@
 extends SceneTree
-const SAVE := "user://test_c_achievement_events.cfg"
 var failures: Array[String] = []
 func _initialize() -> void:
 	call_deferred("run")
@@ -8,10 +7,7 @@ func check(ok: bool, message: String) -> void:
 		failures.append(message)
 		printerr("FAIL: " + message)
 func run() -> void:
-	if FileAccess.file_exists(SAVE):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
 	var level = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
-	level.achievement_save_path = SAVE
 	root.add_child(level)
 	current_scene = level
 	await create_timer(0.15).timeout
@@ -54,13 +50,11 @@ func run() -> void:
 	check(menus.achievements.get("clean_clear", false), "Fresh no-hit attempt can award clean clear")
 	check(not menus.unlock_achievement("web_sweeper"), "Previously unlocked full clear does not notify again")
 	var reader = load("res://scenes/gameplay/game_menus.gd").new()
-	reader.achievement_save_path = SAVE
 	root.add_child(reader)
-	check(reader.achievements.get("web_sweeper", false) and reader.achievements.get("first_retry", false), "New achievements persist to disk")
-	check(not reader.unlock_achievement("web_sweeper"), "Reload never replays unlocked achievement")
+	check(reader.achievements.get("web_sweeper", false) and reader.achievements.get("first_retry", false), "New menus share the active achievement state")
+	check(not reader.unlock_achievement("web_sweeper"), "Existing achievement does not repeat in the same session")
 	reader.queue_free()
 	level.queue_free()
 	await process_frame
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
 	print("ACHIEVEMENT EVENTS: ", "PASS" if failures.is_empty() else failures)
 	quit(0 if failures.is_empty() else 1)

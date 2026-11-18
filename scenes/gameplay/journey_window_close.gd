@@ -3,7 +3,7 @@ extends Node
 var save_before_exit: Callable
 var previous_auto_quit: bool
 
-func _ready() -> void:
+func _enter_tree() -> void:
 	previous_auto_quit = get_tree().auto_accept_quit
 	get_tree().auto_accept_quit = false
 	get_tree().root.close_requested.connect(_on_close_requested)
