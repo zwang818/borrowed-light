@@ -1,4 +1,5 @@
 extends Node2D
+signal open_changed(opened: bool)
 const ATLAS := preload("res://assets/sprites/environment/abdomen/terrain_atlas.png")
 const ART_SCALE := preload("res://scenes/levels/abdomen/abdomen_art_scale.gd")
 var dimensions := Vector2(48, 48)
@@ -28,6 +29,7 @@ func set_open(value: bool) -> void:
 	if not is_instance_valid(lid) or is_open == value:
 		return
 	is_open = value
+	open_changed.emit(value)
 	if motion != null and motion.is_valid():
 		motion.kill()
 	# Menu opening is an explicit state change, not an advancing world timer.

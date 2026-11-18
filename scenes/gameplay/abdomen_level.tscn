@@ -1,7 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://cn7uabqfbv1p8"]
+[gd_scene load_steps=6 format=3 uid="uid://cn7uabqfbv1p8"]
 
 [ext_resource type="Script" path="res://scenes/gameplay/abdomen_level.gd" id="1_abdomen_level"]
 [ext_resource type="PackedScene" path="res://scenes/levels/abdomen/abdomen_graybox.tscn" id="2_graybox"]
+[ext_resource type="AudioStream" path="res://assets/audio/blueprint_transfer.wav" id="3_blueprint_audio"]
+[ext_resource type="AudioStream" path="res://assets/audio/mechanicals/02_shell_hit.wav" id="4_player_hurt"]
+[ext_resource type="AudioStream" path="res://assets/audio/mechanicals/03_bulkhead_unlock.wav" id="5_terminal_unlock"]
 
 [node name="AbdomenLevel" type="Node2D"]
 process_mode = 1
@@ -16,3 +19,17 @@ script = ExtResource("1_abdomen_level")
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(1.5, 1.5)
 limit_smoothed = true
+
+[node name="MechanicalAudio" type="Node2D" parent="."]
+
+[node name="BlueprintTransferAudio" type="AudioStreamPlayer" parent="."]
+process_mode = 3
+stream = ExtResource("3_blueprint_audio")
+
+[node name="PlayerHurtAudio" type="AudioStreamPlayer" parent="."]
+process_mode = 3
+stream = ExtResource("4_player_hurt")
+
+[node name="TerminalUnlockAudio" type="AudioStreamPlayer" parent="."]
+process_mode = 3
+stream = ExtResource("5_terminal_unlock")

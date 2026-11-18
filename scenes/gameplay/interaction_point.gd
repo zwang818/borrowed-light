@@ -5,6 +5,7 @@ enum Cue { INDICATOR, SEAM, NONE, FLOOR_BUTTON, PANEL, RECTANGLE }
 const REACTION_RANGE := 112.0
 const PROMPT_DELAY := 0.22
 const BUTTON_TREAD := Rect2(-16, -9, 32, 18)
+const STEP_MARKER_RADIUS := 20.0
 const TERRAIN := preload("res://assets/sprites/environment/abdomen/terrain_atlas.png")
 
 var interaction_id: StringName
@@ -18,6 +19,29 @@ var _strength := 0.0
 var _tint := Color("abcebb")
 var _button_depth := 0.0
 var _rectangle_focused := false
+var step_marker: Sprite2D
+var _marker_occupied := false
+var _marker_pulse: Tween
+
+func add_step_marker() -> void:
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.19, 0.37, 1.0])
+	gradient.colors = PackedColorArray([Color("e6f3f4"), Color("b9dbe5"), Color("7eaaba", 0.24), Color("7eaaba", 0.0)])
+	var texture := GradientTexture2D.new()
+	texture.width = 32
+	texture.height = 32
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.gradient = gradient
+	step_marker = Sprite2D.new()
+	step_marker.name = "StepMarker"
+	step_marker.texture = texture
+	step_marker.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	add_child(step_marker)
+
+func is_on_step_marker(origin: Vector2) -> bool:
+	return origin.distance_squared_to(global_position) <= STEP_MARKER_RADIUS * STEP_MARKER_RADIUS
 
 func update_approach(origin: Vector2, can_prompt: bool, still: bool, delta: float, ready := true) -> void:
 	if cue == Cue.FLOOR_BUTTON:
@@ -32,6 +56,15 @@ func update_approach(origin: Vector2, can_prompt: bool, still: bool, delta: floa
 	nearby = in_range and has_clear_path_from(origin)
 	_dwell = minf(_dwell + delta, PROMPT_DELAY) if can_prompt and still else 0.0
 	prompt_ready = _dwell >= PROMPT_DELAY
+	if step_marker != null:
+		prompt_ready = can_prompt and is_on_step_marker(origin)
+		if prompt_ready and not _marker_occupied:
+			if _marker_pulse != null and _marker_pulse.is_running():
+				_marker_pulse.kill()
+			_marker_pulse = create_tween().set_trans(Tween.TRANS_SINE)
+			_marker_pulse.tween_property(step_marker, "scale", Vector2.ONE * 1.85, 0.14).set_ease(Tween.EASE_OUT)
+			_marker_pulse.tween_property(step_marker, "scale", Vector2.ONE, 0.32).set_ease(Tween.EASE_IN_OUT)
+		_marker_occupied = prompt_ready
 	if cue == Cue.RECTANGLE and _rectangle_focused != can_prompt:
 		_rectangle_focused = can_prompt
 		queue_redraw()
@@ -82,11 +115,13 @@ func _draw_floor_button() -> void:
 	draw_rect(Rect2(-21, -13, 42, 28), Color("131d20"))
 	draw_texture_rect_region(TERRAIN, Rect2(-20, -12, 40, 24), panel, Color("82928b"))
 	draw_rect(Rect2(-18, -11, 36, 22), Color("1a2427"))
-	var travel := roundf(4.0 * _button_depth)
-	var top := -10.0 + travel
-	draw_rect(Rect2(-16, top, 32, 22 - travel), Color("25312f"))
+	var travel := roundf(7.0 * _button_depth)
+	var top := -15.0 + travel
+	draw_rect(Rect2(-16, top, 32, 25 - travel), Color("172322"))
+	draw_rect(Rect2(-15, top + 16, 30, 8 - travel), Color("40514b"))
 	draw_texture_rect_region(TERRAIN, Rect2(-16, top, 32, 16), tread, Color("b1beba"))
-	draw_line(Vector2(-15, top), Vector2(15, top), Color("8c9e94"))
+	draw_rect(Rect2(-16, top, 32, 16), Color("889e93"), false, 1)
+	draw_line(Vector2(-15, top + 1), Vector2(15, top + 1), Color("a6b9ad"))
 	for x in [-10, 0, 10]:
 		draw_rect(Rect2(x - 2, top + 8, 5, 2), Color("233334"))
 	for x in [-19, 17]:

@@ -49,11 +49,6 @@ func _draw() -> void:
 	if awake:
 		draw_texture_rect(BLUEPRINT, SCREEN, false, Color("c2d4c7"))
 		draw_rect(SCREEN, Color("4c7770"), false, 1)
-		if transfer_time < 0.0:
-			var socket := Rect2(-7, -7, 14, 10)
-			draw_rect(socket, INK)
-			draw_rect(socket, Color("a3c9b6"), false, 1)
-			draw_rect(Rect2(-2, -4, 4, 4), Color("c6a477"))
 	draw_rect(Rect2(-39, 19, 56, 11), INK)
 	for column in range(7):
 		draw_rect(Rect2(-36 + column * 7, 21, 4, 2), Color("829995"))
