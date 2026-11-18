@@ -1,0 +1,291 @@
+{
+  "frames": [
+    {
+      "filename": "borrowed-light-grab-lock 0",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 56
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 56
+      },
+      "sourceSize": {
+        "w": 72,
+        "h": 56
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-grab-lock 1",
+      "frame": {
+        "x": 72,
+        "y": 0,
+        "w": 72,
+        "h": 56
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 56
+      },
+      "sourceSize": {
+        "w": 72,
+        "h": 56
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-grab-lock 2",
+      "frame": {
+        "x": 144,
+        "y": 0,
+        "w": 72,
+        "h": 56
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 56
+      },
+      "sourceSize": {
+        "w": 72,
+        "h": 56
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-grab-lock 3",
+      "frame": {
+        "x": 0,
+        "y": 56,
+        "w": 72,
+        "h": 56
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 56
+      },
+      "sourceSize": {
+        "w": 72,
+        "h": 56
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-grab-lock 4",
+      "frame": {
+        "x": 72,
+        "y": 56,
+        "w": 72,
+        "h": 56
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 56
+      },
+      "sourceSize": {
+        "w": 72,
+        "h": 56
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-grab-lock 5",
+      "frame": {
+        "x": 144,
+        "y": 56,
+        "w": 72,
+        "h": 56
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 56
+      },
+      "sourceSize": {
+        "w": 72,
+        "h": 56
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-grab-lock 6",
+      "frame": {
+        "x": 0,
+        "y": 112,
+        "w": 72,
+        "h": 56
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 56
+      },
+      "sourceSize": {
+        "w": 72,
+        "h": 56
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-grab-lock 7",
+      "frame": {
+        "x": 72,
+        "y": 112,
+        "w": 72,
+        "h": 56
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 56
+      },
+      "sourceSize": {
+        "w": 72,
+        "h": 56
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-grab-lock 8",
+      "frame": {
+        "x": 144,
+        "y": 112,
+        "w": 72,
+        "h": 56
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 56
+      },
+      "sourceSize": {
+        "w": 72,
+        "h": 56
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-grab-lock 9",
+      "frame": {
+        "x": 0,
+        "y": 168,
+        "w": 72,
+        "h": 56
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 56
+      },
+      "sourceSize": {
+        "w": 72,
+        "h": 56
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-grab-lock 10",
+      "frame": {
+        "x": 72,
+        "y": 168,
+        "w": 72,
+        "h": 56
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 72,
+        "h": 56
+      },
+      "sourceSize": {
+        "w": 72,
+        "h": 56
+      },
+      "duration": 33
+    }
+  ],
+  "meta": {
+    "app": "https://github.com/patch-gg/pixelfx",
+    "version": "1",
+    "image": "borrowed-light-grab-lock.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 216,
+      "h": 224
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "borrowed-light-grab-lock",
+        "from": 0,
+        "to": 10,
+        "direction": "forward"
+      }
+    ],
+    "pixelfx": {
+      "id": "impacts/borrowed-light-grab-lock",
+      "name": "Borrowed Light — pincer latch",
+      "fps": 30,
+      "loop": false,
+      "frames": 11,
+      "frameSize": [
+        72,
+        56
+      ],
+      "pivot": [
+        36,
+        28
+      ],
+      "columns": 3
+    },
+    "borrowed_light": {
+      "events": [
+        "grab_contact"
+      ],
+      "visual_only": true,
+      "default_direction": [
+        1,
+        0
+      ]
+    }
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "size": [
+    224,
+    192
+  ],
+  "foot_anchor": [
+    100,
+    168
+  ],
+  "mirror_foot_anchor": [
+    124,
+    168
+  ],
+  "atlas": "并联清扫者_下砸动作图集.png",
+  "loop": false,
+  "contact_index": 5,
+  "frames": [
+    {
+      "file": "slam_01.png",
+      "rect": [
+        0,
+        0,
+        224,
+        192
+      ],
+      "pose": "低姿就位",
+      "hold_ms": 100,
+      "relative_to_impact_ms": -655
+    },
+    {
+      "file": "slam_02.png",
+      "rect": [
+        224,
+        0,
+        224,
+        192
+      ],
+      "pose": "屈肘提钳",
+      "hold_ms": 120,
+      "relative_to_impact_ms": -555
+    },
+    {
+      "file": "slam_03.png",
+      "rect": [
+        448,
+        0,
+        224,
+        192
+      ],
+      "pose": "闭钳举高",
+      "hold_ms": 200,
+      "relative_to_impact_ms": -435
+    },
+    {
+      "file": "slam_04.png",
+      "rect": [
+        672,
+        0,
+        224,
+        192
+      ],
+      "pose": "前压停顿",
+      "hold_ms": 170,
+      "relative_to_impact_ms": -235
+    },
+    {
+      "file": "slam_05.png",
+      "rect": [
+        0,
+        192,
+        224,
+        192
+      ],
+      "pose": "快速下落",
+      "hold_ms": 65,
+      "relative_to_impact_ms": -65
+    },
+    {
+      "file": "slam_06.png",
+      "rect": [
+        224,
+        192,
+        224,
+        192
+      ],
+      "pose": "接地压住",
+      "hold_ms": 55,
+      "relative_to_impact_ms": 0,
+      "event": "ground_contact",
+      "impact_point": [
+        184,
+        187
+      ]
+    },
+    {
+      "file": "slam_07.png",
+      "rect": [
+        448,
+        192,
+        224,
+        192
+      ],
+      "pose": "回弹卸力",
+      "hold_ms": 105,
+      "relative_to_impact_ms": 55
+    },
+    {
+      "file": "slam_08.png",
+      "rect": [
+        672,
+        192,
+        224,
+        192
+      ],
+      "pose": "低位复位",
+      "hold_ms": 205,
+      "relative_to_impact_ms": 160
+    }
+  ],
+  "authored_landing_point": [
+    184,
+    187
+  ],
+  "mirror_landing_point": [
+    40,
+    187
+  ]
+}

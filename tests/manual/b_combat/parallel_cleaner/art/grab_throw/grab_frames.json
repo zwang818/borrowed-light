@@ -1,0 +1,132 @@
+{
+  "boss": {
+    "size": [
+      272,
+      180
+    ],
+    "foot_anchor": [
+      100,
+      150
+    ],
+    "mirror_foot_anchor": [
+      172,
+      150
+    ],
+    "atlas": "Boss抓投_544x360.png",
+    "frames": [
+      {
+        "pose": "低位扣紧",
+        "event": "grab_contact",
+        "rect": [
+          0,
+          0,
+          272,
+          180
+        ],
+        "preview_start_ms": 0,
+        "preview_hold_ms": 65,
+        "claw_socket": [
+          154,
+          134
+        ],
+        "claw_socket_mirrored": [
+          118,
+          134
+        ],
+        "file": "grab_01.png",
+        "front_jaw_overlay": "jaw_01.png"
+      },
+      {
+        "pose": "举住停顿",
+        "event": "lift_hold",
+        "rect": [
+          272,
+          0,
+          272,
+          180
+        ],
+        "preview_start_ms": 65,
+        "preview_hold_ms": 180,
+        "claw_socket": [
+          188,
+          86
+        ],
+        "claw_socket_mirrored": [
+          84,
+          86
+        ],
+        "file": "grab_02.png",
+        "front_jaw_overlay": "jaw_02.png"
+      },
+      {
+        "pose": "转腕甩出",
+        "event": "throw_release",
+        "rect": [
+          0,
+          180,
+          272,
+          180
+        ],
+        "preview_start_ms": 245,
+        "preview_hold_ms": 75,
+        "claw_socket": [
+          233,
+          56
+        ],
+        "claw_socket_mirrored": [
+          39,
+          56
+        ],
+        "file": "grab_03.png"
+      },
+      {
+        "pose": "空钳收回",
+        "event": "claw_recovery",
+        "rect": [
+          272,
+          180,
+          272,
+          180
+        ],
+        "preview_start_ms": 320,
+        "preview_hold_ms": 560,
+        "file": "grab_04.png"
+      }
+    ]
+  },
+  "xiaoyi": {
+    "size": [
+      96,
+      96
+    ],
+    "atlas": "小一受击_288x96.png",
+    "frames": [
+      {
+        "pose": "被夹离地",
+        "rect": [
+          0,
+          0,
+          96,
+          96
+        ],
+        "file": "xiaoyi_held.png",
+        "anchor": [
+          48,
+          57
+        ],
+        "anchor_role": "torso_grip"
+      }
+    ]
+  },
+  "timing_clock_zero": "grab_contact",
+  "fx": [
+    {
+      "id": "borrowed-light-grab-lock",
+      "event": "grab_contact"
+    },
+    {
+      "id": "borrowed-light-throw-skid",
+      "event": "ground_contact"
+    }
+  ]
+}
