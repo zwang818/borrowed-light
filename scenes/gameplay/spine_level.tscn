@@ -1,7 +1,12 @@
 [gd_scene load_steps=3 format=3]
 [ext_resource type="PackedScene" path="res://tests/manual/b_combat/spine_combat_test.tscn" id="1"]
-[ext_resource type="Script" path="res://scenes/gameplay/spine_level.gd" id="2"]
+[ext_resource type="Script" path="res://scenes/gameplay/spine_story_level.gd" id="2"]
 [node name="SpineLevel" instance=ExtResource("1")]
 script = ExtResource("2")
-dynamic_walk_preview = false
+dynamic_walk_preview = true
+scatter_a_preview = true
+hot_scatter_preview = false
 metadata/test_only = false
+isolate_progress = false
+playtest_start = 0
+metadata/flow_version = "spine_v5_interactive"

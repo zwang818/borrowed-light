@@ -9,7 +9,7 @@ func run():
 	title.game_save_path=PATH
 	root.add_child(title)
 	current_scene=title
-	assert(title.start_button.text=="继续第二关")
+	assert(title.start_button.text=="继续旅程")
 	title._continue_journey()
 	await scene_changed
 	while root.has_node("EntryLoading"): await process_frame

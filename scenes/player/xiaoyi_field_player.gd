@@ -1,11 +1,7 @@
 extends "res://scenes/player/xiaoyi_map_player.gd"
 ## Shared movement/status behavior; ability acquisition remains owned by the level.
 func _enter_tree() -> void:
-	if not InputMap.has_action(SPRINT_ACTION):
-		InputMap.add_action(SPRINT_ACTION)
-		var key := InputEventKey.new()
-		key.physical_keycode = KEY_SHIFT
-		InputMap.action_add_event(SPRINT_ACTION,key)
+	super._enter_tree()
 
 const SPRINT_ACTION := &"b_sprint"
 @export var sprint_multiplier: float = 1.25

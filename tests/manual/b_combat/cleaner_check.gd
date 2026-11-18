@@ -63,7 +63,8 @@ func run_checks() -> void:
 	await physics_frame
 	await physics_frame
 	cleaner._physics_process(0.01)
-	check(cleaner.state == cleaner.State.RECOVERY, "Wall blocks pursuit; no stale target chase.")
+	check(cleaner.state == cleaner.State.CHASE and not cleaner.has_clear_line(cleaner.global_position, player.global_position),
+		"A visible target behind cover stays tracked while the cleaner looks for a route.")
 	# Visible player behind the locked attack direction is outside the damage region.
 	player.restore_player(Vector2(560, 500), 3, [&"pulse_gun"])
 	cleaner.global_position = Vector2(600, 500)

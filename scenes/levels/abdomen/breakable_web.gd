@@ -67,6 +67,14 @@ func reset_web() -> void:
 	set_physics_process(false)
 	queue_redraw()
 
+func restore_broken(age: float) -> void:
+	broken = true
+	_spider_released = true
+	_age = clampf(age, 0.0, 0.2)
+	collision_layer = 4 if _age < 0.2 and get_child_count() > 0 else 0
+	set_physics_process(_age < 0.2)
+	queue_redraw()
+
 func _draw() -> void:
 	if broken:
 		if _age < 0.2:

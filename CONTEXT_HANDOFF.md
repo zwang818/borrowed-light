@@ -1,252 +1,167 @@
-# 《借光》上下文交接文档
+# 借光 · 项目上下文交接
 
-核对日期：2026-11-07（Asia/Shanghai）。项目根目录：`/Users/Admin1/projects/game/borrowed-light`。
+> 2026-11-17（Asia/Shanghai）更新。项目延续开发，用户从本次交接起改任成员 C，负责交互与关卡进度。范围仅为此文档。本次核对了工作树、Git 引用、项目配置、设计文件与已有测试记录。
+>
+> 文中“已接入”表示当前分支的代码连到了所述入口。“已有验证”指注明来源的历史实测或日志。“设计已定”“地图预留”“待验证”分别表示尚需实现、已有几何或标记、尚缺对应验收。本次没有重跑游戏流程。
 
-本文依据当前工作树、Git 状态及本次对话中的明确决定编写。**当前代码基线优先于对话中的旧完成记录**；本文是交接索引，不替代 Bible，也不授权新增玩法。文中仓库内相对路径均相对于上述项目根目录。
+## 1. 项目目标、技术栈和分工
 
-## 1. 接手前先读：刚发生的版本回退
+《借光》是四人课程项目，采用 2D 俯视像素画面。小一返回机械神兽，沿途探索、学习使用脉冲和散射臂、理解维护协议，并前往意识核心营救神明。目标流程为荒原开场 → 腹腔制造区 → 脊柱输能区 → 胸腔 → 核心监护者与同步 → 荒原结尾，完整游玩预算 10–15 分钟，待完整试玩计时。
 
-- 用户明确要求从 GitHub 拉取 `feat/p1-combat`，并明确说“不要保存本地相对 p1-combat 多出的部分”。
-- 已成功获取远程分支，并执行 `git reset --hard origin/feat/p1-combat`。此前本地领先的 5 个提交已从当前分支移除；本次不恢复这些提交。
-- 当前分支：`feat/p1-combat`；跟踪：`origin/feat/p1-combat`。
-- 当前 HEAD：`f455ac3559f2b1f0d0104b9e38749615f855103d`。
-- 提交说明：`feat: 优化小一动作与手臂交互，修正敌人受击范围`。
-- 远程：`https://github.com/zwang818/borrowed-light`。
-- 回退完成时双方 ahead/behind 为 `0/0`，工作区干净。本文创建前再次核对仍无未提交修改。本文是本轮唯一预期新增文件，尚未提交或推送。
-- **不要把拉取 `feat/p1-combat` 误解为合并最新 main**。本轮没有再合并 main，未核验当前远程 main 的最新状态。
-- 后期电光激光、蓄力亮核及额外模型缩放曾在对话中实施/讨论，但当前工作树没有这些新特效实现。下一次开发不能沿用旧总结声称它们已在主场景中。
+- Godot `4.7.2.stable.official.ed1daf0bf`，以本机 `/Applications/Godot.app/Contents/MacOS/Godot --version` 和 README 为依据。GDScript、`.tscn`、`.tres`、`.gdshader`；2D 使用 GL Compatibility 和 `canvas_items` 拉伸。F5 主入口 `res://scenes/main.tscn`。工程配置无 Autoload。仓库用普通 Git 管理资源，`.gitattributes` 设置 LF，当前没有 LFS 过滤规则。
+- 人员历史名单见 [团队计划](docs/team_plan.md)。A 负责地图、美术与地形碰撞，B 负责小一、武器、敌人与战斗，C 负责交互、门禁、协议、重试、存档和正式关卡装配，D 负责叙事、视觉表现、音频及协调。用户当前接手 C；此前用户参与的 B 工作按既有成果保留。此交接只更新用户当前负责的工作，项目名单仍查团队文件。
+- 玩法与设计以 [Bible 总览](docs/bible/_index.md)、[各关游玩流程](docs/bible/09_level_flow.md)、[规则](docs/bible/03_rules.md) 和 [决策记录](docs/bible/99_decisions.md) 为准。判断是否已接入时先看所处分支的代码与资源，验收以相应运行结果为准。
 
-## 2. 项目目标、技术栈和协作职责
+### 目录与装配关系
 
-四人大学游戏开发课程项目：2D 俯视角像素剧情闯关游戏。小机器人“小一”进入机械神兽营救创造自己的神明，通过探索记忆、两种内置攻击能力、维护协议与关卡交互完成流程。完整设计目标约 10–15 分钟；当前主要实现标题、开场和第一关腹腔，不能称为整款游戏完成。
-
-- Godot：仓库 README 约定 `4.7.2.stable.official.ed1daf0bf`；本轮执行本机 `--version`，输出与之相同。
-- 语言：GDScript，资源为 `.tscn`、`.tres`、`.gdshader`、PNG/WAV/字体等。
-- 渲染：Compatibility / `gl_compatibility`；2D 游戏。配置中有 Jolt 3D 条目，不代表游戏改成 3D。
-- 主入口：`project.godot` → `scenes/main.tscn`；无 `[autoload]` 配置。
-- Git 普通素材管理；`.gitattributes` 当前未启用 LFS 过滤。不要把文档中的未来 LFS 建议当作已安装依赖。
-- 未发现仓库 `export_presets.cfg`，没有已核验的正式导出流程；不要声称已有可发布构建。
-
-| 成员 | 归属（以 docs/team_plan.md 为准） |
+| 路径 | 职责 |
 | --- | --- |
-| A 汪哲 | 全部地图、环境美术、碰撞、遮光与摆放；统一场景风格 |
-| B 傅韩鹏（当前用户） | 玩家、武器、伤害、敌人、Boss、角色素材接入及独立战斗灰盒 |
-| C 林昆泽 | 探索、交互、协议、重试/进度、运行场景与集成 |
-| D 蒋博宇（组长） | UI、叙事演出、字体、音效与音乐呈现 |
+| `project.godot`、`scenes/main.tscn` | 共用工程配置、F5 标题入口 |
+| `scenes/ui/title_screen/`、`scenes/ui/intro_cutscene/` | 标题、开场、共用 Loading 与关卡进入流程 |
+| `scenes/gameplay/` | 腹腔、脊柱正式包装，交互、HUD、暂停重试、成就、存档和转场 |
+| `scenes/levels/abdomen/`、`scenes/levels/spine/`、`scenes/levels/graybox/` | A 的路线、碰撞、标记、关卡美术和支撑资源 |
+| `scenes/player/`、`scenes/weapons/`、`scenes/enemies/` | 玩家状态、武器、清扫者、哨塔 |
+| `assets/` | 像素图、字体、音频、开场与加载图、过场视频等 |
+| `tests/manual/a_map/`、`tests/manual/b_combat/`、`tests/manual/c_progress/`、`tests/manual/gameplay/` | 独立地图与战斗预览、C 流程检查和正式场景回归 |
+| `docs/`、`docs/bible/`、`.github/pull_request_template.md` | 玩法设计、模块文档、协作与 PR 模板 |
+| `ab_test/`、`node_2d.tscn` | 旧试验与旧场景；F5 走 `scenes/main.tscn` |
 
-用户曾明确授权 B 做声音和主场景集成等局部跨模块工作；这不等于长期接管 A/C/D 所有内容。
+正式腹腔由 `scenes/gameplay/abdomen_level.tscn/.gd` 组合 A 腹腔地图与玩家、敌人、机关。正式脊柱 `scenes/gameplay/spine_level.tscn/.gd` 继承 B 第二灰盒的装配，直接复用 A 脊柱修订 5，并接上正式交互、菜单及存档。`tests/manual/b_combat/` 中有生产依赖，包括共享角色／清扫者贴图逻辑、枪口、散弹及第二关装配。正式入口机关也继承 `tests/manual/a_map/spine_hazard_preview.gd`。移动、删除或清理预览文件前需要追踪引用，尤其用户曾要求优化第二灰盒启动速度。
 
-## 3. 真实架构和目录
+## 2. 当前 Git 与接手基线
 
-```text
-borrowed-light/
-├── project.godot、README.md、.github/pull_request_template.md
-├── docs/
-│   ├── bible/                       # 十文件设计与执行约束
-│   ├── team_plan.md、version_control.md
-│   ├── abdomen_map.md、title_screen.md、asset_credits.md
-│   └── c_level_one_interactions.md、c_ui_achievements.md、c_achievement_catalog.md
-├── scenes/
-│   ├── main.tscn                    # 实例化标题，指定腹腔启动场景
-│   ├── ui/title_screen/、ui/intro_cutscene/
-│   ├── gameplay/                    # 腹腔组合、菜单、交互、成就、机械心等
-│   ├── levels/abdomen/、levels/graybox/
-│   ├── player/、weapons/
-│   └── enemies/cleaner/、enemies/sentry/
-├── assets/                         # 字体、声音、标题和环境等美术
-├── tests/manual/
-│   ├── a_map/、b_combat/、c_progress/、gameplay/
-├── ab_test/                        # 历史 AB 集成与 combat_snapshot
-└── CONTEXT_HANDOFF.md
-```
-
-README/分工中的 `scripts/`、`data/`、`scenes/runtime/`、`scenes/interactables/` 等属于建议目录，不能据此当作已实现架构；本次核对前三类相关业务实际集中在 `scenes/gameplay/` 等现有路径。
-
-关键依赖链：
-
-1. 标题经开场进入 `scenes/gameplay/abdomen_level.tscn`。
-2. 腹腔实例化 A 的 `scenes/levels/abdomen/abdomen_graybox.tscn`；`abdomen_level.gd` 读取标记，生成玩家、敌人、交互与门禁，维护重试状态。
-3. 共享玩家 `scenes/player/player.gd`；正式地图使用其子脚本 `xiaoyi_map_player.gd`。
-4. B 灰盒 `combat_player.gd` 又继承 `xiaoyi_map_player.gd`，只预授予散弹测试能力，避免维护两套行为。
-5. 正式地图正在直接引用 `tests/manual/b_combat/` 中的角色视觉、枪口适配、散弹弹丸和清扫者视觉。**这里不全是可删除的测试文件**；修改共享视觉会同时影响主场景，隔离试验前必须检查引用。
-6. `ab_test/ab_combat.tscn` 是历史组合，不是当前 F5 主入口，不应自动同步。
-
-## 4. 已实现功能与代码入口
-
-本节“已实现”指本轮核对当前代码存在，不代表本轮实机或全部回归通过。本轮仅文档任务，没有启动游戏或重跑玩法测试。
-
-### 4.1 玩家、模式和手臂
-
-- `scenes/player/player.gd/.tscn`：CharacterBody2D 移动、鼠标瞄准、伤害、无敌时间、死亡恢复、协议禁攻击。移动速度原型值 160；斜向归一化，使用碰撞移动。
-- `scenes/player/xiaoyi_map_player.gd`：主场景与灰盒共用的攻击/收手行为；`learn_pulse()`、`has_arm_module()`、`set_attack_mode()`、`get_shot_origin()` 是关键接口。
-- **当前键位是 1 激光、2 散弹**，没有按 2 手动无武器或按 3 散弹的现行绑定。内部枚举仍是 LASER=1、UNARMED=2、SCATTER=3，不能把枚举数字直接解释为键位。
-- 左臂激光、右臂散弹。已解锁能力和当前抬手姿态分开：`pulse_gun_equipped` / `scatter_unlocked` 表示能力，`selected_mode` 记住选择，`attack_mode` 控制表现。
-- 当前屏幕内存在可见且存活的 `combat_enemies` 时抬起选中的攻击臂；不是固定半径，也不等于 C 的真实照明可见性。
-- 无敌人时点击仍可抬手攻击环境蛛网；停止攻击约 2 秒后收手，记住选中的能力。能力模块收手后仍可见。
-- 首次 `learn_pulse()` 有约 1.2 秒装配后观察动作；点击攻击可中断。恢复不会再次播放此动作。
-- 正式关卡散弹默认未解锁，等待后续散弹进化点；B 灰盒直接解锁两种能力供测试。
-- 攻击忙碌时不切模式；死亡、禁用控制、协议状态会阻止相关攻击。
-
-视觉：`tests/manual/b_combat/xiaoyi_aim_visual.gd` 继承 `xiaoyi_combat_visual.gd`，使用 `art/xiaoyi/xiaoyi_body_rig.png` 和 `xiaoyi_arm_rig.png`。身体保持八方向，武器臂独立连续瞄准；无武器姿态随移动，攻击姿态考虑瞄准/发射方向。步态使用 `xiaoyi_gait.gdshader` 和帧动画，增强迈步而非仅整体平移。
-
-- 激光臂长度25、其他武器臂27、普通臂21、粗细1.12为当前视觉参数。
-- 手臂从肩部连接；头部独立遮挡层 `head_occluder.z_index=3`，防止枪管画到头上；不要沿用回退前总结中的 z=4。
-- 角色脚底箭头用于最近敌人方向提示，不代替射击方向。
-- 主场景和 B 灰盒当前 `display_height=60`。本轮查看的配置没有后期额外 `visual.scale=1.5`。
-- 主场景镜头 zoom=1.5 并有跟随/平滑；灰盒镜头固定 `(480,320)`、默认 zoom=1。屏幕显示尺寸受相机影响，不要通过改镜头替代用户要求的模型缩放。
-
-### 4.2 激光与散弹
-
-- `scenes/weapons/pulse_gun.gd/.tscn`：IDLE → CHARGING → FIRING。
-- 蓄力0.8秒；蓄力结束读取当前鼠标方向，再执行 ±10° 辅助索敌；发射后锁方向，枪口随玩家位置更新。
-- 激光最大持续0.5秒；命中墙或敌人后0.15秒结束；以0.3秒参数逐渐向外延伸。
-- 无反射、无20发弹夹、无旧0.3秒射击CD/5秒换弹；结束后可再次点按蓄力。
-- 激光不穿墙、不穿敌人，按地图边界截止，无旧固定短射程上限；单束同一伤害接收者只伤害一次。
-- `laser_trace.gd` 提供射线追踪与 `damage_receiver()` 归一化；`muzzle_pulse_gun.gd/.tscn` 让激光从左臂枪口发出，身体到枪口的阻挡检查防止贴墙穿透。
-- 当前效果仍是 `Line2D` Beam/BeamCore 和 `Polygon2D` ChargeGlow；蓄力转发射时旧 ChargeGlow 隐藏。**没有新版外部电磁炮序列帧，也没有蓄力亮核延续到激光结束的后期逻辑。**
-- 散弹在 `xiaoyi_map_player.gd` 和 `tests/manual/b_combat/scatter_pellet.gd`：右臂枪口、三颗、±12°、0.75秒冷却；逐颗碰撞/伤害。参数为原型，不自动宣布最终平衡。
-- `assets/audio/pulse_charge.wav`、`pulse_biu.wav`、`scenes/weapons/pulse_audio.gd` 是现有激光声音相关入口。
-
-### 4.3 敌人、生命与命中
-
-- 参数集中在 `scenes/weapons/combat_parameters.gd`：玩家3HP、受击无敌0.8秒；哨机/清扫者各3HP（原型数值）。
-- 哨机 `scenes/enemies/sentry/`：固定警戒、视线检查、预警后三连发；警戒320、预警0.75秒、弹间隔0.2秒、恢复1.25秒。弹速240、射程480、伤害1。
-- 清扫者 `scenes/enemies/cleaner/`：巡逻、追击、近身停顿预警、前方攻击、恢复。巡逻48、追击120、警戒256、攻击距离52、预警0.65秒、有效攻击0.16秒、恢复0.65秒、伤害1。
-- 用户明确选近身攻击，不增加第二套冲撞攻击。
-- `tests/manual/b_combat/cleaner_visual.gd`：采用 A 型灰绿色机械蜘蛛侧视/斜侧视觉；步行、攻击与预警表现；血条置于模型上方。素材 `art/cleaner/side_animation.png` 等。历史深色候选素材仍存在，不代表场景同时放置两版。
-- 主场景和灰盒都启用 `match_hurtbox`。`scenes/enemies/cleaner/cleaner_hurtbox.gd` + ModelHurtbox 用透明轮廓凸包适配动画帧，转发到敌人本体；移动碰撞与受击范围分开。
-- 这是对“视觉模型变大但激光打不中”的已实施修正。凸包并非逐像素精确遮罩，窄缝/边缘观感仍应实机复测。
-
-### 4.4 第一关、环境、UI与进度
-
-- `abdomen_level.gd`：查看图纸 → 回制造台主动装配/学习 → 清扫者战斗 → 清场开放终端区域入口 → 操作终端 → 出口门。
-- 终端入口门与出口门是不同对象；不能在有清扫者时提前使用终端。
-- `interaction_point.gd`、`interaction_sheet.gd` 等接入通讯；剧情会暂停世界；常驻以机械心耐久为主，已取消任务目标/距离导航栏。
-- 三个井盖逐点 E 解锁，已解锁点之间互传，有落点安全检查；本关实例内死亡保留解锁。
-- `_retry_level()`：当前恢复到出生标记，恢复满血（当前原型实现），保留 `pulse_learned`，恢复敌人、门、终端、蛛网，清理攻击/弹丸。**新的进化点后复活点尚未实现**；不能把当前满血实现当作 Bible OPEN-05 已定稿。
-- `game_menus.gd`、`pause_input.gd`、`health_hearts.gd`、`achievement_toasts.gd`：暂停/重试、机械心、成就手册与通知。当前11项成就，默认 `user://achievements.cfg` 本机保存；成就存储不是完整游戏存档。
-- A 环境：地板、墙体、灰绿废土像素风、机械臂焊接、压缩机、管线蒸汽、风扇动画；`abdomen_webs.gd`、`breakable_web.gd`、`fleeing_spider.gd` 支持破网释放无伤害逃跑蜘蛛、重试恢复。
-- 标题 `scenes/ui/title_screen/` 使用新版小一和 `xiaoyi_title_animation.gd` 循环动作；记忆档案入口不是已经完成的继续游戏读档。
-- B 灰盒有 `combat_audio.gd`、`audio/`、`music/background_music.gd` 等声音/BGM；历史 AB 也有独立音频检查。不要将其自动整套接入主场景，主场景/标题已有自己的声音接点。
-
-## 5. 已确认设计及覆盖关系
-
-以用户最新明确要求优先于旧讨论，再看现行 Bible 与决策记录。历史被覆盖的要求不要复活。
-
-1. “捡枪”已改为神明指导下学习、自我改造；左激光、右散弹体现身体进化与羁绊。保留 `pulse_gun` 等代码ID兼容，不因名称旧就批量重命名接口。
-2. REV-14 覆盖 REV-13：完成进化后死亡保留能力，不重新过进化、不重播首次教学、不回原点校准。未来在进化点之后设置复活点；首次教学仍需要。
-3. 身体八方向 + 武器臂独立瞄准，是为解决八向身体与连续激光方向偏差；不要无故退回整张武器贴图随身体旋转。
-4. 最新1/2选择能力 + 自动收放覆盖早期1/2/3三模式。收手不等于失去能力，也不等于不能打环境彩蛋。
-5. 清扫者采用灰绿色 A 型蜘蛛，侧视/斜侧而非纯顶视，动画需流畅协调；保留清楚预警及血条可读性。
-6. 脉冲枪时间、无反射、末端锁向、一次伤害按4.2；旧弹夹、反弹及点按瞬间锁向均废弃。
-7. Bible 十文件结构保持：`_index`、`01_core_loop`、`02_entities`、`03_rules`、`04_physics`、`05_ui_hud`、`06_audio`、`07_file_layout`、`08_naming`、`99_decisions`（均.md）。不要另造相互冲突的 Bible。
-8. 叙事仍是固定线性流程，无等级/技能树/材料刷取/第三种攻击；隐藏事实与结尾遵守 `_index.md` STORY-02/04，不擅改为双意识平等共生或新结局。
-
-Bible 中 REV-15 等历史条目还保留早期1/2/3描述，而当前代码和用户后续决定已变更；后续若专门整理设计文档需同步，**本次不修改 Bible**。
-
-## 6. 当前任务、待做与不要误判的历史工作
-
-### 本次任务
-
-只编写本交接文档。已完成代码/文档/版本静态核对及本机引擎版本检查；不修改业务代码，不自动提交/推送，不运行会产生玩法状态的实机验收。没有另一个获授权正在实施的玩法任务。
-
-### 后续建议顺序（不是擅自开工授权）
-
-1. 接到新任务先核对 Git 和本文基线是否仍一致。
-2. 若做 B 战斗试验，优先打开 `tests/manual/b_combat/combat_test.tscn`；先检查共享脚本影响主场景的范围。
-3. 针对新改动运行相关检查、实机看视觉；用户确认需要时再同步主场景/AB。
-4. 团队后续待完成：正式散弹进化点、进化后复活点、后续关卡/Boss、真实可见性与空间记忆、跨房间进度/完整存档、正式台词与联合验收。不能只凭存在测试或文档就宣布完成。
-
-### 历史特效意图：当前未保留，不自动恢复
-
-回退前用户希望：蓝白激光；充能使用“蓝白雷核放电”蓄力后半段，去掉最外围圈，保留蓝白核心；亮核先小→大，再随发射缩小，到枪口大小，与激光同时消失；覆盖枪口但不遮头。发射采用“电磁炮贯穿光束”素材，保持原伤害和阻挡逻辑。后来曾要求同步到主场景。
-
-来源目录（对话提供，本轮未重新验证其内容或存在性）：
-
-- `/Users/Admin1/projects/game/特效库/蓝白雷核放电-V1-256x256-Godot4/`
-- `/Users/Admin1/projects/game/特效库/电磁炮贯穿光束-V6-128x128-Godot4/`
-- 更早尝试：Downloads 中“电光冲刺拖尾 V2-128x128-Godot4”“雷电蓄能球-V1-128x128-Godot4”。
-
-当前没有 `tests/manual/b_combat/art/electric_laser/` 和 `electric_laser_visual.gd` 等实现。后续若用户要求继续特效，再核验素材并重新确定工作范围；此前“同步成功”的历史描述不代表当前状态。类似地，回退后的灰盒未保留额外1.5倍模型缩放，不要把本轮版本回退当作继续执行旧缩放任务。
-
-## 7. 已知问题、限制及排查结果
-
-| 事项 | 当前证据与状态 |
+| 项目 | 本次核对结果 |
 | --- | --- |
-| GitHub 网络 | 先报 `Could not resolve host: github.com`，联网重试报 `Recv failure: Operation timed out` 和 `Operation too slow. Less than 1 bytes/sec transferred the last 20 seconds`；最后重试成功并已对齐远程。未证实具体网络/代理根因，不应再说拉取未完成。 |
-| 设计文档滞后 | 早期三模式键位、原型状态等历史记录仍在；当前实现与后续用户决定见本文件，需专项同步时再改。 |
-| 测试目录被正式代码依赖 | 实际存在，不是清理建议；删除/改名会破坏主场景。 |
-| 显示与瞄准 | 独立臂和头部遮挡修正已在代码；肩点、八向切换、贴墙枪口和模型边缘命中仍需当前版本实机验收。 |
-| 环境像素密度 | 文档说明地板/墙/静态物件已统一当前试做基准；设备/蛛网仍保留原生细度，不等于全部素材已统一。 |
-| 重试与存档 | 当前本关重试与成就保存，不是设计要求的全套复活点/跨房间/跨程序存档。 |
-| 测试日志历史警告 | 前序工作曾出现 ObjectDB/resource 退出泄漏警告、macOS证书/用户设置保存权限警告；不能当作本轮新错误或已修复。新运行时记录完整输出，区分沙箱环境与真实断言失败。 |
+| 仓库 | `/Users/Admin1/projects/game/borrowed-light`，`origin` 为 `https://github.com/zwang818/borrowed-light` |
+| 当前分支 | `feat/p1-combat`，HEAD `691e8aba617537bbb252caa542daab9167ec0b63`，提交“优化清扫者配合与寻路，重做散弹特效” |
+| 跟踪分支 | `origin/feat/p1-combat` 指向同一提交，按本机引用计算领先／落后均为 0 |
+| 本地 main | `bc6337dbd143f9955ac6545f8024bcd5378d0918`，距本机记录的 `origin/main` 落后 78 个提交 |
+| 本机记录的 origin/main | `80cb1da6f3d72bf6470ad85a7d1f92a5a40b977e`。`HEAD...origin/main` 为 1／3。本次未 fetch，远端实时状态未核验 |
+| 开始交接前的工作树 | 只有未暂存 `.gitignore` 改动，加入 `/CONTEXT_HANDOFF.md`。交接文件已被 Git 跟踪，仍会显示文档更新。保留该既有改动；本次没有暂存、提交、切分支或合并 |
 
-仍待定规则见 `docs/bible/99_decisions.md`：OPEN-01完整美术规格/导出验证，OPEN-04协议首次攻击输入，OPEN-05维修/复活恢复量，OPEN-06部分界面暂停与散弹持续输入策略，OPEN-07最终数值，OPEN-08最终日志/布局/素材。清扫者近身攻击与死亡不重新校准已确认，不再当未定问题反复问。
+**新对话先核对目标基线。** 本机 `origin/main` 包含 `5a747a5` 与 PR #36 的腹腔神明独白和交互演出，涉及 `abdomen_voice.gd`、`abdomen_level.gd`、`interaction_point.gd`、`blueprint_terminal.gd`、`exit_terminal_visual.gd`、`intro_cutscene.gd`、独白插图与监听光效。该引用内还更新了正式脊柱散弹提示。当前检出的 `feat/p1-combat` 还没有这些改动。PR #37 的合并记录包含旧提交 `1fad03e`，其父提交与树均显示当前 `691e8ab` 的寻路、协同和加大弹头等预览仍在功能分支。开展 C 工作时先比较两边对 `abdomen_level.gd`、`spine_level.gd` 的修改，核对既有独白、装配反馈和当前战斗入口，避免重复实现或遗漏分支上的改动。共同基线 `1fad03e` 已有脊柱防线、摆臂和标准新版散弹。
 
-## 8. 用户偏好、范围限制和协作要求
+## 3. 当前代码已经接入的功能
 
-- 中文沟通，解释具体，保持原来的实现思路，不无故重写完成代码；改完检查并运行适合改动的测试，诚实说明未验证项。
-- 用户做 B，希望模块独立、可在灰盒测试，不依赖 A 先做完整地图；A 统一正式地图风格。
-- 未授权不要改地图布局或其他成员系统。明确要求“只文档”时只改文档。
-- 默认在 B 灰盒迭代；主场景、`ab_test/ab_combat.tscn` 的同步必须符合当轮要求，不能一次自动扩散到所有场景。共享脚本需特别留意。
-- 主场景不要因 B 模型/特效改动额外加入 BGM 和整套声音；保留现有成员接入，禁止把旧要求理解成删掉已有声音。
-- 修改模型大小不能偷偷改相机；动画要看得出迈步、关节动作，不只平移贴图；手臂不能盖头、不能残留第三只手。
-- 废土像素风，适配灰绿地图；脚步要像机器人踩金属格栅，有摩擦/零件声，避免电子提示音、沉闷或过响。当前不是再次修改音量的授权。
-- 可对真正未确定的玩法提简短选择题；普通实现细节不要反复索要许可。
-- Git：功能分支提交，PR由其他成员审核后合并main；不要直接推main、自动合并、自动群发。约20字提交文案和口语化群消息是常见后续请求。
-- 本次丢弃本地5个提交是明确的一次性授权，不代表未来可无条件reset/清理未提交工作。
-- 共享 `project.godot`、Input Map、Autoload、碰撞层、公共TileSet、`scenes/main.tscn` 由协作规范约束；同一场景避免多人同时编辑。不要升级引擎、切渲染器或引入大框架。
+### 3.1 标题、旅程、过场和加载
 
-## 9. 运行、测试与构建
+- `scenes/ui/title_screen/title_screen.gd` 提供单档旅程。根据当前档显示开始／继续／继续第二关；点击机器人可看记忆档案并操作存档，重新开始与删除需确认。开新旅程在关卡可用后才写入。`intro_cutscene.tscn/.gd` 处理有字幕的可推进、可跳过的开场演出。独立可行走荒原和结尾还没有相应正式流程。
+- 第一关终端已激活且脚底进最终落点后，先保存 `first_level_cleared`，再由 `scenes/ui/intro_cutscene/level_transition.gd` 播放约 12 秒关际视频 `assets/video/abdomen_to_spine.ogv`，保留原声和比例。原始文件为用户给的 `微信视频2026-11-14_184325_465.mp4`，运行用仓库中的 Theora/Vorbis 文件，无额外播放插件。视频结束经过共用 Loading 进入 `spine_level.tscn`。本局转场经 `spine_entry` 携带生命与存档路径，第二关恢复激光。从标题续玩经 `journey_session` 进入，从安全入口按基线恢复。
+- `entry_loading.gd` 负责线程读取、源图预热、挂场景、等待 `is_entry_ready()/get_entry_progress()`。百分比分段约为读取 0–60、预热 60–85、切换 85–88、初始化至 97、就绪帧至 100；最短展示 3 秒。覆盖层暂停期间照常更新并消费输入，失败可通过 LOAD FAILED／RETURN 返回。`loading_card_bag.gd` 用三张世界观图洗牌，`loading_robot_animation.gd` 以 14 fps 播放 8 帧跑步。`scenes/gameplay/prepared_sprite_frames.gd` 在加载阶段复用源图准备结果，切换完成后释放临时资源。初始化先后顺序涉及实际就绪，详见 [加载说明](docs/entry_loading.md)。
+- `scenes/gameplay/journey_save.gd` 管理格式 1 的 `user://journey_save.json`、`.tmp` 写入校验、`.bak` 回退。进度含图纸、脉冲、已读制造室记录、探索记录、三处管道和 `first_level_cleared`、可选布尔 `scatter_unlocked`。旧档缺新字段时有兼容默认值。当前 `scene` 字段仍以首关作为格式约定，标题按通关标记路由第二关；现有格式未记录实时坐标、生命或敌人快照。F6 直进正式关卡可试交互，成功建立实际旅程存档需走标题。成就单独存为 `user://achievements.cfg`。参见 [旅程存档](docs/journey_save.md)，其中较早段落以本分支的路由为准。
 
-本机 Godot 可执行文件：`/Applications/Godot.app/Contents/MacOS/Godot`。
+### 3.2 第一关腹腔交互（C）
+
+地图源 `scenes/levels/abdomen/abdomen_graybox.tscn`，正式运行脚本 `scenes/gameplay/abdomen_level.gd`。从 F5 开新旅程初始无战斗能力。当前分支的流程如下。
+
+| 环节 | 实际行为与落点 |
+| --- | --- |
+| 出生与环境 | `arrival_gripper` 有单独演出和控制归还。近距离显示 E 提示，按实际位置与视线获取可交互物件 |
+| 图纸 | `pulse_blueprint` 需在对话中确认“接入”，播放约 5 秒传输，完成后记住图纸、取得口令前段 `04`。取消可以重新阅读 |
+| 制造台 | `pulse_workbench` 缺图纸时提示，拿到图纸后授予脉冲，已有能力可防重复。受控试射／完整校准待实现 |
+| 制造室记录 | `workshop_origin` 为可选支路，阅读完成提供口令后段 `17`，取消不增加已读状态 |
+| 清场、入口门与电闸 | 现有三台清扫者全部击败后，开放 `p1_terminal_access_gate`。终端在合法站位内第一次 E 拉闸通电并切换交互点，之后 E 才开口令界面 |
+| 维护口令与出口 | `0417` 为四位知识口令，已知正确答案可直接输入；错误可改，Esc 取消。验证通过才开最终出口门。脚底到门后合法区域且终端已激活时才进关际转场 |
+| 管道 | `duct_arrival`、`duct_weapon`、`duct_exit` 分别在出生、图纸和终端区；E 解锁，限第一关内已解锁目标。传送挑选可行走、无墙体或敌人占用的落点，并复位镜头、取消蓄力 |
+| 探索、成就与菜单 | 探索当前记录采样过的区域；完整可见性、地图日志／空间记忆仍待做。11 项成就通过现有事件触发，无数值奖励。室内 10 处可击破蛛网计入成就，背景蛛网独立。`game_menus.gd`、`pause_input.gd`、`health_hearts.gd`、`achievement_toasts.gd` 提供相应界面 |
+| 死亡和重试 | 当前实现回出生点并补满生命；保留图纸、已读内容、已学脉冲、解锁管道、已有探索和成就。重置敌人（含出口遭遇）、两道门、终端、可破蛛网及临时弹丸／交互。环境循环相位、正式进化后复活点、恢复耐久规则仍需按 Bible 和试玩确认 |
+
+交互接口见 `interaction_point.gd`、`interaction_sheet.gd`。关卡维护 `interaction_requested(content_id, payload, token)`、`interaction_finished(token, completed)` 与 `finish_interaction(token, completed)`，只接受当前有效请求，异步完成、取消、重试和迟到回调都要考虑。`get_interaction_state()` 向展示层提供状态副本。口令权限只在 C 的 `_submit_terminal_code` 按 token、目标站位、门、通电和输入值确认。剧情播放完毕的回调只提交其对应内容。范围为 48 世界单位，终端还检查站立区与墙体视线。相关装配和反馈代码包括 `facility_visual.gd`、`exit_terminal_platform.gd`、`exit_terminal_visual.gd`、`duct_visual.gd`。详见 [第一关交互](docs/c_level_one_interactions.md)、[暂停与成就](docs/c_ui_achievements.md)、[成就目录](docs/c_achievement_catalog.md)。
+
+### 3.3 第二关脊柱正式内容与地图预留
+
+- `scenes/levels/spine/spine_graybox.tscn` 是 A 的斜向 2D 修订 5，复用同一套走面、点位与美术。正式场景使用美化地图并屏蔽灰盒调试操作，6 台清扫者、6 台哨塔，左臂激光已装备。正式暂停、死亡和重试已挂接。普通门的当前装配默认开放，检修暗道有独立的封板、碰撞和遮光。详见 [脊柱地图](docs/spine_map.md)、[正式接入](docs/spine_runtime_integration.md)。
+- `spine_entrance_hazards.gd` 已把新版入口防线接到正式关卡与 B 第二灰盒，沿用 A 的 8 个壁挂发射口和 7 个地埋电极。小型激光球会被墙挡，电圈跟随警告和周期，保留安全凹位。两类命中均调用 `apply_damage(1)`，受既有无敌时间限制。暂停冻结，重试清理激光球与电圈命中状态、重置周期。原 `spine_electric_seam.gd` 的通电接缝也仍接入。隔离闸落下、固定封锁脉冲和首次倒下推进尚未接入。`09_level_flow.md` 5.3 的“新版火力待接入”与当前基础伤害装配有差异。
+- 当前可用的 **临时** 散弹流程是靠近 `Markers/ScatterEvolution` 按 E 原地装配右臂。`try_unlock_scatter()` 位于 `tests/manual/b_combat/spine_combat_test.gd`，正式包装负责提示、保存以及重试后的保留。关卡先只有左臂；F5 旅程从标题续玩可恢复 `scatter_unlocked`，回到第二关安全入口。地图该点稳定 ID 为 `p2_scatter_evolution`，元数据 `role=blueprint`、`grants_ability=false`，正式规划要求先取图纸再返程制造。临时装配与设计的差异仍待 C 接入。
+- A 预览可用 K 模拟揭示暗道，靠近 E 开盖，P 测试协议门。`set_service_passage_state()` 在地图脚本中管理 `CONCEALED`、`REVEALED`、`OPEN`，同步两端装甲件、碰撞与遮光。`tests/manual/a_map/spine_protocol_preview.gd` 包含协议段预览。正式场景尚未把预览操作串成剧情和门禁。
+- C 可用的既有标记位于 `scenes/levels/spine/spine_graybox.tscn` 的 `Markers`。入口 `DefenseSafePocket`、`IsolationGate`、`MaintenanceHatch`、`MaintenanceExit`；协议 `ProtocolObservation`、`ProtocolDemoReader`、`ProtocolTerminalUse`、`ProtocolGateReader`、`ProtocolYieldRear`、`ProtocolYieldFront`、`ProtocolExit`；返程与补能 `ScatterEvolution`、`ScatterReturnEntry`、`SpinalFluidTap`、`SpinalFluidTapUse`。配对的稳定 ID、门位和净空见地图文档。可选记录支路、首台哨塔掩体与胸腔接收套筒已有位置，正式记录和胸腔出口交互尚未完成。
+
+### 3.4 与 C 接口相关的既有 B 行为
+
+这些是当前分支的集成基线，尤其装配、协议、死亡和换关会调用相同的玩家及敌人。
+
+- `player.gd` → `xiaoyi_map_player.gd` → `xiaoyi_field_player.gd` → `xiaoyi_journey_player.gd`。B 灰盒角色 `combat_player.gd` 共享正式武器行为。第一灰盒预装两臂；第二灰盒初始化仅装激光，保留散弹站供流程测试。正式玩家由关卡授予能力。保留兼容用 ID `pulse_gun`。选用武器后，无可见敌人时会自动收手，玩家仍可主动发起攻击。
+- 小一有八方向独立摆臂、收手与攻击姿态、贴合模型的受击区；自然行走用 `xiaoyi_scatter_pose_visual.gd` 等共享脚本，双臂以 22°／19° 交替摆动，使用局部肩点与头部遮挡。已调各向武器臂的像素位置、闲置副手和蓄力特效层级，黄色蓄力特效盖枪口并随头部遮挡。按住 Shift 疾走，松开恢复；首关及第一灰盒倍率 1.25，第二关及第二灰盒倍率 1.5，保持正常脚步节奏。灰色扬尘，已删金色擦地火花。第二关右上、左下方向按约 25° 顺着斜廊，其余场景保留常规 45° 斜向输入。
+- 脉冲激光使用约 0.8 秒蓄力与枪口、墙体遮挡，之前试过的墙面反射已删除。生产及第一灰盒用 `scatter_burst_a.gd` 的单扇形 9 弹丸散弹，弹速 448、射程 128、每颗 1 点、冷却 0.75 秒，尚无脊液弹量。第二灰盒的 `hot_scatter_preview=true` 选 `spine_scatter_burst.gd`，亮芯、加法混合火焰拖尾及撞墙／撞敌不同粒子。后一次把弹头长度加到 18 视觉像素，弹丸规则沿用基类。正式 `spine_level.tscn` 显式关闭该试验开关，沿用已批准的 A 版。试验使用的 Kenney 粒子和 CC0 许可随 `tests/manual/b_combat/art/vfx/kenney_particle_pack/` 保存。
+- 清扫者以屏幕内可见为发现条件；远处停下从红眼吐丝，减速约 2 秒至 60% 速度，然后继续接近；近处用既有预警近战。吐丝本身不扣血，正式持久模式速度 330，碰撞收尾。`scenes/enemies/cleaner/cleaner.gd` 与 `cleaner_pathfinder.gd` 提供带身体净空的局部路径、缓存路径和受阻／目标移动重规划。腹腔出口战斗经 `abdomen_exit_cleaner.gd` 配合，利用侧路、错开近战和远程压制，重试时恢复基线。
+- 浮空哨塔球头 16 向跟踪，进入玩家屏幕进入警戒，交替使用 A/B 攻击。B 组合与正式场景使用 360 弹速、持久炮弹及放大的配套扫掠碰撞，场景墙体仍拦弹。角色协议状态通过 `has_protocol` 影响攻击／清扫者识别等公共入口。后续 C 需要限定正式区域与退出，灰盒 P 注入只供测试。
+
+## 4. C 接手的当前计划与技术原则
+
+已确认流程见 [09 Level Flow 第 5 节](docs/bible/09_level_flow.md)。现阶段完成了地图修订 5、基础机关伤害、第二关正式装配、临时散弹与继续旅程。下面是接手后可按任务逐段落实的顺序，目前尚未启动新玩法实现。
+
+| 优先事项 | 目标、依赖与最小验收 |
+| --- | --- |
+| 1. 确认目标分支与第一关基线 | 对照 `origin/main` 的独白／交互与本分支战斗，确定后续工作的目标提交后重跑 F5、首关交互、门禁、存档转场。新任务按用户授权的分支范围推进 |
+| 2. 首次倒下 → 神明通讯 → 暗道 | 正面火力的普通致死和隔离闸落下后的封锁脉冲进入同一段一次性进度。安全凹位恢复、通信能完成或按约定跳过、短暂停黑后 E 揭示后的盖板可走，暗道绕到首台哨塔前。使用 A 的地图状态接口，和 D 对接表演。验证两种触发、重试、读档、重复触发与通讯取消后的状态 |
+| 3. 维护回执 → 授权门 | 观察清扫者及读头按“短、长、短”闪烁；三格拨片可选短／长，提交后读头按输入回放，答错可再试，演示可重播。校准后读头与胸灯回执，门前两只清扫者让行，跨门在掩体处退出协议。协议只对指定区的清扫者识别和授权门生效，期间禁攻；环境机关、哨塔和实体碰撞保留。OPEN-04 的首次攻击按键行为按 Bible 现有状态继续讨论。记录支路可折返，与本门无捷径 |
+| 4. REV-16 图纸和跨关返程 | 图纸点只记知识。由图纸旁管道回 `p1_manufacturing_01 / duct_arrival`，在原工作台制造散射并做首次练习／校准，再回 `p2_scatter_return_entry`。保留第一关进度与原管道成就边界，不重复清场、教学或授予能力。目标落点应在基线碰撞下合法可达；目标场景就绪、安全落位后才提交跨房间进度，失败需可回退或再试。范围涉及存档兼容，以及现有临时 `try_unlock_scatter()` 的正式替代 |
+| 5. 脊液补能和出口 | 返回脊柱后在取液台展示透明管／分格表，右臂每次齐射用一份有限压力，空仓需补能，左臂独立。容量、补能数量、重试剩余量同 B 对齐；UI／声音同 D 对齐。出口与胸腔加载待接入，第二关出口清场要求仍待定 |
+| 6. 复活与联合试玩 | 进化后安全复活点按 REV-14／STATE-01：保留已得能力、已读及探索，房间敌人、机关、门、终端回基线，清理旧投射物、协议、回调和计时。安全落位与存档提交分开。恢复耐久按 OPEN-05 确认。实际从 F5 真人走完整第一、第二关再校准难度、时长和战斗节奏 |
+
+已确认的边界：
+
+- C 持有进度与权限，D 负责反馈演出。用请求 token／完成结果连接两者。播放过剧情和世界状态是独立条件，恢复时分别依据实际记录与地图／门禁状态。取消、失败和旧回调应可重试。
+- 稳定对象 ID 与现有地图、存档、成就、门的对应关系继续使用。优先沿现有接口接地图标记，明确交互距离、墙体与落脚条件。跨房间进度提交需等真实到达，避免读档落墙或带入半提交的状态。
+- C 已有通道、授权、进度保存逻辑可复用。正式能力授予由关卡决定，敌人和武器沿 B 的伤害、碰撞、协议接口运行。狭窄空间的墙体和遮挡同时影响站位、终端可用性与攻击表现。
+- 第三关胸腔、核心 Boss／同步、可玩的荒原教学及完整结尾仍处于设计或待制作。日志数量不作结局分支门槛。叙事基线保持线性，按 STORY-02／04 保留隐藏信息和结尾语义，能力范围维持两臂。未裁定的玩法规则应留待用户及团队确认。
+
+## 5. 已知问题、排查和验证状态
+
+| 事项 | 结论与证据 |
+| --- | --- |
+| 合并后第一关卡在 88% | 已修在 `aac4097`。清扫者视觉异步帧尚未返回就进入帧缓存／碰撞配置，可见 `Out of bounds get index '15' (on base: 'Array[AtlasTexture]')`，随后有 Dictionary `index` 访问报错。`tests/manual/b_combat/cleaner_visual.gd` 等待 `_build_frames()` 后再缓存并置 `preparation_complete`；`cleaner_preparation_check.gd` 覆盖冷读和缓存。再遇 88% 时看第一条初始化错误以及就绪状态 |
+| 清扫者隔墙走来回 | 本分支用路径净空及稳定路线修复此前截图中的首台清扫者横挡板、出口竖向机器两处问题。既有 `abdomen_first_cleaner_detour_check.gd`、`abdomen_exit_navigation_check.gd`、`abdomen_exit_encounter_check.gd` 与更新后的 `cleaner_check.gd` 有 PASS 日志。遮挡角落和正式地图变更后仍需实走，缓存 `origin/main` 暂无该提交 |
+| 两条旧断言失败 | `tests/manual/gameplay/terminal_gate_check.gd:25` 仍以第一下 E 就开口令表单为预期，现有流程先通电。`combat_integration_check.gd:76` 直接调用出口回调时玩家脚底不在落点。两项在前序未修改基线对照仍失败，留待更新用例并重跑真实门与出口；`/tmp/borrowed-light-baseline-terminal_gate_check.log` 和 `/tmp/borrowed-light-baseline-combat_integration_check.log` 是本机临时记录 |
+| 第二关启动、首次进入与渲染 | 初次资源准备较慢；旧无美术的预览切换已简化，保留生产用几何及共享依赖。`docs/entry_loading.md` 记录 Windows 实窗 5 次过场／读档／缓存进入与进度断言通过；`docs/spine_runtime_integration.md` 记录脊柱转场、存档与机关专项验证。当前交接未重新测启动耗时或导出包 |
+| 字体与控制台 | 以前“继续第二关”“装配右臂散弹”有方块缺字，已补 `assets/fonts/noto_sans_sc_gameplay_ui.ttf` 游戏字库及 `gameplay_ui_source.json`。新增 C 中文文案需核对子集与实际窗口。历史日志有 ObjectDB／资源退出警告、macOS 证书 `ret != noErr` 及沙箱不可保存编辑器设置／用户数据等。记录具体报错与步骤，独立判断脚本断言 |
+| 全流程验收 | 已有历史专项验证和主线场景，尚缺当前分支非作者完整手动通关、正式协议／首次倒下／跨关返程用例、后续关卡和独立导出验收。C 文档与 README 存在较老的“通关回标题”“只支持一关存档”描述，以 `level_transition.gd`、标题路由等运行代码与较新的 [脊柱接入说明](docs/spine_runtime_integration.md) 为准 |
+
+## 6. 运行、导入和测试
+
+在仓库根目录执行。macOS 本机 Godot 版本已核对。也可在项目管理器导入 `project.godot`，F5 走标题，F6 只跑当前打开的场景。
 
 ```sh
-cd /Users/Admin1/projects/game/borrowed-light
-# 编辑器，F5标题→开场→腹腔
-/Applications/Godot.app/Contents/MacOS/Godot --editor --path .
-# B灰盒（Godot编辑器打开此场景可F6）
-/Applications/Godot.app/Contents/MacOS/Godot --path . res://tests/manual/b_combat/combat_test.tscn
-# 直接进入正式腹腔
-/Applications/Godot.app/Contents/MacOS/Godot --path . res://scenes/gameplay/abdomen_level.tscn
-# 首次导入/必要时资源检查
-/Applications/Godot.app/Contents/MacOS/Godot --headless --editor --import --path . --quit
-# 示例：SceneTree检查脚本
-/Applications/Godot.app/Contents/MacOS/Godot --headless --path . --script res://tests/manual/b_combat/graybox_sync_check.gd
+GODOT_BIN=/Applications/Godot.app/Contents/MacOS/Godot
+"$GODOT_BIN" --version
+"$GODOT_BIN" --editor --path .
+"$GODOT_BIN" --headless --editor --import --path . --quit
+"$GODOT_BIN" --path . res://scenes/gameplay/abdomen_level.tscn
+"$GODOT_BIN" --path . res://scenes/gameplay/spine_level.tscn
+"$GODOT_BIN" --path . res://tests/manual/b_combat/combat_test.tscn
+"$GODOT_BIN" --path . res://tests/manual/b_combat/spine_combat_test.tscn
+"$GODOT_BIN" --path . res://tests/manual/a_map/spine_preview.tscn
 ```
 
-B灰盒：WASD/方向键移动，鼠标瞄准，左键攻击，1激光，2散弹，R重置，P注入测试协议。P是灰盒调试，不代表正式关卡协议最终操作。灰盒全亮可见性适配器不等于迷雾系统。
+- 常规操作 WASD／方向键，E 交互，鼠标瞄准与左键，1／2 切激光／散弹（需解锁），Shift 疾走，Esc 暂停或当前交互取消。灰盒 R 重置，P 可测试协议，部分地图有 Tab 全图。正式脊柱不开放预览键。
+- `project.godot` 的 2D 碰撞层从 1 到 8 依次为 `world`、`player_body`、`enemy_body`、`player_projectile`、`enemy_projectile`、`interactable`、`hazard`、`room_trigger`。代码中的 mask 为位值，和层号区分。Shift 的 `b_sprint` 为运行时注册。
+- 当前检查未发现仓库内已提交的 `export_presets.cfg` 或 GDExtension。日常“构建”检查以 Godot 资源导入、脚本加载和相应场景启动为准；发行包按团队目标安装匹配的导出模板并独立实测。视频、图像、字体、声音等已在仓库中供运行，源 MP4、外部素材包和 `/tmp` 诊断文件不构成运行依赖。素材许可查 [素材来源](docs/asset_credits.md) 和对应资产目录。
 
-已有检查入口（按任务选择，不必每次全跑）：
+脚本多为 `extends SceneTree`，请用 `--script`。将图形和无窗口验证分开，读实际 PASS、断言、脚本和资源日志。需要等待视频自然结束的检查使用实际窗口。
 
-| 范围 | 路径/脚本 |
-| --- | --- |
-| 移动与基本战斗 | `tests/manual/b_combat/movement_check.gd`、`pulse_gun_check.gd`、`health_sentry_check.gd`、`cleaner_check.gd` |
-| 独立手臂与枪口 | 同目录 `independent_arm_check.gd`、`muzzle_check.gd`、`xiaoyi_animation_check.gd`、`attack_modes_check.gd` |
-| 主场景行为/探索攻击/受击范围 | 同目录 `main_auto_mode_check.gd`、`exploration_attack_check.gd`、`cleaner_hurtbox_check.gd`、`graybox_sync_check.gd` |
-| 声音 | 同目录 `audio_check.gd`、`music_check.gd`；AB有独立对应脚本 |
-| 地图与蛛网 | `tests/manual/a_map/validate_abdomen.gd`、`web_break_check.gd`；预览 `abdomen_preview.tscn` |
-| C进度交互 | `tests/manual/c_progress/progress_check.gd`、`interaction_check.gd`、`duct_check.gd` |
-| 成就 | 同目录 `achievement_check.gd`、`achievement_events_check.gd` |
-| 集成表现与终端 | `tests/manual/gameplay/presentation_check.gd`、`cleaner_visual_check.gd`、`terminal_gate_check.gd` |
+```sh
+"$GODOT_BIN" --headless --path . --log-file /tmp/borrowed-light-interaction.log --script res://tests/manual/c_progress/interaction_check.gd
+"$GODOT_BIN" --headless --path . --script res://tests/manual/c_progress/terminal_password_check.gd
+"$GODOT_BIN" --headless --path . --script res://tests/manual/c_progress/journey_save_check.gd
+"$GODOT_BIN" --headless --path . --script res://tests/manual/gameplay/spine_entrance_hazards_check.gd
+"$GODOT_BIN" --path . --rendering-method gl_compatibility --script res://tests/manual/c_progress/loading_cards_check.gd
+"$GODOT_BIN" --path . --rendering-method gl_compatibility --script res://tests/manual/gameplay/spine_transition_check.gd
+```
 
-这些 `extends SceneTree` 的脚本用 `--script`，不是F6。部分底层战斗测试使用 `manual_modes_fixture.gd` 手动设置姿态，不应把测试替身装进正式游戏。C测试会用隔离 `user://test_*.cfg`，详见 `tests/manual/c_progress/README.md`，不要清空玩家真实成就文件。
+- C 其余专项位于 `tests/manual/c_progress/`，包括 `duct_check.gd`、`progress_check.gd`、`level_clear_check.gd`、`achievement_check.gd`、`achievement_events_check.gd`、`loading_resource_check.gd`。第二关读档 `tests/manual/gameplay/spine_save_check.gd`。A 地图的稳定 ID 与碰撞检查 `tests/manual/a_map/validate_abdomen.gd`、`validate_spine.gd`。
+- 战斗改动影响接口时复测 `tests/manual/b_combat/` 的 `spine_combat_check.gd`、`scatter_burst_check.gd`、`cleaner_preparation_check.gd`、`cleaner_check.gd`、`web_attack_check.gd` 等针对项。界面重点看 E 提示、键盘路由、中文、门位置、枪口与肩头遮挡，以及暂停后的输入和动画。
+- 存档测试使用 `user://test_*` 或独立测试路径。真人档案、成就、设置文件需保留。用 F5 验证真实操作，F6 和脚本有各自的入口、角色构造和状态隔离。
 
-检查不仅看退出码，还看 PASS、断言、解析错误和资源错误。视觉任务必须实际看迈步、朝向、枪口、遮挡、预警和血条；headless不能证明视觉正确。前序对话中的通过记录仅代表当时工作树，尤其回退前的新特效测试不能用于证明当前版本。
+## 7. 开发偏好与工作约束
 
-图形启动可能需要运行环境额外权限；无界面下用户目录写权限/证书错误需要单独判断。导出尚未核验：先由团队确定平台、安装对应导出模板并维护预设，再记录实际构建命令，不虚构 `--export-release` 预设名。
+- 中文沟通。本项目按已有文件、约定和用户最新确认延续，代码现状优先于历史交接。用户要求先阅读、先给建议或先出多版样图时，等其选定或明确执行范围。用户亲自撤销或确认的最后版本作为下次基线。
+- 用户明确要求先在第一个／第二个灰盒改时，做对应范围内的预览，正式场景同步另按指示。改共享视觉、玩家或武器脚本前查正式引用，防止引入灰盒调试和实验特效。视觉以实窗动效、像素位置、实际遮挡和贴图对齐验收；动作需逐朝向自然，改点位要区分游戏像素与放大截图像素。角色缩放按模型本身校验，相机跟随和缩放另行处理。历史试做的电光激光和额外模型缩放以现有资源及代码为准，只有新的明确任务才重新启动。
+- C 优先完成交互、进度、门禁和场景接入。现有地图几何／稳定 ID、战斗数值、玩家资源、角色动画及美术／声音调整分别和 A、B、D 对齐，遵守当次用户的授权范围。`project.godot`、输入映射、Autoload、碰撞层、公共 TileSet、`scenes/main.tscn` 为团队共享配置，有实际需求时先按团队约定处理。保留 Godot 版本与 Compatibility 设置。正式关卡音频沿已有接点，灰盒试验音乐／音效的同步依本次明确范围。
+- 用户要 GitHub 上传文案时给约 20 个中文字的简洁标题／提交文案和可复制的 PR 正文。按 [.github/pull_request_template.md](.github/pull_request_template.md) 的“改了什么”“对应任务 / Bible 规则”“怎么验证的”“有没有动共享文件”“截图 / 录屏”“还没做完 / 已知问题”填写，勾选真实跑过的验证，已知缺项据实列出。
+- 改动按 [版本管理](docs/version_control.md) 和 PR 流程协作。先核对 Git 与待保留的改动，按用户授权执行分支、拉取、合并及上传。旧交接中的一次性强制重置属于历史操作，本次工作树和目标分支以上方 Git 记录为准。
 
-## 10. 下一位开发者开工检查清单
+## 8. 新对话的最短接手顺序
 
-1. 先读当前 `git status --short --branch`、HEAD及用户最新任务；不要直接照历史要求恢复已丢弃内容。
-2. 读 Bible `_index.md`、相关模块和99待定项；核对现行代码与历史记录差异。
-3. 确认改动入口是 B 灰盒、正式腹腔还是历史 AB，检查共享脚本/资源引用。
-4. 不把旧附图的临时路径当永久资产；优先仓库素材及其README。外部原始方案与修改建议曾来自微信临时路径，本轮未重读，不假装已逐字核验。
-5. 记录实际改动、测试命令/结果和未验证项；不要将“能启动”写成完整通关/团队验收。
-6. 不改本次范围外文件，不自动提交推送。若后续更新本文，刷新日期、HEAD、工作区和验收记录，避免旧状态继续误导。
-
-本文本轮核验范围：Git状态、目录/关键代码、README/Bible相关记录、协作及测试说明、Godot版本。未进行游戏运行、视觉验收、完整测试套件、导出或远程PR检查。
-
-## 2026-11-14 主流程接入补充（优先于上文旧快照）
-
-已按用户要求将第一关通关后的视频 → 原 Loading → 第二关美化地图串联，并同步最新 B 灰盒角色/敌人行为。正式入口为 `scenes/gameplay/spine_level.tscn`，详细范围、存档、验证及尚未实现的 Bible 跨关制造流程见 `docs/spine_runtime_integration.md`。第一关通关存档现在可从标题继续第二关。当前工作区有大量此前未提交素材/脚本，请保留；未提交或推送。
+1. 完整读本文件，运行 `git status --short --branch` 与 `git log -8 --oneline --decorate`，核对当前任务和目标分支。需要切到团队最新代码时，先确认当前未提交改动与两边交互入口的差异。
+2. 读 [09 Level Flow](docs/bible/09_level_flow.md) 第 4–5 节、[03 Rules](docs/bible/03_rules.md) 的协议与状态、[99 Decisions](docs/bible/99_decisions.md) 的 REV-14／REV-16 与 OPEN-04／05，并对照 [脊柱地图](docs/spine_map.md) 的点位和 [第一关交互](docs/c_level_one_interactions.md) 的 C 接口。
+3. 从 `abdomen_level.gd`、`spine_level.gd`、`journey_save.gd` 与 `spine_entrance_hazards.gd` 看实际初始化、E 输入、死亡、恢复与保存。根据用户新下达的任务，只实现并验证授权的步骤。

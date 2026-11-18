@@ -1,5 +1,6 @@
 extends "res://tests/manual/b_combat/combat_test.gd"
 ## B-only 1:1 wrapper of A's spine terrain. No story/charging-device rules.
+@export var hot_scatter_preview := false
 var enemies: Array[Node2D] = []
 var baselines: Array[Dictionary] = []
 var doors: Array[Node2D] = []
@@ -10,6 +11,7 @@ var follow_zoom := 0.9
 var electric_seams: Array[Node2D] = []
 var scatter_prompt: Label
 var scatter_station: Polygon2D
+var entrance_hazards: Node2D
 @onready var map: Node2D = $Map
 
 func _enter_tree() -> void:
@@ -67,6 +69,8 @@ func _ready() -> void:
 		unit.configure($SpawnPoints/PlayerSpawn/Player,_cleaner_on_screen,_test_protocol_active)
 		_register_enemy(unit)
 	var player = $SpawnPoints/PlayerSpawn/Player
+	if hot_scatter_preview:
+		player.scatter_burst_script = preload("res://tests/manual/b_combat/spine_scatter_burst.gd")
 	player.scatter_unlocked = false
 	player.selected_mode = player.AttackMode.LASER
 	player.update_combat_mode()
@@ -77,6 +81,10 @@ func _ready() -> void:
 	map.get_node("Reservations").hide()
 	_set_art(true)
 	_install_electric_seams(map.get_node("SpineArt"))
+	entrance_hazards = preload("res://scenes/gameplay/spine_entrance_hazards.gd").new()
+	entrance_hazards.name = "EntranceHazards"
+	entrance_hazards.configure(map,player)
+	add_child(entrance_hazards)
 	_update_camera()
 
 func _register_enemy(unit: Node2D) -> void:
@@ -168,6 +176,7 @@ func reset_test_combat() -> void:
 		enemies[i].restore_combat_state(baselines[i].state)
 	$SpawnPoints/PlayerSpawn/Player.restore_player($SpawnPoints/PlayerSpawn.global_position,3,[&"pulse_gun"])
 	for seam in electric_seams: seam.reset_cycle()
+	entrance_hazards.reset_motion()
 	doors_open = true
 	for door in doors: door.set_open(true)
 	$CombatAudio.reset_audio()

@@ -3,6 +3,7 @@ const SCATTER_AUDIO := preload("res://assets/audio/mechanicals/09_scatter_mechan
 var scatter_audio: AudioStreamPlayer
 
 ## Approved scatter behavior; the level owns ability acquisition.
+var scatter_burst_script: Script = preload("res://tests/manual/b_combat/scatter_burst_a.gd")
 func fire_scatter(direction: Vector2) -> bool:
 	if not scatter_unlocked or attack_mode != AttackMode.SCATTER or is_dead or not controls_enabled or has_protocol or scatter_remaining > 0.0 or direction.is_zero_approx():
 		return false
@@ -17,7 +18,7 @@ func fire_scatter(direction: Vector2) -> bool:
 			scatter_audio.volume_db = -3.0
 			add_child(scatter_audio)
 		scatter_audio.play()
-		var flash := preload("res://tests/manual/b_combat/scatter_burst.gd").new()
+		var flash = scatter_burst_script.new()
 		flash.player = self
 		get_parent().add_child(flash)
 		flash.global_position = origin.position

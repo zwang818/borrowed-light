@@ -28,20 +28,25 @@ func _ready() -> void:
 	$BackgroundMusic.stop()
 	$BackgroundMusic.set_process(false)
 	var player = $SpawnPoints/PlayerSpawn/Player
-	if get_tree().has_meta("spine_entry"):
+	var arriving := get_tree().has_meta("spine_entry")
+	if arriving:
 		var entry: Dictionary = get_tree().get_meta("spine_entry")
 		get_tree().remove_meta("spine_entry")
 		save_path = entry.get("path", "")
+		save_data = JOURNEY.read_save(save_path) if not save_path.is_empty() else {}
 		player.health = clampi(entry.get("health",player.max_health),1,player.max_health)
 	elif get_tree().has_meta("journey_session"):
 		var session: Dictionary = get_tree().get_meta("journey_session")
 		get_tree().remove_meta("journey_session")
 		save_path = session.path
-	if not save_path.is_empty():
-		save_data = JOURNEY.read_save(save_path)
-		player.scatter_unlocked = save_data.get("scatter_unlocked",false)
+		save_data = session.get("data", {})
+	player.scatter_unlocked = save_data.get("scatter_unlocked", false)
 	player.restore_player($SpawnPoints/PlayerSpawn.global_position,player.health,[&"pulse_gun"])
 	player.update_combat_mode()
+	if not arriving and save_data.has("snapshot"):
+		_restore_room_snapshot(player, save_data.snapshot)
+	_update_camera()
+	$Camera2D.reset_smoothing()
 	var hud := CanvasLayer.new()
 	add_child(hud)
 	health_display = preload("res://scenes/gameplay/health_hearts.gd").new()
@@ -54,19 +59,35 @@ func _ready() -> void:
 	notice.position = Vector2(24,110)
 	hud.add_child(notice)
 	menus = preload("res://scenes/gameplay/game_menus.gd").new()
+	if save_path.is_empty(): menus.achievement_save_path = "user://spine_preview_achievements.cfg"
 	add_child(menus)
 	menus.retry_requested.connect(_retry)
 	menus.title_requested.connect(_return_title)
 	menus.save_requested.connect(func():
 		_save_progress()
 		menus.close_and_resume())
-	player.died.connect(func(): menus.show_death())
+	player.died.connect(_on_player_died)
 	var pause_input := preload("res://scenes/gameplay/pause_input.gd").new()
 	pause_input.target = self
 	pause_input.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(pause_input)
+	if not save_path.is_empty():
+		var window_close := preload("res://scenes/gameplay/journey_window_close.gd").new()
+		window_close.save_before_exit = func() -> bool: return _save_progress(false)
+		add_child(window_close)
+	if arriving and not save_path.is_empty():
+		_save_progress(false)
 	entry_progress = 1.0
 	entry_ready = true
+	if not get_tree().root.has_node("EntryLoading"):
+		on_entry_revealed()
+
+func on_entry_revealed() -> void:
+	if $SpawnPoints/PlayerSpawn/Player.is_dead:
+		menus.show_death()
+
+func _on_player_died() -> void:
+	menus.show_death()
 
 func _process(delta: float) -> void:
 	_update_camera()
@@ -100,7 +121,7 @@ func _update_scatter_prompt() -> void:
 	scatter_prompt.add_theme_color_override("font_color", Color("c5decd"))
 	scatter_prompt.add_theme_color_override("font_outline_color", Color("14201e"))
 	scatter_prompt.add_theme_constant_override("outline_size", 3)
-	scatter_prompt.text = "E · 装配右臂散弹"
+	scatter_prompt.text = "%s · 装配右臂散弹" % preload("res://scenes/gameplay/input_bindings.gd").action_label(&"interact")
 
 func _refresh_scatter_response(delta: float) -> void:
 	if not scatter_approach.is_inside_tree():
@@ -120,14 +141,47 @@ func _retry() -> void:
 	$BackgroundMusic.stop()
 	_set_art(true)
 
-func _save_progress() -> bool:
+func _capture_room_snapshot(player: Node2D) -> Dictionary:
+	var snapshot := JOURNEY.SNAPSHOT.capture(self, player, enemies, $EnemyProjectiles)
+	var seam_phases := []
+	for seam in electric_seams:
+		seam_phases.append(seam.seconds)
+	snapshot["room"] = {"doors_open": doors_open, "seam_phases": seam_phases,
+		"entrance_hazards": entrance_hazards.capture_journey_state()}
+	return snapshot
+
+func _restore_room_snapshot(player: Node2D, snapshot: Dictionary) -> void:
+	var state: Dictionary = snapshot.room
+	doors_open = state.get("doors_open", true) == true
+	for door in doors:
+		door.set_open(doors_open)
+	JOURNEY.SNAPSHOT.restore(player, enemies, $EnemyProjectiles, snapshot)
+	var phases = state.get("seam_phases")
+	if phases is Array:
+		for i in range(mini(phases.size(), electric_seams.size())):
+			var seam = electric_seams[i]
+			if JOURNEY.SNAPSHOT.number(phases[i]):
+				seam.seconds = fposmod(phases[i], seam.PERIOD)
+				seam.last_frame = int(seam.seconds * 14)
+				seam.previous = player.global_position
+				seam.queue_redraw()
+	var hazards = state.get("entrance_hazards")
+	if hazards is Dictionary:
+		entrance_hazards.restore_journey_state(hazards)
+
+func _save_progress(show_result: bool = true) -> bool:
 	if save_path.is_empty():
 		notice.text = "请从标题开始旅程后保存。"
 		return false
 	save_data["first_level_cleared"] = true
-	save_data["scatter_unlocked"] = $SpawnPoints/PlayerSpawn/Player.scatter_unlocked
-	var result := JOURNEY.write_save(save_path,save_data)
-	notice.text = "旅程已保存，读档后从脊柱入口继续。" if result == OK else "保存失败，请检查磁盘空间。"
+	var player := $SpawnPoints/PlayerSpawn/Player
+	save_data["scatter_unlocked"] = player.scatter_unlocked
+	save_data["snapshot"] = _capture_room_snapshot(player)
+	var result := JOURNEY.write_save(save_path, save_data, JOURNEY.SPINE)
+	if result != OK:
+		notice.text = "存档失败，请检查磁盘空间或文件权限。"
+	elif show_result:
+		notice.text = "旅程已保存。"
 	return result == OK
 
 func _return_title() -> void:

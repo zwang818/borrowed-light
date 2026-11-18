@@ -4,6 +4,10 @@ signal health_changed(current: int, maximum: int)
 signal died(entity_id: StringName)
 signal melee_warning_changed(active: bool)
 const PARAMETERS := preload("res://scenes/weapons/combat_parameters.gd")
+const PATHFINDER := preload("res://scenes/enemies/cleaner/cleaner_pathfinder.gd")
+const ATTACK_APPROACH_DISTANCE := PARAMETERS.CLEANER_ATTACK_DISTANCE - 10.0
+const ROUTE_REPLAN_DISTANCE := 28.0
+const ROUTE_RETRY_SECONDS := 0.3
 enum State { PATROL, CHASE, WARNING, ATTACK, RECOVERY, DEAD }
 @export var entity_id: StringName = &"cleaner_test_01"
 @export var max_health: int = PARAMETERS.CLEANER_HEALTH
@@ -27,6 +31,10 @@ var home := Vector2.ZERO
 var patrol_index: int = 0
 var reported_missing_configuration: bool = false
 var attack_shape := RectangleShape2D.new()
+var _path := PackedVector2Array()
+var _path_target := Vector2.INF
+var _path_stop_distance := -1.0
+var _path_retry := 0.0
 
 func _ready() -> void:
 	add_to_group("combat_enemies")
@@ -50,12 +58,12 @@ func can_detect() -> bool:
 		return false
 	if not visibility_query.call(self) or global_position.distance_to(target.global_position) > PARAMETERS.CLEANER_DETECTION_RANGE:
 		return false
-	var ray := PhysicsRayQueryParameters2D.create(global_position, target.global_position, 1)
-	return get_world_2d().direct_space_state.intersect_ray(ray).is_empty()
+	return has_clear_line(global_position, target.global_position)
 
 func _physics_process(delta: float) -> void:
 	if state == State.DEAD:
 		return
+	_path_retry = maxf(0.0, _path_retry - delta)
 	hurt_flash = maxf(0, hurt_flash - delta)
 	var detected := can_detect()
 	# Cancellation is evaluated before movement or damage in this update.
@@ -71,15 +79,7 @@ func _physics_process(delta: float) -> void:
 			else:
 				patrol()
 		State.CHASE:
-			var offset := target.global_position - global_position
-			if offset.length() <= PARAMETERS.CLEANER_ATTACK_DISTANCE:
-				velocity = Vector2.ZERO
-				locked_direction = offset.normalized() if not offset.is_zero_approx() else Vector2.RIGHT
-				$Facing.global_rotation = locked_direction.angle()
-				state = State.WARNING
-				remaining = PARAMETERS.CLEANER_WARNING
-			else:
-				move_toward_point(target.global_position, PARAMETERS.CLEANER_CHASE_SPEED)
+			_chase_target()
 		State.WARNING:
 			remaining -= delta
 			if remaining <= 0.000001:
@@ -99,6 +99,18 @@ func _physics_process(delta: float) -> void:
 				state = State.PATROL
 	update_visuals()
 
+func _chase_target() -> void:
+	var offset := target.global_position - global_position
+	if offset.length() <= PARAMETERS.CLEANER_ATTACK_DISTANCE and has_clear_line(global_position, target.global_position):
+		_clear_path()
+		velocity = Vector2.ZERO
+		locked_direction = offset.normalized() if not offset.is_zero_approx() else Vector2.RIGHT
+		$Facing.global_rotation = locked_direction.angle()
+		state = State.WARNING
+		remaining = PARAMETERS.CLEANER_WARNING
+	else:
+		move_toward_point(target.global_position, PARAMETERS.CLEANER_CHASE_SPEED, ATTACK_APPROACH_DISTANCE)
+
 func patrol() -> void:
 	if patrol_offsets.is_empty():
 		velocity = Vector2.ZERO
@@ -109,17 +121,53 @@ func patrol() -> void:
 		point = home + patrol_offsets[patrol_index]
 	move_toward_point(point, PARAMETERS.CLEANER_PATROL_SPEED)
 
-func move_toward_point(point: Vector2, speed: float) -> void:
-	var desired := (point - global_position).normalized()
+func move_toward_point(point: Vector2, speed: float, stop_distance := 0.0) -> void:
+	var same_purpose := is_equal_approx(stop_distance, _path_stop_distance)
+	# Keep the chosen side while the target makes small movements around a corner.
+	if same_purpose and _path_target.distance_squared_to(point) < ROUTE_REPLAN_DISTANCE * ROUTE_REPLAN_DISTANCE and _follow_path(speed):
+		return
+	var approach := point.move_toward(global_position, stop_distance)
+	if PATHFINDER.can_travel(self, global_position, approach) and (stop_distance == 0.0 or has_clear_line(approach, point)):
+		_clear_path()
+		_step_toward(approach, speed)
+		return
+	if _path_retry <= 0.0 or not same_purpose:
+		_path = PATHFINDER.find_route(self, point, stop_distance)
+		_path_target = point
+		_path_stop_distance = stop_distance
+		_path_retry = ROUTE_RETRY_SECONDS
+	if _follow_path(speed):
+		return
 	velocity = Vector2.ZERO
-	# Small local steering for corners; no tracking through a wall or stale target.
-	for degrees in [0, 30, -30, 60, -60, 90, -90]:
-		var direction := desired.rotated(deg_to_rad(degrees))
-		if not test_move(global_transform, direction * 24.0):
-			velocity = direction * speed
-			$Facing.global_rotation = direction.angle()
-			break
+
+func _follow_path(speed: float) -> bool:
+	while not _path.is_empty() and global_position.distance_squared_to(_path[0]) < 1.0:
+		_path.remove_at(0)
+	if _path.is_empty():
+		return false
+	if not PATHFINDER.can_travel(self, global_position, _path[0]):
+		_path.clear()
+		return false
+	_step_toward(_path[0], speed)
+	return true
+
+func _step_toward(point: Vector2, speed: float) -> void:
+	var offset := point - global_position
+	if offset.is_zero_approx():
+		velocity = Vector2.ZERO
+		return
+	velocity = offset.normalized() * minf(speed, offset.length() / get_physics_process_delta_time())
+	$Facing.global_rotation = offset.angle()
 	move_and_slide()
+
+func _clear_path() -> void:
+	_path.clear()
+	_path_target = Vector2.INF
+	_path_stop_distance = -1.0
+	_path_retry = 0.0
+
+func has_clear_line(from: Vector2, to: Vector2) -> bool:
+	return PATHFINDER.has_clear_line(self, from, to)
 
 func try_melee_hit() -> void:
 	if state != State.ATTACK or attack_hit or not can_detect():
@@ -135,6 +183,7 @@ func try_melee_hit() -> void:
 			break
 
 func begin_recovery() -> void:
+	_clear_path()
 	state = State.RECOVERY
 	remaining = PARAMETERS.CLEANER_RECOVERY
 	velocity = Vector2.ZERO
@@ -159,6 +208,7 @@ func get_combat_state() -> Dictionary:
 	return {"entity_id": entity_id, "health": health, "alive": state != State.DEAD, "position": global_position, "patrol_index": patrol_index}
 
 func restore_combat_state(snapshot: Dictionary) -> void:
+	_clear_path()
 	assert(snapshot.entity_id == entity_id, "Cannot restore a different cleaner.")
 	health = clampi(int(snapshot.health), 0, max_health)
 	global_position = snapshot.get("position", home)

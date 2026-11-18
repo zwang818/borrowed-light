@@ -191,7 +191,7 @@ func _input(event: InputEvent) -> void:
 			return   # 最后一帧：让 enter_button 的 _gui_input 正常收 click，不吞事件
 		var is_click: bool = event is InputEventMouseButton and \
 			event.button_index == MOUSE_BUTTON_LEFT and event.pressed
-		var is_accept: bool = event.is_action_pressed("ui_accept")
+		var is_accept: bool = event.is_action_pressed("ui_accept") or event.is_action_pressed("interact")
 		if is_click or is_accept:
 			_advance()
 			get_viewport().set_input_as_handled()
