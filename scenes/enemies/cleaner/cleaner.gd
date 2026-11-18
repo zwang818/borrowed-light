@@ -2,13 +2,20 @@ extends CharacterBody2D
 
 signal health_changed(current: int, maximum: int)
 signal died(entity_id: StringName)
+signal melee_warning_changed(active: bool)
 const PARAMETERS := preload("res://scenes/weapons/combat_parameters.gd")
 enum State { PATROL, CHASE, WARNING, ATTACK, RECOVERY, DEAD }
 @export var entity_id: StringName = &"cleaner_test_01"
 @export var max_health: int = PARAMETERS.CLEANER_HEALTH
 @export var patrol_offsets := PackedVector2Array([Vector2.ZERO, Vector2(96, 0)])
 var health: int
-var state: State = State.PATROL
+var state: State = State.PATROL:
+	set(value):
+		var was_warning := state == State.WARNING
+		state = value
+		var is_warning := state == State.WARNING
+		if was_warning != is_warning:
+			melee_warning_changed.emit(is_warning)
 var remaining: float = 0.0
 var hurt_flash: float = 0.0
 var attack_hit: bool = false

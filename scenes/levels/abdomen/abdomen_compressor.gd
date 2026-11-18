@@ -1,5 +1,6 @@
 @tool
 extends Node2D
+signal cycle_started
 ## Ambient machinery only. The existing parent owns collision and occlusion.
 const PARTS = preload("res://assets/sprites/environment/abdomen/compressor_parts.png")
 const PIXEL_MATERIAL = preload("res://scenes/levels/abdomen/abdomen_pixel.tres")
@@ -33,7 +34,10 @@ func _process(delta: float) -> void:
 	_fit_base()
 	if Engine.is_editor_hint() and not preview_in_editor:
 		return
+	var previous_elapsed := _elapsed
 	_elapsed = fposmod(_elapsed + delta * animation_speed, CYCLE_SECONDS)
+	if not Engine.is_editor_hint() and _elapsed < previous_elapsed:
+		cycle_started.emit()
 	var frame := int(_elapsed * POSE_FPS)
 	if frame != _frame:
 		_frame = frame

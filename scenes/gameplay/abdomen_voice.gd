@@ -16,12 +16,23 @@ const LIGHT_CENTERS: Array[Vector2] = [
 	Vector2(0.49, 0.08),
 	Vector2(0.47, 0.80),
 ]
+const DIALOGUE_EFFECT := preload("res://scenes/gameplay/abdomen_dialogue.gdshader")
+const EFFECT_POINTS: Array[Vector4] = [
+	Vector4(0.30, 0.80, 0.68, 0.80),
+	Vector4(0.24, 0.43, 0.63, 0.43),
+	Vector4(0.224, 0.25, 0.0, 0.0),
+	Vector4(0.50, 0.38, 0.0, 0.0),
+	Vector4(0.49, 0.58, 0.56, 0.58),
+	Vector4(0.17, 0.45, 0.54, 0.45),
+	Vector4(0.66, 0.54, 0.0, 0.0),
+	Vector4(0.46, 0.65, 0.58, 0.53),
+]
 const FONT := preload("res://assets/fonts/lxgw_wenkai.ttf")
 const LINES: Array[String] = [
 	"小一，你听见了吗？你的脚下？",
 	"这是困住我的腹腔。那些管子每响一次，铁壁就收紧一点。",
 	"我受了伤，已经没有力气自己出去了。",
-	"我把声音送出去过很多次。等待了无数个纪年，我终于听见了你的脚步。",
+	"我把声音送出去过很多次，我终于听见了你的脚步。",
 	"谢谢你回来，小一。勇敢向前吧，迎着光亮。你脚下那一点光，我还能替你留住。",
 ]
 
@@ -32,6 +43,11 @@ var _art: TextureRect
 var _light: TextureRect
 var _subtitle: Label
 var _next: Button
+var _dialogue: Array[String] = []
+var _illustrations: Array[Texture2D] = []
+var _effect := ShaderMaterial.new()
+var _first_shot := 0
+var _confirm := ""
 
 func _ready() -> void:
 	layer = 26
@@ -44,6 +60,7 @@ func _ready() -> void:
 	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(backdrop)
 
+	_effect.shader = DIALOGUE_EFFECT
 	_art = TextureRect.new()
 	_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -83,6 +100,7 @@ func _ready() -> void:
 	panel.content_margin_bottom = 8
 	footer.add_theme_stylebox_override("panel", panel)
 	backdrop.add_child(footer)
+	footer.resized.connect(func(): _art.offset_bottom = -maxf(128.0, footer.size.y + 24.0))
 
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 4)
@@ -103,7 +121,11 @@ func _ready() -> void:
 	_next.pressed.connect(_advance)
 	column.add_child(_next)
 
-func present(token: int) -> void:
+func present(token: int, dialogue: Array[String] = [], illustrations: Array[Texture2D] = [], confirm := "返回", first_shot := 0) -> void:
+	_dialogue = dialogue
+	_illustrations = illustrations
+	_first_shot = first_shot
+	_confirm = confirm
 	_token = token
 	page = 0
 	_show_page()
@@ -112,6 +134,9 @@ func present(token: int) -> void:
 
 func dismiss() -> void:
 	_token = -1
+	_art.material = null
+	_illustrations = []
+	_dialogue = []
 	hide()
 	set_process(false)
 
@@ -123,24 +148,45 @@ func _unhandled_input(event: InputEvent) -> void:
 func _advance() -> void:
 	if _token < 0:
 		return
-	if page == LINES.size() - 1:
+	if page == _page_count() - 1:
 		finished.emit(_token, true)
 		return
 	page += 1
 	_show_page()
 
+func _page_count() -> int:
+	return LINES.size() if _dialogue.is_empty() else _dialogue.size()
+
 func _show_page() -> void:
 	_elapsed = 0.0
-	_art.texture = FRAMES[page]
-	_subtitle.text = LINES[page]
-	_next.text = "[E] 继续" if page < LINES.size() - 1 else "[E] 返回"
 	_art.offset_left = 0
 	_art.offset_right = 0
-	_light.visible = page != 1
 	_light.modulate.a = 0.0
+	_next.text = "[E] " + ("继续" if page < _page_count() - 1 else _confirm)
+	if _dialogue.is_empty():
+		_art.material = null
+		_art.texture_filter = CanvasItem.TEXTURE_FILTER_PARENT_NODE
+		_art.texture = FRAMES[page]
+		_subtitle.text = LINES[page]
+		_light.visible = page != 1
+		return
+	_light.hide()
+	var shot := _first_shot + page
+	var points := EFFECT_POINTS[shot]
+	_effect.set_shader_parameter("shot", shot)
+	_effect.set_shader_parameter("target", Vector2(points.x, points.y))
+	_effect.set_shader_parameter("secondary", Vector2(points.z, points.w))
+	_effect.set_shader_parameter("elapsed", 0.0)
+	_art.texture = _illustrations[page]
+	_art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_art.material = _effect
+	_subtitle.text = _dialogue[page]
 
 func _process(delta: float) -> void:
 	_elapsed += delta
+	if not _illustrations.is_empty():
+		_effect.set_shader_parameter("elapsed", _elapsed)
+		return
 	var phase := fposmod(_elapsed, 2.55)
 	if page == 1:
 		var jolt := exp(-pow((phase - 0.76) / 0.18, 2))

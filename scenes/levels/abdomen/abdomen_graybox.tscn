@@ -41,7 +41,6 @@ position = Vector2(512, 2624)
 script = ExtResource("6_floor_art")
 size = Vector2(128, 64)
 floor_color = Color(0.160784, 0.231373, 0.25098, 1)
-surface = 3
 
 [node name="TeachingNeck" type="Node2D" parent="Floors"]
 position = Vector2(544, 2016)
@@ -986,6 +985,12 @@ position = Vector2(1056, 1536)
 script = ExtResource("9_prop")
 atlas_cell = 2
 fit_parent_wall = true
+
+[node name="ControlPanel" type="Node2D" parent="Walls/WorkshopBench"]
+position = Vector2(107, 23)
+script = ExtResource("9_prop")
+atlas_cell = 4
+draw_size = Vector2(25, 21)
 
 [node name="EnvironmentSkin" type="Node2D" parent="Walls/ExitMachine"]
 script = ExtResource("9_prop")

@@ -1,5 +1,6 @@
 @tool
 extends Node2D
+signal weld_started
 ## Ambient two-link rig. Only the art moves; the existing table collider stays fixed.
 const PARTS = preload("res://assets/sprites/environment/abdomen/welding_station_parts.png")
 const PIXEL_MATERIAL = preload("res://scenes/levels/abdomen/abdomen_pixel.tres")
@@ -34,7 +35,10 @@ func _process(delta: float) -> void:
 	var frame := int(_elapsed * POSE_FPS)
 	if frame != _frame:
 		_frame = frame
+		var was_welding := _welding
 		_update_pose(float(frame) / POSE_FPS)
+		if not Engine.is_editor_hint() and welding_sparks and _welding and not was_welding:
+			weld_started.emit()
 
 func _fit_existing_base() -> void:
 	var parent := get_parent()

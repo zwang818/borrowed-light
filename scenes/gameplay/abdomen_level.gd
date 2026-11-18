@@ -8,6 +8,23 @@ signal interaction_finished(token: int, completed: bool)
 ## D may connect this signal and complete/cancel via finish_interaction(token, bool).
 const ABDOMEN_VOICE := preload("res://scenes/gameplay/abdomen_voice.gd")
 const LISTENING_GLOW := preload("res://scenes/levels/abdomen/abdomen_listening_glow.gdshader")
+const CLEANER_INTRO := preload("res://scenes/gameplay/cleaner_intro_card.gd")
+const CLEANER_INTRO_ID := &"cleaner_intro"
+const CLEANER_INTRO_SECONDS := 3.0
+const STORY_ART := {
+	&"pulse_blueprint": [
+		preload("res://assets/backgrounds/abdomen_dialogue/blueprint-01.webp"),
+		preload("res://assets/backgrounds/abdomen_dialogue/blueprint-02.webp"),
+		preload("res://assets/backgrounds/abdomen_dialogue/blueprint-03.webp"),
+		preload("res://assets/backgrounds/abdomen_dialogue/blueprint-04.webp"),
+		preload("res://assets/backgrounds/abdomen_dialogue/blueprint-05.webp"),
+	],
+	&"pulse_workbench": [
+		preload("res://assets/backgrounds/abdomen_dialogue/weapon-01.webp"),
+		preload("res://assets/backgrounds/abdomen_dialogue/weapon-02.webp"),
+		preload("res://assets/backgrounds/abdomen_dialogue/weapon-03.webp"),
+	],
+}
 const VOICE_POINT := &"abdomen_voice"
 const ARRIVAL_GRIP_RADIUS := 172.0
 const POINT_SCRIPT := preload("res://scenes/gameplay/interaction_point.gd")
@@ -31,6 +48,16 @@ const TERMINAL_CODE := "0417"
 const TERMINAL_CLUES := {&"pulse_blueprint": "04", &"workshop_origin": "17"}
 
 const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
+const MODULE_SEAT_AUDIO := preload("res://assets/audio/mechanicals/01_connector_seat.wav")
+const GRIPPER_EXTEND_AUDIO := preload("res://assets/audio/mechanicals/02_gripper_extend.wav")
+const WELD_START_AUDIO := preload("res://assets/audio/mechanicals/03_welder_pulse.wav")
+const COMPRESSOR_STROKE_AUDIO := preload("res://assets/audio/mechanicals/04_compressor_spinup.wav")
+const WEB_BREAK_AUDIO := preload("res://assets/audio/mechanicals/05_web_break.wav")
+const TERMINAL_POWER_AUDIO := preload("res://assets/audio/mechanicals/06_terminal_power.wav")
+const DUCT_SLIDE_AUDIO := preload("res://assets/audio/mechanicals/07_duct_slide.wav")
+const DUCT_LATCH_AUDIO := preload("res://assets/audio/mechanicals/08_duct_latch.wav")
+const MODULE_COMPLETE_AUDIO := preload("res://assets/audio/mechanicals/10_arm_assembly_complete.wav")
+const CLEANER_WARNING_AUDIO := preload("res://assets/audio/mechanicals/01_servo_warning.wav")
 const CLEANER_SCENE := preload("res://scenes/enemies/cleaner/cleaner.tscn")
 const SENTRY_SCENE := preload("res://scenes/enemies/sentry/sentry.tscn")
 const PAUSE_INPUT_SCRIPT := preload("res://scenes/gameplay/pause_input.gd")
@@ -73,6 +100,10 @@ const C := {
 @onready var bullets_parent := $Bullets as Node2D
 @onready var interactables_parent := $Interactables as Node2D
 @onready var camera := $Camera2D as Camera2D
+@onready var mechanical_audio := $MechanicalAudio as Node2D
+@onready var player_hurt_audio: AudioStreamPlayer = $PlayerHurtAudio
+@onready var terminal_unlock_audio: AudioStreamPlayer = $TerminalUnlockAudio
+@onready var blueprint_transfer_audio: AudioStreamPlayer = $BlueprintTransferAudio
 
 var robot_visual: Node2D
 var player: CharacterBody2D
@@ -111,6 +142,8 @@ var pending_interaction: StringName = &"":
 var interaction_token := 0
 var interaction_sheet
 var abdomen_voice: CanvasLayer
+var cleaner_intro: CanvasLayer
+var cleaner_intro_seen := false
 var terminal_gate: StaticBody2D
 const EXIT_TERMINAL_PLATFORM := preload("res://scenes/gameplay/exit_terminal_platform.gd")
 var health_display: Control
@@ -118,6 +151,7 @@ var interaction_points: Dictionary = {}
 const ARRIVAL_GRIPPER = preload("res://scenes/levels/abdomen/arrival_gripper.gd")
 var arrival_gripper: Node2D
 var arrival_grip_tween: Tween
+var arrival_grip_audio: AudioStreamPlayer2D
 var arrival_grip_origin: Vector2
 var arrival_player_z: int
 var arrival_grip_armed := true
@@ -181,10 +215,19 @@ func _ready() -> void:
 	abdomen_voice.name = "AbdomenVoice"
 	add_child(abdomen_voice)
 	abdomen_voice.finished.connect(finish_interaction)
+	cleaner_intro = CLEANER_INTRO.new()
+	cleaner_intro.name = "CleanerIntro"
+	add_child(cleaner_intro)
 	_setup_story_points()
 	_setup_terminal_gate()
 	_setup_ducts()
 	_setup_achievement_events()
+	var welder = map.get_node("Walls/AssemblyBase/EnvironmentSkin")
+	welder.weld_started.connect(func():
+		_play_mechanical(WELD_START_AUDIO, welder.global_position, -12.0, 180.0))
+	var compressor = map.get_node("Walls/TeachingMachine/EnvironmentSkin")
+	compressor.cycle_started.connect(func():
+		_play_mechanical(COMPRESSOR_STROKE_AUDIO, compressor.global_position, -13.0, 200.0))
 	_restore_journey()
 	entry_progress = 1.0
 	entry_ready = true
@@ -252,6 +295,11 @@ func _process(delta: float) -> void:
 func _update_automatic_interactions() -> void:
 	if player.is_dead or is_level_complete or not pending_interaction.is_empty():
 		return
+	if not cleaner_intro_seen:
+		var room := map.get_node("ExplorationRegions/FirstCombat") as Polygon2D
+		if Geometry2D.is_point_in_polygon(room.to_local(player.global_position), room.polygon):
+			_show_cleaner_intro()
+			return
 	var arm := map.get_node("Environment/Decor/ArrivalExteriorArm") as Node2D
 	var offset := player.global_position - arm.global_position
 	var inside := offset.x < 0.0 and offset.length_squared() <= ARRIVAL_GRIP_RADIUS * ARRIVAL_GRIP_RADIUS
@@ -265,6 +313,16 @@ func _update_automatic_interactions() -> void:
 		if get_world_2d().direct_space_state.intersect_ray(query).is_empty():
 			arrival_grip_armed = false
 			_start_arrival_grip()
+
+func _show_cleaner_intro() -> void:
+	cleaner_intro_seen = true
+	interaction_token += 1
+	var token := interaction_token
+	pending_interaction = CLEANER_INTRO_ID
+	cleaner_intro.present(CLEANER_INTRO_SECONDS)
+	get_tree().paused = true
+	await get_tree().create_timer(CLEANER_INTRO_SECONDS, true).timeout
+	finish_interaction(token, true)
 
 func _physics_process(delta: float) -> void:
 	if get_tree().paused:
@@ -463,7 +521,9 @@ func _update_world_prompts(delta := 0.0) -> void:
 	var still := player.velocity.length_squared() < 1.0
 	var terminal_open: bool = terminal_gate.get_meta("is_open", false)
 	var terminal_access = terminal.get_node("InteractionMarker")
-	var terminal_selected: bool = active and nearest_interactable == terminal and not terminal_activated
+	var terminal_available := terminal_open and not terminal_activated
+	terminal_access.step_marker.visible = terminal_available
+	var terminal_selected: bool = active and terminal_available and nearest_interactable == terminal
 	terminal_access.update_approach(origin, terminal_selected, still, delta)
 	var terminal_visual = terminal.get_node("FacilityVisual")
 	terminal_visual.z_index = 0 if origin.y > terminal_visual.global_position.y else 6
@@ -647,8 +707,10 @@ func _add_terminal(pos: Vector2, term_id: String, linked: Array) -> Node:
 	var marker := POINT_SCRIPT.new()
 	marker.name = "InteractionMarker"
 	marker.cue = POINT_SCRIPT.Cue.NONE
-	marker.position = Vector2(40, 14)
+	marker.position = Vector2(86, 29)
 	area.add_child(marker)
+	marker.add_step_marker()
+	marker.step_marker.hide()
 	area.set_meta("terminal_id", term_id)
 	area.set_meta("linked_ids", linked)
 	area.set_meta("is_terminal", true)
@@ -738,6 +800,17 @@ func _configure_enemies() -> void:
 				enemy.configure(player, _sentry_visible_query, bullets_parent)
 			else:
 				enemy.configure(player, _cleaner_visible_query, _in_protocol_query)
+				var warning_audio := AudioStreamPlayer2D.new()
+				warning_audio.name = "MeleeWarningAudio"
+				warning_audio.stream = CLEANER_WARNING_AUDIO
+				warning_audio.max_distance = 320.0
+				enemy.add_child(warning_audio)
+				enemy.melee_warning_changed.connect(func(active: bool):
+					if active:
+						warning_audio.play()
+					else:
+						warning_audio.stop()
+				)
 		enemy.died.connect(_on_enemy_died)
 		enemy_baselines[enemy.entity_id] = enemy.get_combat_state().duplicate(true)
 
@@ -757,23 +830,22 @@ func _update_interaction() -> void:
 	nearest_interactable = null
 	if player == null or player.is_dead or get_tree().paused:
 		return
-	if Rect2(Vector2.ZERO, entry_grate.size).has_point(entry_grate.to_local(player.global_position)):
-		nearest_interactable = interaction_points.get(VOICE_POINT)
-		return
 	var nearest_dist: float = C.interaction_range
 	for obj in interactables:
 		if not is_instance_valid(obj):
 			continue
 		if not obj.has_meta("is_terminal") and obj.get_script() != POINT_SCRIPT:
 			continue
+		var point = obj
 		if obj == terminal:
-			if not terminal_gate.get_meta("is_open", false) or not _on_terminal_landing():
+			if terminal_activated or not terminal_gate.get_meta("is_open", false):
 				continue
-		elif obj.interaction_id == VOICE_POINT:
+			point = terminal.get_node("InteractionMarker")
+		if point.step_marker != null and not point.is_on_step_marker(player.global_position):
 			continue
-		elif obj.cue == POINT_SCRIPT.Cue.FLOOR_BUTTON and not obj.is_on_button(player.global_position):
+		if point.cue == POINT_SCRIPT.Cue.FLOOR_BUTTON and not point.is_on_button(player.global_position):
 			continue
-		var target: Vector2 = _terminal_access_position() if obj == terminal else obj.global_position
+		var target: Vector2 = point.global_position
 		var dist: float = player.global_position.distance_to(target)
 		if dist >= nearest_dist:
 			continue
@@ -816,21 +888,18 @@ func _try_interact() -> void:
 		var console = terminal.get_node("FacilityVisual")
 		if not console.powered:
 			console.set_power(true)
-			terminal.get_node("InteractionMarker").position = Vector2(-12, 14)
+			_play_mechanical(TERMINAL_POWER_AUDIO, terminal.global_position, -3.0)
 			return
 		_request_terminal_code()
 
 func _terminal_access_position() -> Vector2:
 	return terminal.get_node("InteractionMarker").global_position
 
-func _on_terminal_landing() -> bool:
-	return EXIT_TERMINAL_PLATFORM.LANDING.has_point(terminal.to_local(player.global_position))
-
 func _can_use_terminal() -> bool:
-	if player.is_dead or terminal_activated or not _on_terminal_landing() or _remaining_cleaners() > 0 or not terminal_gate.get_meta("is_open", false):
+	if player.is_dead or terminal_activated or _remaining_cleaners() > 0 or not terminal_gate.get_meta("is_open", false):
 		return false
 	var target := _terminal_access_position()
-	if not terminal.get_node("FacilityVisual").powered or player.global_position.distance_to(target) >= C.interaction_range:
+	if not terminal.get_node("FacilityVisual").powered or not terminal.get_node("InteractionMarker").is_on_step_marker(player.global_position):
 		return false
 	var query := PhysicsRayQueryParameters2D.create(player.global_position, target, 1)
 	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
@@ -859,44 +928,34 @@ func _submit_terminal_code(token: int, code: String) -> void:
 	terminal.set_meta("activated", true)
 	terminal_activated = true
 	for door_id in terminal.get_meta("linked_ids", []):
-		_open_door(door_id)
+		_open_door(door_id, 0.12)
 	for child in terminal.get_children():
 		if child is Polygon2D:
 			child.color = Color(0.5, 0.5, 0.5, 0.5)
-	_play_terminal_sound()
+	terminal_unlock_audio.play()
 	game_menus.unlock_achievement("first_terminal")
 	_show_notification(C.t_terminal_ok, C.notify_default)
 	current_objective = Objective.REACH_EXIT
 	interaction_sheet.show_code_success(token)
 	get_tree().create_timer(1.8).timeout.connect(finish_interaction.bind(token, true))
 
-func _play_terminal_sound() -> void:
-	# Optional existing sound is absent in this checkout; do not add a new effect.
-	if not ResourceLoader.exists("res://assets/audio/repair.wav"):
-		return
-	var audio := AudioStreamPlayer.new()
-	var stream := load("res://assets/audio/repair.wav")
-	if stream != null:
-		audio.stream = stream
-		audio.bus = "SFX"
-		add_child(audio)
-		audio.play()
-		audio.finished.connect(func(): audio.queue_free())
-
-func _open_door(door_id: String) -> void:
+func _open_door(door_id: String, unlock_delay: float = 0.0) -> void:
 	for obj in interactables:
 		if not is_instance_valid(obj):
 			continue
 		if obj.has_meta("door_id") and obj.get_meta("door_id") == door_id:
 			obj.set_meta("is_open", true)
 			obj.collision_layer = 0
-			_door_flash_animation(obj)
+			_door_flash_animation(obj, unlock_delay)
 
-func _door_flash_animation(door: Node) -> void:
+func _door_flash_animation(door: Node, unlock_delay: float) -> void:
 	var visual = door.get_node("FacilityVisual")
 	visual.set_status(true)
 	var tween := create_tween()
 	door_tweens.append(tween)
+	if unlock_delay > 0.0:
+		tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tween.tween_interval(unlock_delay)
 	tween.tween_property(visual, "open_amount", 1.0, 0.35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 ## ---------- 事件回调 ----------
@@ -983,10 +1042,28 @@ func _fade_to_black() -> ColorRect:
 	await tween.finished
 	return rect
 
+func _play_mechanical(stream: AudioStream, position: Vector2, volume_db: float = -4.0, distance: float = 320.0, during_pause: bool = false) -> AudioStreamPlayer2D:
+	var audio := AudioStreamPlayer2D.new()
+	audio.stream = stream
+	audio.volume_db = volume_db
+	audio.max_distance = distance
+	if during_pause:
+		audio.process_mode = Node.PROCESS_MODE_ALWAYS
+	mechanical_audio.add_child(audio)
+	audio.global_position = position
+	audio.finished.connect(audio.queue_free)
+	audio.play()
+	return audio
+
 func _retry_level() -> void:
+	player_hurt_audio.stop()
+	terminal_unlock_audio.stop()
 	var retry_after_death: bool = player.is_dead
 	if not pending_interaction.is_empty():
 		finish_interaction(interaction_token, false)
+	for audio in mechanical_audio.get_children():
+		audio.stop()
+		audio.queue_free()
 	var environment := map.get_node_or_null("Environment")
 	if environment != null and environment.has_method("reset_breakable_webs"):
 		environment.reset_breakable_webs()
@@ -1004,7 +1081,6 @@ func _retry_level() -> void:
 	if is_instance_valid(terminal):
 		terminal.set_meta("activated", false)
 		terminal.get_node("FacilityVisual").set_power(false)
-		terminal.get_node("InteractionMarker").position = Vector2(40, 14)
 		for child in terminal.get_children():
 			if child is Polygon2D:
 				child.color = Color(0.2, 0.8, 0.4, 0.7)
@@ -1066,6 +1142,7 @@ func _setup_story_points() -> void:
 	var grate_size: Vector2 = entry_grate.size
 	var listening_point = _add_story_point(VOICE_POINT, entry_grate.to_global(grate_size * 0.5))
 	listening_point.cue = POINT_SCRIPT.Cue.NONE
+	listening_point.add_step_marker()
 	_add_listening_glow(grate_size)
 	var base = map.get_node("Walls/AssemblyBase")
 	# Keep the tread outside the solid base and leave clearance for Xiaoyi's head.
@@ -1073,9 +1150,11 @@ func _setup_story_points() -> void:
 	assembly_point.cue = POINT_SCRIPT.Cue.FLOOR_BUTTON
 	assembly_point.z_index = 0
 	var bench = map.get_node("Walls/WorkshopBench")
-	var record_point = _add_story_point(&"workshop_origin", bench.to_global(Vector2(bench.size.x * 0.5, bench.size.y + 4)))
+	var record_offset := Vector2(bench.size.x * 0.5, bench.size.y + 64)
+	var record_point = _add_story_point(&"workshop_origin", bench.to_global(record_offset))
 	record_point.cue = POINT_SCRIPT.Cue.PANEL
-	record_point.cue_offset = Vector2(-bench.size.x * 0.5 + 6, -bench.size.y - 4 + 8)
+	record_point.add_step_marker()
+	record_point.cue_offset = Vector2(6, 8) - record_offset
 	record_point.panel_size = Vector2(bench.size.x - 12, bench.size.y * 0.56)
 
 func _add_listening_glow(grate_size: Vector2) -> void:
@@ -1091,8 +1170,9 @@ func _add_listening_glow(grate_size: Vector2) -> void:
 	material.set_shader_parameter("floor_size", grate_size)
 	glow.material = material
 	entry_grate.add_child(glow)
-	# This later floor decal otherwise draws over the opaque glow center.
+	# The listening spot uses the continuous metal floor under its light.
 	map.get_node("Environment/FloorDecals/EntryTread").hide()
+
 
 func _point_prompt(id: StringName) -> String:
 	if ducts.has(id):
@@ -1149,11 +1229,23 @@ func _request_story(id: StringName) -> void:
 	payload["state"] = get_interaction_state()
 	payload["replay"] = (id == &"pulse_blueprint" and blueprint_known) or (id == &"workshop_origin" and workshop_seen)
 	get_tree().paused = true
+	if id == &"pulse_workbench":
+		_play_mechanical(MODULE_SEAT_AUDIO, player.global_position, -4.0, 320.0, true)
 	# A connected presenter owns the whole display. No automatic success fallback.
-	if interaction_requested.get_connections().is_empty():
-		interaction_sheet.present(interaction_token, payload)
-	else:
+	if not interaction_requested.get_connections().is_empty():
 		interaction_requested.emit(id, payload, interaction_token)
+	elif STORY_ART.has(id):
+		var illustrations: Array[Texture2D] = []
+		illustrations.assign(STORY_ART[id])
+		var subtitles: Array[String] = []
+		for line in payload.dialogue:
+			subtitles.append("%s：%s" % [line.speaker, line.text])
+		if id == &"pulse_blueprint":
+			var reply: String = subtitles.pop_back()
+			subtitles[subtitles.size() - 1] += "\n" + reply
+		abdomen_voice.present(interaction_token, subtitles, illustrations, payload.confirm, 5 if id == &"pulse_workbench" else 0)
+	else:
+		interaction_sheet.present(interaction_token, payload)
 
 func _start_abdomen_voice() -> void:
 	if not pending_interaction.is_empty():
@@ -1182,6 +1274,7 @@ func _start_arrival_grip() -> void:
 	var socket := arrival_grip_origin + ARRIVAL_GRIPPER.SOCKET
 	var parked := arm.global_position + Vector2(37, -10)
 	arrival_gripper.pose(parked, 0.0)
+	arrival_grip_audio = _play_mechanical(GRIPPER_EXTEND_AUDIO, arrival_grip_origin, -3.0, 320.0, true)
 	arrival_grip_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	arrival_grip_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	arrival_grip_tween.tween_method(func(t: float): arrival_gripper.pose(parked.lerp(socket, t), 0.0), 0.0, 1.0, 0.65)
@@ -1199,24 +1292,21 @@ func _lift_arrival_player(progress: float) -> void:
 
 func _restore_arrival_grip() -> void:
 	arrival_grip_tween.kill()
+	if is_instance_valid(arrival_grip_audio):
+		arrival_grip_audio.stop()
+		arrival_grip_audio.queue_free()
 	player.global_position = arrival_grip_origin
 	player.z_index = arrival_player_z
 	robot_visual.set_front_pose(false)
 	arrival_gripper.queue_free()
 	map.get_node("Environment/Decor/ArrivalExteriorArm").show()
 
-func _offer_blueprint_plug(token: int) -> void:
+func _play_blueprint_transfer(token: int) -> void:
 	blueprint_plug_ready = true
 	robot_visual.set_front_pose(true)
 	blueprint_transfer_socket = player.global_position + Vector2(16, -19)
-	blueprint_computer.show_transfer(0.55, blueprint_transfer_socket, false)
-	interaction_sheet.present(token, {
-		"title": "接口", "summary": "", "confirm": "接入",
-		"backdrop_alpha": 0.0, "card_width": 320.0, "center_card": true,
-	})
-
-func _play_blueprint_transfer(token: int) -> void:
 	interaction_sheet.dismiss()
+	blueprint_transfer_audio.play()
 	blueprint_transfer = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	blueprint_transfer.tween_method(_draw_blueprint_transfer, 0.0, 5.0, 5.0)
 	blueprint_transfer.tween_callback(func():
@@ -1231,16 +1321,16 @@ func finish_interaction(token: int, completed: bool) -> void:
 	if token != interaction_token or pending_interaction.is_empty():
 		return
 	var id := pending_interaction
+	if STORY_ART.has(id):
+		abdomen_voice.dismiss()
 	if id == &"pulse_blueprint":
 		if not blueprint_known and blueprint_transfer == null and completed:
-			if blueprint_plug_ready:
-				_play_blueprint_transfer(token)
-			else:
-				_offer_blueprint_plug(token)
+			_play_blueprint_transfer(token)
 			return
 		if blueprint_transfer != null:
 			if completed and not blueprint_transfer_complete:
 				return
+			blueprint_transfer_audio.stop()
 			blueprint_transfer.kill()
 			blueprint_transfer = null
 			blueprint_transfer_complete = false
@@ -1257,6 +1347,8 @@ func finish_interaction(token: int, completed: bool) -> void:
 	interaction_sheet.dismiss()
 	if id == VOICE_POINT:
 		abdomen_voice.dismiss()
+	if id == CLEANER_INTRO_ID:
+		cleaner_intro.hide()
 	if ducts.has(id):
 		ducts[id].visual.set_open(false)
 		if completed and not unlocked_ducts.has(id):
@@ -1277,6 +1369,7 @@ func finish_interaction(token: int, completed: bool) -> void:
 			&"pulse_workbench":
 				pulse_learned = true
 				player.learn_pulse()
+				_play_mechanical(MODULE_COMPLETE_AUDIO, player.global_position, -3.0, 320.0, true)
 				game_menus.unlock_achievement("first_weapon")
 				current_objective = Objective.ACTIVATE_TERMINAL if _remaining_cleaners() == 0 else Objective.KILL_ENEMIES
 				_show_notification(C.t_weapon_get, 2.5)
@@ -1284,7 +1377,7 @@ func finish_interaction(token: int, completed: bool) -> void:
 				workshop_seen = true
 				game_menus.unlock_achievement("workshop_reader")
 	# Finish this event before enabling the world again (prevents input leaking).
-	if completed and id != &"arrival_gripper" and id != VOICE_POINT:
+	if completed and id != &"arrival_gripper" and id != VOICE_POINT and id != CLEANER_INTRO_ID:
 		_save_journey(false)
 	interaction_finished.emit(token, completed)
 	_resume_story.call_deferred()
@@ -1331,6 +1424,9 @@ func _setup_ducts() -> void:
 		visual.dimensions = decal.size
 		visual.position = point.position
 		interactables_parent.add_child(visual)
+		visual.open_changed.connect(func(opened: bool):
+			var stream: AudioStream = DUCT_SLIDE_AUDIO if opened else DUCT_LATCH_AUDIO
+			_play_mechanical(stream, visual.global_position, -5.0, 320.0, true))
 		decal.hide()
 		ducts[config[0]] = {"title": config[2], "point": point, "visual": visual}
 
@@ -1408,6 +1504,8 @@ func _setup_achievement_events() -> void:
 	achievement_last_health = player.health
 	player.health_changed.connect(_achievement_health_changed)
 	for web in map.get_node("Environment").webs:
+		web.broken_once.connect(func(broken_web: Area2D):
+			_play_mechanical(WEB_BREAK_AUDIO, broken_web.global_position, -4.0, 240.0))
 		# Only A's reachable placed targets, not the hundreds of background patches.
 		if not web.background_region.has_area():
 			achievement_webs.append(web)
@@ -1418,6 +1516,7 @@ func _setup_achievement_events() -> void:
 func _achievement_health_changed(health: int, _maximum: int) -> void:
 	if health < achievement_last_health:
 		room_damage_taken = true
+		player_hurt_audio.play()
 	achievement_last_health = health
 
 func _on_achievement_web_broken(_web: Area2D) -> void:
