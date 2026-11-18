@@ -1,0 +1,293 @@
+{
+  "sheet_size": [
+    384,
+    192
+  ],
+  "frame_size": [
+    96,
+    96
+  ],
+  "axes": "screen +X right; +Y down",
+  "row_order": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "ordered_octants_from_positive_x": [
+    6,
+    7,
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "stages": {
+    "flight": {
+      "atlas": "xiaoyi_flight_atlas.png",
+      "frames": [
+        {
+          "id": "S",
+          "label": "下",
+          "source_order": 0,
+          "screen_vector": [
+            0,
+            1
+          ],
+          "frame": [
+            0,
+            0,
+            96,
+            96
+          ]
+        },
+        {
+          "id": "SW",
+          "label": "左下",
+          "source_order": 1,
+          "screen_vector": [
+            -1,
+            1
+          ],
+          "frame": [
+            96,
+            0,
+            96,
+            96
+          ]
+        },
+        {
+          "id": "W",
+          "label": "左",
+          "source_order": 2,
+          "screen_vector": [
+            -1,
+            0
+          ],
+          "frame": [
+            192,
+            0,
+            96,
+            96
+          ]
+        },
+        {
+          "id": "NW",
+          "label": "左上",
+          "source_order": 3,
+          "screen_vector": [
+            -1,
+            -1
+          ],
+          "frame": [
+            288,
+            0,
+            96,
+            96
+          ]
+        },
+        {
+          "id": "N",
+          "label": "上",
+          "source_order": 4,
+          "screen_vector": [
+            0,
+            -1
+          ],
+          "frame": [
+            0,
+            96,
+            96,
+            96
+          ]
+        },
+        {
+          "id": "NE",
+          "label": "右上",
+          "source_order": 5,
+          "screen_vector": [
+            1,
+            -1
+          ],
+          "frame": [
+            96,
+            96,
+            96,
+            96
+          ]
+        },
+        {
+          "id": "E",
+          "label": "右",
+          "source_order": 6,
+          "screen_vector": [
+            1,
+            0
+          ],
+          "frame": [
+            192,
+            96,
+            96,
+            96
+          ]
+        },
+        {
+          "id": "SE",
+          "label": "右下",
+          "source_order": 7,
+          "screen_vector": [
+            1,
+            1
+          ],
+          "frame": [
+            288,
+            96,
+            96,
+            96
+          ]
+        }
+      ],
+      "anchor": [
+        48,
+        57
+      ],
+      "anchor_role": "flight_center"
+    },
+    "ground": {
+      "atlas": "xiaoyi_ground_atlas.png",
+      "frames": [
+        {
+          "id": "S",
+          "label": "下",
+          "source_order": 0,
+          "screen_vector": [
+            0,
+            1
+          ],
+          "frame": [
+            0,
+            0,
+            96,
+            96
+          ]
+        },
+        {
+          "id": "SW",
+          "label": "左下",
+          "source_order": 1,
+          "screen_vector": [
+            -1,
+            1
+          ],
+          "frame": [
+            96,
+            0,
+            96,
+            96
+          ]
+        },
+        {
+          "id": "W",
+          "label": "左",
+          "source_order": 2,
+          "screen_vector": [
+            -1,
+            0
+          ],
+          "frame": [
+            192,
+            0,
+            96,
+            96
+          ]
+        },
+        {
+          "id": "NW",
+          "label": "左上",
+          "source_order": 3,
+          "screen_vector": [
+            -1,
+            -1
+          ],
+          "frame": [
+            288,
+            0,
+            96,
+            96
+          ]
+        },
+        {
+          "id": "N",
+          "label": "上",
+          "source_order": 4,
+          "screen_vector": [
+            0,
+            -1
+          ],
+          "frame": [
+            0,
+            96,
+            96,
+            96
+          ]
+        },
+        {
+          "id": "NE",
+          "label": "右上",
+          "source_order": 5,
+          "screen_vector": [
+            1,
+            -1
+          ],
+          "frame": [
+            96,
+            96,
+            96,
+            96
+          ]
+        },
+        {
+          "id": "E",
+          "label": "右",
+          "source_order": 6,
+          "screen_vector": [
+            1,
+            0
+          ],
+          "frame": [
+            192,
+            96,
+            96,
+            96
+          ]
+        },
+        {
+          "id": "SE",
+          "label": "右下",
+          "source_order": 7,
+          "screen_vector": [
+            1,
+            1
+          ],
+          "frame": [
+            288,
+            96,
+            96,
+            96
+          ]
+        }
+      ],
+      "anchor": [
+        48,
+        57
+      ],
+      "anchor_role": "ground_contact"
+    }
+  }
+}

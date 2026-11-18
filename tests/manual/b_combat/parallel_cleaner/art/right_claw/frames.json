@@ -1,0 +1,94 @@
+{
+  "size": [
+    224,
+    148
+  ],
+  "foot_anchor": [
+    100,
+    122
+  ],
+  "mirror_foot_anchor": [
+    124,
+    122
+  ],
+  "atlas": "右钳横扫_图集_672x296.png",
+  "frames": [
+    {
+      "file": "claw_01.png",
+      "rect": [
+        0,
+        0,
+        224,
+        148
+      ],
+      "pose": "压肘蓄势",
+      "relative_to_vfx_ms": -420,
+      "hold_ms": 150
+    },
+    {
+      "file": "claw_02.png",
+      "rect": [
+        224,
+        0,
+        224,
+        148
+      ],
+      "pose": "低位内收",
+      "relative_to_vfx_ms": -270,
+      "hold_ms": 270
+    },
+    {
+      "file": "claw_03.png",
+      "rect": [
+        448,
+        0,
+        224,
+        148
+      ],
+      "pose": "扫过身前",
+      "relative_to_vfx_ms": 0,
+      "hold_ms": 100,
+      "event": "start_sweep_vfx"
+    },
+    {
+      "file": "claw_04.png",
+      "rect": [
+        0,
+        148,
+        224,
+        148
+      ],
+      "pose": "向外扫满",
+      "relative_to_vfx_ms": 100,
+      "hold_ms": 65,
+      "event": "sweep_hit_once"
+    },
+    {
+      "file": "claw_05.png",
+      "rect": [
+        224,
+        148,
+        224,
+        148
+      ],
+      "pose": "外侧制动",
+      "relative_to_vfx_ms": 165,
+      "hold_ms": 90
+    },
+    {
+      "file": "claw_06.png",
+      "rect": [
+        448,
+        148,
+        224,
+        148
+      ],
+      "pose": "收钳复位",
+      "relative_to_vfx_ms": 255,
+      "hold_ms": 245
+    }
+  ],
+  "loop": false,
+  "effect": "borrowed-light-claw-sweep",
+  "effect_contact_frame_index": 3
+}

@@ -1,0 +1,113 @@
+{
+  "sprite_size": [
+    200,
+    148
+  ],
+  "foot_anchor": [
+    100,
+    122
+  ],
+  "atlas": "并联清扫者_动作图集_800x296.png",
+  "nearest_neighbor": true,
+  "animations": [
+    {
+      "id": "flank_step",
+      "frames": [
+        {
+          "name": "探足",
+          "file": "01_侧探卡位/01_探足.png",
+          "atlas_rect": [
+            0,
+            0,
+            200,
+            148
+          ],
+          "preview_ms": 130
+        },
+        {
+          "name": "落脚跟转",
+          "file": "01_侧探卡位/02_落脚跟转.png",
+          "atlas_rect": [
+            200,
+            0,
+            200,
+            148
+          ],
+          "preview_ms": 150
+        },
+        {
+          "name": "横移承重",
+          "file": "01_侧探卡位/03_横移承重.png",
+          "atlas_rect": [
+            400,
+            0,
+            200,
+            148
+          ],
+          "preview_ms": 120
+        },
+        {
+          "name": "卡位站稳",
+          "file": "01_侧探卡位/04_卡位站稳.png",
+          "atlas_rect": [
+            600,
+            0,
+            200,
+            148
+          ],
+          "preview_ms": 190
+        }
+      ]
+    },
+    {
+      "id": "low_pinch",
+      "frames": [
+        {
+          "name": "压低右钳",
+          "file": "02_低位短夹/01_压低右钳.png",
+          "atlas_rect": [
+            0,
+            148,
+            200,
+            148
+          ],
+          "preview_ms": 120
+        },
+        {
+          "name": "张钳预警",
+          "file": "02_低位短夹/02_张钳预警.png",
+          "atlas_rect": [
+            200,
+            148,
+            200,
+            148
+          ],
+          "preview_ms": 450
+        },
+        {
+          "name": "短促合钳",
+          "file": "02_低位短夹/03_短促合钳.png",
+          "atlas_rect": [
+            400,
+            148,
+            200,
+            148
+          ],
+          "preview_ms": 80,
+          "event": "pinch_hit_once"
+        },
+        {
+          "name": "收回",
+          "file": "02_低位短夹/04_收回.png",
+          "atlas_rect": [
+            600,
+            148,
+            200,
+            148
+          ],
+          "preview_ms": 300
+        }
+      ]
+    }
+  ]
+}

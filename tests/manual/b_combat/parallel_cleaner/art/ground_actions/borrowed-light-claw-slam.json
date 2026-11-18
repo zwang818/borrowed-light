@@ -1,0 +1,792 @@
+{
+  "frames": [
+    {
+      "filename": "borrowed-light-claw-slam 0",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 1",
+      "frame": {
+        "x": 208,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 2",
+      "frame": {
+        "x": 416,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 3",
+      "frame": {
+        "x": 624,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 4",
+      "frame": {
+        "x": 832,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 5",
+      "frame": {
+        "x": 1040,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 6",
+      "frame": {
+        "x": 0,
+        "y": 204,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 7",
+      "frame": {
+        "x": 208,
+        "y": 204,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 8",
+      "frame": {
+        "x": 416,
+        "y": 204,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 9",
+      "frame": {
+        "x": 624,
+        "y": 204,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 10",
+      "frame": {
+        "x": 832,
+        "y": 204,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 11",
+      "frame": {
+        "x": 1040,
+        "y": 204,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 12",
+      "frame": {
+        "x": 0,
+        "y": 408,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 13",
+      "frame": {
+        "x": 208,
+        "y": 408,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 14",
+      "frame": {
+        "x": 416,
+        "y": 408,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 15",
+      "frame": {
+        "x": 624,
+        "y": 408,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 16",
+      "frame": {
+        "x": 832,
+        "y": 408,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 17",
+      "frame": {
+        "x": 1040,
+        "y": 408,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 18",
+      "frame": {
+        "x": 0,
+        "y": 612,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 19",
+      "frame": {
+        "x": 208,
+        "y": 612,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 20",
+      "frame": {
+        "x": 416,
+        "y": 612,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 21",
+      "frame": {
+        "x": 624,
+        "y": 612,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 22",
+      "frame": {
+        "x": 832,
+        "y": 612,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 23",
+      "frame": {
+        "x": 1040,
+        "y": 612,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 24",
+      "frame": {
+        "x": 0,
+        "y": 816,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 25",
+      "frame": {
+        "x": 208,
+        "y": 816,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 26",
+      "frame": {
+        "x": 416,
+        "y": 816,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 27",
+      "frame": {
+        "x": 624,
+        "y": 816,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-claw-slam 28",
+      "frame": {
+        "x": 832,
+        "y": 816,
+        "w": 208,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 204
+      },
+      "duration": 33
+    }
+  ],
+  "meta": {
+    "app": "https://github.com/patch-gg/pixelfx",
+    "version": "1",
+    "image": "borrowed-light-claw-slam.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 1248,
+      "h": 1020
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "borrowed-light-claw-slam",
+        "from": 0,
+        "to": 28,
+        "direction": "forward"
+      }
+    ],
+    "pixelfx": {
+      "id": "impacts/borrowed-light-claw-slam",
+      "name": "Borrowed Light — claw floor impact",
+      "fps": 30,
+      "loop": false,
+      "frames": 29,
+      "frameSize": [
+        208,
+        204
+      ],
+      "pivot": [
+        104,
+        102
+      ],
+      "columns": 6,
+      "act": {
+        "windup": 0.62,
+        "recovery": 0,
+        "onBody": false,
+        "targets": [],
+        "hits": [
+          {
+            "t": 0,
+            "freeze": 0.05,
+            "shake": 0.19,
+            "amp": 3,
+            "push": 0
+          }
+        ],
+        "poses": [
+          {
+            "t": -0.62,
+            "how": "smooth",
+            "pose": {
+              "crouch": 3,
+              "fx": 12,
+              "fy": -17,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw"
+            }
+          },
+          {
+            "t": -0.22,
+            "how": "smooth",
+            "pose": {
+              "crouch": 0,
+              "fx": 11,
+              "fy": -32,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw",
+              "x": 2,
+              "sa": -1.1
+            }
+          },
+          {
+            "t": -0.09,
+            "how": "smooth",
+            "pose": {
+              "crouch": 0,
+              "fx": 11,
+              "fy": -32,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw",
+              "x": 2,
+              "sa": -1.1
+            }
+          },
+          {
+            "t": 0,
+            "how": "snap",
+            "pose": {
+              "crouch": 8,
+              "fx": 17,
+              "fy": -10,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw",
+              "x": 4,
+              "lean": 6,
+              "sa": 0.8
+            }
+          },
+          {
+            "t": 0.16,
+            "how": "smooth",
+            "pose": {
+              "crouch": 8,
+              "fx": 17,
+              "fy": -10,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw",
+              "x": 4,
+              "lean": 6,
+              "sa": 0.8
+            }
+          },
+          {
+            "t": 0.42,
+            "how": "smooth",
+            "pose": {
+              "crouch": 3,
+              "fx": 12,
+              "fy": -17,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw"
+            }
+          }
+        ]
+      }
+    },
+    "borrowed_light": {
+      "start_event": "ground_contact",
+      "visual_ring_max_px": 82
+    }
+  }
+}

@@ -1,0 +1,263 @@
+{
+  "frames": [
+    {
+      "filename": "borrowed-light-silk-splat 0",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 80,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 80,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 80,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-silk-splat 1",
+      "frame": {
+        "x": 80,
+        "y": 0,
+        "w": 80,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 80,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 80,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-silk-splat 2",
+      "frame": {
+        "x": 160,
+        "y": 0,
+        "w": 80,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 80,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 80,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-silk-splat 3",
+      "frame": {
+        "x": 240,
+        "y": 0,
+        "w": 80,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 80,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 80,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-silk-splat 4",
+      "frame": {
+        "x": 0,
+        "y": 80,
+        "w": 80,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 80,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 80,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-silk-splat 5",
+      "frame": {
+        "x": 80,
+        "y": 80,
+        "w": 80,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 80,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 80,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-silk-splat 6",
+      "frame": {
+        "x": 160,
+        "y": 80,
+        "w": 80,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 80,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 80,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-silk-splat 7",
+      "frame": {
+        "x": 240,
+        "y": 80,
+        "w": 80,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 80,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 80,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-silk-splat 8",
+      "frame": {
+        "x": 0,
+        "y": 160,
+        "w": 80,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 80,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 80,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-silk-splat 9",
+      "frame": {
+        "x": 80,
+        "y": 160,
+        "w": 80,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 80,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 80,
+        "h": 80
+      },
+      "duration": 33
+    }
+  ],
+  "meta": {
+    "app": "https://github.com/patch-gg/pixelfx",
+    "version": "1",
+    "image": "borrowed-light-silk-splat.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 320,
+      "h": 240
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "borrowed-light-silk-splat",
+        "from": 0,
+        "to": 9,
+        "direction": "forward"
+      }
+    ],
+    "pixelfx": {
+      "id": "status/borrowed-light-silk-splat",
+      "name": "Borrowed Light — silk lands",
+      "fps": 30,
+      "loop": false,
+      "frames": 10,
+      "frameSize": [
+        80,
+        80
+      ],
+      "pivot": [
+        40,
+        40
+      ],
+      "columns": 4
+    },
+    "borrowed_light": {
+      "visual_patch_radius_px": 26,
+      "steady_starts_at_s": 0.2
+    }
+  }
+}

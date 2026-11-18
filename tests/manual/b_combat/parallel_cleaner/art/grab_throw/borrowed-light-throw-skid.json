@@ -1,0 +1,489 @@
+{
+  "frames": [
+    {
+      "filename": "borrowed-light-throw-skid 0",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 1",
+      "frame": {
+        "x": 152,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 2",
+      "frame": {
+        "x": 304,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 3",
+      "frame": {
+        "x": 456,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 4",
+      "frame": {
+        "x": 0,
+        "y": 72,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 5",
+      "frame": {
+        "x": 152,
+        "y": 72,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 6",
+      "frame": {
+        "x": 304,
+        "y": 72,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 7",
+      "frame": {
+        "x": 456,
+        "y": 72,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 8",
+      "frame": {
+        "x": 0,
+        "y": 144,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 9",
+      "frame": {
+        "x": 152,
+        "y": 144,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 10",
+      "frame": {
+        "x": 304,
+        "y": 144,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 11",
+      "frame": {
+        "x": 456,
+        "y": 144,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 12",
+      "frame": {
+        "x": 0,
+        "y": 216,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 13",
+      "frame": {
+        "x": 152,
+        "y": 216,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 14",
+      "frame": {
+        "x": 304,
+        "y": 216,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 15",
+      "frame": {
+        "x": 456,
+        "y": 216,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 16",
+      "frame": {
+        "x": 0,
+        "y": 288,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 17",
+      "frame": {
+        "x": 152,
+        "y": 288,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 18",
+      "frame": {
+        "x": 304,
+        "y": 288,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-throw-skid 19",
+      "frame": {
+        "x": 456,
+        "y": 288,
+        "w": 152,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 152,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 152,
+        "h": 72
+      },
+      "duration": 33
+    }
+  ],
+  "meta": {
+    "app": "https://github.com/patch-gg/pixelfx",
+    "version": "1",
+    "image": "borrowed-light-throw-skid.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 608,
+      "h": 360
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "borrowed-light-throw-skid",
+        "from": 0,
+        "to": 19,
+        "direction": "forward"
+      }
+    ],
+    "pixelfx": {
+      "id": "impacts/borrowed-light-throw-skid",
+      "name": "Borrowed Light — throw landing skid",
+      "fps": 30,
+      "loop": false,
+      "frames": 20,
+      "frameSize": [
+        152,
+        72
+      ],
+      "pivot": [
+        56,
+        40
+      ],
+      "columns": 4
+    },
+    "borrowed_light": {
+      "events": [
+        "ground_contact"
+      ],
+      "visual_only": true,
+      "default_direction": [
+        1,
+        0
+      ]
+    }
+  }
+}
