@@ -132,7 +132,7 @@ func verify_sweep(boss: BOSS) -> void:
 	assert(player.web_speed_factor < 1.0 and not boss.bound)
 	player.apply_damage(full)
 	assert(paused and boss.sweep_visual.frame_index == -1 and boss.leftover_silk.is_empty() and not boss.held)
-	var retry: Button = room.game_menus.find_children("*", "Button", true, false).filter(func(button: Button): return button.text == "重试本房间")[0]
+	var retry: Button = room.game_menus.find_children("*", "Button", true, false).filter(func(button: Button): return button.text == "重试")[0]
 	retry.pressed.emit()
 	assert(not paused and not is_instance_valid(room.boss) and room.player.controls_enabled)
 	print("SWEEP_PASS: action 04 == PixelFX 04 == one damage; pause, sidestep, clipped shutter, independent silk, death and menu retry clean-up")
@@ -219,7 +219,6 @@ func capture_sweep_sequence(boss: BOSS) -> void:
 
 func run() -> void:
 	room = SCENE.instantiate()
-	room.achievement_save_path = OS.get_temp_dir().path_join("parallel-cleaner-tuning-%d.cfg" % OS.get_process_id())
 	root.add_child(room)
 	current_scene = room
 	while not room.prototype_ready:
@@ -278,7 +277,6 @@ func run() -> void:
 	await verify_pressure(boss)
 	await verify_sweep(boss)
 	paused = false
-	DirAccess.remove_absolute(room.achievement_save_path)
 	room.queue_free()
 	await process_frame
 	print("BOSS_TUNING_PASS")

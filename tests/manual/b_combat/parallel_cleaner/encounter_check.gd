@@ -188,7 +188,6 @@ func verify_pinch(boss: ACTOR) -> void:
 
 func run() -> void:
 	level = SCENE.instantiate()
-	level.achievement_save_path = OS.get_temp_dir().path_join("parallel-cleaner-check-%d.cfg" % OS.get_process_id())
 	root.add_child(level)
 	current_scene = level
 	while not level.prototype_ready:
@@ -338,13 +337,12 @@ func run() -> void:
 	assert(await until(func(): return boss.held))
 	level.player.apply_damage(level.player.max_health)
 	assert(paused and level.player.is_dead)
-	var retry: Button = level.game_menus.find_children("*", "Button", true, false).filter(func(button: Button): return button.text == "重试本房间")[0]
+	var retry: Button = level.game_menus.find_children("*", "Button", true, false).filter(func(button: Button): return button.text == "重试")[0]
 	retry.pressed.emit()
 	assert(not paused and not is_instance_valid(level.boss) and level.player.controls_enabled)
 	assert(level.player.health == level.player.max_health and not level.terminal_gate.get_meta("is_open"))
 	print("RETRY_PASS: B fuses, R clears active reel, death-menu retry releases a grab and restores the room")
 	print("PARALLEL_CLEANER_PASS: both kill orders, gate, swept silk, pull, wall release, grab dodge, wall-safe throw, real pulse, proper terminal code, retry")
-	DirAccess.remove_absolute(level.achievement_save_path)
 	level.queue_free()
 	await process_frame
 	quit()

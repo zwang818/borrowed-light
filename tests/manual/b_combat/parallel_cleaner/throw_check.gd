@@ -149,7 +149,6 @@ func verify_miss_and_reel(boss: BOSS) -> void:
 
 func run() -> void:
 	room = SCENE.instantiate()
-	room.achievement_save_path = OS.get_temp_dir().path_join("parallel-throw-%d.cfg" % OS.get_process_id())
 	root.add_child(room)
 	current_scene = room
 	while not room.prototype_ready:
@@ -169,7 +168,6 @@ func run() -> void:
 	await throw_case(boss, "右下 · 使用独立斜向帧", "04-southeast", Vector2(760, 443), Vector2(1, 1).normalized(), 7)
 	await throw_case(boss, "撞设备早停 · 朝向不变，擦痕留在近侧", "05-wall", Vector2(780, 471), Vector2.LEFT, 2, true)
 	await verify_miss_and_reel(boss)
-	DirAccess.remove_absolute(room.achievement_save_path)
 	room.queue_free()
 	await process_frame
 	print("THROW_VISUALS_PASS")
