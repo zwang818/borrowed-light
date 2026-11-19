@@ -8,7 +8,6 @@ signal interaction_requested(content_id: StringName, payload: Dictionary, token:
 signal interaction_finished(token: int, completed: bool)
 ## D may connect this signal and complete/cancel via finish_interaction(token, bool).
 const ABDOMEN_VOICE := preload("res://scenes/gameplay/abdomen_voice.gd")
-const LISTENING_GLOW := preload("res://scenes/levels/abdomen/abdomen_listening_glow.gdshader")
 const CLEANER_INTRO := preload("res://scenes/gameplay/cleaner_intro_card.gd")
 const CLEANER_INTRO_ID := &"cleaner_intro"
 const CLEANER_INTRO_SECONDS := 3.0
@@ -50,6 +49,7 @@ func get_entry_progress() -> float:
 const TERMINAL_REQUEST := &"terminal_access"
 const TERMINAL_CODE := "0417"
 const TERMINAL_CLUES := {&"pulse_blueprint": "04", &"workshop_origin": "17"}
+const PULSE_GATE_ID := "p1_pulse_assembly_gate"
 
 const PLAYER_SCENE := preload("res://scenes/player/player.tscn")
 const MODULE_SEAT_AUDIO := preload("res://assets/audio/mechanicals/01_connector_seat.wav")
@@ -139,7 +139,15 @@ var enemy_baselines: Dictionary = {}
 var door_tweens: Array[Tween] = []
 var notification_revision := 0
 var blueprint_known := false
-var pulse_learned := false
+var pulse_learned := false:
+	set(value):
+		if pulse_learned == value:
+			return
+		pulse_learned = value
+		if is_instance_valid(pulse_assembly_gate):
+			_sync_pulse_assembly_gate(entry_ready)
+var pulse_assembly_gate: StaticBody2D
+var touching_pulse_gate := false
 var workshop_seen := false
 var terminal_clues: Dictionary = {}
 var pending_interaction: StringName = &"":
@@ -181,6 +189,7 @@ var blueprint_hint: TextureRect
 var blueprint_hint_tween: Tween
 var blueprint_transfer: Tween
 var blueprint_transfer_socket: Vector2
+var blueprint_player_z: int
 var blueprint_transfer_complete := false
 var blueprint_plug_ready := false
 var blueprint_response_time := 0.0
@@ -226,6 +235,7 @@ func _ready() -> void:
 	cleaner_intro.name = "CleanerIntro"
 	add_child(cleaner_intro)
 	_setup_story_points()
+	_setup_pulse_assembly_gate()
 	_setup_terminal_gate()
 	_setup_ducts()
 	_setup_achievement_events()
@@ -267,7 +277,7 @@ func _restore_journey() -> void:
 		pulse_learned = data.pulse_learned
 		workshop_seen = data.workshop_seen
 		if checkpoint_beacon != null:
-			checkpoint_beacon.activated = data.get("abdomen_checkpoint", "") == JOURNEY_SAVE.ABDOMEN_CHECKPOINT
+			checkpoint_beacon.activated = pulse_learned and data.get("abdomen_checkpoint", "") == JOURNEY_SAVE.ABDOMEN_CHECKPOINT
 		if blueprint_known:
 			terminal_clues[&"pulse_blueprint"] = TERMINAL_CLUES[&"pulse_blueprint"]
 		if workshop_seen:
@@ -328,7 +338,7 @@ func _capture_room_snapshot() -> Dictionary:
 			broken_webs[String(web.name)] = web._age
 	var open_doors := {}
 	for door in interactables:
-		if door.get_meta("is_open", false):
+		if door != pulse_assembly_gate and door.get_meta("is_open", false):
 			open_doors[String(door.get_meta("door_id"))] = door.get_node("FacilityVisual").open_amount
 	snapshot["room"] = {"broken_webs": broken_webs, "open_doors": open_doors,
 		"terminal_powered": terminal.get_node("FacilityVisual").powered,
@@ -348,6 +358,8 @@ func _restore_room_snapshot(snapshot: Dictionary) -> void:
 	var open_doors = state.get("open_doors")
 	if open_doors is Dictionary:
 		for door in interactables:
+			if door == pulse_assembly_gate:
+				continue
 			var id: String = door.get_meta("door_id", "")
 			var amount = open_doors.get(id)
 			if id.is_empty() or not JOURNEY_SAVE.SNAPSHOT.number(amount):
@@ -363,8 +375,7 @@ func _restore_room_snapshot(snapshot: Dictionary) -> void:
 	console.powered = state.get("terminal_powered") == true
 	console.lever = 1.0 if console.powered else 0.0
 	console.set_status(false, false, terminal_activated)
-	if console.powered:
-		terminal.get_node("InteractionMarker").position = Vector2(-12, 14)
+	_position_terminal_marker()
 	exit_encounter_active = state.get("exit_encounter_active") == true
 	exit_retry_blocked = state.get("exit_retry_blocked") == true
 	JOURNEY_SAVE.SNAPSHOT.restore(player, enemies, bullets_parent, snapshot, webs)
@@ -443,8 +454,11 @@ func _physics_process(delta: float) -> void:
 	if get_tree().paused:
 		return
 	if player != null and not player.is_dead:
-		if entry_ready and checkpoint_beacon != null and player.controls_enabled and not is_level_complete:
-			checkpoint_beacon.check_contact(player.global_position)
+		if entry_ready and player.controls_enabled and not is_level_complete:
+			if not pulse_learned:
+				_update_pulse_gate_contact()
+			elif checkpoint_beacon != null:
+				checkpoint_beacon.check_contact(player.global_position)
 		_update_exit_encounter()
 		camera.global_position = player.global_position
 		last_memory_record_time += delta
@@ -640,7 +654,7 @@ func _update_world_prompts(delta := 0.0) -> void:
 	var terminal_open: bool = terminal_gate.get_meta("is_open", false)
 	var terminal_access = terminal.get_node("InteractionMarker")
 	var terminal_available := terminal_open and not terminal_activated
-	terminal_access.step_marker.visible = terminal_available
+	terminal_access.visible = terminal_available
 	var terminal_selected: bool = active and terminal_available and nearest_interactable == terminal
 	terminal_access.update_approach(origin, terminal_selected, still, delta)
 	var terminal_visual = terminal.get_node("FacilityVisual")
@@ -656,8 +670,7 @@ func _update_world_prompts(delta := 0.0) -> void:
 		if obj.get_script() != POINT_SCRIPT:
 			continue
 		var selected: bool = active and obj == nearest_interactable
-		var ready: bool = obj.interaction_id != &"pulse_workbench" or blueprint_known
-		obj.update_approach(origin, selected, still, delta, ready)
+		obj.update_approach(origin, selected, still, delta)
 		if obj.interaction_id == &"pulse_blueprint":
 			_update_blueprint_response(active and obj.nearby, delta)
 		if obj.prompt_ready:
@@ -785,11 +798,7 @@ func _weapon_display_position() -> Vector2:
 
 func _add_weapon_pickup(_pos: Vector2, _weapon_id: String) -> Node:
 	var rack = map.get_node("Walls/GunRackBase")
-	var point = _add_story_point(&"pulse_blueprint", rack.to_global(Vector2(59.6, 112.8)))
-	point.cue = POINT_SCRIPT.Cue.FLOOR_BUTTON
-	point.z_index = 0
-	point.queue_redraw()
-	return point
+	return _add_story_point(&"pulse_blueprint", rack.to_global(Vector2(rack.size.x * 0.5, rack.size.y + 16)))
 
 func _add_terminal(pos: Vector2, term_id: String, linked: Array) -> Node:
 	var area := Area2D.new()
@@ -827,20 +836,18 @@ func _add_terminal(pos: Vector2, term_id: String, linked: Array) -> Node:
 	# Presentation only: the Area2D remains the sole terminal interaction target.
 	var marker := POINT_SCRIPT.new()
 	marker.name = "InteractionMarker"
-	marker.cue = POINT_SCRIPT.Cue.NONE
-	marker.position = Vector2(86, 29)
 	area.add_child(marker)
-	marker.add_step_marker()
-	marker.step_marker.hide()
+	marker.hide()
 	area.set_meta("terminal_id", term_id)
 	area.set_meta("linked_ids", linked)
 	area.set_meta("is_terminal", true)
 	area.set_meta("activated", false)
 	interactables_parent.add_child(area)
+	marker.z_index = 7
 	interactables.append(area)
 	return area
 
-func _add_door(pos: Vector2, door_id: String) -> void:
+func _add_door(pos: Vector2, door_id: String) -> StaticBody2D:
 	var body := StaticBody2D.new()
 	body.name = "Door_" + door_id
 	body.position = pos
@@ -860,6 +867,7 @@ func _add_door(pos: Vector2, door_id: String) -> void:
 	body.set_meta("is_door", true)
 	interactables_parent.add_child(body)
 	interactables.append(body)
+	return body
 
 func _add_exit(pos: Vector2, exit_id: String, target_room: String, is_final: bool = false) -> Node:
 	var area := Area2D.new()
@@ -989,19 +997,9 @@ func _update_interaction() -> void:
 			if terminal_activated or not terminal_gate.get_meta("is_open", false):
 				continue
 			point = terminal.get_node("InteractionMarker")
-		if point.step_marker != null and not point.is_on_step_marker(player.global_position):
-			continue
-		if point.cue == POINT_SCRIPT.Cue.FLOOR_BUTTON and not point.is_on_button(player.global_position):
-			continue
-		var target: Vector2 = point.global_position
-		var dist: float = player.global_position.distance_to(target)
-		if dist >= nearest_dist:
-			continue
-		var query := PhysicsRayQueryParameters2D.create(player.global_position, target, 1)
-		if not get_world_2d().direct_space_state.intersect_ray(query).is_empty():
-			continue
-		nearest_interactable = obj
-		nearest_dist = dist
+		if point.can_interact_from(player.global_position, nearest_dist):
+			nearest_interactable = obj
+			nearest_dist = player.global_position.distance_to(point.global_position)
 
 func _remaining_cleaners() -> int:
 	var count := 0
@@ -1036,9 +1034,21 @@ func _try_interact() -> void:
 		var console = terminal.get_node("FacilityVisual")
 		if not console.powered:
 			console.set_power(true)
+			_position_terminal_marker()
+			_update_interaction()
+			_update_world_prompts()
 			_play_mechanical(TERMINAL_POWER_AUDIO, terminal.global_position, -3.0)
 			return
 		_request_terminal_code()
+
+func _position_terminal_marker() -> void:
+	var console = terminal.get_node("FacilityVisual")
+	var marker = terminal.get_node("InteractionMarker")
+	var control: Vector2 = console.position + console.active_control_center()
+	# Draw on the control while measuring reach and occlusion from the open landing.
+	marker.position = Vector2(control.x, 18)
+	marker.cue_offset = control - marker.position
+	marker.queue_redraw()
 
 func _terminal_access_position() -> Vector2:
 	return terminal.get_node("InteractionMarker").global_position
@@ -1046,11 +1056,8 @@ func _terminal_access_position() -> Vector2:
 func _can_use_terminal() -> bool:
 	if player.is_dead or terminal_activated or _remaining_cleaners() > 0 or not terminal_gate.get_meta("is_open", false):
 		return false
-	var target := _terminal_access_position()
-	if not terminal.get_node("FacilityVisual").powered or not terminal.get_node("InteractionMarker").is_on_step_marker(player.global_position):
-		return false
-	var query := PhysicsRayQueryParameters2D.create(player.global_position, target, 1)
-	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
+	return (terminal.get_node("FacilityVisual").powered
+		and terminal.get_node("InteractionMarker").can_interact_from(player.global_position, C.interaction_range))
 
 func _request_terminal_code() -> void:
 	if not pending_interaction.is_empty() or not _can_use_terminal():
@@ -1075,6 +1082,7 @@ func _submit_terminal_code(token: int, code: String) -> void:
 		return
 	terminal.set_meta("activated", true)
 	terminal_activated = true
+	terminal.get_node("InteractionMarker").hide()
 	for door_id in terminal.get_meta("linked_ids", []):
 		_open_door(door_id, 0.12)
 	for child in terminal.get_children():
@@ -1231,16 +1239,18 @@ func _retry_level() -> void:
 	if is_instance_valid(terminal):
 		terminal.set_meta("activated", false)
 		terminal.get_node("FacilityVisual").set_power(false)
+		_position_terminal_marker()
 		for child in terminal.get_children():
 			if child is Polygon2D:
 				child.color = Color(0.2, 0.8, 0.4, 0.7)
 	for obj in interactables:
-		if is_instance_valid(obj) and obj.has_meta("is_door"):
+		if is_instance_valid(obj) and obj != pulse_assembly_gate and obj.has_meta("is_door"):
 			obj.set_meta("is_open", false)
 			obj.collision_layer = 1
 			var visual = obj.get_node("FacilityVisual")
 			visual.set_status(false)
 			visual.open_amount = 0.0
+	_sync_pulse_assembly_gate()
 	dead_enemies = 0
 	_reset_exit_encounter()
 	_show_notification(C.t_retry, 2.0)
@@ -1293,40 +1303,13 @@ func _add_story_point(id: StringName, pos: Vector2) -> Node2D:
 	return point
 
 func _setup_story_points() -> void:
-	var grate_size: Vector2 = entry_grate.size
-	var listening_point = _add_story_point(VOICE_POINT, entry_grate.to_global(grate_size * 0.5))
-	listening_point.cue = POINT_SCRIPT.Cue.NONE
-	listening_point.add_step_marker()
-	_add_listening_glow(grate_size)
-	var base = map.get_node("Walls/AssemblyBase")
-	# Keep the tread outside the solid base and leave clearance for Xiaoyi's head.
-	var assembly_point = _add_story_point(&"pulse_workbench", base.to_global(Vector2(base.size.x * 0.5, base.size.y + 64)))
-	assembly_point.cue = POINT_SCRIPT.Cue.FLOOR_BUTTON
-	assembly_point.z_index = 0
-	var bench = map.get_node("Walls/WorkshopBench")
-	var record_offset := Vector2(bench.size.x * 0.5, bench.size.y + 64)
-	var record_point = _add_story_point(&"workshop_origin", bench.to_global(record_offset))
-	record_point.cue = POINT_SCRIPT.Cue.PANEL
-	record_point.add_step_marker()
-	record_point.cue_offset = Vector2(6, 8) - record_offset
-	record_point.panel_size = Vector2(bench.size.x - 12, bench.size.y * 0.56)
-
-func _add_listening_glow(grate_size: Vector2) -> void:
-	var glow := ColorRect.new()
-	glow.name = "ListeningGlow"
-	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	glow.position = Vector2(-124, -172)
-	glow.size = grate_size + Vector2(248, 268)
-	var material := ShaderMaterial.new()
-	material.shader = LISTENING_GLOW
-	material.set_shader_parameter("glow_size", glow.size)
-	material.set_shader_parameter("glow_center", grate_size * 0.5 - glow.position)
-	material.set_shader_parameter("floor_size", grate_size)
-	glow.material = material
-	entry_grate.add_child(glow)
-	# The listening spot uses the continuous metal floor under its light.
+	_add_story_point(VOICE_POINT, entry_grate.to_global(entry_grate.size * 0.5))
 	map.get_node("Environment/FloorDecals/EntryTread").hide()
-
+	var base = map.get_node("Walls/AssemblyBase")
+	_add_story_point(&"pulse_workbench", base.to_global(Vector2(base.size.x * 0.5, base.size.y + 16)))
+	var bench = map.get_node("Walls/WorkshopBench")
+	var record_offset := Vector2(bench.size.x * 0.5, bench.size.y + 16)
+	_add_story_point(&"workshop_origin", bench.to_global(record_offset))
 
 func _point_prompt(id: StringName) -> String:
 	if ducts.has(id):
@@ -1457,6 +1440,8 @@ func _restore_arrival_grip() -> void:
 
 func _play_blueprint_transfer(token: int) -> void:
 	blueprint_plug_ready = true
+	blueprint_player_z = player.z_index
+	player.z_index = maxi(blueprint_player_z, blueprint_computer.z_index + 1)
 	robot_visual.set_front_pose(true)
 	blueprint_transfer_socket = player.global_position + Vector2(16, -19)
 	interaction_sheet.dismiss()
@@ -1491,6 +1476,7 @@ func finish_interaction(token: int, completed: bool) -> void:
 		if blueprint_plug_ready:
 			blueprint_plug_ready = false
 			blueprint_computer.show_transfer(-1.0, blueprint_transfer_socket)
+			player.z_index = blueprint_player_z
 			robot_visual.set_front_pose(false)
 	if id == &"arrival_gripper":
 		_restore_arrival_grip()
@@ -1540,7 +1526,31 @@ func _resume_story() -> void:
 	if pending_interaction.is_empty() and game_menus.page == game_menus.Page.CLOSED:
 		get_tree().paused = false
 
+func _setup_pulse_assembly_gate() -> void:
+	var threshold = map.get_node("Floors/GunThreshold")
+	pulse_assembly_gate = _add_door(threshold.to_global(threshold.size * 0.5), PULSE_GATE_ID)
+
+func _update_pulse_gate_contact() -> void:
+	for index in player.get_slide_collision_count():
+		if player.get_slide_collision(index).get_collider() == pulse_assembly_gate:
+			if not touching_pulse_gate:
+				touching_pulse_gate = true
+				_show_notification("请先到制造台装配激光装置。")
+			return
+	touching_pulse_gate = false
+
+func _sync_pulse_assembly_gate(animate: bool = false) -> void:
+	if pulse_learned and animate:
+		_open_door(PULSE_GATE_ID)
+		return
+	pulse_assembly_gate.collision_layer = 0 if pulse_learned else 1
+	pulse_assembly_gate.set_meta("is_open", pulse_learned)
+	var visual = pulse_assembly_gate.get_node("FacilityVisual")
+	visual.set_status(pulse_learned)
+	visual.open_amount = 1.0 if pulse_learned else 0.0
+
 func _setup_terminal_gate() -> void:
+	_position_terminal_marker()
 	var origin: Vector2 = terminal.position
 	_add_door(origin + Vector2(0, 48), "p1_terminal_access_gate")
 	terminal_gate = interactables[-1]
@@ -1566,7 +1576,6 @@ func _setup_ducts() -> void:
 		point.interaction_id = config[0]
 		point.position = decal.to_global(decal.size * 0.5)
 		point.name = String(config[0])
-		point.cue = POINT_SCRIPT.Cue.RECTANGLE
 		interactables_parent.add_child(point)
 		point.z_index = 10
 		interactables.append(point)

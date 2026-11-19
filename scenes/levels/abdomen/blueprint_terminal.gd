@@ -9,10 +9,20 @@ const INK := Color("101b20")
 const CYAN := Color("73e8e0")
 
 var transfer_time := -1.0
+var transfer_progress := 0.0
 var receiver := Vector2.ZERO
 var inserting := true
 var responding := false
 var transferred := false
+@onready var transfer_cable := Node2D.new()
+
+func _ready() -> void:
+	transfer_cable.name = "TransferCable"
+	transfer_cable.z_as_relative = false
+	transfer_cable.z_index = 9
+	transfer_cable.hide()
+	transfer_cable.draw.connect(_draw_transfer)
+	add_child(transfer_cable)
 
 func set_response(active: bool, completed: bool) -> void:
 	if responding == active and transferred == completed:
@@ -24,8 +34,10 @@ func set_response(active: bool, completed: bool) -> void:
 func show_transfer(seconds: float, socket: Vector2, insert := true) -> void:
 	inserting = insert
 	transfer_time = seconds
-	z_index = 9 if seconds >= 0.0 else 2
+	transfer_progress = clampf((seconds - 0.55) / 3.7, 0.0, 1.0)
 	receiver = to_local(socket)
+	transfer_cable.visible = seconds >= 0.0
+	transfer_cable.queue_redraw()
 	queue_redraw()
 
 func _draw() -> void:
@@ -58,11 +70,11 @@ func _draw() -> void:
 	for bolt in [Vector2(-54, -30), Vector2(47, -30), Vector2(-54, 30), Vector2(47, 30)]:
 		draw_rect(Rect2(bolt, Vector2(3, 3)), Color("b7a782"))
 	if transfer_time >= 0.0:
-		_draw_transfer()
+		draw_rect(Rect2(-40, 9, 80, 4), INK)
+		draw_rect(Rect2(-40, 9, 80 * transfer_progress, 4), CYAN)
 
 func _draw_transfer() -> void:
 	var source := CABLE_PORT
-	var progress := clampf((transfer_time - 0.55) / 3.7, 0.0, 1.0)
 	var retract := smoothstep(4.55, 5.0, transfer_time)
 	var approach := Vector2(18, 0)
 	var insertion := smoothstep(0.0, 0.55, transfer_time) if inserting else 0.0
@@ -75,29 +87,27 @@ func _draw_transfer() -> void:
 	for i in range(17):
 		var t := float(i) / 16.0
 		wire.append(source.bezier_interpolate(control_a, control_b, end, t))
-	draw_polyline(wire, Color("0d1518"), 8)
-	draw_polyline(wire, Color("797c70"), 5)
-	draw_polyline(wire, Color("b4ad94"), 2)
+	transfer_cable.draw_polyline(wire, Color("0d1518"), 8)
+	transfer_cable.draw_polyline(wire, Color("797c70"), 5)
+	transfer_cable.draw_polyline(wire, Color("b4ad94"), 2)
 	if span.length() > 24.0:
 		var wrap := wire[5]
 		var tangent := (wire[6] - wire[4]).normalized()
-		draw_line(wrap - tangent * 4, wrap + tangent * 4, Color("807055"), 5)
-		draw_line(wrap, wrap + tangent, Color("b6a383"), 5)
-	draw_rect(Rect2(source - Vector2(4, 4), Vector2(8, 8)), INK)
-	draw_rect(Rect2(receiver - Vector2(6, 6), Vector2(12, 12)), Color("161d20"))
-	draw_rect(Rect2(receiver - Vector2(5, 5), Vector2(10, 10)), Color("bb955e"), false, 2)
-	draw_rect(Rect2(receiver - Vector2(3, 2), Vector2(6, 4)), CYAN if insertion >= 1.0 and retract == 0.0 else Color("576663"))
+		transfer_cable.draw_line(wrap - tangent * 4, wrap + tangent * 4, Color("807055"), 5)
+		transfer_cable.draw_line(wrap, wrap + tangent, Color("b6a383"), 5)
+	transfer_cable.draw_rect(Rect2(source - Vector2(4, 4), Vector2(8, 8)), INK)
+	transfer_cable.draw_rect(Rect2(receiver - Vector2(6, 6), Vector2(12, 12)), Color("161d20"))
+	transfer_cable.draw_rect(Rect2(receiver - Vector2(5, 5), Vector2(10, 10)), Color("bb955e"), false, 2)
+	transfer_cable.draw_rect(Rect2(receiver - Vector2(3, 2), Vector2(6, 4)), CYAN if insertion >= 1.0 and retract == 0.0 else Color("576663"))
 
-	draw_set_transform(end, (end - wire[15]).angle())
-	draw_rect(Rect2(-14, -6, 14, 12), INK)
-	draw_rect(Rect2(-12, -4, 8, 8), Color("a0a89a"))
-	draw_rect(Rect2(-4, -3, 4, 6), Color("d0ad70"))
-	draw_set_transform(Vector2.ZERO)
+	transfer_cable.draw_set_transform(end, (end - wire[15]).angle())
+	transfer_cable.draw_rect(Rect2(-14, -6, 14, 12), INK)
+	transfer_cable.draw_rect(Rect2(-12, -4, 8, 8), Color("a0a89a"))
+	transfer_cable.draw_rect(Rect2(-4, -3, 4, 6), Color("d0ad70"))
+	transfer_cable.draw_set_transform(Vector2.ZERO)
 
-	if insertion >= 1.0 and progress < 1.0:
+	if insertion >= 1.0 and transfer_progress < 1.0:
 		_draw_bits(wire)
-	draw_rect(Rect2(-40, 9, 80, 4), INK)
-	draw_rect(Rect2(-40, 9, 80 * progress, 4), CYAN)
 
 func _draw_bits(wire: PackedVector2Array) -> void:
 	# Pixel glyphs stay readable without a font or glow around the cable.
@@ -108,9 +118,9 @@ func _draw_bits(wire: PackedVector2Array) -> void:
 		var sample := phase * 16.0
 		var index := int(sample)
 		var point := wire[index].lerp(wire[index + 1], sample - index).round() - Vector2(2, 17)
-		draw_rect(Rect2(point - Vector2(2, 2), Vector2(11, 14)), Color("132529"))
+		transfer_cable.draw_rect(Rect2(point - Vector2(2, 2), Vector2(11, 14)), Color("132529"))
 		if i % 2 == 0:
-			draw_rect(Rect2(point, Vector2(7, 10)), CYAN, false, 2)
+			transfer_cable.draw_rect(Rect2(point, Vector2(7, 10)), CYAN, false, 2)
 		else:
-			draw_line(point + Vector2(3, 0), point + Vector2(3, 9), CYAN, 2)
-			draw_line(point + Vector2(0, 9), point + Vector2(6, 9), CYAN, 2)
+			transfer_cable.draw_line(point + Vector2(3, 0), point + Vector2(3, 9), CYAN, 2)
+			transfer_cable.draw_line(point + Vector2(0, 9), point + Vector2(6, 9), CYAN, 2)

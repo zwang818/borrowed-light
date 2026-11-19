@@ -61,6 +61,9 @@ func _ready() -> void:
 	for id in ducts:
 		unlocked_ducts[id] = true
 		ducts[id].visual.set_unlocked(true)
+		ducts[id].point.visible = id == &"duct_arrival"
+	for id in interaction_points:
+		interaction_points[id].visible = id == &"pulse_workbench"
 	var old = player
 	old.set_script(preload("res://scenes/gameplay/spine_flow_player.gd"))
 	player = old
@@ -96,29 +99,33 @@ func _configure_player() -> void:
 func _process(delta: float) -> void:
 	if not visit_ready: return
 	super._process(delta)
-	if get_tree().paused: return
-	var bench: Vector2 = interaction_points[&"pulse_workbench"].global_position
-	var duct: Vector2 = ducts[&"duct_arrival"].point.global_position
-	var text := ""
-	if player.global_position.distance_to(bench)<95:
-		text = "[%s] %s" % [INPUT_BINDINGS.action_label(&"interact"),"接入散射制造台" if not flow_state.calibrated else "散射机械臂已完成"]
-	elif player.global_position.distance_to(duct)<88:
-		text = "[%s] 返回输能脊柱" % INPUT_BINDINGS.action_label(&"interact")
-	if not text.is_empty():
-		interact_label.text = text
-		interact_label.show()
-		interact_bg.show()
-	if calibration_active:
+	if not get_tree().paused and calibration_active:
 		calibration_caption.text = "散射校准 · 站稳并瞄准两个触点之间，一次齐射点亮两点。"
 
-func _try_interact() -> void:
-	if not visit_ready or visit_busy or player.is_dead: return
-	var bench: Vector2 = interaction_points[&"pulse_workbench"].global_position
-	if player.global_position.distance_to(bench)<95 and _visit_line_clear(player.global_position,bench):
-		if not flow_state.calibrated: _assemble()
+func _update_interaction() -> void:
+	nearest_interactable = null
+	if not visit_ready or visit_busy or player.is_dead or get_tree().paused:
 		return
-	var duct: Vector2 = ducts[&"duct_arrival"].point.global_position
-	if player.global_position.distance_to(duct)<88:
+	var bench = interaction_points[&"pulse_workbench"]
+	var duct = ducts[&"duct_arrival"].point
+	if bench.can_interact_from(player.global_position, 95.0):
+		nearest_interactable = bench
+	elif duct.can_interact_from(player.global_position, 88.0):
+		nearest_interactable = duct
+
+func _point_prompt(id: StringName) -> String:
+	var key := INPUT_BINDINGS.action_label(&"interact")
+	if id == &"pulse_workbench":
+		var text := "散射机械臂已完成" if flow_state.calibrated else "接入散射制造台"
+		return "[%s] %s" % [key, text]
+	return "[%s] 返回输能脊柱" % key
+
+func _try_interact() -> void:
+	_update_interaction()
+	if nearest_interactable == null: return
+	if nearest_interactable == interaction_points[&"pulse_workbench"]:
+		if not flow_state.calibrated: _assemble()
+	elif nearest_interactable == ducts[&"duct_arrival"].point:
 		if flow_state.calibrated: _return_spine()
 		else: _show_notification("先到原制造台完成右臂装配与双触点校准。",3)
 

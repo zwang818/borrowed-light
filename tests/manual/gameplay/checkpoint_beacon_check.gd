@@ -77,8 +77,14 @@ func _run() -> void:
 	SAVE.erase(PATH_ABDOMEN)
 	SAVE.erase(PATH_SPINE)
 
-	var abdomen = await _open(SAVE.SCENE, PATH_ABDOMEN)
+	var old_abdomen := {"blueprint_known":true, "pulse_learned":false, "workshop_seen":false,
+		"ducts":[], "explored":[], "abdomen_checkpoint":SAVE.ABDOMEN_CHECKPOINT}
+	var abdomen = await _open(SAVE.SCENE, PATH_ABDOMEN, old_abdomen)
 	var beacon = abdomen.checkpoint_beacon
+	check(not beacon.activated and abdomen._retry_spawn() == abdomen._find_spawn_position(),
+		"A legacy save without the laser starts on the accessible side of the locked gate")
+	abdomen.pulse_learned = true
+	abdomen.player.learn_pulse()
 	var foot: Vector2 = beacon.global_position
 	var combat_floor = abdomen.map.get_node("Floors/FirstCombat")
 	var threshold = abdomen.map.get_node("Floors/GunThreshold")

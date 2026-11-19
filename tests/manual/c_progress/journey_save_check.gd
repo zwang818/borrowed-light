@@ -75,6 +75,8 @@ func run() -> void:
 	if current_scene != null and current_scene.scene_file_path == SAVE.SCENE:
 		var level = current_scene
 		check(level.pulse_learned and level.player.pulse_gun_equipped, "Learned ability restored without repeating manufacture")
+		check(level.pulse_assembly_gate.get_meta("is_open") and level.pulse_assembly_gate.collision_layer == 0,
+			"Continuing an older save with the laser opens the assembly gate")
 		check(level.unlocked_ducts.size() == 2 and level.explored_positions.size() >= 2, "Duct knowledge and exploration restored")
 		check(not level.terminal_activated and level._remaining_cleaners() == 3, "World returns to room baseline")
 		check(level.player.global_position.distance_to(level._find_spawn_position()) < 1 and level.player.health == level.player.max_health, "Continue uses safe entry and room retry health")

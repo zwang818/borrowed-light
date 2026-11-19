@@ -70,6 +70,7 @@ func _run() -> void:
 		and not abdomen.player.pulse_gun_equipped and abdomen.unlocked_ducts.is_empty()
 		and abdomen.explored_positions.is_empty(), "Abilities obtained in this level, ducts and exploration reset")
 	check(not abdomen.terminal_activated and not abdomen.terminal_gate.get_meta("is_open")
+		and abdomen.pulse_assembly_gate.collision_layer == 1
 		and not abdomen.achievement_webs[0].broken and abdomen._remaining_cleaners() == 3
 		and not abdomen.checkpoint_beacon.activated, "Terminal, gate, webs, enemies and beacon return to initial state")
 	var saved := SAVE.read_save(PATH)
