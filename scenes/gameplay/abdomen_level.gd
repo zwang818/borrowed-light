@@ -1532,7 +1532,7 @@ func finish_interaction(token: int, completed: bool) -> void:
 				game_menus.unlock_achievement("workshop_reader")
 	# Finish this event before enabling the world again (prevents input leaking).
 	if completed and id != &"arrival_gripper" and id != VOICE_POINT and id != CLEANER_INTRO_ID:
-		_save_journey(false)
+		_save_journey()
 	interaction_finished.emit(token, completed)
 	_resume_story.call_deferred()
 
