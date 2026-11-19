@@ -511,7 +511,7 @@ size = Vector2(72, 8)
 surface = 4
 
 [node name="ArrivalHatch" type="Node2D" parent="FloorDecals"]
-position = Vector2(672, 2520)
+position = Vector2(416, 2432)
 script = ExtResource("3_decal")
 size = Vector2(64, 64)
 surface = 5
