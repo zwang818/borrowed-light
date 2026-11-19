@@ -162,7 +162,6 @@ func point_blank_and_retry(boss: BOSS) -> void:
 
 func run() -> void:
 	room = SCENE.instantiate()
-	room.achievement_save_path = OS.get_temp_dir().path_join("parallel-web-reel-%d.cfg" % OS.get_process_id())
 	root.add_child(room)
 	current_scene = room
 	while not room.prototype_ready:
@@ -184,7 +183,6 @@ func run() -> void:
 	await close_reel(boss, false)
 	await close_reel(boss, true)
 	await point_blank_and_retry(boss)
-	DirAccess.remove_absolute(room.achievement_save_path)
 	room.queue_free()
 	await process_frame
 	print("WEB_REEL_PASS")

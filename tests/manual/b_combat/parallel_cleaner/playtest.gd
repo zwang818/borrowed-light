@@ -36,9 +36,8 @@ func _configure_player() -> void:
 	await super._configure_player()
 
 func _ready() -> void:
-	if achievement_save_path == "user://achievements.cfg":
-		achievement_save_path = "user://parallel_cleaner_playtest_achievements.cfg"
 	await super._ready()
+	game_menus.bind_achievement_journey("parallel_cleaner_playtest")
 	shake_base = camera.offset
 	notify_bg.offset_top = 15
 	notify_bg.offset_bottom = 61

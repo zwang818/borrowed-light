@@ -251,7 +251,6 @@ func _on_contact(_at: Vector2) -> void:
 
 func run() -> void:
 	room = SCENE.instantiate()
-	room.achievement_save_path = OS.get_temp_dir().path_join("parallel-ground-%d.cfg" % OS.get_process_id())
 	root.add_child(room)
 	current_scene = room
 	while not room.prototype_ready:
@@ -289,10 +288,9 @@ func run() -> void:
 	room.player.invulnerability_remaining = 0.0
 	room.player.apply_damage(room.player.max_health)
 	assert(paused and boss.leftover_silk.is_empty() and room.camera.offset == room.shake_base)
-	var retry: Button = room.game_menus.find_children("*", "Button", true, false).filter(func(button: Button): return button.text == "重试本房间")[0]
+	var retry: Button = room.game_menus.find_children("*", "Button", true, false).filter(func(button: Button): return button.text == "重试")[0]
 	retry.pressed.emit()
 	assert(not paused and not is_instance_valid(room.boss) and room.camera.offset == room.shake_base)
-	DirAccess.remove_absolute(room.achievement_save_path)
 	room.queue_free()
 	await process_frame
 	print("GROUND_ACTIONS_PASS")
