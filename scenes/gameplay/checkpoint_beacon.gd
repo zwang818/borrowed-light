@@ -1,17 +1,20 @@
 extends Node2D
 ## A non-solid beacon. Activation is checked against the player's foot position.
 signal touched
+signal activation_changed(active: bool)
 
 const TEXTURE := preload("res://assets/sprites/ui/checkpoints/checkpoint_beacon.png")
 const LAMP := preload("res://scenes/gameplay/checkpoint_lamp.gdshader")
 const TOUCH_RADIUS := 22.0
 const PIXEL_BOUNDS := Rect2(314, 180, 634, 891)
 const WORLD_HEIGHT := 39.0
+var use_default_visual := true
 var activated := false:
 	set(value):
 		activated = value
 		if lamp_material != null:
 			lamp_material.set_shader_parameter("activated", value)
+		activation_changed.emit(value)
 var lamp_material: ShaderMaterial
 var contact_attempted := false
 var banner: CenterContainer
@@ -19,6 +22,8 @@ var banner_text: Label
 var banner_timer: Timer
 
 func _ready() -> void:
+	if not use_default_visual:
+		return
 	var crop := AtlasTexture.new()
 	crop.atlas = TEXTURE
 	crop.region = PIXEL_BOUNDS

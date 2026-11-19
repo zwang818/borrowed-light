@@ -1,21 +1,22 @@
 extends Node2D
 ## Terminal dressing and the real patrol route used as the puzzle reference.
 const DIRECTIONS := [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]
-const EDGE := Color("81e2db")
-const CORE := Color("bbf3df")
-const AMBER := Color("c8a268")
 const INSPECTION_AFTER := 3
 var demonstration := PackedVector2Array()
-var terminal := Vector2.ZERO
+var console: Node2D
+var demo_reader: Node2D
+var guide: Node2D
 var board_angle := 0.0
-var powered := false
 
 func configure(flow: Node2D) -> void:
 	var forward: Vector2 = flow.F
 	var side := Vector2(-forward.y, forward.x)
 	var start: Vector2 = flow.anchor("ProtocolCleaner")
 	board_angle = forward.angle()
-	terminal = to_local(flow.anchor("ProtocolTerminal"))
+	var art: Node2D = flow.map.get_node("SpineArt")
+	console = art.protocol_console
+	demo_reader = art.demo_reader
+	guide = flow.demo_cleaner
 	demonstration = PackedVector2Array([
 		start,
 		start + forward * 124.0,
@@ -25,6 +26,12 @@ func configure(flow: Node2D) -> void:
 		start + side * 92.0,
 	])
 	flow.demo_cleaner.configure_loop(demonstration, INSPECTION_AFTER)
+	var screen_points := PackedVector2Array()
+	for point in demonstration:
+		var offset := (point - start).rotated(-board_angle)
+		screen_points.append((Vector2(-21, -16) + offset * Vector2(0.34, 0.16)).round())
+	console.set_route(screen_points, INSPECTION_AFTER)
+	queue_redraw()
 
 func observed_directions() -> Array[int]:
 	var result: Array[int] = []
@@ -36,23 +43,15 @@ func observed_directions() -> Array[int]:
 	return result
 
 func set_powered(value: bool) -> void:
-	powered = value
-	queue_redraw()
+	console.set_active(value)
+
+func _process(_delta: float) -> void:
+	if is_instance_valid(guide):
+		demo_reader.set_active(guide.is_inspecting())
 
 func _draw() -> void:
 	if demonstration.is_empty():
 		return
-	# Cover the old switches on the terminal only in this scene.
-	draw_rect(Rect2(terminal + Vector2(-31, -24), Vector2(62, 39)), Color("263235"))
-	draw_rect(Rect2(terminal + Vector2(-29, -22), Vector2(58, 35)), Color("587573"), false, 2.0)
-	var color := CORE if powered else AMBER
-	var board_points := PackedVector2Array()
-	for point in demonstration:
-		var offset := (point - demonstration[0]).rotated(-board_angle)
-		board_points.append(terminal + Vector2(-20, -15) + offset * Vector2(0.32, 0.23))
-	board_points.append(board_points[0])
-	draw_polyline(board_points, color, 2.0)
-	draw_rect(Rect2(board_points[0] - Vector2(3, 3), Vector2(6, 6)), color)
 
 	var start := to_local(demonstration[0])
 	for i in range(demonstration.size()):

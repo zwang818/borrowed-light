@@ -197,6 +197,10 @@ func _make_door(marker: Node2D) -> void:
 	add_child(door)
 	door.set_open(false)
 	doors.append(door)
+	if marker.object_id in ["p2_authorized_door", "p2_exit_door"]:
+		map.get_node("SpineArt").make_door_skin(door, marker.object_id == "p2_authorized_door")
+	if marker.object_id in ["p2_authorized_door", "p2_exit_door", "p2_shortcut_door"]:
+		door.self_modulate.a = 0.0
 
 func _door(id: String):
 	for door in doors:
@@ -227,7 +231,10 @@ func _process(delta: float) -> void:
 	hero().modulate = Color(0.62,0.83,0.92,0.82) if hero().has_protocol else Color.WHITE
 	pressure_label.text = "右臂蓄压  %d / %d" % [hero().pressure,state.capacity] if state.calibrated else ""
 	_update_prompt()
-	queue_redraw()
+	var art := map.get_node("SpineArt")
+	art.gate_reader.set_active(hero().has_protocol or authorized_gate.opening or authorized_gate.is_open)
+	var pressure_fraction := float(hero().pressure) / maxf(1.0, state.capacity)
+	art.fluid_station.set_fluid_state(pressure_fraction, refill_time / 1.6)
 
 func _physics_process(delta: float) -> void:
 	if not story_ready or hero().is_dead or busy: return
@@ -257,6 +264,8 @@ func _physics_process(delta: float) -> void:
 func _setup_service_checkpoint() -> void:
 	checkpoint_beacon = CHECKPOINT_BEACON.new()
 	checkpoint_beacon.name = "CheckpointBeacon"
+	checkpoint_beacon.use_default_visual = false
+	checkpoint_beacon.activation_changed.connect(map.get_node("SpineArt").checkpoint_skin.set_active)
 	checkpoint_beacon.activated = state.checkpoint == FLOW.SERVICE_CHECKPOINT
 	map.get_node("Checkpoints/ServiceExit").add_child(checkpoint_beacon)
 	checkpoint_beacon.touched.connect(_activate_service_checkpoint)
@@ -661,10 +670,3 @@ func _finish_level() -> void:
 	busy = true
 	var heading := "输能脊柱 · 试玩完成" if isolate_progress or save_path.is_empty() else "第二关 · 输能脊柱完成"
 	_talk(heading,["系统|"+heading+"。", "小一|胸腔就在前面了。", "系统|胸腔地图尚未接入，返回标题保留旅程记录。"],func(): _return_title())
-
-func _draw() -> void:
-	if not story_ready: return
-	if refill_time >= 0:
-		var at := anchor("SpinalFluidTap")
-		draw_rect(Rect2(at-Vector2(8,24),Vector2(16,48)),Color("263b3b"))
-		draw_rect(Rect2(at+Vector2(-6,22-refill_time/1.6*44),Vector2(12,refill_time/1.6*44)),Color("bd6a50"))

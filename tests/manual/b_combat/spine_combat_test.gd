@@ -116,6 +116,9 @@ func _make_door(marker: Node2D) -> void:
 	add_child(door)
 	door.set_open(true)
 	doors.append(door)
+	if marker.object_id in ["p2_authorized_door", "p2_exit_door"]:
+		map.get_node("SpineArt").make_door_skin(door, marker.object_id == "p2_authorized_door")
+		door.self_modulate.a = 0.0
 
 func _set_art(_value: bool) -> void:
 	art_enabled = true
