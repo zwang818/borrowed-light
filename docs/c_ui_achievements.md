@@ -9,9 +9,10 @@
 
 - 整体入口：F5 / `scenes/main.tscn`，标题开始后进入已有开场，再进入腹腔。
 - 独立入口：F6 / `scenes/gameplay/abdomen_level.tscn`。
-- Esc 打开暂停菜单；继续、成就手册、重试本房间、返回标题均有实际功能。
+- Esc 打开暂停菜单，按钮依次为「继续游戏」「重试本房间」「成就手册」「返回首页」。
+- 暂停菜单中的「重试本房间」从当前关卡出生点重新开始，并重置本关的解谜、敌人、场景装置和获得的能力。第二关返程制造期间使用该按钮会从脊柱入口重开，保留第一关通关记录。重开成功后旅程更新到新的出生状态，本次旅程已解锁的成就保留。
 - 成就手册支持名称／完成条件搜索，以及全部、未解锁、已解锁筛选；Esc 返回暂停菜单，再按 Esc 恢复。
-- 死亡后世界暂停，等待玩家选择重试或返回标题，不再两秒自动重生。
+- 死亡后世界暂停，等待玩家选择「重试」或「返回首页」。
 - 常驻 HUD 只显示当前目标和耐久。方向／距离卡片及 WASD 说明已移除；交互与短通知仍按事件出现。
 
 ## 状态与接口
@@ -21,14 +22,14 @@
 | `scenes/gameplay/abdomen_level.gd` | C 运行集成，组装真实角色／敌人；在既有事件回调中解锁成就；调度基线恢复和标题转场 |
 | `scenes/gameplay/abdomen_level.tscn` | 根节点 `process_mode = 1`，使世界继承可暂停处理；同时移除失效的地图 UID 引用，继续使用原路径 |
 | `scenes/gameplay/pause_input.gd` | 唯一持续监听 Esc 的节点，仅转发 `_toggle_pause()` 并消费该输入 |
-| `scenes/gameplay/game_menus.gd` | C 的模态协调层；`toggle_pause()`、`show_death()`、`close_and_resume()`；按钮发出 `retry_requested` / `title_requested` |
+| `scenes/gameplay/game_menus.gd` | C 的模态协调层；`toggle_pause()`、`show_death()`、`close_and_resume()`；暂停重开用 `restart_level_requested`，死亡重试用 `retry_requested` |
 | `scenes/gameplay/game_menus.gd` | `unlock_achievement(id) -> bool`：只接受定义中的稳定 ID，首次解锁返回 true，重复或无效 ID 返回 false |
 | `scenes/gameplay/achievement_toasts.gd` | 根窗口下唯一通知层，跨场景保留队列；`show_achievement(id, definition, completed, total)`；每项显示约 3 秒 |
 | `scenes/gameplay/gameplay_ui_theme.tres` | HUD、模态菜单、交互提示和成就通知共用的中文字体主题 |
 
 世界根节点可暂停，Esc 转发、模态菜单和纯 UI 通知保持处理。怪物、玩家、激光、弹丸、终端动画和受伤计时冻结；恢复不补算暂停时间。通知层及其所有 Control 忽略鼠标输入，不遮断游戏点击，也不自行结算战斗。
 
-重试使用房间启动时按敌人 `entity_id` 保存的快照，恢复敌人位置／耐久／巡逻状态，清除旧弹丸和未完成的开门补间，关闭门并重置终端、相机。探索位置保留。主关卡死亡和主动重试继续执行已确认的“脉冲枪回枪架，需要重拾”规则；终端继续执行当前主关卡的清扫者清场条件，依据 Bible 99 中 2026-10-26 的覆盖记录。
+死亡重试使用当前关卡的复活规则，保留已学能力。暂停菜单重开会重新实例化关卡，场景就绪并保存后才丢弃旧现场。加载或保存失败时，可以返回原暂停菜单。
 
 未改玩家、敌人、武器的公共接口；未改 `project.godot`、Input Map、Autoload、碰撞层、公共 TileSet 或 `scenes/main.tscn`。根窗口通知层由 C 菜单按需创建，并非新增 Autoload。
 
@@ -51,7 +52,7 @@
 | `first_clear` | 清理完成 | 首次击败房间内所有敌人 |
 | `first_exit` | 继续前行 | 首次抵达样板出口 |
 
-沿用本机 `user://achievements.cfg`，`[achievements]` 下使用上述 ID 的布尔值。兼容已有记录，不重置、不在加载时重播通知。它只保存成就，不能用于继续游戏、恢复世界或选择剧情分支，也不增加奖励／养成数值。
+成就只在游戏运行期间记录。同一趟旅程的关卡切换、重试、返回首页再继续均保留已解锁成就。进入新旅程第一关时清空成就和通知队列，退出游戏后内存记录随进程结束。旧 `user://achievements.cfg` 已停止读写。
 
 通知显示成就名称、完成条件和完成总数；同时解锁按队列顺序展示，不互相覆盖。手册内所有四项均可检索，不存在隐藏剧情条目；未解锁明确显示条件和状态。搜索或筛选无结果时显示空状态。
 
@@ -67,7 +68,7 @@ godot --headless --path . --script res://tests/manual/c_progress/progress_check.
 godot --headless --path . --script res://tests/manual/c_progress/achievement_check.gd
 ```
 
-这两个脚本是独立验证入口，不用 F6；测试配置分别写入 `user://test_c_ui_regression.cfg` 与 `user://test_c_ui_achievements.cfg`，结束时清理，不覆盖玩家成就文件。
+两个脚本分别验证菜单与成就行为。成就检查覆盖内存共享、新旅程清零、重复解锁和旧文件字节校验。
 
 | 检查 | 2026-10-26 结果 |
 | --- | --- |
@@ -84,7 +85,7 @@ godot --headless --path . --script res://tests/manual/c_progress/achievement_che
 
 人工复测：F5 进入腹腔，拿枪时观察右下角通知；Esc → 成就手册，搜索“出口”并筛选未解锁；靠近清扫者暂停数秒确认世界停止；继续后主动受伤死亡并选择重试，检查门／终端／敌人复位、枪回枪架。
 
-已有全部成就的个人记录不会再次弹出通知。需要独立测试时运行上面的隔离验证入口，不删除或覆盖玩家存档。
+同一趟旅程只为每项成就弹出一次通知。重开旅程后可以再次解锁。
 
 ## 素材与剩余范围
 
@@ -92,4 +93,4 @@ godot --headless --path . --script res://tests/manual/c_progress/achievement_che
 
 待处理：至少一位非作者成员复测；macOS／Linux 实机检查；完整 P1 的真实可见性、地图／日志、固定灯回滚和双房间成功／失败提交仍未由本次实现。现有 `_enemy_visible_query()` 只检查地图边界，不能将其算作 VISION-04 验收通过。完整流程时长、剧情结尾和四人同提交联合验收也不在本次通过范围。
 
-2026-11-02 后续：旧四项条件列表是历史范围；当前 11 项与本轮蛛网全清等条件以 [成就目录](c_achievement_catalog.md) 为准，旧 ID 与保存文件兼容。
+2026-11-02 后续：旧四项条件列表是历史范围；当前 11 项与本轮蛛网全清等条件以 [成就目录](c_achievement_catalog.md) 为准。

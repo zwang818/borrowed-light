@@ -15,11 +15,11 @@ func menu_labels(title: Control) -> Array[String]:
 		if child is Button and child.visible:
 			labels.append(child.text)
 	return labels
-func wait_for_room() -> bool:
+func wait_for_room(path: String = SAVE.SCENE) -> bool:
 	var deadline := Time.get_ticks_msec() + 120000
 	while Time.get_ticks_msec() < deadline:
 		await process_frame
-		if not paused and current_scene != null and current_scene.scene_file_path == SAVE.SCENE and current_scene.get("game_menus") != null:
+		if not paused and current_scene != null and current_scene.scene_file_path == path and not root.has_node("EntryLoading"):
 			return true
 	return false
 func run() -> void:
@@ -74,19 +74,11 @@ func run() -> void:
 	check(current_scene != null and current_scene.scene_file_path == SAVE.SCENE and not paused, "Continue opens gameplay directly: scene=%s paused=%s loading=%s" % [current_scene.scene_file_path if current_scene != null else "none", paused, root.has_node("EntryLoading")])
 	if current_scene != null and current_scene.scene_file_path == SAVE.SCENE:
 		var level = current_scene
-		level.achievement_save_path = "user://test_journey_achievements.cfg"
-		level.game_menus.achievement_save_path = level.achievement_save_path
 		check(level.pulse_learned and level.player.pulse_gun_equipped, "Learned ability restored without repeating manufacture")
 		check(level.unlocked_ducts.size() == 2 and level.explored_positions.size() >= 2, "Duct knowledge and exploration restored")
 		check(not level.terminal_activated and level._remaining_cleaners() == 3, "World returns to room baseline")
 		check(level.player.global_position.distance_to(level._find_spawn_position()) < 1 and level.player.health == level.player.max_health, "Continue uses safe entry and room retry health")
 		level.explored_positions.append(Vector2(600, 1200))
-		level.game_menus.toggle_pause()
-		for action in level.game_menus._content.find_children("*", "Button", true, false):
-			if action.text == "保存游戏":
-				action.pressed.emit()
-				break
-		check(not paused and SAVE.read_save(PATH).explored.size() >= 3, "Pause save button persists current exploration and resumes")
 		level.player.global_position = level.interaction_points[&"workshop_origin"].global_position + Vector2(0, 24)
 		await physics_frame
 		level._try_interact()
@@ -94,15 +86,14 @@ func run() -> void:
 			level.interaction_sheet._advance_or_finish()
 		await process_frame
 		check(SAVE.read_save(PATH).workshop_seen, "Completing a real story interaction automatically saves knowledge")
+		check(SAVE.read_save(PATH).explored.size() >= 3, "Automatic save also persists current exploration")
+		check(level.game_menus.achievements.get("workshop_reader", false), "Story interaction awards the journey achievement")
 		level._return_to_title()
-		await process_frame
-		await process_frame
+		check(await wait_for_room("res://scenes/main.tscn"), "Story save can return home through loading")
 		title = current_scene
 		title.game_save_path = PATH
 		title._refresh_archive()
 		var before_restart := FileAccess.get_file_as_bytes(PATH)
-		var achievements := "user://test_journey_achievements.cfg"
-		var before_achievements := FileAccess.get_file_as_bytes(achievements) if FileAccess.file_exists(achievements) else PackedByteArray()
 		title.restart_button.pressed.emit()
 		check(title.restart_overlay.visible and not title._is_starting, "Restart opens confirmation without starting or deleting")
 		check(root.gui_get_focus_owner() == title.restart_cancel, "Restart initially focuses safe return action")
@@ -114,6 +105,16 @@ func run() -> void:
 		title.restart_button.pressed.emit()
 		title.restart_cancel.pressed.emit()
 		check(not title.restart_overlay.visible and not title._is_starting, "Return button also cancels restart")
+		title._continue_journey()
+		check(await wait_for_room(), "Continuing after cancelled restart reaches the current journey")
+		level = current_scene
+		check(level.game_menus.achievements.get("workshop_reader", false), "Continuing in the same process preserves achievements")
+		level._return_to_title()
+		check(await wait_for_room("res://scenes/main.tscn"), "Continued journey can return home through loading")
+		title = current_scene
+		title.game_save_path = PATH
+		title._refresh_archive()
+		before_restart = FileAccess.get_file_as_bytes(PATH)
 		title.restart_button.pressed.emit()
 		title.restart_confirm.pressed.emit()
 		await process_frame
@@ -125,10 +126,10 @@ func run() -> void:
 		level = current_scene
 		check(not level.pulse_learned and not level.blueprint_known and level.unlocked_ducts.is_empty() and not level.first_level_cleared, "Restart resets abilities, clues, ducts and level progress")
 		check(not SAVE.read_save(PATH).pulse_learned and SAVE.read_save(PATH).scene == SAVE.SCENE, "New first-level checkpoint replaces previous journey")
-		check(before_achievements == (FileAccess.get_file_as_bytes(achievements) if FileAccess.file_exists(achievements) else PackedByteArray()), "Restart preserves independent achievements")
+		check(level.game_menus.achievements.is_empty(), "Confirmed new journey resets completed achievements")
+		check(level.game_menus.unlock_achievement("workshop_reader"), "The same achievement can unlock again on the new journey")
 		level._return_to_title()
-		await process_frame
-		await process_frame
+		check(await wait_for_room("res://scenes/main.tscn"), "New journey can return home through loading")
 		title = current_scene
 		title.game_save_path = PATH
 		title._open_archive()
@@ -139,7 +140,5 @@ func run() -> void:
 	current_scene.queue_free()
 	await process_frame
 	SAVE.erase(PATH)
-	if FileAccess.file_exists("user://test_journey_achievements.cfg"):
-		DirAccess.remove_absolute("user://test_journey_achievements.cfg")
 	print("JOURNEY SAVE CHECKS: ", "PASS" if failures.is_empty() else failures)
 	quit(0 if failures.is_empty() else 1)

@@ -1,9 +1,16 @@
 extends CanvasLayer
 ## Shared loading presentation; resource, warm-up and readiness work drive progress.
 signal cancelled
-signal card_selected(index: int, path: String)
 signal progress_changed(value: float)
-const CARD_BAG := preload("res://scenes/ui/intro_cutscene/loading_card_bag.gd")
+const TITLE_SCENE := "res://scenes/main.tscn"
+const ABDOMEN_CARD := preload("res://assets/loading/abdomen_workshop.png")
+const SPINE_CARD := preload("res://assets/loading/energy_spine.png")
+const LEVEL_CARDS := {
+	"res://scenes/gameplay/abdomen_level.tscn": ABDOMEN_CARD,
+	"res://scenes/gameplay/spine_workshop_visit.tscn": ABDOMEN_CARD,
+	"res://scenes/gameplay/spine_level.tscn": SPINE_CARD,
+	"res://scenes/gameplay/spine_story_playtest.tscn": SPINE_CARD,
+}
 const FRAME_CACHE := preload("res://scenes/gameplay/prepared_sprite_frames.gd")
 var minimum_seconds := 3.0
 var elapsed := 0.0
@@ -20,7 +27,6 @@ var robot_animation
 var robot_clock := 0.0
 var sources_ready := false
 var preparing_sources := false
-var selected_card := -1
 var background: TextureRect
 var cover: ColorRect
 var status_group: Control
@@ -28,13 +34,18 @@ var progress_target := 0.0
 var display_progress := 0.0
 var ready_to_finish := false
 
+static func return_home(tree: SceneTree) -> void:
+	if tree.root.has_node("EntryLoading"):
+		return
+	var loading = load("res://scenes/ui/intro_cutscene/entry_loading.gd").new()
+	loading.name = "EntryLoading"
+	tree.root.add_child(loading)
+	loading.begin(TITLE_SCENE)
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 200
-	# Choose the finished card before attaching/drawing any presentation nodes.
-	selected_card = CARD_BAG.take()
 	background = TextureRect.new()
-	background.texture = CARD_BAG.CARDS[selected_card]
 	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	background.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -85,7 +96,6 @@ func _ready() -> void:
 	cover.add_child(back)
 	cover.resized.connect(_layout_status)
 	_layout_status()
-	card_selected.emit(selected_card,background.texture.resource_path)
 
 func _layout_status() -> void:
 	var scale_factor := minf(cover.size.x/1280.0,cover.size.y/720.0)
@@ -97,6 +107,10 @@ func _layout_status() -> void:
 func begin(path: String, resource: PackedScene = null) -> void:
 	target_path = path
 	packed = resource
+	var card_scene := packed.resource_path if packed != null and not packed.resource_path.is_empty() else path
+	if card_scene == TITLE_SCENE and get_tree().current_scene != null:
+		card_scene = get_tree().current_scene.scene_file_path
+	background.texture = LEVEL_CARDS.get(card_scene)
 	previous_pause = get_tree().paused
 	get_tree().paused = true
 	if packed != null:
@@ -184,8 +198,8 @@ func _finish_loading() -> void:
 	# Leave a real full frame at 100% after the destination is prepared for control.
 	await get_tree().create_timer(0.15,true).timeout
 	FRAME_CACHE.release_loading_sources()
-	get_tree().paused = previous_pause
 	var destination := get_tree().current_scene
+	get_tree().paused = previous_pause and (destination == null or destination.scene_file_path != TITLE_SCENE)
 	if destination != null and destination.has_method("on_entry_revealed"):
 		destination.on_entry_revealed()
 	queue_free()

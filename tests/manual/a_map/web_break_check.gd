@@ -7,7 +7,6 @@ func _initialize() -> void:
 
 func run() -> void:
 	var game = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
-	game.achievement_save_path = "user://test_a_web_achievements.cfg"
 	root.add_child(game)
 	current_scene = game
 	game.player.set_physics_process(false)
@@ -92,8 +91,6 @@ func run() -> void:
 	game.queue_free()
 	await process_frame
 	await process_frame
-	if FileAccess.file_exists("user://test_a_web_achievements.cfg"):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_a_web_achievements.cfg"))
 	print("WEBS: 10 reachable pulse targets, 432 background patches, one spider per hit, pause, cleanup, retry, enemy counts: PASS")
 	quit()
 

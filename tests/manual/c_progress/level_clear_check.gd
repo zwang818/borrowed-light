@@ -1,5 +1,4 @@
 extends SceneTree
-const SAVE := "user://test_spine_exit_achievements.cfg"
 const PATH := "user://test_level_clear.json"
 var failures: Array[String] = []
 func _initialize() -> void:
@@ -10,7 +9,6 @@ func check(ok: bool, message: String) -> void:
 		printerr("FAIL: " + message)
 func run() -> void:
 	var level = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
-	level.achievement_save_path = SAVE
 	level.journey_save_path = PATH
 	root.add_child(level)
 	current_scene = level
@@ -58,7 +56,5 @@ func run() -> void:
 	if current_scene != null:
 		current_scene.queue_free()
 	await process_frame
-	if FileAccess.file_exists(SAVE):
-		DirAccess.remove_absolute(SAVE)
 	print("LEVEL CLEAR CHECKS: ", "PASS" if failures.is_empty() else failures)
 	quit(0 if failures.is_empty() else 1)

@@ -42,7 +42,6 @@ func run() -> void:
 		check(workshop._save_journey()==OK,"Interrupted calibration saves a real version-2 workshop snapshot")
 		var saved := SAVE.read_save(PATH)
 		check(saved.get("version")==2 and SAVE.resume_scene(saved)==SAVE.SCENE,"Workshop snapshot owns the abdomen scene, never the previous spine scene")
-		var position: Vector2 = workshop.player.global_position
 		workshop.queue_free()
 		await process_frame
 		paused = false
@@ -56,7 +55,7 @@ func run() -> void:
 		while Time.get_ticks_msec()<until:
 			await process_frame
 			if current_scene.scene_file_path=="res://scenes/gameplay/spine_workshop_visit.tscn" and current_scene.visit_ready and not paused and not root.has_node("EntryLoading"): break
-		check(current_scene.player.health==2 and current_scene.player.global_position.distance_to(position)<0.01,"Workshop continue restores real position and health after replacing the player script")
+		check(current_scene.player.health==2 and current_scene.player.global_position.distance_to(current_scene._duct_landing(&"duct_arrival"))<0.01,"Workshop continue resumes at the duct landing with saved health")
 		check(current_scene.calibration_active and not current_scene.player.scatter_unlocked and current_scene.calibration_targets.size()==2,"Resume regenerates two calibration contacts without granting the ability")
 	current_scene.queue_free()
 	await process_frame

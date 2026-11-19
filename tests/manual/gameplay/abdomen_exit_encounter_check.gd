@@ -6,7 +6,6 @@ func _initialize() -> void:
 
 func run() -> void:
 	var level = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
-	level.achievement_save_path = "/tmp/borrowed-light-exit-encounter-%d.cfg" % OS.get_process_id()
 	root.add_child(level)
 	current_scene = level
 	while not level.is_entry_ready():
@@ -92,7 +91,6 @@ func run() -> void:
 	for enemy in level.enemies:
 		enemy.apply_damage(enemy.max_health)
 	assert(level._remaining_cleaners() == 0 and level.terminal_gate.get_meta("is_open"))
-	DirAccess.remove_absolute(level.achievement_save_path)
 	level.queue_free()
 	await process_frame
 	print("Abdomen exit encounter: entry, paired roles, side route, staggered strikes, retreat and retry: PASS")

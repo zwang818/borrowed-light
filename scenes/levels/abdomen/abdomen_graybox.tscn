@@ -650,6 +650,11 @@ metadata/area_id = "p1_landing_01_area_18"
 metadata/room_id = "p1_landing_01"
 metadata/requires_visibility_check = true
 
+[node name="Checkpoints" type="Node2D" parent="."]
+
+[node name="FirstCombat" type="Marker2D" parent="Checkpoints"]
+position = Vector2(574, 1716)
+
 [node name="Markers" type="Node2D" parent="."]
 
 [node name="PlayerSpawn" type="Marker2D" parent="Markers"]

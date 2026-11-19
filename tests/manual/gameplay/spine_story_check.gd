@@ -47,7 +47,7 @@ func run() -> void:
 	create_timer(180,true,false,true).timeout.connect(func(): printerr("FAIL: watchdog timeout"); quit(1))
 	Engine.time_scale = 4
 	Engine.physics_ticks_per_second = 240
-	for path in ["spine_flow_state","spine_flow_player","spine_calibration_target","spine_flow_gate","spine_protocol_panel","spine_flow_loading","spine_story_defense","spine_story_signals","spine_story_level","spine_workshop_visit"]:
+	for path in ["spine_flow_state","spine_flow_player","spine_calibration_target","spine_flow_gate","spine_protocol_panel","spine_protocol_rail","spine_patrol_demo","spine_flow_loading","spine_story_defense","spine_story_signals","spine_story_level","spine_workshop_visit"]:
 		var script = load("res://scenes/gameplay/"+path+".gd")
 		check(script != null and script.can_instantiate(),"Script compiles: "+path)
 	if not failures.is_empty():
@@ -79,37 +79,149 @@ func run() -> void:
 		for waypoint in level.map.get_node("RouteWaypoints/ServiceRoute").get_children().slice(4):
 			await walk_to(waypoint.global_position,4)
 		check(level.hero().global_position.distance_to(level.map.get_node("RouteWaypoints/ServiceRoute/Point12").global_position)<12,"Real player walks the opened inspection route without crossing walls")
+		check(level.checkpoint_beacon.activated and level.state.checkpoint == level.FLOW.SERVICE_CHECKPOINT,
+			"Walking out of the inspection route activates the service exit beacon")
 		await capture("hatch_exit")
+		var guide = level.protocol_rail
+		var cleaner = level.demo_cleaner
+		var side := Vector2(-level.F.y, level.F.x)
+		var guard = level.enemies.filter(func(unit): return unit.entity_id == &"p2_cleaner_03")[0]
+		var shifted_snapshot: Dictionary = level._capture_room_snapshot(level.hero())
+		shifted_snapshot.room.story_runtime["observation_layout"] = 2
+		shifted_snapshot.enemies["p2_cleaner_03"].global_position = [6260.466, -98.533]
+		shifted_snapshot.enemies["p2_cleaner_03"].state = guard.State.CHASE
+		level._apply_live_snapshot(shifted_snapshot)
+		check(guard.global_position.is_equal_approx(level.anchor("Cleaner03"))
+			and guard.state == guard.State.RECOVERY, "An unsolved save with shifted guards restores their original deployment")
+		var original_positions := {"Cleaner03": Vector2(6129.958, -37.6764),
+			"Cleaner04": Vector2(6294.2764, -26.0284), "Cleaner05": Vector2(6591.15249, -264.87076),
+			"ProtocolYieldRear": Vector2(6585.73416, -328.54683)}
+		for marker in original_positions:
+			check(level.map.get_node("Markers/" + marker).position.is_equal_approx(original_positions[marker]),
+				"Cleaner or yield marker uses its original coordinates: " + marker)
+		level.hero().global_position = guard.global_position + side * 58.0
+		level._update_camera()
+		level.get_node("Camera2D").reset_smoothing()
+		await wait_game(1.0)
+		check(guard.is_on_screen() and level._line_clear(guard.global_position,level.hero().global_position)
+			and not guard.can_detect() and guard.state == guard.State.PATROL and guard.web_phase == 0,
+			"A visible player at close range cannot be chased while the terminal is unsolved")
+		cleaner.restore_loop(0.0)
+		level.hero().global_position = guide.demonstration[0]
+		var observed: Array[int] = []
+		var observed_stop := 0
+		var stopped_frames := 0
+		var previous: Vector2 = cleaner.global_position
+		var health: int = level.hero().health
+		for i in range(480):
+			await physics_frame
+			var step: Vector2 = cleaner.global_position - previous
+			previous = cleaner.global_position
+			if step.length() < 0.05:
+				stopped_frames += 1
+				if stopped_frames >= 20 and observed.size() > 0 and observed.size() < 6:
+					observed_stop = observed.size()
+				continue
+			stopped_frames = 0
+			var direction := step.normalized().rotated(-guide.board_angle)
+			var index: int = guide.DIRECTIONS.find(Vector2(roundf(direction.x), roundf(direction.y)))
+			if index >= 0 and (observed.is_empty() or observed[-1] != index):
+				observed.append(index)
+			if observed.size() == 6 and cleaner.global_position.distance_to(guide.demonstration[0]) < 2:
+				break
+		check(observed.size() == 6 and observed == guide.observed_directions() and observed_stop == cleaner.stop_after,
+			"The real cleaner demonstrates six moves and an observable intermediate stop")
+		check(not cleaner.can_detect() and cleaner.state == cleaner.State.PATROL
+			and cleaner.web_phase == 0 and level.hero().health == health, "The guide walks past a visible player without attacking")
+		cleaner.apply_damage(99)
+		check(cleaner.health == cleaner.max_health and cleaner.collision_layer == 0
+			and not cleaner.has_node("ModelHurtbox"), "The demonstration stays available during combat")
+
+		level.hero().global_position = level.anchor("ProtocolObservation")
+		cleaner.restore_loop(1.4)
+		level._update_camera()
+		level.get_node("Camera2D").reset_smoothing()
+		await capture("patrol")
+
 		level.hero().global_position = level.anchor("ProtocolTerminalUse")
 		await physics_frame
 		await press("interact")
-		check(is_instance_valid(level.protocol_panel),"Real terminal interaction opens three-contact input")
+		check(is_instance_valid(level.protocol_panel), "Real terminal interaction opens the route and stop controls")
 		await capture("protocol")
-		if not is_instance_valid(level.protocol_panel):
-			print("SPINE STORY CHECK: ",failures)
+		if not is_instance_valid(level.protocol_panel) or observed.size() != 6 or observed_stop == 0:
+			print("SPINE STORY CHECK: ", failures)
 			quit(1)
 			return
+		var original: Array = level.protocol_panel.directions.duplicate()
 		level.protocol_panel._send()
-		await wait_game(2.9)
-		check(not level.state.receipt_learned and level.protocol_panel.contacts==[false,false,false],"Wrong receipt preserves contacts and grants no protocol")
-		level.protocol_panel._toggle(1)
+		check(not level.state.receipt_learned and level.protocol_panel.directions == original,
+			"An incorrect sequence keeps input and grants no authorization")
+		for i in range(observed.size()):
+			while level.protocol_panel.directions[i] != observed[i]:
+				level.protocol_panel._rotate(i)
 		level.protocol_panel._send()
-		await wait_game(2.9)
-		check(level.state.receipt_learned and level.hero().has_protocol,"Correct receipt activates real cleaner recognition state")
-		level.hero().global_position = level.anchor("ProtocolGateReader")-level.F*25
+		check(not level.state.receipt_learned, "Correct directions alone cannot authorize the player")
+		level.protocol_panel.stop_picker.select(1)
+		level.protocol_panel._send()
+		check(not level.state.receipt_learned, "A wrong stop keeps the puzzle and guard protection active")
+		level.protocol_panel._close()
+		await process_frame
+		level._open_protocol()
+		check(level.protocol_panel.directions == observed and level.protocol_panel.stop_picker.get_selected_id() == 1,
+			"Returning from observation preserves the entered directions and stop")
+		level.protocol_panel.stop_picker.select(observed_stop)
+		await capture("protocol_connected")
+		level.protocol_panel._send()
 		await physics_frame
+		await physics_frame
+		check(level.state.receipt_learned and level.hero().has_protocol,
+			"Copying the observed sequence enables concealment even at the console")
+
+		var gate_approach: Vector2 = level.anchor("ProtocolGateReader") + side * 78
+		level.hero().global_position = gate_approach
+		await physics_frame
+		await physics_frame
+		check(level.hero().has_protocol, "The player stays hidden away from the old marked rail")
+		await walk_to(gate_approach + level.F * 8 + side * 54, 4)
+		check(level.hero().has_protocol, "Moving across the width of the corridor stays hidden")
+		await press("protocol_exit")
+		await physics_frame
+		check(not level.hero().has_protocol and level.protocol_suspended, "Manual exit keeps protocol disabled within the area")
+		level.hero().global_position = guard.global_position + side * 58.0
+		level._update_camera()
+		level.get_node("Camera2D").reset_smoothing()
+		await physics_frame
+		await physics_frame
+		check(guard.can_detect() and guard.state == guard.State.CHASE,
+			"After solving, a nearby guard resumes pursuit when the player exits concealment")
+		level.hero().global_position = level.anchor("ProtocolExit")
+		await physics_frame
+		await physics_frame
+		check(not level.hero().has_protocol and not level.protocol_suspended, "Exiting the area clears the manual override")
+		level.hero().global_position = gate_approach
+		await physics_frame
+		await physics_frame
+		check(level.hero().has_protocol, "Reentering anywhere in the area restores protocol")
+		await capture("protocol_gate")
 		await press("interact")
-		await wait_game(3.0)
-		check(level.authorized_gate.is_open,"Learned receipt is reused at the physical authorization gate")
-		await walk_to(level.anchor("AuthorizedDoor")+level.F*40,4)
-		check(level.hero().global_position.distance_to(level.anchor("AuthorizedDoor")+level.F*40)<12,"Real body crosses the gate after the two cleaners yield")
+		await wait_game(1.3)
+		check(level.authorized_gate.is_open, "An authorized player can open the gate away from the old rail")
+		await walk_to(level.anchor("AuthorizedDoor"), 6)
+		await walk_to(level.anchor("AuthorizedDoor") + level.F * 55, 6)
+		check(level.hero().global_position.distance_to(level.anchor("AuthorizedDoor") + level.F * 55) < 12,
+			"The real player crosses the authorized door")
 		level._update_camera()
 		await physics_frame
 		await physics_frame
 		var gate_sentry
 		for unit in level.enemies:
-			if unit.entity_id == "p2_protocol_gate_sentry": gate_sentry = unit
-		check(level.hero().has_protocol and not level.demo_cleaner.can_detect() and gate_sentry.can_detect(),"Inside the same valid protocol, cleaner refuses a target while the real gate sentry detects it")
+			if unit.entity_id == "p2_protocol_gate_sentry":
+				gate_sentry = unit
+		check(level.hero().has_protocol and gate_sentry.can_detect(), "The gate sentry still detects the cloaked player")
+		await walk_to(level.anchor("ProtocolExit"), 4)
+		await physics_frame
+		await physics_frame
+		check(not level.hero().has_protocol, "Walking into the authored cover ends concealment")
 		level.hero().global_position = level.anchor("ScatterEvolution")+Vector2(0,32)
 		await physics_frame
 		await press("interact")

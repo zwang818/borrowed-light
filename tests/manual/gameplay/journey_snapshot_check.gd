@@ -4,7 +4,6 @@ const SAVE := preload("res://scenes/gameplay/journey_save.gd")
 const ABDOMEN_PATH := "user://test_snapshot_abdomen.json"
 const SPINE_PATH := "user://test_snapshot_spine.json"
 const DEATH_PATH := "user://test_snapshot_death.json"
-const ACHIEVEMENTS := "user://test_snapshot_achievements.cfg"
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -34,7 +33,6 @@ func _write() -> void:
 	assert(SAVE.write_save(SPINE_PATH, knowledge) == OK)
 
 	var abdomen = await _continue_from_title(ABDOMEN_PATH)
-	abdomen.game_menus.achievement_save_path = ACHIEVEMENTS
 	abdomen.player.global_position = abdomen._find_spawn_position() + Vector2(14.125, -19.375)
 	abdomen.player.apply_damage(1)
 	abdomen.player.apply_web_slow(1.5, 0.6)
@@ -50,7 +48,7 @@ func _write() -> void:
 	abdomen.terminal.get_node("FacilityVisual").set_power(true)
 	assert(abdomen.player.pulse_gun.request_fire(Vector2.RIGHT))
 	abdomen.game_menus.toggle_pause()
-	assert(abdomen._save_journey(true) == OK)
+	assert(abdomen._save_journey() == OK)
 	assert(SAVE.read_save(ABDOMEN_PATH).version == 2)
 
 	var spine = await _continue_from_title(SPINE_PATH)
@@ -65,7 +63,8 @@ func _write() -> void:
 	sentry.shots_left = 2
 	sentry.attack_mode = 1
 	sentry.shot_index = 4
-	spine.enemies[1].apply_damage(99)
+	var combat_cleaner = spine.enemies.filter(func(enemy): return enemy.entity_id == "p2_cleaner_02")[0]
+	combat_cleaner.apply_damage(99)
 	var bullet = load("res://scenes/weapons/enemy_projectile.tscn").instantiate()
 	spine.get_node("EnemyProjectiles").add_child(bullet)
 	bullet.global_position = player.global_position + Vector2(89, 11)
@@ -93,7 +92,7 @@ func _write() -> void:
 
 	spine.state.first_fall = true # The story recovery has already been seen.
 	# Return to the title from death. Then verify the window close uses the
-	# latest state rather than the last pause-menu save.
+	# latest state rather than the previous save.
 	player.invulnerability_remaining = 0.0
 	player.apply_damage(99)
 	assert(spine.menus.page == spine.menus.Page.DEATH)
@@ -104,12 +103,14 @@ func _write() -> void:
 	spine = await _continue_from_title(SPINE_PATH)
 	player = spine.get_node("SpawnPoints/PlayerSpawn/Player")
 	player.global_position += Vector2(7.5, 2.25)
+	var closing_position: Vector2 = player.global_position
 	assert(not auto_accept_quit)
 	root.close_requested.emit()
+	assert(SAVE.SNAPSHOT.vector(SAVE.read_save(SPINE_PATH).snapshot.player.global_position).is_equal_approx(closing_position))
 
 func _read() -> void:
 	var abdomen = await _continue_from_title(ABDOMEN_PATH)
-	assert(abdomen.player.global_position.is_equal_approx(abdomen._find_spawn_position() + Vector2(14.125, -19.375)))
+	assert(abdomen.player.global_position.is_equal_approx(abdomen._find_spawn_position()))
 	assert(abdomen.player.health == 2 and is_equal_approx(abdomen.player.web_speed_factor, 0.6))
 	assert(abdomen.player.pulse_gun.state == abdomen.player.pulse_gun.State.CHARGING)
 	var cleaner = abdomen.enemies[0]
@@ -128,12 +129,13 @@ func _read() -> void:
 	var spine = await _continue_from_title(SPINE_PATH)
 	var spawn = spine.get_node("SpawnPoints/PlayerSpawn")
 	var player = spawn.get_node("Player")
-	assert(player.global_position.is_equal_approx(spawn.global_position + Vector2(37.75, -16.5)))
+	assert(player.global_position.is_equal_approx(spine.anchor("DefenseSafePocket")))
 	assert(player.health == 2 and player.scatter_unlocked and player.selected_mode == player.AttackMode.SCATTER)
 	assert(is_equal_approx(player.scatter_remaining, 0.47))
 	var sentry = spine.enemies[0]
 	assert(sentry.state == sentry.State.BURST and sentry.shots_left == 2 and sentry.shot_index == 4)
-	assert(spine.enemies[1].health == 0 and spine.enemies[1].collision_layer == 0)
+	var combat_cleaner = spine.enemies.filter(func(enemy): return enemy.entity_id == "p2_cleaner_02")[0]
+	assert(combat_cleaner.health == 0 and combat_cleaner.collision_layer == 0)
 	assert(is_equal_approx(spine.defense.elapsed, 7.25) and spine.hero().pressure == 3 and spine.state.record_read and spine.authorized_gate.is_open)
 	assert(is_equal_approx(spine.entrance_hazards.elapsed, 8.25) and spine.entrance_hazards.ring_hit_cycle[0] == 1)
 	assert(is_equal_approx(spine.entrance_hazards.orbs.back().travel_left, 97.5))
@@ -162,12 +164,11 @@ func _read() -> void:
 	assert(SAVE.resume_scene(arrived) == SAVE.SPINE and arrived.snapshot.player.health == 2)
 	for path in [ABDOMEN_PATH, SPINE_PATH, DEATH_PATH]:
 		SAVE.erase(path)
-	if FileAccess.file_exists(ACHIEVEMENTS):
-		DirAccess.remove_absolute(ACHIEVEMENTS)
 	print("Journey snapshot: two levels, window close, combat, room state and death/retry: PASS")
 	quit()
 
 func _run() -> void:
+	create_timer(120, true, false, true).timeout.connect(func(): quit(1))
 	if "write" in OS.get_cmdline_user_args():
 		await _write()
 	else:

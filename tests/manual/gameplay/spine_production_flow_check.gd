@@ -2,7 +2,6 @@ extends SceneTree
 ## Actual title/intro/first exit/video/loading/production route, with isolated saves.
 const SAVE := preload("res://scenes/gameplay/journey_save.gd")
 const PATH := "user://test_spine_production_journey.json"
-const ACH := "user://test_spine_production_achievements.cfg"
 var failures: Array[String] = []
 func _initialize() -> void: call_deferred("run")
 func check(value: bool,text: String) -> void:
@@ -51,7 +50,7 @@ func run() -> void:
 		quit(1)
 		return
 	var first = current_scene
-	first.game_menus.achievement_save_path = ACH
+	check(first.game_menus.unlock_achievement("first_weapon"), "First level records a journey achievement")
 	# Fixture only shortens first-level combat; it does not replace the exit route.
 	first.blueprint_known = true
 	first.pulse_learned = true
@@ -70,6 +69,7 @@ func run() -> void:
 	var level = current_scene
 	check(level.get_meta("flow_version","")=="spine_v5_interactive" and level.story_ready,"Production scene binds the interactive v5 flow")
 	check(not level.isolate_progress and level.playtest_start==0 and level.save_path==PATH,"Formal flow uses the original journey with no developer jump")
+	check(level.menus.achievements.get("first_weapon", false), "Second level sees achievements earned in the first level")
 	check(level.hero().health==2 and level.hero().pulse_gun_equipped and not level.hero().scatter_unlocked,"First exit carries real health and pulse without granting scatter")
 	check(level.defense.emitters.size()==8 and not level.authorized_gate.is_open,"Formal flow enables hazards and locked authorization gate")
 	level.state.first_fall = true
@@ -85,8 +85,7 @@ func run() -> void:
 	check(await wait_room("res://scenes/gameplay/spine_level.tscn"),"Title Continue returns to the same formal flow")
 	level = current_scene
 	check(level.state.first_fall and level.state.hatch_open and not level.isolate_progress,"Formal continue retains story knowledge and save ownership")
-	# Base menu construction must see the production save owner on a return transfer.
-	check(level.menus.achievement_save_path=="user://achievements.cfg","Formal entry uses the real achievement profile, rather than the preview profile")
+	check(level.menus.achievements.get("first_weapon", false), "Continue preserves achievements in the running journey")
 	# Completed manufacture fixture: the real manufacture is covered separately.
 	level.state.scatter_blueprint = true
 	level.state.assembled = true
@@ -95,14 +94,13 @@ func run() -> void:
 	level._begin_workshop_trip()
 	check(await wait_room("res://scenes/gameplay/spine_workshop_visit.tscn"),"Formal journey can revisit the real abdomen workshop")
 	var workshop = current_scene
-	check(workshop.flow_path==PATH and workshop.game_menus.achievement_save_path=="user://achievements.cfg","Workshop retains production save and achievement ownership")
+	check(workshop.flow_path==PATH and workshop.game_menus.achievements.get("first_weapon", false),"Workshop retains the journey and its achievements")
 	workshop._return_spine()
 	check(await wait_room("res://scenes/gameplay/spine_level.tscn"),"Formal workshop return reaches production spine")
-	check(current_scene.save_path==PATH and not current_scene.isolate_progress and current_scene.menus.achievement_save_path=="user://achievements.cfg","Return loading cannot silently switch to preview persistence")
+	check(current_scene.save_path==PATH and not current_scene.isolate_progress and current_scene.menus.achievements.get("first_weapon", false),"Workshop return preserves the journey and its achievements")
 	current_scene.queue_free()
 	await process_frame
 	SAVE.erase(PATH)
-	DirAccess.remove_absolute(ACH)
 	var i := 0
 	for path in [SAVE.DEFAULT_PATH,"user://achievements.cfg","user://settings.cfg"]:
 		var after := FileAccess.get_file_as_bytes(path) if FileAccess.file_exists(path) else PackedByteArray()

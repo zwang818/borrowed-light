@@ -583,7 +583,7 @@ offset_left = 34.0
 offset_top = 88.0
 offset_right = 506.0
 offset_bottom = 146.0
-text = "当前旅程进度将被覆盖。\n已解锁的成就保留。"
+text = "当前旅程进度将被覆盖。\n已解锁的成就将重置。"
 
 [node name="CancelButton" type="Button" parent="Presentation/RestartOverlay/Panel"]
 layout_mode = 0

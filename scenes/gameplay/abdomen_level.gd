@@ -34,6 +34,9 @@ const FACILITY_SCRIPT := preload("res://scenes/gameplay/facility_visual.gd")
 const DUCT_VISUAL := preload("res://scenes/gameplay/duct_visual.gd")
 const HEALTH_SCRIPT := preload("res://scenes/gameplay/health_hearts.gd")
 const JOURNEY_SAVE := preload("res://scenes/gameplay/journey_save.gd")
+const ENTRY_LOADING := preload("res://scenes/ui/intro_cutscene/entry_loading.gd")
+const CHECKPOINT_BEACON := preload("res://scenes/gameplay/checkpoint_beacon.gd")
+var checkpoint_beacon: CHECKPOINT_BEACON
 var journey_save_path := ""
 var first_level_cleared := false
 var entry_ready := false
@@ -131,7 +134,6 @@ var terminal: Node = null
 var final_exit: Node = null
 var explored_positions: Array[Vector2] = []
 var last_memory_record_time: float = 0.0
-@export var achievement_save_path := "user://achievements.cfg"
 var game_menus
 var enemy_baselines: Dictionary = {}
 var door_tweens: Array[Tween] = []
@@ -207,13 +209,10 @@ func _ready() -> void:
 	_setup_hud()
 	game_menus = GAME_MENUS_SCRIPT.new()
 	game_menus.name = "GameMenus"
-	game_menus.achievement_save_path = achievement_save_path
 	add_child(game_menus)
 	game_menus.retry_requested.connect(_retry_level)
+	game_menus.restart_level_requested.connect(_restart_level)
 	game_menus.title_requested.connect(_return_to_title)
-	game_menus.save_requested.connect(func():
-		_save_journey(true)
-		game_menus.close_and_resume())
 	interaction_sheet = SHEET_SCRIPT.new()
 	add_child(interaction_sheet)
 	interaction_sheet.finished.connect(finish_interaction)
@@ -230,6 +229,7 @@ func _ready() -> void:
 	_setup_terminal_gate()
 	_setup_ducts()
 	_setup_achievement_events()
+	_setup_checkpoint()
 	var welder = map.get_node("Walls/AssemblyBase/EnvironmentSkin")
 	welder.weld_started.connect(func():
 		_play_mechanical(WELD_START_AUDIO, welder.global_position, -12.0, 180.0))
@@ -257,12 +257,17 @@ func _restore_journey() -> void:
 	var session: Dictionary = get_tree().get_meta("journey_session")
 	get_tree().remove_meta("journey_session")
 	journey_save_path = session.path
+	game_menus.bind_achievement_journey(journey_save_path)
+	if session.get("new_journey", false):
+		game_menus.reset_journey_achievements()
 	var data: Dictionary = session.get("data", {})
 	if not data.is_empty():
 		first_level_cleared = data.get("first_level_cleared", false)
 		blueprint_known = data.blueprint_known
 		pulse_learned = data.pulse_learned
 		workshop_seen = data.workshop_seen
+		if checkpoint_beacon != null:
+			checkpoint_beacon.activated = data.get("abdomen_checkpoint", "") == JOURNEY_SAVE.ABDOMEN_CHECKPOINT
 		if blueprint_known:
 			terminal_clues[&"pulse_blueprint"] = TERMINAL_CLUES[&"pulse_blueprint"]
 		if workshop_seen:
@@ -272,16 +277,44 @@ func _restore_journey() -> void:
 			ducts[StringName(id)].visual.set_unlocked(true)
 		for point in data.explored:
 			explored_positions.append(Vector2(point[0], point[1]))
-		player.restore_player(_find_spawn_position(), player.max_health, ["pulse_gun"] if pulse_learned else [])
+		var resume_at_checkpoint: bool = session.get("resume_at_checkpoint", false)
+		var spawn := _retry_spawn() if resume_at_checkpoint else _find_spawn_position()
+		player.restore_player(spawn, player.max_health, ["pulse_gun"] if pulse_learned else [])
 		current_objective = Objective.KILL_ENEMIES if pulse_learned else (Objective.CRAFT_ARM if blueprint_known else Objective.GET_WEAPON)
 		if data.has("snapshot"):
-			_restore_room_snapshot(data.snapshot)
+			var snapshot: Dictionary = data.snapshot
+			if resume_at_checkpoint:
+				snapshot = JOURNEY_SAVE.SNAPSHOT.with_player_spawn(snapshot, spawn)
+			_restore_room_snapshot(snapshot)
 		game_menus.set_achievement_progress("duct_network", unlocked_ducts.size(), ducts.size())
 		camera.global_position = player.global_position
 		camera.reset_smoothing()
 		_update_hud()
-	else:
-		_save_journey(false)
+	elif not session.get("defer_save", false):
+		_save_journey()
+
+func _restart_level() -> void:
+	preload("res://scenes/gameplay/spine_flow_loading.gd").restart_level(
+		self, scene_file_path, journey_save_path)
+
+func commit_level_restart() -> bool:
+	return journey_save_path.is_empty() or _save_journey() == OK
+
+func _setup_checkpoint() -> void:
+	checkpoint_beacon = CHECKPOINT_BEACON.new()
+	checkpoint_beacon.name = "CheckpointBeacon"
+	map.get_node("Checkpoints/FirstCombat").add_child(checkpoint_beacon)
+	checkpoint_beacon.touched.connect(_activate_checkpoint)
+
+func _has_active_checkpoint() -> bool:
+	return checkpoint_beacon != null and checkpoint_beacon.activated
+
+func _activate_checkpoint() -> void:
+	checkpoint_beacon.activated = true
+	if not journey_save_path.is_empty() and _save_journey() != OK:
+		checkpoint_beacon.activated = false
+		return
+	_show_notification("存档点已保存", 2.5)
 
 func _capture_room_snapshot() -> Dictionary:
 	var webs: Array = map.get_node("Environment").webs
@@ -346,10 +379,8 @@ func _restore_room_snapshot(snapshot: Dictionary) -> void:
 		current_objective = Objective.ACTIVATE_TERMINAL
 	_refresh_web_achievement(false)
 
-func _save_journey(show_result: bool = false) -> Error:
+func _save_journey() -> Error:
 	if journey_save_path.is_empty():
-		if show_result:
-			_show_notification("当前为独立场景，请从标题开始旅程后保存。")
 		return ERR_UNAVAILABLE
 	var explored: Array = []
 	for point in explored_positions:
@@ -358,11 +389,10 @@ func _save_journey(show_result: bool = false) -> Error:
 		"first_level_cleared": first_level_cleared,
 		"blueprint_known": blueprint_known, "pulse_learned": pulse_learned,
 		"workshop_seen": workshop_seen, "ducts": unlocked_ducts.keys(), "explored": explored,
+		"abdomen_checkpoint": JOURNEY_SAVE.ABDOMEN_CHECKPOINT if _has_active_checkpoint() else "",
 		"snapshot": _capture_room_snapshot()})
 	if error != OK:
 		_show_notification("存档失败，请检查磁盘空间或文件权限。", 4.0)
-	elif show_result:
-		_show_notification("旅程已保存。", 3.0)
 	return error
 
 func _process(delta: float) -> void:
@@ -413,6 +443,8 @@ func _physics_process(delta: float) -> void:
 	if get_tree().paused:
 		return
 	if player != null and not player.is_dead:
+		if entry_ready and checkpoint_beacon != null and player.controls_enabled and not is_level_complete:
+			checkpoint_beacon.check_contact(player.global_position)
 		_update_exit_encounter()
 		camera.global_position = player.global_position
 		last_memory_record_time += delta
@@ -1094,7 +1126,7 @@ func _on_exit_entered(body: Node, exit_id: String) -> void:
 
 func _on_player_died() -> void:
 	_update_hp_bar()
-	game_menus.show_death()
+	game_menus.show_death(_has_active_checkpoint())
 
 func _on_enemy_died(_entity_id: StringName) -> void:
 	dead_enemies += 1
@@ -1131,7 +1163,7 @@ func _in_protocol_query() -> bool:
 func _show_level_complete() -> void:
 	var previously_cleared := first_level_cleared
 	first_level_cleared = true
-	if not journey_save_path.is_empty() and _save_journey(false) != OK:
+	if not journey_save_path.is_empty() and _save_journey() != OK:
 		first_level_cleared = previously_cleared
 		is_level_complete = false
 		exit_retry_blocked = true
@@ -1192,9 +1224,7 @@ func _retry_level() -> void:
 	door_tweens.clear()
 	for bullet in bullets_parent.get_children():
 		bullet.queue_free()
-	var spawn_pos: Vector2 = _find_spawn_position()
-
-	player.restore_player(spawn_pos, player.max_health, ["pulse_gun"] if pulse_learned else [])
+	player.restore_player(_retry_spawn(), player.max_health, ["pulse_gun"] if pulse_learned else [])
 	robot_visual.trail.clear()
 	current_objective = Objective.KILL_ENEMIES if pulse_learned else (Objective.CRAFT_ARM if blueprint_known else Objective.GET_WEAPON)
 	terminal_activated = false
@@ -1230,6 +1260,9 @@ func _retry_level() -> void:
 	_refresh_web_achievement()
 	if retry_after_death:
 		game_menus.unlock_achievement("first_retry")
+
+func _retry_spawn() -> Vector2:
+	return checkpoint_beacon.global_position if _has_active_checkpoint() else _find_spawn_position()
 
 func _find_spawn_position() -> Vector2:
 	var markers := map.get_node_or_null("Markers")
@@ -1516,13 +1549,9 @@ func _setup_terminal_gate() -> void:
 	terminal_gate.get_node("FacilityVisual").dimensions = Vector2(144, 16)
 
 func _return_to_title() -> void:
-	if not journey_save_path.is_empty() and _save_journey(false) != OK:
+	if not journey_save_path.is_empty() and _save_journey() != OK:
 		return
-	get_tree().paused = false
-	var error := get_tree().change_scene_to_file("res://scenes/main.tscn")
-	if error != OK:
-		get_tree().paused = true
-		push_error("无法返回标题：%s" % error_string(error))
+	ENTRY_LOADING.return_home(get_tree())
 
 ## ---------- Discovered duct shortcuts ----------
 
