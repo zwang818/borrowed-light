@@ -4,8 +4,10 @@ const PIXELS = preload("res://scenes/levels/abdomen/abdomen_art_scale.gd")
 const METAL = preload("res://scenes/levels/spine/spine_metal.gdshader")
 const PIPE = preload("res://scenes/levels/spine/spine_pipe.gdshader")
 const MACHINERY = preload("res://scenes/levels/spine/spine_machinery.gd")
+const INTERACTION_FIXTURE := preload("res://scenes/levels/spine/spine_interaction_fixture.gd")
 const FIXTURE = preload("res://scenes/levels/spine/spine_fixture.gd")
 const PIPE_DRIVE = preload("res://scenes/levels/spine/spine_pipe_drive.gd")
+const FIXTURE_FINISH := preload("res://scenes/levels/spine/spine_fixture_finish.gdshader")
 const DRIVE_FINISH = preload("res://scenes/levels/spine/spine_drive_finish.gdshader")
 const ENTRY_TUNNEL = preload("res://scenes/levels/spine/spine_entry_tunnel.gd")
 const FORWARD := Vector2(0.9063078, -0.4226183)
@@ -30,9 +32,18 @@ var service_covers: Node2D
 var service_hint: Node2D
 var service_rims: Node2D
 var service_skirts: Node2D
+var checkpoint_skin: INTERACTION_FIXTURE
+var protocol_console: INTERACTION_FIXTURE
+var demo_reader: INTERACTION_FIXTURE
+var gate_reader: INTERACTION_FIXTURE
+var fluid_station: INTERACTION_FIXTURE
+var authorization_skin: INTERACTION_FIXTURE
+var exit_gate_skin: INTERACTION_FIXTURE
 var metal: Array[ShaderMaterial] = []
 var pipe_uv: GradientTexture2D
 var drive_finish: ShaderMaterial
+var fixture_finish: ShaderMaterial
+var cover_blockouts: Array[Node2D] = []
 var pipe_drives: Array[Node2D] = []
 var circulation_clock := 0.0
 var circulation_frame := -1
@@ -53,6 +64,8 @@ func _ready() -> void:
 	pipe_uv.gradient = gradient
 	pipe_uv.width = 4
 	pipe_uv.height = 4
+	fixture_finish = ShaderMaterial.new()
+	fixture_finish.shader = FIXTURE_FINISH
 	drive_finish = ShaderMaterial.new()
 	drive_finish.shader = DRIVE_FINISH
 	drive_finish.set_shader_parameter("pixel_world", PIXELS.ART_PIXEL_WORLD)
@@ -86,6 +99,8 @@ func set_art_enabled(value: bool) -> void:
 		face.color = art_colors[index] if value else original_colors[index]
 	for line in blockout_lines:
 		line.visible = not value
+	for cover in cover_blockouts:
+		cover.visible = not value
 	for group in fittings:
 		group.visible = value
 	map.get_node("DeepStructure").visible = not value
@@ -518,20 +533,30 @@ func _build_fittings() -> void:
 	var fixtures := _group("Fittings", 2)
 	var paint := _group("RoutePaint", 1)
 	var marks := map.get_node("Markers")
-	for item in [["OptionalRecord", "record"],
-			["ScatterEvolution", "blueprint"], ["BlueprintDuct", "duct"], ["ExitTerminal", "terminal"]]:
-		_fixture(fixtures, item[1], marks.get_node(item[0]).position)
+	for item in [["OptionalRecord", &"record"], ["ScatterEvolution", &"blueprint"],
+			["BlueprintDuct", &"return_duct"], ["ExitTerminal", &"exit_console"]]:
+		var mark: Node2D = marks.get_node(item[0])
+		_interaction_fixture(fixtures, item[1], mark.position, FORWARD.angle()).name = mark.name
 	var seam: Node2D = map.get_node("Reservations/ElectricFloor")
 	_fixture(fixtures, "seam", seam.position, seam.rotation, seam.size).name = "ElectricSeam"
 	for cover in map.get_node("Covers").get_children():
-		if cover.name in [&"DefenseBayShield", &"ProtocolBayScreen", &"ProtocolGateCover", &"SpinalFluidPlinth"]:
+		if cover.name in [&"DefenseBayShield", &"ProtocolBayScreen", &"SpinalFluidPlinth"]:
 			continue
 		var top: Polygon2D = cover.get_node("Volume/Top")
 		var center := (top.polygon[0] + top.polygon[2]) * 0.5
 		if cover.name == &"BlockedRecordEnd":
 			_fixture(fixtures, "barrier", center, FORWARD.angle(), Vector2(32, 144))
 		else:
-			_fixture(fixtures, "valve", center, FORWARD.angle())
+			var body: CollisionPolygon2D = cover.get_node("Body/Collision")
+			var footprint := body.polygon
+			var axis := footprint[0].direction_to(footprint[1])
+			var size := Vector2(footprint[0].distance_to(footprint[1]),
+				footprint[1].distance_to(footprint[2]))
+			var foot := body.to_global((footprint[0] + footprint[2]) * 0.5)
+			var kind := &"gate_cover" if cover.name == &"ProtocolGateCover" else &"valve"
+			_interaction_fixture(fixtures, kind, fixtures.to_local(foot), axis.angle(), size).name = cover.name
+			cover_blockouts.append(cover.get_node("Volume"))
+
 	var spawn: Vector2 = marks.get_node("PlayerSpawn").position
 	var exit: Vector2 = marks.get_node("ToThorax").position
 	_build_entry_tunnel(spawn)
@@ -558,9 +583,12 @@ func _build_spinal_fluid_tap(marks: Node) -> void:
 	var path := PackedVector2Array([inlet, junction, junction + DOWN * 98.0,
 		deck_edge - DOWN * 67.0 - FORWARD * 112.0, deck_edge - DOWN * 26.0, deck_edge])
 	_ribbon(pipe, "PumpBranch", _curved_path(path), 22.0, Color("a15841"), 78.0, Tube.COPPER)
-	_ribbon(dressing, "TapInlet", PackedVector2Array([deck_edge, at - DOWN * 22.0]),
+	var intake := at - FORWARD * 21.0 - DOWN * 30.0
+	_ribbon(dressing, "TapInlet", _curved_path(PackedVector2Array([deck_edge,
+		intake - DOWN * 18.0 + FORWARD * 3.0, intake])),
 		13.0, Color("ae694a"), 38.0, Tube.COPPER)
-	_fixture(dressing, "spinal_fluid_tap", at, tap.rotation, tap.footprint).name = "SpinalFluidTap"
+	fluid_station = _interaction_fixture(dressing, &"fluid", at, tap.rotation, tap.footprint)
+	fluid_station.name = "SpinalFluidTap"
 	var operator: Vector2 = marks.get_node("SpinalFluidTapUse").position
 	for side: float in [-1.0, 1.0]:
 		var stripe := operator + FORWARD * side * 21.0
@@ -585,7 +613,13 @@ func _build_thorax_receiver(marks: Node) -> void:
 		along.call(243, -247), along.call(311, -189), along.call(311, 189),
 		along.call(243, 247), along.call(78, 247), along.call(-32, 184)]), Color("38262e"), 1)
 	_shape(body, _quad(exit + FORWARD * 137.0, FORWARD, Vector2(260, 291)), Color("1d151d"))
-	_shape(body, _quad(exit + FORWARD * 162.0, FORWARD, Vector2(213, 242)), Color("2a1f28"))
+	_shape(body, _quad(exit + FORWARD * 153.0, FORWARD, Vector2(204, 236)), Color("2a1f28"))
+	# These bevels sit below the playable landing edge and lead into the end wall.
+	for side: float in [-1.0, 1.0]:
+		var bevel := PackedVector2Array([along.call(40, side * 136), along.call(205, side * 136),
+			along.call(236, side * 113), along.call(50, side * 113)])
+		_shape(body, bevel, Color("4e323b"), 1)
+		_stroke(body, PackedVector2Array([bevel[0], bevel[1], bevel[2]]), 2.0, Color("99705b"))
 	for y: float in [-92.0, -46.0, 0.0, 46.0, 92.0]:
 		var channel: Vector2 = along.call(153, y)
 		_shape(body, _quad(channel, FORWARD, Vector2(188, 24)), Color("1c141c"))
@@ -614,14 +648,19 @@ func _build_thorax_receiver(marks: Node) -> void:
 			var lamp: Vector2 = along.call(x, side * 130)
 			_shape(trim, _quad(lamp, FORWARD, Vector2(19, 9)), Color("382e33"))
 			_shape(trim, _quad(lamp, FORWARD, Vector2(12, 4)), Color("dfa975"))
-	var back: Vector2 = along.call(262, 0)
-	_fixture(body, "socket", back, FORWARD.angle(), Vector2(61, 319))
+	var back: Vector2 = along.call(237, 0)
+	_interaction_fixture(body, &"receiver_bulkhead", back, FORWARD.angle(), Vector2(61, 420))
 	var landing_edge: Vector2 = along.call(37, 0)
 	var lip := PackedVector2Array([landing_edge - DOWN * 125.0, landing_edge + DOWN * 125.0])
 	var lower := Vector2(6, 24)
 	_shape(trim, PackedVector2Array([lip[0], lip[1], lip[1] + lower, lip[0] + lower]), Color("32242d"))
 	_stroke(trim, lip, 3, Color("a58170"))
-	_fixture(trim, "entry", exit - FORWARD * 5.0, FORWARD.angle(), Vector2(27, 244))
+	for side: float in [-1.0, 1.0]:
+		_interaction_fixture(trim, &"receiver_latch", along.call(-6, side * 116), FORWARD.angle())
+	var shutter: Node2D = marks.get_node("Door")
+	exit_gate_skin = _interaction_fixture(trim, &"exit_gate", shutter.position,
+		shutter.rotation, shutter.footprint)
+	exit_gate_skin.name = "ExitGate"
 	for distance in [-44.0, -20.0]:
 		var point: Vector2 = along.call(distance, 0)
 		_stroke(trim, PackedVector2Array([point - FORWARD * 10.0 - DOWN * 16.0,
@@ -629,24 +668,27 @@ func _build_thorax_receiver(marks: Node) -> void:
 
 func _build_protocol_dressing(marks: Node) -> void:
 	var hardware := _group("ProtocolFittings", 2)
-	for entry in [["ProtocolTerminal", "protocol_dials"], ["ProtocolDemoReader", "protocol_reader"],
-			["ProtocolGateReader", "protocol_reader"], ["AuthorizedDoor", "protocol_gate_frame"]]:
-		var mark: Node2D = marks.get_node(entry[0])
-		_fixture(hardware, entry[1], mark.position, mark.rotation, mark.footprint).name = mark.name
+	var terminal: Node2D = marks.get_node("ProtocolTerminal")
+	protocol_console = _interaction_fixture(hardware, &"protocol_console", terminal.position, FORWARD.angle())
+	protocol_console.name = terminal.name
+	var demo: Node2D = marks.get_node("ProtocolDemoReader")
+	demo_reader = _interaction_fixture(hardware, &"demo_reader", demo.position, FORWARD.angle())
+	demo_reader.name = demo.name
+	var reader: Node2D = marks.get_node("ProtocolGateReader")
+	gate_reader = _interaction_fixture(hardware, &"gate_reader", reader.position, FORWARD.angle())
+	gate_reader.name = reader.name
+	var gate: Node2D = marks.get_node("AuthorizedDoor")
+	authorization_skin = _interaction_fixture(hardware, &"authorization_gate", gate.position,
+		gate.rotation, gate.footprint)
+	authorization_skin.name = gate.name
 
 	var screen: Polygon2D = map.get_node("Covers/ProtocolBayScreen/Volume/Top")
 	var rail_start := (screen.polygon[0] + screen.polygon[5]) * 0.5
 	var rail_end := (screen.polygon[1] + screen.polygon[4]) * 0.5
-	var glass := _fixture(hardware, "protocol_window", rail_start.lerp(rail_end, 0.57),
+	var glass := _interaction_fixture(hardware, &"observation", rail_start.lerp(rail_end, 0.57),
 		FORWARD.angle(), Vector2(192, 20))
 	glass.name = "ObservationWindow"
 	_stroke(hardware, screen.polygon, 2, Color("94766b"))
-
-	var cover: Polygon2D = map.get_node("Covers/ProtocolGateCover/Volume/Top")
-	var center := (cover.polygon[0] + cover.polygon[2]) * 0.5
-	var size := Vector2(cover.polygon[0].distance_to(cover.polygon[1]),
-		cover.polygon[1].distance_to(cover.polygon[2]))
-	_fixture(hardware, "protocol_cover", center, FORWARD.angle(), size).name = "GateCover"
 
 	var paint := _group("ProtocolFloorMarks", 1)
 	for label in ["ProtocolYieldRear", "ProtocolYieldFront"]:
@@ -758,15 +800,18 @@ func _build_service_passage(at: Callable, bay_fixtures: Node2D) -> void:
 	_service_lamp(bay_fixtures, at.call(1305, -158), FORWARD.angle() + PI, lamp_glow)
 	_service_lamp(fixtures, at.call(1310, -244), FORWARD.angle(), lamp_glow)
 	_service_lamp(fixtures, at.call(2322, -269), FORWARD.angle() + PI * 0.5, lamp_glow)
-	for item in [["MaintenanceHatch", "service_hatch"], ["MaintenanceExit", "service_exit"]]:
-		var mark: Node2D = marks.get_node(item[0])
-		_fixture(fixtures, item[1], mark.position, mark.rotation, mark.footprint).name = mark.name
-		_fixture(service_covers, "service_cover", mark.position, mark.rotation, mark.footprint).name = mark.name
-		var axis := Vector2.from_angle(mark.rotation)
-		var plate := _quad(mark.position - axis * 6.0, axis, Vector2(32, mark.footprint.y - 22.0))
-		_shape(service_covers, plate, Color("80625a"), 1)
+	for key in ["MaintenanceHatch", "MaintenanceExit"]:
+		var mark: Node2D = marks.get_node(key)
+		_interaction_fixture(fixtures, &"service_threshold", mark.position,
+			mark.rotation, mark.footprint).name = mark.name
+		_interaction_fixture(service_covers, &"service_cover", mark.position,
+			mark.rotation, mark.footprint).name = mark.name
 	var hatch: Node2D = marks.get_node("MaintenanceHatch")
-	_fixture(service_hint, "service_seam_hint", hatch.position, hatch.rotation)
+	_interaction_fixture(service_hint, &"service_hint", hatch.position, hatch.rotation, hatch.footprint)
+	var checkpoint: Node2D = map.get_node("Checkpoints/ServiceExit")
+	checkpoint_skin = _interaction_fixture(fixtures, &"checkpoint", checkpoint.position, FORWARD.angle())
+	checkpoint_skin.name = "ServiceCheckpoint"
+
 	var window: Node2D = marks.get_node("MaintenanceWindow")
 	_fixture(fixtures, "inspection_window", window.position + DOWN * 30.0, FORWARD.angle(), window.footprint)
 
@@ -835,13 +880,20 @@ func _build_collars(start: Vector2, end: Vector2) -> void:
 			_shape(shell, _quad(shoulder, FORWARD, Vector2(width - 18, 2)), Color("a48059"))
 
 func make_door_skin(door: Node2D, authorized: bool) -> Node2D:
-	var skin = FIXTURE.new()
-	skin.kind = "protocol_gate_leaf" if authorized else "door"
-	skin.span = door.size
-	skin.tint = Color("a2d6bf") if authorized else Color("ffe1a1")
-	door.add_child(skin)
+	var skin := authorization_skin if authorized else exit_gate_skin
 	skin.track_door(door)
 	return skin
+
+func _interaction_fixture(group: Node2D, kind: StringName, at: Vector2,
+		angle: float, span := Vector2.ZERO) -> INTERACTION_FIXTURE:
+	var fixture := INTERACTION_FIXTURE.new()
+	fixture.material = fixture_finish
+	fixture.kind = kind
+	fixture.position = at
+	fixture.rotation = angle
+	fixture.span = span
+	group.add_child(fixture)
+	return fixture
 
 func _build_record_fork_paint() -> void:
 	var group := _group("RecordForkPaint", 1)

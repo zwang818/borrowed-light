@@ -44,20 +44,20 @@ func apply_damage(_amount: int) -> void:
 func _physics_process(delta: float) -> void:
 	if waypoints.is_empty():
 		return
-	var was_inspecting := _is_inspecting()
+	var was_inspecting := is_inspecting()
 	loop_time = fposmod(loop_time + delta, loop_duration)
 	_place_on_loop()
-	if was_inspecting != _is_inspecting():
+	if was_inspecting != is_inspecting():
 		queue_redraw()
 
 func _draw() -> void:
 	# Matches the starting marker so players can pick out the guide in a group.
 	draw_arc(Vector2(0, 4), 16.0, 0.0, TAU, 24, Color("302823"), 4.0)
 	draw_arc(Vector2(0, 4), 16.0, 0.0, TAU, 24, Color("f0cd8a"), 2.0)
-	if _is_inspecting():
+	if is_inspecting():
 		draw_arc(Vector2(0, 4), 23.0, 0.0, TAU, 28, Color("81e2db"), 3.0)
 
-func _is_inspecting() -> bool:
+func is_inspecting() -> bool:
 	return stop_after > 0 and loop_time >= _inspection_time and loop_time < _inspection_time + INSPECTION_PAUSE
 
 func restore_combat_state(snapshot: Dictionary) -> void:
