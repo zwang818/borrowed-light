@@ -1,7 +1,7 @@
 extends "res://tests/manual/b_combat/parallel_cleaner/tuning_check.gd"
 
 const STEP := 1.0 / 60.0
-const GRIP := preload("res://tests/manual/b_combat/parallel_cleaner/grab_visual.gd")
+const GRIP := preload("res://scenes/enemies/parallel_cleaner/grab_visual.gd")
 var frame_index := 0
 var landing_count := 0
 var landed_motion := Vector2.ZERO
@@ -40,7 +40,7 @@ func make_boss() -> BOSS:
 	return boss
 
 func stage(boss: BOSS, at: Vector2, offset: Vector2, caption: String) -> void:
-	boss.cancel_preview_actions()
+	boss.cancel_actions()
 	boss.global_position = at
 	room.player.restore_player(at + offset, room.player.max_health, ["pulse_gun"])
 	room.player.set_physics_process(false)

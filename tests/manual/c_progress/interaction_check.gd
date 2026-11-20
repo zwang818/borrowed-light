@@ -1,4 +1,5 @@
 extends SceneTree
+const BATTLE_FIXTURE := preload("res://tests/manual/gameplay/abdomen_combat_fixture.gd")
 var failures: Array[String] = []
 var received_token := 0
 
@@ -145,10 +146,9 @@ func run_checks() -> void:
 	check(player.test_move(player.global_transform, Vector2(0, -60)), "Closed entrance physically blocks player")
 	level._update_interaction()
 	check(level.nearest_interactable != level.terminal, "Terminal cannot be used through closed gate")
-	for enemy in level.enemies:
-		enemy.apply_damage(999)
+	check(await BATTLE_FIXTURE.clear_exit_encounter(level), "Exit encounter cleared")
 	await physics_frame
-	check(level.terminal_gate.collision_layer == 0 and level.terminal_gate.get_meta("is_open"), "Last cleaner opens entrance")
+	check(level.terminal_gate.collision_layer == 0 and level.terminal_gate.get_meta("is_open"), "Defeating the exit encounter opens entrance")
 	await create_timer(0.4).timeout
 	check(is_equal_approx(level.terminal_gate.get_node("FacilityVisual").open_amount, 1.0), "Door animation exposes open entrance")
 	player.global_position = level.terminal.global_position + Vector2(0, 100)
@@ -198,7 +198,7 @@ func run_checks() -> void:
 	check(not marker.visible and marker.to_global(marker.cue_offset).is_equal_approx(console.to_global(console.LEVER_WELL.get_center())),
 		"Retry restores the lever position and hides the locked marker")
 	check(is_zero_approx(level.terminal_gate.get_node("FacilityVisual").open_amount), "Retry closes door visual with collision")
-	check(level._remaining_cleaners() == 3, "Retry restores all cleaners")
+	check(level._remaining_cleaners() == 4, "Retry restores all cleaners")
 
 	await process_frame
 	# Export an actual graphical preview when run without --headless.

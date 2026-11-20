@@ -1,5 +1,5 @@
 extends "res://scenes/weapons/pulse_gun.gd"
-## B-only muzzle adapter. Shared beam timing/damage logic remains inherited.
+## Pulse muzzle adapter shared by the journey and combat tests.
 var muzzle_owner: Node2D
 var use_muzzle: bool = true
 
@@ -27,12 +27,16 @@ func update_beam(origin: Vector2) -> void:
 		beam_core.visible = false
 		if contact_remaining < 0.0:
 			contact_remaining = CONTACT_DURATION
-		var target: Object = start.target
-		if is_instance_valid(target) and not damaged_targets.has(target.get_instance_id()):
-			damaged_targets[target.get_instance_id()] = true
-			target.apply_damage(beam_damage)
+		_damage_beam_target(start.target)
 		return
 	super.update_beam(start.position)
+
+
+func _apply_beam_damage(target: Object) -> void:
+	if is_instance_valid(muzzle_owner) and target.has_method("take_pulse_hit"):
+		target.take_pulse_hit(beam_damage, muzzle_owner)
+	else:
+		super._apply_beam_damage(target)
 
 func refresh_muzzle_visuals() -> void:
 	if not use_muzzle or not is_instance_valid(muzzle_owner):

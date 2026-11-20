@@ -59,7 +59,7 @@ func run() -> void:
 	assert(not level.exit_encounter_active and not west.engaged and not east.engaged)
 	assert(west.global_position == west.home and east.global_position == east.home)
 	assert(get_nodes_in_group("b_cleaner_webs").is_empty())
-	assert(player.pulse_gun_equipped and level._remaining_cleaners() == 3)
+	assert(player.pulse_gun_equipped and level._remaining_cleaners() == 4)
 
 	# Enter again, then step into the retreat route during the visible warning.
 	place_player(level, Vector2(640, 628))
@@ -90,6 +90,14 @@ func run() -> void:
 	assert(not level.exit_encounter_active)
 	for enemy in level.enemies:
 		enemy.apply_damage(enemy.max_health)
+	assert(level._remaining_cleaners() == 1 and not level.terminal_gate.get_meta("is_open"))
+	place_player(level, Vector2(855, 533))
+	for i in range(110):
+		await physics_frame
+		if is_instance_valid(level.boss) and not level.boss.chassis.disabled:
+			break
+	assert(is_instance_valid(level.boss) and not level.boss.chassis.disabled)
+	level.boss.apply_damage(level.boss.health)
 	assert(level._remaining_cleaners() == 0 and level.terminal_gate.get_meta("is_open"))
 	level.queue_free()
 	await process_frame

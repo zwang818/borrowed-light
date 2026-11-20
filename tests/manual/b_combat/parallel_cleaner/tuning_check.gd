@@ -1,7 +1,7 @@
 extends SceneTree
 
 const SCENE := preload("res://tests/manual/b_combat/parallel_cleaner/abdomen_boss_playtest.tscn")
-const BOSS := preload("res://tests/manual/b_combat/parallel_cleaner/boss.gd")
+const BOSS := preload("res://scenes/enemies/parallel_cleaner/boss.gd")
 const PULSE := preload("res://tests/manual/b_combat/parallel_cleaner/test_pulse.gd")
 var room
 var capture_dir := OS.get_environment("PARALLEL_CLEANER_CAPTURE")
@@ -83,6 +83,8 @@ func verify_sweep(boss: BOSS) -> void:
 	var player: CharacterBody2D = room.player
 	var home := Vector2(774, 476)
 	var full: int = player.max_health
+	boss.cancel_actions()
+	boss.sweep_cooldown = 0.0
 	player.restore_player(home + Vector2(49, 44), full, ["pulse_gun"])
 	boss.set_physics_process(true)
 	boss.global_position = home
@@ -129,7 +131,7 @@ func verify_sweep(boss: BOSS) -> void:
 	boss.set_physics_process(true)
 	boss._drop_silk(player.global_position)
 	await frames(2)
-	assert(player.web_speed_factor < 1.0 and not boss.bound)
+	assert(player.web_movement_factor() < 1.0 and not boss.bound)
 	player.apply_damage(full)
 	assert(paused and boss.sweep_visual.frame_index == -1 and boss.leftover_silk.is_empty() and not boss.held)
 	var retry: Button = room.game_menus.find_children("*", "Button", true, false).filter(func(button: Button): return button.text == "重试")[0]
@@ -167,27 +169,40 @@ func verify_pressure(boss: BOSS) -> void:
 			player.restore_player(point, player.max_health, ["pulse_gun"])
 	boss._recover(false, 0.0)
 	boss.global_position = Vector2(818, 514)
-	player.restore_player(Vector2(640, 683), player.max_health, ["pulse_gun"])
+	player.restore_player(Vector2(818, 670), player.max_health, ["pulse_gun"])
 	await frames(40)
 	assert(boss.phase == BOSS.Phase.STALK and not boss.web_active and not boss.bound and not boss.held)
-	assert(boss.global_position.distance_to(home) < Vector2(818, 514).distance_to(home))
+	assert(boss.global_position.y > 584.0 and boss._chassis_arena().has_point(boss.global_position))
 	room.camera.global_position = Vector2(630, 1050)
 	room.camera.reset_smoothing()
 	room.camera.force_update_scroll()
-	player.global_position = Vector2(852, 506)
+	player.global_position = Vector2(899, 492)
+	boss.web_cooldown = 0.0
 	await frames(32)
 	assert(not boss._on_screen() and boss.phase == BOSS.Phase.STALK and not boss.web_active)
 	room.camera.global_position = Vector2(764, 479)
 	room.camera.reset_smoothing()
 	room.camera.force_update_scroll()
-	print("PRESSURE_PASS route around device, leaves arena -> guard instead of offscreen fire")
-	boss.global_position = Vector2(525, 485)
-	player.global_position = Vector2(640, 683)
+	print("PRESSURE_PASS follows to the arena edge without retreat; no offscreen attacks")
+
+	var start := Vector2(785, 475)
+	boss.global_position = start
+	player.global_position = Vector2(912, 480)
+	var wall := obstacle(Vector2(842, 454), Vector2(14, 112))
+	boss.route.clear()
+	boss.route_wait = 0.0
+	boss.web_cooldown = 8.0
+	boss._switch(BOSS.Phase.STALK, 0.0)
 	await frames(2)
-	assert(not boss._can_step(boss.global_position, home))
-	assert(await until(func(): return boss.global_position.distance_to(home) <= 8.0, 490), "A retreat blocked by the machine must go around it.")
-	assert(boss.phase == BOSS.Phase.STALK and not boss.web_active)
-	print("GUARD_PASS: returned around the device from the west side without attacking")
+	assert(not boss._line_clear(boss.global_position, player.global_position))
+	assert(await until(func(): return boss.global_position.distance_to(start) > 2.0, 20))
+	assert((boss.global_position - start).dot(start.direction_to(player.global_position)) >= 0.0,
+		"The available forward detour must take priority over walking back to the compressor.")
+	assert(await until(func(): return boss._can_see_player() and boss.global_position.distance_to(player.global_position) < 86.0, 200),
+		"A wall between boss and player must lead to an approach from the side.")
+	assert(boss._chassis_arena().has_point(boss.global_position) and boss._chassis_is_clear_at(boss.global_position))
+	wall.queue_free()
+	print("CHASE_PASS: routes around a second obstacle and closes on the player")
 
 func capture_sweep_sequence(boss: BOSS) -> void:
 	if capture_dir.is_empty():

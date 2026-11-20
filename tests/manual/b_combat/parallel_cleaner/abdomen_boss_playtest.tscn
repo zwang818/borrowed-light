@@ -5,3 +5,4 @@
 
 [node name="ParallelCleanerPlaytest" instance=ExtResource("1")]
 script = ExtResource("2")
+seal_boss_room = false

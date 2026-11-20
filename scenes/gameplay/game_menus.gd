@@ -30,6 +30,7 @@ var achievement_progress: Dictionary = {}
 
 var page: Page = Page.CLOSED
 var death_at_checkpoint := false
+var death_retry_hint := ""
 var _content: VBoxContainer
 var _overlay: Control
 var _panel: PanelContainer
@@ -101,8 +102,9 @@ func toggle_pause() -> void:
 			pass
 
 
-func show_death(at_checkpoint: bool = false) -> void:
+func show_death(at_checkpoint: bool = false, retry_hint: String = "") -> void:
 	death_at_checkpoint = at_checkpoint
+	death_retry_hint = retry_hint
 	_show_page(Page.DEATH)
 
 
@@ -144,8 +146,8 @@ func _show_page(next_page: Page) -> void:
 			_button("返回暂停菜单", func(): _show_page(Page.PAUSE))
 		Page.DEATH:
 			_label("信号中断", 34, Color(0.96, 0.9, 0.73))
-			_label("重试将回到存档点" if death_at_checkpoint else "重试将回到本房间入口",
-				16, Color(0.65, 0.75, 0.77))
+			var default_hint := "重试将回到存档点" if death_at_checkpoint else "重试将回到本房间入口"
+			_label(death_retry_hint if not death_retry_hint.is_empty() else default_hint, 16, Color(0.65, 0.75, 0.77))
 			_button("重试", func(): retry_requested.emit())
 			_button("返回首页", func(): title_requested.emit())
 	var first_button := _content.find_children("*", "Button", false, false)

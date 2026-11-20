@@ -100,16 +100,25 @@ func update_beam(origin: Vector2) -> void:
 	beam_core.points = local_points
 	beam.visible = true
 	beam_core.visible = true
-	var target: Object = result.target
-	if is_instance_valid(target):
-		var target_id := target.get_instance_id()
-		if not damaged_targets.has(target_id):
-			# Record before callbacks; the same enemy still blocks subsequent frames.
-			damaged_targets[target_id] = true
-			if target.has_method("apply_damage"):
-				target.apply_damage(beam_damage)
-			else:
-				push_error("Laser enemy collider must provide apply_damage(amount).")
+	_damage_beam_target(result.target)
+
+
+func _damage_beam_target(target: Object) -> void:
+	if not is_instance_valid(target):
+		return
+	var target_id := target.get_instance_id()
+	if damaged_targets.has(target_id):
+		return
+	# Record before callbacks; the same enemy still blocks subsequent frames.
+	damaged_targets[target_id] = true
+	_apply_beam_damage(target)
+
+
+func _apply_beam_damage(target: Object) -> void:
+	if target.has_method("apply_damage"):
+		target.apply_damage(beam_damage)
+	else:
+		push_error("Laser enemy collider must provide apply_damage(amount).")
 
 
 func cancel() -> void:

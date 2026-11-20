@@ -1,4 +1,5 @@
 extends SceneTree
+const BATTLE_FIXTURE := preload("res://tests/manual/gameplay/abdomen_combat_fixture.gd")
 var failures: Array[String] = []
 func _initialize() -> void:
 	call_deferred("run")
@@ -10,7 +11,8 @@ func run() -> void:
 	var level = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
 	root.add_child(level)
 	current_scene = level
-	await create_timer(0.15).timeout
+	while not level.is_entry_ready():
+		await process_frame
 	for enemy in level.enemies:
 		enemy.set_physics_process(false)
 	var menus = level.game_menus
@@ -37,16 +39,14 @@ func run() -> void:
 	check(menus.achievements.get("web_sweeper", false), "Final indoor web awards man achievement")
 	check(menus.achievement_progress["web_sweeper"] == Vector2i(10, 10), "Handbook receives exact full-clear progress")
 	level.player.apply_damage(1)
-	for enemy in level.enemies:
-		enemy.apply_damage(999)
+	check(await BATTLE_FIXTURE.clear_exit_encounter(level), "Exit encounter cleared")
 	check(not menus.achievements.get("clean_clear", false), "Damaged attempt cannot award no-hit clear")
 	level.player.invulnerability_remaining = 0
 	level.player.apply_damage(999)
 	level._retry_level()
 	check(menus.achievements.get("first_retry", false), "Death followed by retry awards reboot achievement")
 	check(menus.achievements.get("web_sweeper", false), "Unlocked achievements survive room reset")
-	for enemy in level.enemies:
-		enemy.apply_damage(999)
+	check(await BATTLE_FIXTURE.clear_exit_encounter(level), "Exit encounter cleared")
 	check(menus.achievements.get("clean_clear", false), "Fresh no-hit attempt can award clean clear")
 	check(not menus.unlock_achievement("web_sweeper"), "Previously unlocked full clear does not notify again")
 	var reader = load("res://scenes/gameplay/game_menus.gd").new()

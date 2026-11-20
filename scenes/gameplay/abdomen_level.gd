@@ -649,7 +649,7 @@ func _update_hp_bar() -> void:
 
 func _update_world_prompts(delta := 0.0) -> void:
 	var origin := player.global_position
-	var active: bool = not player.is_dead and not is_level_complete and pending_interaction.is_empty()
+	var active: bool = player.controls_enabled and not player.is_dead and not is_level_complete and pending_interaction.is_empty()
 	var still := player.velocity.length_squared() < 1.0
 	var terminal_open: bool = terminal_gate.get_meta("is_open", false)
 	var terminal_access = terminal.get_node("InteractionMarker")
@@ -984,7 +984,7 @@ func _configure_camera() -> void:
 
 func _update_interaction() -> void:
 	nearest_interactable = null
-	if player == null or player.is_dead or get_tree().paused:
+	if player == null or not player.controls_enabled or player.is_dead or get_tree().paused:
 		return
 	var nearest_dist: float = C.interaction_range
 	for obj in interactables:
@@ -1258,8 +1258,9 @@ func _retry_level() -> void:
 		if not is_instance_valid(enemy):
 			continue
 		if enemy.has_method("get_combat_state") and enemy.has_method("restore_combat_state"):
-			var snap: Dictionary = enemy_baselines[enemy.entity_id].duplicate(true)
-			enemy.restore_combat_state(snap)
+			enemy.restore_combat_state(_retry_enemy_state(enemy))
+			if enemy.health <= 0:
+				dead_enemies += 1
 	camera.global_position = player.global_position
 	camera.reset_smoothing()
 	nearest_interactable = null
@@ -1273,6 +1274,9 @@ func _retry_level() -> void:
 
 func _retry_spawn() -> Vector2:
 	return checkpoint_beacon.global_position if _has_active_checkpoint() else _find_spawn_position()
+
+func _retry_enemy_state(enemy: Node) -> Dictionary:
+	return enemy_baselines[enemy.entity_id].duplicate(true)
 
 func _find_spawn_position() -> Vector2:
 	var markers := map.get_node_or_null("Markers")
@@ -1615,6 +1619,7 @@ func _request_duct(id: StringName) -> void:
 func _duct_landing(id: StringName) -> Variant:
 	var center: Vector2 = ducts[id].point.global_position
 	var exit_offset := Vector2(0, ducts[id].visual.dimensions.y * 0.5 + 12)
+	var feet := player.get_node("CollisionShape2D") as CollisionShape2D
 	for offset in [exit_offset, Vector2.ZERO, Vector2(36, 0), Vector2(-36, 0), Vector2(0, -36), Vector2(36, 36), Vector2(-36, 36)]:
 		var candidate: Vector2 = center + offset
 		var on_floor := false
@@ -1625,9 +1630,9 @@ func _duct_landing(id: StringName) -> Variant:
 		if not on_floor:
 			continue
 		var query := PhysicsShapeQueryParameters2D.new()
-		query.shape = player.get_node("CollisionShape2D").shape
-		query.transform = Transform2D(0, candidate)
-		query.collision_mask = 1 | 4
+		query.shape = feet.shape
+		query.transform = feet.global_transform.translated(candidate - player.global_position)
+		query.collision_mask = player.collision_mask | 4
 		query.exclude = [player.get_rid()]
 		if player.get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty():
 			return candidate

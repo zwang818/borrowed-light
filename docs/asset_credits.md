@@ -60,3 +60,7 @@ Noto Sans SC 的许可副本：`assets/fonts/OFL-NotoSansSC.txt`。
 - 第二关流程试玩：复用现有A地图/B角色和音效；信号音、锁销、校准触点、压力表由代码绘制/生成。新增官方Noto Sans SC 400子集`assets/fonts/noto_sans_sc_spine_flow.ttf`，SIL OFL 1.1，来源与哈希见同目录`spine_flow_source.json`，保留既有OFL许可。未添加来源不明的第三方模型。
 
 2026-11-17 标题设置页新增 `assets/fonts/noto_sans_sc_settings.ttf`，官方Noto Sans SC 400文本子集，SIL OFL 1.1；来源URL、请求字符与SHA-256见`assets/fonts/settings_source.json`，许可副本`OFL-NotoSansSC.txt`随仓库保留。按钮动画与设置控件由代码实现，无新增第三方图片或音频。
+
+## 并联清扫者
+
+运行资源和测试房共用 `assets/sprites/enemies/parallel_cleaner/`。Boss 身体动作来自团队的项目素材包，PixelFX 图集、帧数据和原许可随素材保存。[来源与许可索引](../tests/manual/b_combat/parallel_cleaner/README.md#素材来源)

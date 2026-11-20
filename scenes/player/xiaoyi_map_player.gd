@@ -149,8 +149,9 @@ func get_shot_origin(mode: int) -> Dictionary:
 	query.hit_from_inside = true
 	var hit := get_world_2d().direct_space_state.intersect_ray(query)
 	if not hit.is_empty():
-		var target: Object = hit.collider if hit.collider.has_method("apply_damage") and (hit.collider.collision_layer & 1) == 0 else null
-		target = preload("res://scenes/weapons/laser_trace.gd").damage_receiver(target)
+		var target: Object = preload("res://scenes/weapons/laser_trace.gd").damage_receiver(hit.collider)
+		if (hit.collider.collision_layer & 1) != 0 or not is_instance_valid(target) or not target.has_method("apply_damage"):
+			target = null
 		return {"position": hit.position, "blocked": true, "target": target}
 	var bounds: Rect2 = pulse_gun.map_bounds
 	var outside := bounds.has_area() and not bounds.has_point(desired)

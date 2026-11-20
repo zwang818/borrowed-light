@@ -73,7 +73,10 @@ func update_beam(origin: Vector2) -> void:
 			var receiver := LASER_TRACE.damage_receiver(collider)
 			if is_instance_valid(receiver) and receiver.has_method("apply_damage") and not damaged_targets.has(receiver.get_instance_id()):
 				damaged_targets[receiver.get_instance_id()] = true
-				receiver.apply_damage(beam_damage)
+				if receiver.has_method("take_pulse_hit"):
+					receiver.take_pulse_hit(beam_damage, muzzle_owner)
+				else:
+					receiver.apply_damage(beam_damage)
 				did_damage = true
 		var key := str(collider.get_path())
 		if trace_debug and (key != report_key or did_damage):

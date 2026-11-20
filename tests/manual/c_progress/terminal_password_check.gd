@@ -1,4 +1,5 @@
 extends SceneTree
+const BATTLE_FIXTURE := preload("res://tests/manual/gameplay/abdomen_combat_fixture.gd")
 ## Real console input, clue reads, gate boundaries and retry knowledge separation.
 var failures: Array[String] = []
 
@@ -74,8 +75,7 @@ func run_checks() -> void:
 	var snapshot: Dictionary = level.get_interaction_state()
 	snapshot.terminal_clues.clear()
 	check(level.terminal_clues.size() == 2, "Presenter cannot mutate clue knowledge through snapshot")
-	for enemy in level.enemies:
-		enemy.apply_damage(999)
+	check(await BATTLE_FIXTURE.clear_exit_encounter(level), "Exit encounter cleared")
 	await physics_frame
 	var exit_door = level.interactables_parent.get_node("Door_p1_door_01")
 	await approach(level, level.terminal)
@@ -161,8 +161,7 @@ func run_checks() -> void:
 	await physics_frame
 	fresh.player.set_physics_process(false)
 	check(fresh.terminal_clues.is_empty() and not fresh.terminal_activated, "New level starts without old clues or authorization")
-	for enemy in fresh.enemies:
-		enemy.apply_damage(999)
+	check(await BATTLE_FIXTURE.clear_exit_encounter(fresh), "Exit encounter cleared on fresh room")
 	await physics_frame
 	await approach(fresh, fresh.terminal)
 	await approach(fresh, fresh.terminal)

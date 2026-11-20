@@ -7,6 +7,7 @@ const SPRINT_ACTION := &"b_sprint"
 @export var sprint_multiplier: float = 1.25
 var web_slow_remaining := 0.0
 var web_speed_factor := 1.0
+var boss_web_speed_factor := 1.0
 var sprint_active := false
 var sprint_motion := Vector2.ZERO
 var sprint_window_focused := true
@@ -19,12 +20,15 @@ func _physics_process(delta: float) -> void:
 	sprint_active = sprint_window_focused and controls_enabled and not is_dead and Input.is_action_pressed(SPRINT_ACTION)
 	var normal_speed := move_speed
 	var before := global_position
-	move_speed *= web_speed_factor
+	move_speed *= web_movement_factor()
 	if sprint_active:
 		move_speed *= sprint_multiplier
 	super._physics_process(delta)
 	move_speed = normal_speed
 	sprint_motion = global_position-before
+
+func web_movement_factor() -> float:
+	return minf(web_speed_factor, boss_web_speed_factor)
 
 func gait_displacement(displacement: Vector2) -> Vector2:
 	# Cover more ground per step without speeding up the existing leg cycle.
@@ -42,6 +46,7 @@ func _notification(what: int) -> void:
 func restore_player(location: Vector2, checkpoint_health: int, retained_weapons: Array) -> void:
 	web_slow_remaining = 0.0
 	web_speed_factor = 1.0
+	boss_web_speed_factor = 1.0
 	sprint_active = false
 	sprint_motion = Vector2.ZERO
 	super.restore_player(location, checkpoint_health, retained_weapons)

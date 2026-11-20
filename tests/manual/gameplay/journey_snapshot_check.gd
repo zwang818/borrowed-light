@@ -126,7 +126,7 @@ func _read() -> void:
 	assert(abdomen.achievement_webs[0].broken and abdomen.achievement_webs[0].collision_layer == 0)
 	abdomen._retry_level()
 	assert(abdomen.player.global_position.is_equal_approx(abdomen._find_spawn_position()))
-	assert(abdomen.player.health == abdomen.player.max_health and abdomen._remaining_cleaners() == 3)
+	assert(abdomen.player.health == abdomen.player.max_health and abdomen._remaining_cleaners() == 4)
 	assert(not abdomen.terminal_gate.get_meta("is_open") and not abdomen.achievement_webs[0].broken)
 
 	var spine = await _continue_from_title(SPINE_PATH)
