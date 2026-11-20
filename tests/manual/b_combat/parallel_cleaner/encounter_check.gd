@@ -1,7 +1,7 @@
 extends SceneTree
 
 const SCENE := preload("res://tests/manual/b_combat/parallel_cleaner/abdomen_boss_playtest.tscn")
-const ACTOR := preload("res://tests/manual/b_combat/parallel_cleaner/boss.gd")
+const ACTOR := preload("res://scenes/enemies/parallel_cleaner/boss.gd")
 const MISS := ACTOR.Phase.RECOVER
 var level
 var capture_dir := OS.get_environment("PARALLEL_CLEANER_CAPTURE")
@@ -132,7 +132,7 @@ func verify_hull_and_flank(boss: ACTOR) -> void:
 	assert(await until(func(): return boss.phase != ACTOR.Phase.FLANK, 7), "A new obstacle must stop the committed step.")
 	assert(boss.global_position.distance_to(start) > 2.0 and boss.global_position.distance_to(start) < 14.0)
 	assert(boss._chassis_is_clear_at(boss.global_position))
-	assert(boss.route_wait > 0.35 and boss.alternate_side == 1, "An interrupted upper flank must pause and try the lower side next.")
+	assert(boss.route_wait == 0.0 and boss.alternate_side == 1, "A blocked flank should replan on the next tick.")
 	block.queue_free()
 	assert(await until(func(): return boss.phase == ACTOR.Phase.FLANK and boss.action_frame == 2))
 	start = boss.global_position
@@ -242,8 +242,10 @@ func run() -> void:
 	assert(level.player.global_position.distance_to(before_pull) > 24.0)
 	level.player.global_position = Vector2(585, 456)
 	await frames(2)
-	assert(not boss.bound and level.player.web_slow_remaining <= 0)
-	assert(boss.phase == MISS and level.player.health == level.player.max_health)
+	assert(boss.bound and boss.reel_slack_left > 0.0)
+	assert(await until(func(): return not boss.bound, 12))
+	assert(not boss.bound and level.player.web_movement_factor() == 1.0)
+	assert(boss.phase == MISS and boss.reel_end == "持续遮挡" and level.player.health == level.player.max_health)
 
 	# Locked grab cannot track a sidestep; the miss creates a punish window.
 	boss.global_position = Vector2(774, 476)
@@ -327,7 +329,7 @@ func run() -> void:
 	boss._switch(ACTOR.Phase.STALK, 0.0)
 	assert(await until(func(): return boss.bound))
 	press(KEY_R)
-	assert(not is_instance_valid(level.boss) and level.player.web_slow_remaining == 0.0)
+	assert(not is_instance_valid(level.boss) and level.player.web_movement_factor() == 1.0)
 	assert(level.player.controls_enabled and first.health > 0 and second.health > 0)
 	press(KEY_B)
 	boss = level.boss

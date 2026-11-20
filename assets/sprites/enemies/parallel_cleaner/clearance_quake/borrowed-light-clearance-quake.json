@@ -1,0 +1,1742 @@
+{
+  "frames": [
+    {
+      "filename": "borrowed-light-clearance-quake 0",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 1",
+      "frame": {
+        "x": 480,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 2",
+      "frame": {
+        "x": 960,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 3",
+      "frame": {
+        "x": 1440,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 4",
+      "frame": {
+        "x": 1920,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 5",
+      "frame": {
+        "x": 2400,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 6",
+      "frame": {
+        "x": 2880,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 7",
+      "frame": {
+        "x": 3360,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 8",
+      "frame": {
+        "x": 0,
+        "y": 352,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 9",
+      "frame": {
+        "x": 480,
+        "y": 352,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 10",
+      "frame": {
+        "x": 960,
+        "y": 352,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 11",
+      "frame": {
+        "x": 1440,
+        "y": 352,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 12",
+      "frame": {
+        "x": 1920,
+        "y": 352,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 13",
+      "frame": {
+        "x": 2400,
+        "y": 352,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 14",
+      "frame": {
+        "x": 2880,
+        "y": 352,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 15",
+      "frame": {
+        "x": 3360,
+        "y": 352,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 16",
+      "frame": {
+        "x": 0,
+        "y": 704,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 17",
+      "frame": {
+        "x": 480,
+        "y": 704,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 18",
+      "frame": {
+        "x": 960,
+        "y": 704,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 19",
+      "frame": {
+        "x": 1440,
+        "y": 704,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 20",
+      "frame": {
+        "x": 1920,
+        "y": 704,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 21",
+      "frame": {
+        "x": 2400,
+        "y": 704,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 22",
+      "frame": {
+        "x": 2880,
+        "y": 704,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 23",
+      "frame": {
+        "x": 3360,
+        "y": 704,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 24",
+      "frame": {
+        "x": 0,
+        "y": 1056,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 25",
+      "frame": {
+        "x": 480,
+        "y": 1056,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 26",
+      "frame": {
+        "x": 960,
+        "y": 1056,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 27",
+      "frame": {
+        "x": 1440,
+        "y": 1056,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 28",
+      "frame": {
+        "x": 1920,
+        "y": 1056,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 29",
+      "frame": {
+        "x": 2400,
+        "y": 1056,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 30",
+      "frame": {
+        "x": 2880,
+        "y": 1056,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 31",
+      "frame": {
+        "x": 3360,
+        "y": 1056,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 32",
+      "frame": {
+        "x": 0,
+        "y": 1408,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 33",
+      "frame": {
+        "x": 480,
+        "y": 1408,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 34",
+      "frame": {
+        "x": 960,
+        "y": 1408,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 35",
+      "frame": {
+        "x": 1440,
+        "y": 1408,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 36",
+      "frame": {
+        "x": 1920,
+        "y": 1408,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 37",
+      "frame": {
+        "x": 2400,
+        "y": 1408,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 38",
+      "frame": {
+        "x": 2880,
+        "y": 1408,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 39",
+      "frame": {
+        "x": 3360,
+        "y": 1408,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 40",
+      "frame": {
+        "x": 0,
+        "y": 1760,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 41",
+      "frame": {
+        "x": 480,
+        "y": 1760,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 42",
+      "frame": {
+        "x": 960,
+        "y": 1760,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 43",
+      "frame": {
+        "x": 1440,
+        "y": 1760,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 44",
+      "frame": {
+        "x": 1920,
+        "y": 1760,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 45",
+      "frame": {
+        "x": 2400,
+        "y": 1760,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 46",
+      "frame": {
+        "x": 2880,
+        "y": 1760,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 47",
+      "frame": {
+        "x": 3360,
+        "y": 1760,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 48",
+      "frame": {
+        "x": 0,
+        "y": 2112,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 49",
+      "frame": {
+        "x": 480,
+        "y": 2112,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 50",
+      "frame": {
+        "x": 960,
+        "y": 2112,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 51",
+      "frame": {
+        "x": 1440,
+        "y": 2112,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 52",
+      "frame": {
+        "x": 1920,
+        "y": 2112,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 53",
+      "frame": {
+        "x": 2400,
+        "y": 2112,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 54",
+      "frame": {
+        "x": 2880,
+        "y": 2112,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 55",
+      "frame": {
+        "x": 3360,
+        "y": 2112,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 56",
+      "frame": {
+        "x": 0,
+        "y": 2464,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 57",
+      "frame": {
+        "x": 480,
+        "y": 2464,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 58",
+      "frame": {
+        "x": 960,
+        "y": 2464,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 59",
+      "frame": {
+        "x": 1440,
+        "y": 2464,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 60",
+      "frame": {
+        "x": 1920,
+        "y": 2464,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 61",
+      "frame": {
+        "x": 2400,
+        "y": 2464,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 62",
+      "frame": {
+        "x": 2880,
+        "y": 2464,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 63",
+      "frame": {
+        "x": 3360,
+        "y": 2464,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 64",
+      "frame": {
+        "x": 0,
+        "y": 2816,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 16
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 65",
+      "frame": {
+        "x": 480,
+        "y": 2816,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    },
+    {
+      "filename": "borrowed-light-clearance-quake 66",
+      "frame": {
+        "x": 960,
+        "y": 2816,
+        "w": 480,
+        "h": 352
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 480,
+        "h": 352
+      },
+      "sourceSize": {
+        "w": 480,
+        "h": 352
+      },
+      "duration": 17
+    }
+  ],
+  "meta": {
+    "app": "https://github.com/patch-gg/pixelfx",
+    "version": "1",
+    "image": "borrowed-light-clearance-quake.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 3840,
+      "h": 3168
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "borrowed-light-clearance-quake",
+        "from": 0,
+        "to": 66,
+        "direction": "forward"
+      }
+    ],
+    "pixelfx": {
+      "id": "impacts/borrowed-light-clearance-quake",
+      "name": "Borrowed Light – Clearance Quake",
+      "fps": 60,
+      "loop": false,
+      "frames": 67,
+      "frameSize": [
+        480,
+        352
+      ],
+      "pivot": [
+        240,
+        183
+      ],
+      "columns": 8,
+      "act": {
+        "windup": 0.35,
+        "recovery": 0,
+        "onBody": false,
+        "targets": [],
+        "hits": [
+          {
+            "t": 0.1,
+            "freeze": 0,
+            "shake": 0.15,
+            "amp": 3,
+            "push": 0
+          },
+          {
+            "t": 0.45,
+            "freeze": 0,
+            "shake": 0.27,
+            "amp": 6,
+            "push": 0
+          }
+        ],
+        "poses": [
+          {
+            "t": -0.35,
+            "how": "smooth",
+            "pose": {
+              "crouch": 3,
+              "fx": 11,
+              "fy": -19,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw"
+            }
+          },
+          {
+            "t": 0,
+            "how": "smooth",
+            "pose": {
+              "crouch": 7,
+              "fx": 12,
+              "fy": -11,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw",
+              "lean": -1,
+              "toeB": 2
+            }
+          },
+          {
+            "t": 0.1,
+            "how": "snap",
+            "pose": {
+              "crouch": 9,
+              "fx": 17,
+              "fy": -9,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw",
+              "lean": 3,
+              "toeB": 2,
+              "sa": 0.16
+            }
+          },
+          {
+            "t": 0.29,
+            "how": "smooth",
+            "pose": {
+              "crouch": 7,
+              "fx": 12,
+              "fy": -11,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw",
+              "lean": -1,
+              "toeB": 2
+            }
+          },
+          {
+            "t": 0.45,
+            "how": "snap",
+            "pose": {
+              "crouch": 9,
+              "fx": 17,
+              "fy": -9,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw",
+              "lean": 3,
+              "toeB": 2,
+              "sa": 0.16
+            }
+          },
+          {
+            "t": 0.72,
+            "how": "smooth",
+            "pose": {
+              "crouch": 7,
+              "fx": 12,
+              "fy": -11,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw",
+              "lean": -1,
+              "toeB": 2
+            }
+          },
+          {
+            "t": 1.07,
+            "how": "smooth",
+            "pose": {
+              "crouch": 3,
+              "fx": 11,
+              "fy": -19,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw"
+            }
+          }
+        ]
+      }
+    },
+    "borrowed_light": {
+      "pose_timeline_start_ms": 900,
+      "actor_pivot": "boss_floor_anchor",
+      "paint_order": "room_floor, quake_atlas, actors, HUD",
+      "shielded_shader": "Clip lit ripple and chips to the room mask. Use separate world hit shapes.",
+      "camera_impulses": [
+        {
+          "pose_event": "inner_sweep_contact",
+          "time_ms": 1000,
+          "atlas_frame_index": 6,
+          "offsets_px_60fps": [
+            [
+              0,
+              -2
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              -2,
+              2
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              -1,
+              -1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "pose_event": "outer_sweep_contact",
+          "time_ms": 1350,
+          "atlas_frame_index": 27,
+          "offsets_px_60fps": [
+            [
+              -4,
+              5
+            ],
+            [
+              5,
+              -5
+            ],
+            [
+              -6,
+              3
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              -4,
+              -3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              -3,
+              0
+            ],
+            [
+              2,
+              -2
+            ],
+            [
+              -1,
+              1
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "hit_stop_baked_into_atlas": false
+    }
+  }
+}

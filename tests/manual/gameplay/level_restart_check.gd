@@ -71,7 +71,7 @@ func _run() -> void:
 		and abdomen.explored_positions.is_empty(), "Abilities obtained in this level, ducts and exploration reset")
 	check(not abdomen.terminal_activated and not abdomen.terminal_gate.get_meta("is_open")
 		and abdomen.pulse_assembly_gate.collision_layer == 1
-		and not abdomen.achievement_webs[0].broken and abdomen._remaining_cleaners() == 3
+		and not abdomen.achievement_webs[0].broken and abdomen._remaining_cleaners() == 4
 		and not abdomen.checkpoint_beacon.activated, "Terminal, gate, webs, enemies and beacon return to initial state")
 	var saved := SAVE.read_save(PATH)
 	check(saved.get("version") == 2 and not saved.blueprint_known and not saved.first_level_cleared
@@ -124,7 +124,7 @@ func _run() -> void:
 	check(not paused and spine.hero().global_position == spine.anchor("PlayerSpawn")
 		and spine.hero().health == spine.hero().max_health, "Spine restarts at the entrance even after activating the beacon")
 	check(spine.state == FLOW.fresh() and not spine.checkpoint_beacon.activated
-		and not spine.protocol_rail.powered and not spine.hero().scatter_unlocked
+		and not spine.protocol_rail.console.active and not spine.hero().scatter_unlocked
 		and spine.hero().pulse_gun_equipped and spine.hero().pressure == 0 and not spine.hero().has_protocol,
 		"New spine entry restores fresh progression and loadout")
 	check(not spine.authorized_gate.is_open and not spine.exit_gate.is_open and spine.defense.elapsed < 0.2

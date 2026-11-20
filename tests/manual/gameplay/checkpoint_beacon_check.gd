@@ -85,6 +85,7 @@ func _run() -> void:
 		"A legacy save without the laser starts on the accessible side of the locked gate")
 	abdomen.pulse_learned = true
 	abdomen.player.learn_pulse()
+	abdomen.cleaner_intro_seen = true
 	var foot: Vector2 = beacon.global_position
 	var combat_floor = abdomen.map.get_node("Floors/FirstCombat")
 	var threshold = abdomen.map.get_node("Floors/GunThreshold")
@@ -131,7 +132,7 @@ func _run() -> void:
 	_retry_from_menu(abdomen.game_menus)
 	check(not paused and abdomen.player.global_position == foot and abdomen.player.health == abdomen.player.max_health,
 		"Death retry chooses the touched first beacon")
-	check(abdomen._remaining_cleaners() == 3, "Retry still restores the combat baseline")
+	check(abdomen._remaining_cleaners() == 4, "Retry still restores the combat baseline")
 
 	var opening := {"first_level_cleared": true, "blueprint_known": true, "pulse_learned": true,
 		"workshop_seen": false, "ducts": [], "explored": [],

@@ -1,4 +1,5 @@
 extends SceneTree
+const BATTLE_FIXTURE := preload("res://tests/manual/gameplay/abdomen_combat_fixture.gd")
 const PATH := "user://test_level_clear.json"
 var failures: Array[String] = []
 func _initialize() -> void:
@@ -12,46 +13,57 @@ func run() -> void:
 	level.journey_save_path = PATH
 	root.add_child(level)
 	current_scene = level
-	await create_timer(0.15).timeout
+	while not level.is_entry_ready():
+		await process_frame
 	level.player.set_physics_process(false)
+	for enemy in level.enemies:
+		enemy.set_physics_process(false)
 	level.player.global_position = level.final_exit.global_position
 	await physics_frame
 	await process_frame
 	check(not level.is_level_complete and not root.has_node("EntryLoading"), "Exit remains locked before terminal activation")
-	for enemy in level.enemies:
-		enemy.apply_damage(999)
-	level.player.global_position = level.terminal.global_position + Vector2(0, 40)
+	check(await BATTLE_FIXTURE.clear_exit_encounter(level), "Exit encounter cleared")
+	level.player.global_position = level._terminal_access_position()
 	await physics_frame
 	level._try_interact()
-	for digit in level.TERMINAL_CODE:
-		level.interaction_sheet._type_code(digit)
+	level.player.global_position = level._terminal_access_position()
+	level._try_interact()
+	if not is_instance_valid(level.interaction_sheet._code_input):
+		quit(1)
+		return
+	level.interaction_sheet._code_input.text = level.TERMINAL_CODE
 	level.interaction_sheet._advance_or_finish()
-	await process_frame
+	while paused:
+		await process_frame
 	check(level.terminal_activated, "Terminal password unlocks exit normally")
 	level.player.global_position = level.final_exit.global_position + Vector2(0, 35)
 	level._on_exit_entered(level.player.get_node("PlayerModelHurtbox"), level.final_exit.get_meta("exit_id"))
 	await physics_frame
 	check(not level.is_level_complete, "Head silhouette alone does not trigger transition")
 	level.player.global_position = level.final_exit.global_position
+	level._on_exit_entered(level.player.get_node("PlayerModelHurtbox"), level.final_exit.get_meta("exit_id"))
 	await physics_frame
 	await process_frame
-	check(level.is_level_complete and root.has_node("EntryLoading"), "Feet entering an already-overlapped exit starts loading")
-	var loading = root.get_node_or_null("EntryLoading")
-	if loading != null:
-		level._on_exit_entered(level.player, level.final_exit.get_meta("exit_id"))
-		check(root.get_node("EntryLoading") == loading, "Exit cannot create duplicate transitions")
-	var deadline := Time.get_ticks_msec() + 10000
+	var transitions := root.get_children().filter(func(child: Node):
+		return child.get_script() == preload("res://scenes/ui/intro_cutscene/level_transition.gd"))
+	check(level.is_level_complete and transitions.size() == 1, "Feet entering the exit starts one transition")
+	if transitions.is_empty():
+		quit(1)
+		return
+	var transition: Node = transitions[0]
+	level._on_exit_entered(level.player, level.final_exit.get_meta("exit_id"))
+	check(root.get_children().filter(func(child: Node):
+		return child.get_script() == transition.get_script()).size() == 1, "Exit cannot create duplicate transitions")
+	var save_script = preload("res://scenes/gameplay/journey_save.gd")
+	check(save_script.read_save(PATH).get("first_level_cleared", false), "Clear result is persisted before the video finishes")
+	transition.video.stop()
+	transition._finish()
+	var deadline := Time.get_ticks_msec() + 30000
 	while Time.get_ticks_msec() < deadline:
 		await process_frame
-		if not paused and current_scene != null and current_scene.scene_file_path == "res://scenes/main.tscn":
+		if not paused and current_scene != null and current_scene.scene_file_path == save_script.SPINE:
 			break
-	check(not paused and current_scene != null and current_scene.scene_file_path == "res://scenes/main.tscn", "Level clear returns to title through loading")
-	var save_script = preload("res://scenes/gameplay/journey_save.gd")
-	check(save_script.read_save(PATH).get("first_level_cleared", false), "Clear result is persisted before returning to title")
-	if current_scene != null and current_scene.scene_file_path == "res://scenes/main.tscn":
-		current_scene.game_save_path = PATH
-		current_scene._refresh_archive()
-		check(current_scene.start_button.text == "重玩第一关", "Title distinguishes cleared journey from unfinished continue")
+	check(not paused and current_scene != null and current_scene.scene_file_path == save_script.SPINE, "Level clear reaches Spine through loading")
 	save_script.erase(PATH)
 	if current_scene != null:
 		current_scene.queue_free()

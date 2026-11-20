@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://cn7uabqfbv1p8"]
 
-[ext_resource type="Script" path="res://scenes/gameplay/abdomen_level.gd" id="1_abdomen_level"]
+[ext_resource type="Script" path="res://scenes/gameplay/abdomen_boss_level.gd" id="1_abdomen_level"]
 [ext_resource type="PackedScene" path="res://scenes/levels/abdomen/abdomen_graybox.tscn" id="2_graybox"]
 [ext_resource type="AudioStream" path="res://assets/audio/blueprint_transfer.wav" id="3_blueprint_audio"]
 [ext_resource type="AudioStream" path="res://assets/audio/mechanicals/02_shell_hit.wav" id="4_player_hurt"]
@@ -15,6 +15,12 @@ script = ExtResource("1_abdomen_level")
 [node name="Bullets" type="Node2D" parent="."]
 
 [node name="Interactables" type="Node2D" parent="."]
+
+[node name="BossEntrance" type="Marker2D" parent="."]
+position = Vector2(640, 660)
+
+[node name="BossRetryPoint" type="Marker2D" parent="."]
+position = Vector2(640, 704)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(1.5, 1.5)

@@ -1,0 +1,522 @@
+{
+  "frames": [
+    {
+      "filename": "borrowed-light-rift-sweep 0",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 1",
+      "frame": {
+        "x": 208,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 2",
+      "frame": {
+        "x": 416,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 3",
+      "frame": {
+        "x": 624,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 4",
+      "frame": {
+        "x": 0,
+        "y": 128,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 5",
+      "frame": {
+        "x": 208,
+        "y": 128,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 6",
+      "frame": {
+        "x": 416,
+        "y": 128,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 7",
+      "frame": {
+        "x": 624,
+        "y": 128,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 8",
+      "frame": {
+        "x": 0,
+        "y": 256,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 9",
+      "frame": {
+        "x": 208,
+        "y": 256,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 10",
+      "frame": {
+        "x": 416,
+        "y": 256,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 11",
+      "frame": {
+        "x": 624,
+        "y": 256,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 12",
+      "frame": {
+        "x": 0,
+        "y": 384,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 13",
+      "frame": {
+        "x": 208,
+        "y": 384,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 14",
+      "frame": {
+        "x": 416,
+        "y": 384,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    },
+    {
+      "filename": "borrowed-light-rift-sweep 15",
+      "frame": {
+        "x": 624,
+        "y": 384,
+        "w": 208,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 208,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 208,
+        "h": 128
+      },
+      "duration": 33
+    }
+  ],
+  "meta": {
+    "app": "https://github.com/patch-gg/pixelfx",
+    "version": "1",
+    "image": "borrowed-light-rift-sweep.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 832,
+      "h": 512
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "borrowed-light-rift-sweep",
+        "from": 0,
+        "to": 15,
+        "direction": "forward"
+      }
+    ],
+    "pixelfx": {
+      "id": "melee/borrowed-light-rift-sweep",
+      "name": "Borrowed Light – Rift Sweep",
+      "fps": 30,
+      "loop": false,
+      "frames": 16,
+      "frameSize": [
+        208,
+        128
+      ],
+      "pivot": [
+        104,
+        19
+      ],
+      "columns": 4,
+      "act": {
+        "windup": 0.32,
+        "recovery": 0,
+        "onBody": false,
+        "targets": [],
+        "hits": [
+          {
+            "t": 0.1,
+            "freeze": 0.06666666666666667,
+            "shake": 0,
+            "amp": 0,
+            "push": 0
+          }
+        ],
+        "poses": [
+          {
+            "t": -0.32,
+            "how": "smooth",
+            "pose": {
+              "crouch": 3,
+              "fx": 11,
+              "fy": -21,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw"
+            }
+          },
+          {
+            "t": -0.12,
+            "how": "smooth",
+            "pose": {
+              "crouch": 5,
+              "fx": 6,
+              "fy": -17,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw",
+              "lean": -4,
+              "yaw": -0.8,
+              "sa": -0.48
+            }
+          },
+          {
+            "t": 0,
+            "how": "smooth",
+            "pose": {
+              "crouch": 5,
+              "fx": 6,
+              "fy": -17,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw",
+              "lean": -4,
+              "yaw": -0.8,
+              "sa": -0.48
+            }
+          },
+          {
+            "t": 0.1,
+            "how": "snap",
+            "pose": {
+              "crouch": 5,
+              "fx": 19,
+              "fy": -16,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw",
+              "lean": 4,
+              "yaw": 0.8,
+              "sa": 0.28
+            }
+          },
+          {
+            "t": 0.2,
+            "how": "smooth",
+            "pose": {
+              "crouch": 5,
+              "fx": 19,
+              "fy": -16,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw",
+              "lean": 4,
+              "yaw": 0.8,
+              "sa": 0.28
+            }
+          },
+          {
+            "t": 0.43,
+            "how": "smooth",
+            "pose": {
+              "crouch": 3,
+              "fx": 11,
+              "fy": -21,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "claw"
+            }
+          }
+        ]
+      }
+    },
+    "borrowed_light": {
+      "facing": [
+        0,
+        1
+      ],
+      "sector_half_degrees": 72,
+      "visual_radius_px": 82,
+      "contact_frame_index": 3,
+      "contact_time_ms_after_vfx_start": 100,
+      "hitstop_ms_on_damage": 67,
+      "hitstop_ms_on_miss": 0,
+      "hitstop_baked_into_atlas": false,
+      "visual_suspend_until_ms": 200,
+      "rift_closes_by_ms": 440,
+      "displacement_mask": "borrowed-light-rift-sweep-displacement.png",
+      "max_displacement_display_px": 4,
+      "displacement_encoding": "Alpha = weight; red 255 = positive; red 0 = negative."
+    }
+  }
+}

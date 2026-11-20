@@ -20,7 +20,7 @@ func film() -> void:
 		clip_frame += 1
 
 func stage(boss: BOSS, at: Vector2, player_at: Vector2, title: String, view: Vector2) -> void:
-	boss.cancel_preview_actions()
+	boss.cancel_actions()
 	boss.set_physics_process(false)
 	boss.global_position = at
 	room.player.restore_player(player_at, room.player.max_health, ["pulse_gun"])
@@ -115,12 +115,13 @@ func verify_crossing(boss: BOSS) -> void:
 		assert(boss.sweep_cooldown == BOSS.SWEEP_COOLDOWN_TIME and not boss._can_begin_sweep(53.0))
 		for step in range(58):
 			if step < 29:
-				player.move_and_collide(Vector2(0, 3.25))
+				player.move_and_collide(Vector2(1.95, 2.60))
 			await tick(boss)
 			if repetition == 0 and step % 2 == 0:
 				await film()
-		assert(boss.sweep_struck and player.health == player.max_health and boss.locked == lock)
+		assert(boss.sweep_struck and player.health == player.max_health and boss.locked == lock, "crossing %d struck=%s hp=%d lock=%s current=%s player=%s" % [repetition, boss.sweep_struck, player.health, lock, boss.locked, player.global_position])
 	# Keep the old short pinch as an isolated fixture. Regular combat resumes with a sweep.
+	boss.global_position = HOME
 	player.restore_player(HOME + Vector2(48, 0), player.max_health, ["pulse_gun"])
 	boss.previous_target = player.global_position
 	boss.sweep_cooldown = 0.0
@@ -129,15 +130,15 @@ func verify_crossing(boss: BOSS) -> void:
 	await tick(boss)
 	assert(boss.phase == BOSS.Phase.PINCH)
 	var start := player.global_position
-	player.move_and_collide(Vector2(0, 50))
-	for i in range(28):
+	player.global_position = HOME + Vector2(48, -56)
+	for i in range(38):
 		await tick(boss)
-	assert(boss.sweep_after_dodge > 0.0)
+	assert(boss.sweep_after_dodge > 0.0, "Pinch evasion did not register at %s, frame=%d, health=%d" % [player.global_position, boss.action_frame, player.health])
 	boss._switch(BOSS.Phase.STALK, 0.0)
 	player.global_position = start
 	boss.previous_target = start
 	await tick(boss)
-	assert(boss.phase == BOSS.Phase.SWEEP)
+	assert(boss.phase == BOSS.Phase.SWEEP, boss._diagnose())
 	print("CROSS_PASS: two transverse crossings trigger sweep at 49u; locked dodge, separate cooldown, sweep resumes after isolated legacy pinch")
 
 func verify_silk(boss: BOSS) -> void:
@@ -159,24 +160,45 @@ func verify_silk(boss: BOSS) -> void:
 	assert(not BOSS.GROUND_FX.covers(boss.get_world_2d().direct_space_state, centre, Vector2(1027, 485), patch.limits))
 	player.global_position = centre + Vector2(-12, 0)
 	await tick(boss)
-	assert(is_equal_approx(player.web_speed_factor, BOSS.GROUND_WEB_FACTOR))
+	assert(is_equal_approx(player.web_movement_factor(), BOSS.GROUND_WEB_FACTOR))
 	# A tether releasing while standing in overlapping silk must not clear slow.
 	boss._drop_silk(centre + Vector2(-4, 1))
 	boss.bound = true
 	boss._release_tether()
 	assert(boss.slam_grace > 0.0)
 	await tick(boss)
-	assert(not boss.bound and is_equal_approx(player.web_speed_factor, BOSS.GROUND_WEB_FACTOR))
+	assert(not boss.bound and is_equal_approx(player.web_movement_factor(), 0.48))
+	# All four overlapping patches share the player's feet but expire independently.
+	boss._drop_silk(player.global_position)
+	await tick(boss)
+	assert(is_equal_approx(player.web_movement_factor(), 0.22))
+	boss._drop_silk(player.global_position)
+	await tick(boss)
+	assert(is_equal_approx(player.web_movement_factor(), 0.20))
+	boss.leftover_silk[-1].left = DT * 0.5
+	await tick(boss)
+	assert(boss.leftover_silk.size() == 3 and is_equal_approx(player.web_movement_factor(), 0.22))
+	# Moving off all silk should clear the effect during the same boss tick.
+	var on_silk: Vector2 = player.global_position
+	player.global_position = centre + Vector2(-BOSS.GROUND_WEB_RADIUS - 18.0, 0)
+	await tick(boss)
+	assert(is_equal_approx(player.web_movement_factor(), 1.0))
+	player.global_position = on_silk
+	await tick(boss)
 	await capture("silk-patch.png")
-	for i in range(ceili((BOSS.GROUND_WEB_RADIUS + 10.0) / 2.1)):
-		player.move_and_collide(Vector2(-2.1, 0))
+	var walk_distance := BOSS.GROUND_WEB_RADIUS + 25.0
+	var escape_direction := Vector2.ZERO
+	for direction in [Vector2.UP, Vector2.DOWN, Vector2.LEFT]:
+		if not player.test_move(player.global_transform, direction * walk_distance):
+			escape_direction = direction
+			break
+	assert(escape_direction != Vector2.ZERO, "Silk fixture needs a clear path off the patch")
+	for i in range(ceili(walk_distance / 2.1)):
+		player.move_and_collide(escape_direction * 2.1)
 		await tick(boss)
 		if i % 2 == 0:
 			await film()
-	player.set_physics_process(true)
-	await frames(8)
-	player.set_physics_process(false)
-	assert(is_equal_approx(player.web_speed_factor, 1.0))
+	assert(is_equal_approx(player.web_movement_factor(), 1.0))
 	boss._update_ground_silk(BOSS.GROUND_WEB_LIFETIME + DT)
 	assert(boss.leftover_silk.is_empty())
 	# Clean-air endpoint stays on the actual range boundary.
@@ -186,7 +208,57 @@ func verify_silk(boss: BOSS) -> void:
 	for i in range(ceili(BOSS.WEB_RANGE / (BOSS.WEB_SPEED * DT)) + 1):
 		await tick(boss)
 	assert(boss.leftover_silk.size() == 1 and boss.leftover_silk[0].at.is_equal_approx(Vector2(395 + BOSS.WEB_RANGE, 586)))
-	print("SILK_PASS: wall and range endpoints, splat -> patch, wall clip, enter/exit, tether release, overlap, expiry")
+	var first_patch: Vector2 = boss.leftover_silk[0].at
+	for i in range(1, 10):
+		boss._drop_silk(first_patch + Vector2(i, 0))
+	assert(boss.leftover_silk.size() == 10 and boss.leftover_silk[0].at == first_patch)
+	var latest := first_patch + Vector2(10, 0)
+	boss._drop_silk(latest)
+	assert(boss.leftover_silk.size() == 10)
+	assert(boss.leftover_silk[0].at == first_patch + Vector2.RIGHT and boss.leftover_silk[-1].at == latest)
+	print("SILK_PASS: wall and range endpoints, wall clip, 80% slow cap, independent expiry, 10-patch FIFO limit")
+
+func verify_boss_silk_speed(boss: BOSS) -> void:
+	await stage(boss, HOME, HOME + Vector2(140, 0), "残网 · Boss 移速", Vector2(840, 465))
+	boss.health = BOSS.MAX_HP
+	boss._switch(BOSS.Phase.RECOVER, 2.0)
+	var silk_at := HOME + Vector2.RIGHT * 55.0
+	var goal := HOME + Vector2.RIGHT * 120.0
+	boss._drop_silk(silk_at)
+	boss._drop_silk(silk_at)
+	assert(is_equal_approx(boss._chase_speed(), BOSS.CHASE_SPEED))
+	for i in range(3):
+		assert(not boss._move_chassis(goal, boss._chase_speed(), DT))
+		await tick(boss)
+	var on_silk := boss.global_position
+	assert(is_equal_approx(boss._chase_speed(), BOSS.CHASE_SPEED * 1.20))
+	assert(not boss._move_chassis(goal, boss._chase_speed(), DT))
+	assert(absf(boss.global_position.distance_to(on_silk) - BOSS.CHASE_SPEED * 1.20 * DT) < 0.01)
+	boss.pressure_left = 1.0
+	assert(is_equal_approx(boss._chase_speed(), BOSS.CHASE_SPEED * 1.20 * BOSS.PRESSURE_MOVE_MULT))
+	boss.pressure_left = 0.0
+	for i in range(4):
+		assert(not boss._move_chassis(HOME, boss._chase_speed(), DT))
+		await tick(boss)
+	assert(boss.global_position.is_equal_approx(HOME))
+	assert(is_equal_approx(boss._chase_speed(), BOSS.CHASE_SPEED))
+
+	# The grid distance is inside the radius, but the shutter cuts the web.
+	boss.global_position = HOME
+	boss.leftover_silk.clear()
+	var shutter := obstacle(HOME + Vector2(36, 0), Vector2(4, 66))
+	await frames(2)
+	boss._drop_silk(HOME + Vector2(44, 0))
+	assert(boss.leftover_silk.size() == 1 and is_equal_approx(boss._chase_speed(), BOSS.CHASE_SPEED))
+	shutter.queue_free()
+	await frames(2)
+	await tick(boss)
+	assert(is_equal_approx(boss._chase_speed(), BOSS.CHASE_SPEED * 1.20))
+	boss.leftover_silk[0].left = DT * 0.5
+	await tick(boss)
+	assert(boss.leftover_silk.is_empty() and is_equal_approx(boss._chase_speed(), BOSS.CHASE_SPEED))
+	print("BOSS_SILK_SPEED_PASS: movement +20%, overlapping webs count once, pressure combines, exiting and expiry restore speed, shutter blocks coverage")
+
 
 func verify_slam(boss: BOSS, dodge: bool, shutter_test := false) -> void:
 	var player: CharacterBody2D = room.player
@@ -199,6 +271,7 @@ func verify_slam(boss: BOSS, dodge: bool, shutter_test := false) -> void:
 	await stage(boss, HOME, HOME + Vector2(82, 18), title, Vector2(776, 469))
 	boss.slam_cooldown = 0.0
 	boss.slam_grace = 0.0
+	boss.sweep_cooldown = 1.0
 	boss.previous_target = player.global_position
 	boss._switch(BOSS.Phase.STALK, 0.0)
 	var initial_contacts := contact_count
@@ -271,6 +344,7 @@ func run() -> void:
 	await verify_rays(boss)
 	await verify_crossing(boss)
 	await verify_silk(boss)
+	await verify_boss_silk_speed(boss)
 	await verify_slam(boss, true)
 	await verify_slam(boss, false)
 	await verify_slam(boss, false, true)

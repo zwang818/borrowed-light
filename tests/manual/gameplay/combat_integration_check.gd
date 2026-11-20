@@ -1,9 +1,16 @@
 extends SceneTree
+
+const BOSS := preload("res://scenes/enemies/parallel_cleaner/boss.gd")
+const EXIT_BATTLE := preload("res://tests/manual/gameplay/abdomen_combat_fixture.gd")
+const SAVE := preload("res://scenes/gameplay/journey_save.gd")
+const SAVE_PATH := "user://combat_integration_check.json"
+
 func _initialize() -> void:
 	root.size = Vector2i(1152,648)
 	call_deferred("run")
 func run() -> void:
 	var level = load("res://scenes/gameplay/abdomen_level.tscn").instantiate()
+	level.journey_save_path = SAVE_PATH
 	root.add_child(level)
 	current_scene = level
 	await physics_frame
@@ -19,8 +26,8 @@ func run() -> void:
 		unit.set_physics_process(false)
 	assert(not player.pulse_gun_equipped and not player.scatter_unlocked)
 	assert(visual._uses_rig() and visual.diagonal_legs.size() == 7)
-	assert(player.has_node("PlayerModelHurtbox") and player.collision_mask == 1)
-	assert(level._remaining_cleaners() == level.enemies.size())
+	assert(player.has_node("PlayerModelHurtbox") and player.collision_mask == (1 | BOSS.CHASSIS_LAYER))
+	assert(level._remaining_cleaners() == level.enemies.size() + 1)
 	Input.action_press("move_right")
 	Input.action_press("b_sprint")
 	player._physics_process(0.01)
@@ -56,25 +63,21 @@ func run() -> void:
 	paused = false
 	player.learn_pulse()
 	level.pulse_learned = true
+	level.cleaner_intro_seen = true
 	level._retry_level()
 	await process_frame
 	assert(trail.particles.is_empty())
 	assert(player.pulse_gun_equipped and not player.scatter_unlocked)
 	assert(player.web_slow_remaining == 0.0 and not player.sprint_active)
 	assert(get_nodes_in_group("b_cleaner_webs").is_empty())
-	assert(level._remaining_cleaners() == level.enemies.size())
-	for unit in level.enemies:
-		unit.apply_damage(unit.max_health)
+	assert(level._remaining_cleaners() == level.enemies.size() + 1)
+	assert(await EXIT_BATTLE.clear_exit_encounter(level))
 	assert(level._remaining_cleaners() == 0)
 	assert(level.terminal_gate.get_meta("is_open"))
-	# Exit callback recognizes the model's damage body rather than ignoring it.
-	level.terminal_activated = true
-	for obj in level.interactables_parent.get_children():
-		if obj.get_meta("is_final_exit",false):
-			level._on_exit_entered(player.get_node("PlayerModelHurtbox"),obj.get_meta("exit_id"))
-			assert(level.is_level_complete)
-			break
+	# The level-clear check exercises this body inside the powered exit trigger.
+	assert(player.get_node("PlayerModelHurtbox").get_damage_receiver() == player)
+	SAVE.erase(SAVE_PATH)
 	level.queue_free()
 	await process_frame
-	print("Main combat integration: unarmed gait/unlocks, sprint, model hitbox, screen detection, eye emission, pause, retry, cleaner gate and exit: PASS")
+	print("Main combat integration: unarmed gait/unlocks, sprint, model hitbox, screen detection, eye emission, pause, retry and terminal gate: PASS")
 	quit()
