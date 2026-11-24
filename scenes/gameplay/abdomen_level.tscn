@@ -1,10 +1,12 @@
-[gd_scene load_steps=6 format=3 uid="uid://cn7uabqfbv1p8"]
+[gd_scene load_steps=8 format=3 uid="uid://cn7uabqfbv1p8"]
 
 [ext_resource type="Script" path="res://scenes/gameplay/abdomen_boss_level.gd" id="1_abdomen_level"]
 [ext_resource type="PackedScene" path="res://scenes/levels/abdomen/abdomen_graybox.tscn" id="2_graybox"]
 [ext_resource type="AudioStream" path="res://assets/audio/blueprint_transfer.wav" id="3_blueprint_audio"]
 [ext_resource type="AudioStream" path="res://assets/audio/mechanicals/02_shell_hit.wav" id="4_player_hurt"]
 [ext_resource type="AudioStream" path="res://assets/audio/mechanicals/03_bulkhead_unlock.wav" id="5_terminal_unlock"]
+[ext_resource type="AudioStream" path="res://assets/audio/abdomen_residual_warmth.wav" id="6_abdomen_bgm"]
+[ext_resource type="AudioStream" path="res://assets/audio/abdomen_parallel_engagement.wav" id="7_boss_bgm"]
 
 [node name="AbdomenLevel" type="Node2D"]
 process_mode = 1
@@ -27,6 +29,14 @@ zoom = Vector2(1.5, 1.5)
 limit_smoothed = true
 
 [node name="MechanicalAudio" type="Node2D" parent="."]
+
+[node name="AbdomenMusic" type="AudioStreamPlayer" parent="."]
+process_mode = 3
+stream = ExtResource("6_abdomen_bgm")
+
+[node name="BossMusic" type="AudioStreamPlayer" parent="."]
+process_mode = 3
+stream = ExtResource("7_boss_bgm")
 
 [node name="BlueprintTransferAudio" type="AudioStreamPlayer" parent="."]
 process_mode = 3
