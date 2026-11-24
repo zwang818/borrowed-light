@@ -1,6 +1,12 @@
 extends "res://scenes/gameplay/abdomen_level.gd"
 
 const BOSS_ACTOR := preload("res://scenes/enemies/parallel_cleaner/boss.gd")
+const AUDIO_PREFERENCES := preload("res://scenes/ui/user_settings.gd")
+const FOOTSTEPS := preload("res://scenes/gameplay/abdomen_footsteps.gd")
+const MUSIC_VOLUME_DB := -7.0
+const DIALOGUE_MUSIC_VOLUME_DB := -15.0
+const BOSS_MUSIC_VOLUME_DB := -8.5
+const SILENT_MUSIC_VOLUME_DB := -80.0
 const BOSS_STATE_KEY := "parallel_cleaner"
 const FUSION_POINT := Vector2(774, 476)
 const BOSS_ENTRANCE_SIZE := Vector2(132, 16)
@@ -15,7 +21,13 @@ const FATAL_HIT_FEEDBACK_TIME := 0.23
 
 @onready var boss_entrance := $BossEntrance as Marker2D
 @onready var boss_retry_point := $BossRetryPoint as Marker2D
+@onready var abdomen_music: AudioStreamPlayer = $AbdomenMusic
+@onready var boss_music: AudioStreamPlayer = $BossMusic
 
+var music_fade: Tween
+var boss_music_fade: Tween
+var boss_music_active := false
+var footsteps: FOOTSTEPS
 var boss: BOSS_ACTOR
 var boss_beat := false
 var boss_resume: Dictionary = {}
@@ -36,6 +48,60 @@ var shake_offsets := PackedVector2Array()
 func _ready() -> void:
 	await super._ready()
 	shake_base = camera.offset
+	if scene_file_path == JOURNEY_SAVE.SCENE:
+		abdomen_voice.visibility_changed.connect(_update_music_mix)
+		footsteps = FOOTSTEPS.new()
+		footsteps.name = "XiaoyiFootsteps"
+		footsteps.player = player
+		add_child(footsteps)
+
+
+func on_entry_revealed() -> void:
+	super.on_entry_revealed()
+	if scene_file_path != JOURNEY_SAVE.SCENE or abdomen_music.playing:
+		return
+	if AudioServer.get_bus_index(AUDIO_PREFERENCES.MUSIC_BUS) < 0:
+		AUDIO_PREFERENCES.apply_audio(AUDIO_PREFERENCES.read_preferences())
+	abdomen_music.bus = AUDIO_PREFERENCES.MUSIC_BUS
+	boss_music.bus = AUDIO_PREFERENCES.MUSIC_BUS
+	abdomen_music.volume_db = MUSIC_VOLUME_DB
+	abdomen_music.play()
+	_set_boss_music(is_instance_valid(boss) and not boss_beat and not player.is_dead)
+
+
+func _update_music_mix() -> void:
+	if is_instance_valid(music_fade):
+		music_fade.kill()
+	var target_db := DIALOGUE_MUSIC_VOLUME_DB if abdomen_voice.visible else MUSIC_VOLUME_DB
+	if boss_music_active:
+		target_db = SILENT_MUSIC_VOLUME_DB
+	music_fade = abdomen_music.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	music_fade.tween_property(abdomen_music, "volume_db", target_db, 0.22)
+
+
+func _set_boss_music(active: bool) -> void:
+	if is_instance_valid(footsteps):
+		footsteps.set_boss_battle(active)
+	if scene_file_path != JOURNEY_SAVE.SCENE or not abdomen_music.playing or active == boss_music_active:
+		return
+	boss_music_active = active
+	if is_instance_valid(boss_music_fade):
+		boss_music_fade.kill()
+	if active:
+		boss_music.volume_db = BOSS_MUSIC_VOLUME_DB
+		boss_music.play()
+	else:
+		boss_music_fade = boss_music.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		boss_music_fade.tween_property(boss_music, "volume_db", SILENT_MUSIC_VOLUME_DB, 0.65)
+		boss_music_fade.tween_callback(boss_music.stop)
+	_update_music_mix()
+
+
+func _show_level_complete() -> void:
+	super._show_level_complete()
+	if is_level_complete:
+		abdomen_music.stream_paused = true
+		boss_music.stop()
 
 
 func _configure_player() -> void:
@@ -160,6 +226,7 @@ func _begin_fusion() -> void:
 	boss.machine_bounds = Rect2(machine.to_global(Vector2.ZERO), machine.to_global(machine.size) - machine.to_global(Vector2.ZERO))
 	boss.position = to_local(FUSION_POINT)
 	add_child(boss)
+	_set_boss_music(true)
 	boss.defeated.connect(_on_fusion_defeated)
 	boss.slammed.connect(_on_slammed)
 	boss.clearance.shake_requested.connect(_on_clearance_shake)
@@ -208,6 +275,7 @@ func _on_fusion_defeated() -> void:
 	if boss_beat:
 		return
 	boss_beat = true
+	_set_boss_music(false)
 	boss_resume.clear()
 	_set_boss_gate_open(true)
 	_clear_shake()
@@ -229,6 +297,7 @@ func _on_player_died() -> void:
 	_open_death_menu()
 
 func _open_death_menu() -> void:
+	_set_boss_music(false)
 	_clear_shake()
 	if is_instance_valid(boss):
 		boss.cancel_actions()
@@ -244,6 +313,8 @@ func _open_death_menu() -> void:
 
 func _process(delta: float) -> void:
 	super._process(delta)
+	if abdomen_music.stream_paused and not is_level_complete:
+		abdomen_music.stream_paused = false
 	if not entry_ready or get_tree().paused or not is_instance_valid(boss):
 		return
 	_advance_shake(delta)
@@ -315,6 +386,7 @@ func _clear_wrecks() -> void:
 	wreck_starts.clear()
 
 func _retry_level() -> void:
+	_set_boss_music(false)
 	_clear_shake()
 	if is_instance_valid(boss):
 		boss.cancel_actions()
