@@ -3,14 +3,16 @@ extends "res://tests/manual/a_map/preview_door.gd"
 signal opened
 var aperture := 0.0
 var opening := false
+var fixed_closed := false
 
 func set_open(value: bool) -> void:
-	aperture = 1.0 if value else 0.0
+	var opened := value and not fixed_closed
+	aperture = 1.0 if opened else 0.0
 	opening = false
-	super.set_open(value)
+	super.set_open(opened)
 
 func unlock() -> void:
-	if is_open or opening: return
+	if fixed_closed or is_open or opening: return
 	opening = true
 
 func _process(delta: float) -> void:

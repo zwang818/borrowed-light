@@ -7,6 +7,7 @@ var pulse_warning := false
 @export_range(0.01,1.0) var damage_ratio := 1.0
 
 func _ready() -> void:
+	cycle_speed = 4.0 / 3.0
 	actor_hit.connect(_hit)
 
 func _hit(_device: String) -> void:

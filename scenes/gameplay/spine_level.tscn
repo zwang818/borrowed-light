@@ -1,6 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=5 format=3]
 [ext_resource type="PackedScene" path="res://tests/manual/b_combat/spine_combat_test.tscn" id="1"]
 [ext_resource type="Script" path="res://scenes/gameplay/spine_story_level.gd" id="2"]
+[ext_resource type="Script" path="res://scenes/levels/graybox/map_marker.gd" id="3"]
+[ext_resource type="Script" path="res://scenes/levels/spine/spine_reservation.gd" id="4"]
 [node name="SpineLevel" instance=ExtResource("1")]
 script = ExtResource("2")
 dynamic_walk_preview = true
@@ -10,3 +12,29 @@ metadata/test_only = false
 isolate_progress = false
 playtest_start = 0
 metadata/flow_version = "spine_v5_interactive"
+
+[node name="FirstFallRespawn" type="Marker2D" parent="Map"]
+position = Vector2(1615, 2117)
+
+[node name="Cleaner07" type="Marker2D" parent="Map/Markers"]
+position = Vector2(6272, -109)
+script = ExtResource("3")
+object_id = "p2_cleaner_07"
+object_type = "cleaner"
+room_id = "p2_spine_middle"
+
+[node name="Cleaner08" type="Marker2D" parent="Map/Markers"]
+position = Vector2(6306, -25)
+script = ExtResource("3")
+object_id = "p2_cleaner_08"
+object_type = "cleaner"
+room_id = "p2_spine_middle"
+
+[node name="CleanerPatrolZone" type="Node2D" parent="Map/Reservations"]
+visible = false
+position = Vector2(6126.55462, -150.83983)
+rotation = -0.43633231
+script = ExtResource("4")
+size = Vector2(399.66, 288)
+
+[editable path="Map"]

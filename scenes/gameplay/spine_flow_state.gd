@@ -2,8 +2,11 @@ extends RefCounted
 ## Serializable knowledge is separate from room baselines and transient combat.
 const FLAGS := ["first_fall", "hatch_open", "record_read", "receipt_learned", "scatter_blueprint", "assembled", "calibrated", "fluid_tutorial", "completed"]
 const SERVICE_CHECKPOINT := "service_exit"
+const PATROL_CHECKPOINT := "patrol_approach"
+const BLUEPRINT_CHECKPOINT := "blueprint_approach"
+const BEACON_CHECKPOINTS := [SERVICE_CHECKPOINT, PATROL_CHECKPOINT, BLUEPRINT_CHECKPOINT]
 static func fresh() -> Dictionary:
-	var state := {"ammo": 0, "capacity": 4, "room": "spine", "baseline": {}, "checkpoint": "entry"}
+	var state := {"ammo": 0, "capacity": 4, "room": "spine", "baseline": {}, "checkpoint": "entry", "saved_beacons": []}
 	for flag in FLAGS: state[flag] = false
 	return state
 
@@ -16,8 +19,14 @@ static func sanitize(raw: Variant) -> Dictionary:
 	if raw.get("ammo") is int or raw.get("ammo") is float: result.ammo = clampi(int(raw.ammo),0,result.capacity)
 	result.room = "workshop" if raw.get("room") == "workshop" else "spine"
 	result.checkpoint = "return" if raw.get("checkpoint") == "return" else "entry"
-	if raw.get("checkpoint") == SERVICE_CHECKPOINT and result.hatch_open:
-		result.checkpoint = SERVICE_CHECKPOINT
+	var saved: Variant = raw.get("saved_beacons", [])
+	for id in BEACON_CHECKPOINTS:
+		if id == SERVICE_CHECKPOINT and not result.hatch_open: continue
+		if raw.get("checkpoint") == id:
+			result.checkpoint = id
+			result.saved_beacons.append(id)
+		elif saved is Array and id in saved:
+			result.saved_beacons.append(id)
 	if raw.get("baseline") is Dictionary:
 		var base: Dictionary = raw.baseline
 		result.baseline = {"gate":base.get("gate",false)==true,"exit":base.get("exit",false)==true,"units":[]}

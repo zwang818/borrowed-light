@@ -92,13 +92,14 @@ func _run() -> void:
 	spine.state.fluid_tutorial = true
 	spine.state.completed = true
 	spine.state.checkpoint = FLOW.SERVICE_CHECKPOINT
-	spine.checkpoint_beacon.activated = true
+	spine.state.saved_beacons = FLOW.BEACON_CHECKPOINTS.duplicate()
+	for beacon in spine.checkpoint_beacons.values():
+		beacon.activated = true
 	spine.hero().global_position = spine.anchor("ScatterCheckpoint")
 	spine.hero().health = 1
 	spine.hero().scatter_unlocked = true
 	spine.hero().pressure = 2
 	spine.protocol_rail.set_powered(true)
-	spine.authorized_gate.set_open(true)
 	spine.exit_gate.set_open(true)
 	spine.defense.elapsed = 7.5
 	var defeated = spine.enemies[0]
@@ -112,7 +113,7 @@ func _run() -> void:
 		await process_frame
 	check(current_scene == spine and paused and spine.menus.page == spine.menus.Page.PAUSE,
 		"Failed restart restores the same room and paused menu")
-	check(spine.authorized_gate.is_open and spine.hero().health == 1 and not auto_accept_quit
+	check(not spine.authorized_gate.is_open and spine.exit_gate.is_open and spine.hero().health == 1 and not auto_accept_quit
 		and before_rejected == FileAccess.get_file_as_bytes(PATH), "Rollback keeps live progress, saved bytes and the close handler")
 	loader._cancel()
 	await loader.tree_exited
@@ -123,7 +124,7 @@ func _run() -> void:
 	spine = current_scene
 	check(not paused and spine.hero().global_position == spine.anchor("PlayerSpawn")
 		and spine.hero().health == spine.hero().max_health, "Spine restarts at the entrance even after activating the beacon")
-	check(spine.state == FLOW.fresh() and not spine.checkpoint_beacon.activated
+	check(spine.state == FLOW.fresh() and spine.checkpoint_beacons.values().all(func(beacon): return not beacon.activated)
 		and not spine.protocol_rail.console.active and not spine.hero().scatter_unlocked
 		and spine.hero().pulse_gun_equipped and spine.hero().pressure == 0 and not spine.hero().has_protocol,
 		"New spine entry restores fresh progression and loadout")

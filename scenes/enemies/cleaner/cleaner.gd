@@ -29,6 +29,8 @@ var visibility_query: Callable
 var protocol_query: Callable
 var home := Vector2.ZERO
 var patrol_index: int = 0
+var patrol_cycle_query: Callable # 0 to 1 outbound, 1 to 2 returning.
+var paced_patrol_distance := -1.0
 var reported_missing_configuration: bool = false
 var attack_shape := RectangleShape2D.new()
 var _path := PackedVector2Array()
@@ -112,8 +114,18 @@ func _chase_target() -> void:
 		move_toward_point(target.global_position, PARAMETERS.CLEANER_CHASE_SPEED, ATTACK_APPROACH_DISTANCE)
 
 func patrol() -> void:
+	paced_patrol_distance = -1.0
 	if patrol_offsets.is_empty():
 		velocity = Vector2.ZERO
+		return
+	if patrol_cycle_query.is_valid() and patrol_offsets.size() == 2:
+		var phase := float(patrol_cycle_query.call())
+		var progress := 1.0 - absf(1.0 - phase)
+		var destination := home + patrol_offsets[0].lerp(patrol_offsets[1], progress)
+		move_toward_point(destination, PARAMETERS.CLEANER_PATROL_SPEED * 1.5)
+		if global_position.distance_squared_to(destination) < 0.01:
+			# A cleaner returning from combat uses its own stride until it catches up.
+			paced_patrol_distance = fposmod(phase, 1.0) * patrol_offsets[0].distance_to(patrol_offsets[1])
 		return
 	var point := home + patrol_offsets[patrol_index]
 	if global_position.distance_to(point) < 6.0:
@@ -213,6 +225,7 @@ func restore_combat_state(snapshot: Dictionary) -> void:
 	health = clampi(int(snapshot.health), 0, max_health)
 	global_position = snapshot.get("position", home)
 	patrol_index = clampi(int(snapshot.get("patrol_index", 0)), 0, maxi(0, patrol_offsets.size() - 1))
+	paced_patrol_distance = -1.0
 	state = State.PATROL if health > 0 else State.DEAD
 	remaining = 0.0
 	velocity = Vector2.ZERO

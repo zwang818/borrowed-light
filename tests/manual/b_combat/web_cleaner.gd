@@ -1,5 +1,7 @@
 extends "res://scenes/enemies/cleaner/cleaner.gd"
 ## Shared ranged behavior for the graybox and abdomen; base melee timings remain unchanged.
+signal target_defeated
+
 const WEB = preload("res://tests/manual/b_combat/web_projectile.gd")
 const WEB_MIN_DISTANCE := 110.0
 const WEB_WARNING := 0.55
@@ -134,4 +136,6 @@ func try_melee_hit() -> void:
 		if receiver == target:
 			attack_hit = true
 			target.apply_damage(PARAMETERS.CLEANER_DAMAGE)
+			if target.is_dead:
+				target_defeated.emit()
 			break

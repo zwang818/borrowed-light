@@ -74,7 +74,7 @@ func _write() -> void:
 	spine.defense.elapsed = 7.25
 	spine.hero().pressure = 3
 	spine.state.record_read = true
-	spine.authorized_gate.set_open(true)
+	spine.exit_gate.set_open(true)
 	spine.entrance_hazards.ring_hit_cycle[0] = 1
 	var hazard := {"position": [player.global_position.x + 100, player.global_position.y],
 		"direction": [-1, 0], "travel_left": 97.5}
@@ -132,14 +132,15 @@ func _read() -> void:
 	var spine = await _continue_from_title(SPINE_PATH)
 	var spawn = spine.get_node("SpawnPoints/PlayerSpawn")
 	var player = spawn.get_node("Player")
-	assert(player.global_position.is_equal_approx(spine.anchor("DefenseSafePocket")))
+	assert(player.global_position.is_equal_approx(spine.first_fall_spawn.global_position))
 	assert(player.health == 2 and player.scatter_unlocked and player.selected_mode == player.AttackMode.SCATTER)
 	assert(is_equal_approx(player.scatter_remaining, 0.47))
 	var sentry = spine.enemies[0]
 	assert(sentry.state == sentry.State.BURST and sentry.shots_left == 2 and sentry.shot_index == 4)
 	var combat_cleaner = spine.enemies.filter(func(enemy): return enemy.entity_id == "p2_cleaner_02")[0]
 	assert(combat_cleaner.health == 0 and combat_cleaner.collision_layer == 0)
-	assert(is_equal_approx(spine.defense.elapsed, 7.25) and spine.hero().pressure == 3 and spine.state.record_read and spine.authorized_gate.is_open)
+	assert(is_equal_approx(spine.defense.elapsed, 7.25) and spine.hero().pressure == 3 and spine.state.record_read
+		and not spine.authorized_gate.is_open and spine.exit_gate.is_open)
 	assert(is_equal_approx(spine.entrance_hazards.elapsed, 8.25) and spine.entrance_hazards.ring_hit_cycle[0] == 1)
 	assert(is_equal_approx(spine.entrance_hazards.orbs.back().travel_left, 97.5))
 	assert(is_equal_approx(spine.get_node("EnemyProjectiles").get_child(0).travelled, 53.5))
