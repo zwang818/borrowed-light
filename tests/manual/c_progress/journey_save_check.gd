@@ -81,7 +81,7 @@ func run() -> void:
 		check(not level.terminal_activated and level._remaining_cleaners() == 4, "World returns to room baseline")
 		check(level.player.global_position.distance_to(level._find_spawn_position()) < 1 and level.player.health == level.player.max_health, "Continue uses safe entry and room retry health")
 		level.explored_positions.append(Vector2(600, 1200))
-		level.player.global_position = level.interaction_points[&"workshop_origin"].global_position + Vector2(0, 24)
+		level.player.global_position = level.interaction_points[&"workshop_origin"].global_position + Vector2(0, 20)
 		await physics_frame
 		level._try_interact()
 		for _line in level.interaction_sheet.dialogue.size():

@@ -86,7 +86,7 @@ const C := {
 	"text_dist": Color(0.9, 0.9, 0.9, 0.9),
 	"hp_full": Color(0.9, 0.2, 0.2, 1),
 	"hp_empty": Color(0.3, 0.1, 0.1, 1),
-	"interaction_range": 48.0,
+	"interaction_range": 24.0,
 	"weapon_prompt_range": 120.0,
 	"welcome_duration": 4.0,
 	"notify_default": 2.0,

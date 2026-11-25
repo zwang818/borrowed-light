@@ -10,6 +10,19 @@ const COPPER := Color("a96142")
 const AMBER := Color("f2bd75")
 const TEAL := Color("9ad4c7")
 const GLASS := Color("25363b")
+const SOLID_CASINGS := {
+	&"record": [Rect2(-25, -18, 50, 38), 5.0, 6.0],
+	&"gate_reader": [Rect2(-12, -15, 24, 33), 4.0, 6.0],
+	&"protocol_console": [Rect2(-37, -25, 74, 46), 7.0, 7.0],
+	&"blueprint": [Rect2(-36, -20, 72, 39), 6.0, 7.0],
+	&"fluid": [Rect2(-33, -25, 64, 50), 6.0, 6.0],
+	&"exit_console": [Rect2(-27, -20, 54, 41), 7.0, 7.0],
+}
+const RECORD_KEYBOARD := Rect2(-13, 22, 26, 5)
+const CHECKPOINT_PLATE := Rect2(-13, -8, 25, 16)
+const CHECKPOINT_LANTERN_BASE := Rect2(-14, -11, 28, 21)
+const CHECKPOINT_LANTERN_OFFSET := Vector2(-28, 1)
+const CHECKPOINT_CABLE := [Vector2(-13, 1), Vector2(-18, 1), Vector2(-22, -3)]
 
 var kind: StringName
 var span := Vector2.ZERO
@@ -83,13 +96,60 @@ func _draw() -> void:
 		&"receiver_latch": _draw_receiver_latch()
 		&"receiver_bulkhead": _draw_receiver_bulkhead()
 
-func _armor(box: Rect2, paint: Color, bevel: float, depth: float) -> void:
+func solid_outline() -> PackedVector2Array:
+	var casing: Array = SOLID_CASINGS[kind]
+	var silhouette := _armor_silhouette(casing[0], casing[1], casing[2])
+	if kind == &"record":
+		var keyboard := _armor_outline(RECORD_KEYBOARD, 2.0)
+		for corner in keyboard:
+			silhouette.append(corner + Vector2(2, 2))
+	return _outer_outline(silhouette)
+
+func checkpoint_contact_outlines() -> Array[PackedVector2Array]:
+	var plate := _armor_silhouette(CHECKPOINT_PLATE, 4.0, 1.0)
+	plate.append_array(PackedVector2Array(CHECKPOINT_CABLE))
+	var lantern := _armor_silhouette(CHECKPOINT_LANTERN_BASE, 5.0, 4.0)
+	lantern.append_array(PackedVector2Array([Vector2(-8, -29), Vector2(0, -35), Vector2(8, -29),
+		Vector2(13, -8), Vector2(-12, -6)]))
+	return [_outer_outline(plate), Transform2D(0.0, CHECKPOINT_LANTERN_OFFSET) * _outer_outline(lantern)]
+
+func _outer_outline(points: PackedVector2Array) -> PackedVector2Array:
+	var hull := Geometry2D.convex_hull(points)
+	hull.resize(hull.size() - 1) # The hull repeats its first vertex at the end.
+	return hull
+
+func interaction_position(clearance: float) -> Vector2:
+	var casing: Array = SOLID_CASINGS[kind]
+	var box: Rect2 = casing[0]
+	# The tall gate reader is approached from the incoming side of the corridor.
+	if box.size.y > box.size.x:
+		return to_global(Vector2(box.position.x - clearance, box.get_center().y))
+	var front: float = box.end.y + casing[2]
+	if kind == &"record":
+		front = RECORD_KEYBOARD.end.y + 2.0
+	return to_global(Vector2(box.get_center().x + 2.0, front + clearance))
+
+func _draw_solid_casing() -> void:
+	var casing: Array = SOLID_CASINGS[kind]
+	_armor(casing[0], RED, casing[1], casing[2])
+
+func _armor_outline(box: Rect2, bevel: float) -> PackedVector2Array:
 	var at := box.position
 	var end := box.end
-	var outline := PackedVector2Array([at + Vector2(bevel, 0), Vector2(end.x - bevel, at.y),
+	return PackedVector2Array([at + Vector2(bevel, 0), Vector2(end.x - bevel, at.y),
 		Vector2(end.x, at.y + bevel), Vector2(end.x, end.y - bevel),
 		end - Vector2(bevel, 0), Vector2(at.x + bevel, end.y),
 		Vector2(at.x, end.y - bevel), Vector2(at.x, at.y + bevel)])
+
+func _armor_silhouette(box: Rect2, bevel: float, depth: float) -> PackedVector2Array:
+	var outline := _armor_outline(box, bevel)
+	outline.append_array(Transform2D(0.0, Vector2(2, depth)) * outline)
+	return outline
+
+func _armor(box: Rect2, paint: Color, bevel: float, depth: float) -> void:
+	var at := box.position
+	var end := box.end
+	var outline := _armor_outline(box, bevel)
 	var offset := Vector2(2.0, depth)
 	draw_colored_polygon(Transform2D(0.0, offset) * outline, INK)
 	if depth > 0.0:
@@ -165,7 +225,7 @@ func _coupling(at: Vector2, radius: float) -> void:
 		draw_rect(Rect2(lug - Vector2(2, 2), Vector2(4, 4)), BRASS.lightened(0.13))
 
 func _draw_record() -> void:
-	_armor(Rect2(-25, -18, 50, 38), RED, 5, 6)
+	_draw_solid_casing()
 	_armor(Rect2(-21, -20, 42, 33), STEEL, 4, 2)
 	for x in [-24, 21]:
 		draw_line(Vector2(x, -8), Vector2(x, 10), BRASS.darkened(0.24), 1)
@@ -179,11 +239,11 @@ func _draw_record() -> void:
 	for y in range(14, 22, 2):
 		draw_rect(Rect2(-8, y, 16, 1), BRASS.lightened(0.11))
 		draw_rect(Rect2(4, y, 2, 1), Color("836349"))
-	_armor(Rect2(-13, 22, 26, 5), BRASS, 2, 2)
+	_armor(RECORD_KEYBOARD, BRASS, 2, 2)
 	draw_rect(Rect2(-4, 23, 8, 2), INK)
 
 func _draw_blueprint() -> void:
-	_armor(Rect2(-36, -20, 72, 39), RED, 6, 7)
+	_draw_solid_casing()
 	for x: float in [-25.0, 12.0]:
 		_armor(Rect2(x - 8, -16, 21, 30), BRASS, 3, 2)
 		draw_rect(Rect2(x - 5, -13, 15, 24), Color("b29a79"))
@@ -232,7 +292,7 @@ func _draw_exit_console() -> void:
 		draw_polyline(lead, INK, 8.0)
 		draw_polyline(lead, COPPER, 6.0)
 		draw_polyline(lead, COPPER.lightened(0.3), 2.0)
-	_armor(Rect2(-27, -20, 54, 41), RED, 7, 7)
+	_draw_solid_casing()
 	for x in [-24, 20]:
 		_armor(Rect2(x, -13, 5, 31), RUST, 1, 2)
 		_bolt(Vector2(x + 2, 12))
@@ -319,15 +379,14 @@ func _draw_service() -> void:
 func _draw_checkpoint() -> void:
 	# A flush pressure plate marks the activation point. The lantern is offset
 	# from the walking line, so the hero can step onto the plate cleanly.
-	_armor(Rect2(-13, -8, 25, 16), Color("52403e"), 4, 1)
+	_armor(CHECKPOINT_PLATE, Color("52403e"), 4, 1)
 	_armor(Rect2(-8, -5, 15, 10), Color("785b4d"), 2, 0)
 	var signal_color := TEAL if active else Color("bd6f56")
 	for x in [-5, 0, 5]:
 		draw_rect(Rect2(x - 1, -1, 2, 2), signal_color)
-	draw_polyline(PackedVector2Array([Vector2(-13, 1), Vector2(-18, 1), Vector2(-22, -3)]),
-		Color("76534a"), 3)
-	draw_set_transform(Vector2(-28, 1))
-	_armor(Rect2(-14, -11, 28, 21), RED, 5, 4)
+	draw_polyline(PackedVector2Array(CHECKPOINT_CABLE), Color("76534a"), 3)
+	draw_set_transform(CHECKPOINT_LANTERN_OFFSET)
+	_armor(CHECKPOINT_LANTERN_BASE, RED, 5, 4)
 	_armor(Rect2(-11, -10, 22, 16), RUST, 4, 2)
 	_bolt(Vector2(-9, 5))
 	_bolt(Vector2(9, 5))
@@ -373,7 +432,7 @@ func _draw_observation() -> void:
 	_lamp(Rect2(-10, -13, 20, 3), AMBER.darkened(0.18))
 
 func _draw_protocol_console() -> void:
-	_armor(Rect2(-37, -25, 74, 46), RED, 7, 7)
+	_draw_solid_casing()
 	_armor(Rect2(-32, -25, 64, 33), STEEL, 4, 2)
 	for x in [-34, 30]:
 		_armor(Rect2(x, -15, 4, 21), BRASS.darkened(0.20), 1, 2)
@@ -413,7 +472,7 @@ func _draw_demo_reader() -> void:
 func _draw_gate_reader() -> void:
 	draw_line(Vector2(3,-12), Vector2(3,-20), INK, 8)
 	draw_line(Vector2(3,-12), Vector2(3,-20), COPPER, 5)
-	_armor(Rect2(-12, -15, 24, 33), RED, 4, 6)
+	_draw_solid_casing()
 	_armor(Rect2(-10, -16, 20, 16), RUST, 3, 2)
 	for x in [-10, 9]:
 		draw_line(Vector2(x, 2), Vector2(x, 13), Color("956958"), 1)
@@ -425,7 +484,7 @@ func _draw_gate_reader() -> void:
 		draw_arc(Vector2(0, 8), 5, start, start + 1.13, 4, TEAL if active else BRASS, 1.5)
 
 func _draw_fluid() -> void:
-	_armor(Rect2(-33, -25, 64, 50), RED, 6, 6)
+	_draw_solid_casing()
 	_armor(Rect2(-32, -25, 30, 46), RUST, 5, 3)
 	_armor(Rect2(-27, -32, 11, 14), COPPER, 2, 2)
 	_armor(Rect2(-29, -29, 15, 5), BRASS, 1, 1)

@@ -55,9 +55,12 @@ func _ready() -> void:
 	add_child(hud)
 	health_display = preload("res://scenes/gameplay/health_hearts.gd").new()
 	health_display.theme = preload("res://scenes/gameplay/gameplay_ui_theme.tres")
-	health_display.position = Vector2(20,20)
-	health_display.size = Vector2(252,82)
 	hud.add_child(health_display)
+	health_display.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	health_display.offset_left = 20.0
+	health_display.offset_right = 20.0 + health_display.custom_minimum_size.x
+	health_display.offset_top = -20.0 - health_display.custom_minimum_size.y
+	health_display.offset_bottom = -20.0
 	notice = Label.new()
 	notice.theme = health_display.theme
 	notice.position = Vector2(24,110)

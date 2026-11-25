@@ -18,6 +18,7 @@ class Orb:
 	var travel_left := 392.0
 
 var actor: CharacterBody2D
+var cycle_speed := 1.0
 var elapsed := 0.0
 var emitters: Array[Marker2D] = []
 var electrodes: Array[Marker2D] = []
@@ -47,7 +48,7 @@ func reset_motion() -> void:
 
 func _physics_process(delta: float) -> void:
 	var previous := elapsed
-	elapsed += delta
+	elapsed += delta * cycle_speed
 	var space := get_world_2d().direct_space_state
 	var ray := PhysicsRayQueryParameters2D.create(Vector2.ZERO, Vector2.ZERO, 1)
 	for index in range(emitters.size()):
@@ -81,7 +82,7 @@ func _physics_process(delta: float) -> void:
 		for index in range(electrodes.size()):
 			var cycle_time := elapsed + index * 0.51
 			var cycle := floori(cycle_time / RING_PERIOD)
-			var age := fposmod(cycle_time, RING_PERIOD)
+			var age := fposmod(cycle_time, RING_PERIOD) / cycle_speed
 			if age < RING_WARNING or age >= RING_WARNING + RING_SWEEP or ring_hit_cycle[index] == cycle:
 				continue
 			var marker := electrodes[index]
@@ -100,7 +101,7 @@ func _wave_radius(marker: Marker2D, age: float) -> float:
 func _draw() -> void:
 	for index in range(emitters.size()):
 		var age := fposmod(elapsed + index * 0.43, ORB_PERIOD)
-		if age >= ORB_PERIOD - ORB_WARNING:
+		if age >= ORB_PERIOD - ORB_WARNING * cycle_speed:
 			var marker := emitters[index]
 			var axis := Vector2.from_angle(marker.global_rotation)
 			var muzzle := marker.global_position + axis * 34.0
@@ -108,7 +109,7 @@ func _draw() -> void:
 			draw_dashed_line(muzzle + axis * 8.0, muzzle + axis * 86.0, Color("ffb983"), 2.0, 8.0)
 	for index in range(electrodes.size()):
 		var marker := electrodes[index]
-		var age := fposmod(elapsed + index * 0.51, RING_PERIOD)
+		var age := fposmod(elapsed + index * 0.51, RING_PERIOD) / cycle_speed
 		if age < RING_WARNING:
 			_draw_ring(marker.global_position, float(marker.get_meta("pulse_radius")), true)
 		elif age < RING_WARNING + RING_SWEEP:

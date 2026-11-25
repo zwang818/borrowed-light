@@ -77,6 +77,8 @@ func run() -> void:
 	hazard.reset_motion()
 	for frame in range(300): hazard._physics_process(1.0/60.0)
 	assert(player.health == player.max_health,"Safe pocket must remain safe")
+	# The story flow check covers first-fall communications. Exercise the later retry here.
+	room.state.first_fall = true
 	player.health = 1
 	player.invulnerability_remaining = 0.0
 	hazard.actor_hit.emit("扩散电圈")
@@ -86,6 +88,7 @@ func run() -> void:
 	assert(hazard.elapsed == time)
 	room._retry()
 	assert(not player.is_dead and player.health == player.max_health and not paused)
+	assert(player.global_position.is_equal_approx(room.first_fall_spawn.global_position))
 	assert(hazard.elapsed == 0.0 and hazard.orbs.is_empty())
 	for cycle in hazard.ring_hit_cycle: assert(cycle == -1)
 	room.queue_free()

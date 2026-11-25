@@ -211,7 +211,7 @@ func check_protocol_bay(ids: Dictionary) -> void:
 	var start := actor.position
 	var approach := route("ProtocolBayRoute")
 	actor.position = approach[0]
-	await walk(approach)
+	await walk(approach.slice(0, 5))
 	var terminal: Node2D = ids["p2_protocol_terminal"]
 	check(actor.position.distance_to(terminal.position) < float(terminal.get_meta("interaction_range")),
 		"Operator cannot reach the three-dial console")
@@ -221,6 +221,7 @@ func check_protocol_bay(ids: Dictionary) -> void:
 	var hit := root.world_2d.direct_space_state.intersect_ray(crossing)
 	check(not hit.is_empty() and hit.collider == map.get_node("Covers/ProtocolBayScreen/Body"),
 		"Observation pane does not separate the spider lane")
+	await walk(approach.slice(5)) # Leave through the right opening, then walk back to the left.
 	approach.reverse()
 	await walk(approach)
 	actor.position = start
@@ -235,9 +236,12 @@ func check_gate_shelter(ids: Dictionary) -> void:
 	await walk(PackedVector2Array([threshold, exit.position]))
 	var zone: Node2D = map.get_node("Reservations/ProtocolZone")
 	var region := Rect2(Vector2.ZERO, zone.size)
-	check(region.has_point(zone.to_local(threshold + axis * 25.0)),
-		"Protocol range ends before clearing the gate")
-	check(not region.has_point(zone.to_local(exit.position)), "Protocol exit remains inside the range")
+	check(zone.position.distance_to(Vector2(5524.095, 130.0919)) < 0.01,
+		"The protocol starts at the observation bay deck notch")
+	var near_face: Vector2 = threshold - axis * (door.footprint.x * 0.5)
+	check(region.has_point(zone.to_local(near_face - axis)) and not region.has_point(zone.to_local(near_face + axis)),
+		"The protocol ends at the front face of the brown partition")
+	check(not region.has_point(zone.to_local(exit.position)), "The cover beyond the partition is outside the protocol range")
 	var sentry: Node2D = ids["p2_protocol_gate_sentry"]
 	var shot := PhysicsRayQueryParameters2D.create(sentry.position + Vector2(0, -78), exit.position, 1)
 	var stop := root.world_2d.direct_space_state.intersect_ray(shot)
@@ -308,7 +312,7 @@ func run() -> void:
 			check(root.world_2d.direct_space_state.intersect_shape(query,1).is_empty(), "Blocked marker: " + marker.object_id)
 	for marker in ids.values():
 		for link in marker.linked_ids: check(ids.has(link), "Missing linked ID")
-	check(ids.size()==56 and counts.sentry==6 and counts.cleaner==6, "Marker reservations mismatch")
+	check(ids.size()==57 and counts.sentry==6 and counts.cleaner==6, "Marker reservations mismatch")
 	check(not ids["p2_scatter_evolution"].get_meta("grants_ability"), "Blueprint grants scatter")
 	check(ids["duct_spine_blueprint"].target_entry_id=="duct_arrival", "Wrong return destination")
 	check(ids["p2_shortcut_door"].get_meta("role")=="blocked_maintenance_end", "Branch is still a forward shortcut")
@@ -412,5 +416,5 @@ func run() -> void:
 	check(preview.get_node("Camera").zoom.x<.65, "Overview failed")
 	for top in map.get_walk_surfaces(): check(not Geometry2D.triangulate_polygon(top.polygon).is_empty(), "Invalid terrain")
 	preview.queue_free(); await process_frame
-	print("SPINE_DIAGONAL: %s | 56 IDs, fluid station and upper routes, protocol bay and sheltered gate, wide entry hazards, inspection route and first sentry cover, 6 sentries/6 cleaners reserved, main return walk, dead-end out/back, duct walk, gate isolation, rotated door safety, raised 2D camera, circulation art toggle and paused hazards" % ("PASS" if failures.is_empty() else "FAIL"))
+	print("SPINE_DIAGONAL: %s | 57 IDs, fluid station and upper routes, protocol bay and sheltered gate, wide entry hazards, inspection route and first sentry cover, 6 sentries/6 cleaners reserved, main return walk, dead-end out/back, duct walk, gate isolation, rotated door safety, raised 2D camera, circulation art toggle and paused hazards" % ("PASS" if failures.is_empty() else "FAIL"))
 	quit(0 if failures.is_empty() else 1)

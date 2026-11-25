@@ -68,8 +68,8 @@ func _retry_from_menu(menus: Node) -> void:
 			return
 	check(false, "Death menu offers retry")
 
-func _reported(beacon: Node) -> bool:
-	return beacon.banner != null and beacon.banner.is_visible() and beacon.banner_text.text == "存档点已保存"
+func _reported(spine: Node) -> bool:
+	return spine.status_notice.visible and spine.status_label.text.contains("存档点已保存")
 
 func _run() -> void:
 	create_timer(120, true, false, true).timeout.connect(func(): quit(1))
@@ -138,7 +138,7 @@ func _run() -> void:
 		"workshop_seen": false, "ducts": [], "explored": [],
 		"spine_flow": {"first_fall": true, "hatch_open": true, "checkpoint": "return"}}
 	var spine = await _open(SAVE.SPINE, PATH_SPINE, opening)
-	beacon = spine.checkpoint_beacon
+	beacon = spine.checkpoint_beacons[FLOW.SERVICE_CHECKPOINT]
 	foot = beacon.global_position
 	var arena: Polygon2D = spine.map.get_node("Reservations/DefenseArena")
 	check(spine.map.is_walkable_point(foot) and _open_space(spine.hero(), foot)
@@ -149,10 +149,14 @@ func _run() -> void:
 	spine.get_node("Camera2D").reset_smoothing()
 	check(not beacon.activated, "Spine beacon starts red even with a legacy return checkpoint")
 	await _capture("spine-red")
-	spine.hero().global_position = foot.move_toward(spine.anchor("MaintenanceExit"), 14.0)
+	var lamp_edge: Vector2 = beacon.to_global(Vector2(-43, 3))
+	check(lamp_edge.distance_to(foot) > beacon.TOUCH_RADIUS and spine.map.is_walkable_point(lamp_edge)
+		and beacon._has_contact(beacon.to_global(Vector2(-28, -37))) and beacon._has_contact(foot),
+		"The lantern cap, outer base and pressure plate all have touch coverage")
+	spine.hero().global_position = lamp_edge
 	await _frames(3)
-	check(beacon.activated and _reported(beacon) and spine.state.checkpoint == FLOW.SERVICE_CHECKPOINT,
-		"Spine contact supersedes the older return checkpoint")
+	check(beacon.activated and _reported(spine) and spine.state.checkpoint == FLOW.SERVICE_CHECKPOINT,
+		"Touching the lantern beyond the old radius supersedes the legacy return checkpoint")
 	saved = SAVE.read_save(PATH_SPINE)
 	check(saved.spine_flow.checkpoint == FLOW.SERVICE_CHECKPOINT and saved.spine_flow.hatch_open,
 		"Spine checkpoint and open passage are written together")
@@ -162,18 +166,81 @@ func _run() -> void:
 	spine.hero().health = 2
 	check(spine._save_progress(false), "A later save records the spine player away from the beacon")
 	spine = await _continue_from_title(PATH_SPINE)
-	check(spine.checkpoint_beacon.activated and spine.state.checkpoint == FLOW.SERVICE_CHECKPOINT
+	check(spine.checkpoint_beacons[FLOW.SERVICE_CHECKPOINT].activated and spine.state.checkpoint == FLOW.SERVICE_CHECKPOINT
 		and spine.hero().global_position.is_equal_approx(foot) and spine.hero().health == 2,
 		"Title Continue uses the service beacon position and keeps saved health")
 	spine.hero().global_position = spine.anchor("ScatterCheckpoint")
 	spine.state.calibrated = true
 	await _frames(2)
 	check(spine.state.checkpoint == FLOW.SERVICE_CHECKPOINT, "The invisible return fallback cannot replace a touched beacon")
+	var hud: Rect2 = spine.health_display.get_global_rect()
+	check(is_equal_approx(hud.position.x, 20.0) and is_equal_approx(hud.end.y, root.get_visible_rect().end.y - 20.0),
+		"The spine health display is anchored in the bottom-left corner")
+	check(not hud.intersects(spine.interaction_panel.get_global_rect()),
+		"The health display and interaction prompt have separate screen space")
+	var patrol = spine.checkpoint_beacons[FLOW.PATROL_CHECKPOINT]
+	var patrol_foot: Vector2 = patrol.global_position
+	check(not patrol.activated and spine.map.is_walkable_point(patrol_foot) and _open_space(spine.hero(), patrol_foot)
+		and spine.protocol_approach.to_local(patrol_foot).x < 0.0,
+		"The patrol approach checkpoint starts red on a clear landing before the observation area")
+	spine.hero().global_position = patrol_foot - spine.F * 65
+	spine._update_camera()
+	spine.get_node("Camera2D").reset_smoothing()
+	await _capture("patrol-red")
+	spine.hero().global_position = patrol_foot
+	await _frames(3)
+	check(patrol.activated and _reported(spine) and SAVE.read_save(PATH_SPINE).spine_flow.checkpoint == FLOW.PATROL_CHECKPOINT,
+		"Contact activates and saves the new checkpoint")
+	spine.hero().global_position = patrol_foot - spine.F * 65
+	await _capture("patrol-green")
+	spine.hero().health = 2
+	check(spine._save_progress(false), "A later save preserves the patrol approach checkpoint")
+	spine = await _continue_from_title(PATH_SPINE)
+	check(spine.checkpoint_beacons[FLOW.PATROL_CHECKPOINT].activated and spine.state.checkpoint == FLOW.PATROL_CHECKPOINT
+		and spine.hero().global_position.is_equal_approx(patrol_foot) and spine.hero().health == 2,
+		"Continue resumes at the patrol approach checkpoint with saved health")
 	spine.hero().invulnerability_remaining = 0.0
 	spine.hero().apply_damage(999)
 	_retry_from_menu(spine.menus)
-	check(not paused and spine.hero().global_position == foot and spine.hero().health == spine.hero().max_health,
-		"Death retry chooses the most recently touched service beacon")
+	check(not paused and spine.hero().global_position == patrol_foot and spine.hero().health == spine.hero().max_health,
+		"Death retry uses the patrol approach checkpoint with full health")
+
+	var blueprint = spine.checkpoint_beacons[FLOW.BLUEPRINT_CHECKPOINT]
+	var blueprint_foot: Vector2 = blueprint.global_position
+	check(not blueprint.activated and spine.map.is_walkable_point(blueprint_foot) and _open_space(spine.hero(), blueprint_foot),
+		"The new checkpoint starts red with a clear landing on the main deck")
+	spine.save_path = PATH_SPINE.path_join("missing/journey.json")
+	spine.hero().global_position = blueprint_foot
+	await _frames(3)
+	check(not blueprint.activated and spine.state.checkpoint == FLOW.PATROL_CHECKPOINT,
+		"A failed write leaves the new beacon red and keeps the previous checkpoint")
+	spine.save_path = PATH_SPINE
+	spine.hero().global_position = blueprint_foot + spine.F * 53
+	await _frames(2)
+	spine._update_camera()
+	spine.get_node("Camera2D").reset_smoothing()
+	await _capture("blueprint-red")
+	spine.hero().global_position = blueprint_foot
+	await _frames(3)
+	check(blueprint.activated and _reported(spine) and spine.state.checkpoint == FLOW.BLUEPRINT_CHECKPOINT,
+		"Touching the new beacon's plate selects it as the latest checkpoint")
+	spine.hero().global_position = blueprint_foot + spine.F * 53
+	await _capture("blueprint-green")
+	spine.hero().health = 2
+	check(spine._save_progress(false), "Saving away from the new beacon keeps its checkpoint")
+	spine = await _continue_from_title(PATH_SPINE)
+	check(spine.checkpoint_beacons.values().all(func(item): return item.activated)
+		and spine.state.checkpoint == FLOW.BLUEPRINT_CHECKPOINT and spine.hero().global_position.is_equal_approx(blueprint_foot)
+		and spine.hero().health == 2, "Continue picks the blueprint approach and restores all three lamps")
+	spine.hero().invulnerability_remaining = 0.0
+	spine.hero().apply_damage(999)
+	_retry_from_menu(spine.menus)
+	check(not paused and spine.hero().global_position == blueprint_foot and spine.hero().health == spine.hero().max_health,
+		"Death retry chooses the most recently touched checkpoint")
+	spine.hero().global_position = foot
+	await _frames(3)
+	check(spine.state.checkpoint == FLOW.SERVICE_CHECKPOINT and SAVE.read_save(PATH_SPINE).spine_flow.checkpoint == FLOW.SERVICE_CHECKPOINT,
+		"Touching an earlier green beacon makes it the latest checkpoint again")
 
 	current_scene.queue_free()
 	await process_frame

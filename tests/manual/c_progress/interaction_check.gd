@@ -13,7 +13,7 @@ func check(condition: bool, message: String) -> void:
 		printerr("FAIL: " + message)
 
 func interact_at(level: Node, id: StringName) -> void:
-	level.player.global_position = level.interaction_points[id].global_position + Vector2(0, 24)
+	level.player.global_position = level.interaction_points[id].global_position + Vector2(0, 20)
 	await physics_frame
 	press_interact()
 
@@ -81,7 +81,7 @@ func run_checks() -> void:
 		"Xiaoyi can walk to the blueprint marker from below")
 	check(level.player.test_move(Transform2D(0, blueprint_point.global_position), Vector2(0, -24)),
 		"The visible blueprint casing still prevents walking through it")
-	level.player.global_position = level.interaction_points[&"pulse_blueprint"].global_position + Vector2(0, 60)
+	level.player.global_position = level.interaction_points[&"pulse_blueprint"].global_position + Vector2(0, 32)
 	await physics_frame
 	press_interact()
 	check(not paused and level.pending_interaction.is_empty(), "Standing beyond duct reach cannot open the blueprint panel")
@@ -163,7 +163,7 @@ func run_checks() -> void:
 	var console = level.terminal.get_node("FacilityVisual")
 	check(marker.visible and marker.to_global(marker.cue_offset).is_equal_approx(console.to_global(console.LEVER_WELL.get_center())),
 		"The unpowered terminal marks the right-hand lever")
-	player.global_position = level._terminal_access_position() + Vector2(0, 24)
+	player.global_position = level._terminal_access_position() + Vector2(0, 20)
 	await physics_frame
 	press_interact()
 	check(not paused and console.powered, "Interact from beside the marker powers the terminal")
@@ -171,7 +171,7 @@ func run_checks() -> void:
 		"Powering the terminal moves the marker to the left-hand screen")
 	press_interact()
 	check(not paused and level.pending_interaction.is_empty(), "The previous lever approach is out of reach of the new screen point")
-	player.global_position = level._terminal_access_position() + Vector2(0, 24)
+	player.global_position = level._terminal_access_position() + Vector2(0, 20)
 	await physics_frame
 	press_interact()
 	check(paused and level.pending_interaction == level.TERMINAL_REQUEST and not level.terminal_activated, "E opens terminal password entry")

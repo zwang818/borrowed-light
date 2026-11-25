@@ -12,6 +12,7 @@ const DRIVE_FINISH = preload("res://scenes/levels/spine/spine_drive_finish.gdsha
 const ENTRY_TUNNEL = preload("res://scenes/levels/spine/spine_entry_tunnel.gd")
 const FORWARD := Vector2(0.9063078, -0.4226183)
 const DOWN := Vector2(0.4226183, 0.9063078)
+const SERVICE_LAMP_ENERGY := 0.44
 const BRASS := Color("bd8e51")
 const BLUE := Color("76aaba")
 enum Tube { COPPER, VESSEL, HOSE, COUPLING }
@@ -32,10 +33,15 @@ var service_covers: Node2D
 var service_hint: Node2D
 var service_rims: Node2D
 var service_skirts: Node2D
-var checkpoint_skin: INTERACTION_FIXTURE
+var service_feeds: Node2D
+var service_lights: Array[PointLight2D] = []
+var service_original_materials: Dictionary[CanvasItem, Material] = {}
+var service_reveal_materials: Dictionary[Material, ShaderMaterial] = {}
+var checkpoint_skins: Dictionary[StringName, INTERACTION_FIXTURE] = {}
 var protocol_console: INTERACTION_FIXTURE
 var demo_reader: INTERACTION_FIXTURE
 var gate_reader: INTERACTION_FIXTURE
+var transfer_receiver: INTERACTION_FIXTURE
 var fluid_station: INTERACTION_FIXTURE
 var authorization_skin: INTERACTION_FIXTURE
 var exit_gate_skin: INTERACTION_FIXTURE
@@ -114,13 +120,72 @@ func set_depth_enabled(value: bool) -> void:
 		service_rims.visible = value
 		service_skirts.visible = value
 
-func update_service_passage() -> void:
+func update_service_passage(opening := false) -> void:
 	if not is_instance_valid(service_open):
 		return
+	for item in service_original_materials:
+		item.material = service_original_materials[item]
+	service_original_materials.clear()
+	service_reveal_materials.clear()
+	service_feeds.modulate.a = 1.0
+	for light in service_lights:
+		light.energy = SERVICE_LAMP_ENERGY
 	var state: int = map.service_passage_state
 	service_open.visible = state == map.ServicePassage.OPEN
-	service_covers.visible = not service_open.visible
+	service_covers.visible = opening or not service_open.visible
 	service_hint.visible = state == map.ServicePassage.REVEALED
+	for cover: Node2D in service_covers.get_children():
+		cover.position = map.get_node("Markers/" + String(cover.name)).position
+		cover.modulate.a = 1.0
+
+func animate_service_passage(tween: Tween) -> void:
+	var deck: Polygon2D = map.get_node("Floors/ServiceCatwalk/Top")
+	var axis: Vector2 = map.global_transform.basis_xform(FORWARD).normalized()
+	var start := INF
+	var end := -INF
+	for vertex in deck.polygon:
+		var distance := deck.to_global(vertex).dot(axis)
+		start = minf(start, distance)
+		end = maxf(end, distance)
+	# Use the same moving edge for the deck, its cladding, and the fittings on top.
+	_install_service_reveal(deck.get_parent())
+	_install_service_reveal(map.get_node("EntranceDefense/ServiceWalls"))
+	_install_service_reveal(service_open)
+	_set_service_reveal(start - 28.0, axis)
+	tween.tween_method(_set_service_reveal.bind(axis), start - 28.0, end + 44.0, 2.00) \
+		.set_delay(0.48).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	service_feeds.modulate.a = 0.0
+	tween.tween_property(service_feeds, "modulate:a", 1.0, 2.00).set_delay(0.48)
+	for cover: Node2D in service_covers.get_children():
+		var delay := 0.24 if cover.name == &"MaintenanceHatch" else 2.10
+		var tucked := cover.position + Vector2(-44, 0).rotated(cover.rotation)
+		tween.tween_property(cover, "position", tucked, 0.58).set_delay(delay) \
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+		tween.tween_property(cover, "modulate:a", 0.0, 0.18).set_delay(delay + 0.40)
+
+func _install_service_reveal(item: CanvasItem) -> void:
+	if item is Polygon2D or item is Line2D or item.get_script() in [FIXTURE, INTERACTION_FIXTURE]:
+		var original := item.material
+		if not service_reveal_materials.has(original):
+			var clip := ShaderMaterial.new()
+			if original != null:
+				clip = original.duplicate()
+			else:
+				clip.shader = METAL
+				clip.set_shader_parameter("finish", 4)
+			service_reveal_materials[original] = clip
+		service_original_materials[item] = original
+		item.material = service_reveal_materials[original]
+	for child: CanvasItem in item.get_children():
+		if child != service_feeds:
+			_install_service_reveal(child)
+
+func _set_service_reveal(distance: float, axis: Vector2) -> void:
+	for material in service_reveal_materials.values():
+		material.set_shader_parameter("service_reveal", Vector3(axis.x, axis.y, distance))
+	for light in service_lights:
+		var coverage := distance - light.global_position.dot(axis)
+		light.energy = SERVICE_LAMP_ENERGY * smoothstep(14.0, 60.0, coverage)
 
 func _paint(face: Polygon2D, paint: Color, finish: int) -> void:
 	painted_faces.append(face)
@@ -562,6 +627,8 @@ func _build_fittings() -> void:
 	_build_entry_tunnel(spawn)
 	_build_entry_defense(spawn)
 	_build_protocol_dressing(marks)
+	_add_checkpoint_skin(fixtures, &"PatrolApproach")
+	_add_checkpoint_skin(fixtures, &"BlueprintApproach")
 	_build_spinal_fluid_tap(marks)
 	_build_upper_lane_edges(spawn)
 	_build_thorax_receiver(marks)
@@ -677,15 +744,18 @@ func _build_protocol_dressing(marks: Node) -> void:
 	var reader: Node2D = marks.get_node("ProtocolGateReader")
 	gate_reader = _interaction_fixture(hardware, &"gate_reader", reader.position, FORWARD.angle())
 	gate_reader.name = reader.name
+	var receiver: Node2D = marks.get_node("ProtocolTransferReceiver")
+	transfer_receiver = _interaction_fixture(hardware, &"gate_reader", receiver.position, FORWARD.angle())
+	transfer_receiver.name = receiver.name
 	var gate: Node2D = marks.get_node("AuthorizedDoor")
 	authorization_skin = _interaction_fixture(hardware, &"authorization_gate", gate.position,
 		gate.rotation, gate.footprint)
 	authorization_skin.name = gate.name
 
 	var screen: Polygon2D = map.get_node("Covers/ProtocolBayScreen/Volume/Top")
-	var rail_start := (screen.polygon[0] + screen.polygon[5]) * 0.5
-	var rail_end := (screen.polygon[1] + screen.polygon[4]) * 0.5
-	var glass := _interaction_fixture(hardware, &"observation", rail_start.lerp(rail_end, 0.57),
+	var rail_start := (screen.polygon[0] + screen.polygon[3]) * 0.5
+	var rail_end := (screen.polygon[1] + screen.polygon[2]) * 0.5
+	var glass := _interaction_fixture(hardware, &"observation", rail_start.lerp(rail_end, 0.59),
 		FORWARD.angle(), Vector2(192, 20))
 	glass.name = "ObservationWindow"
 	_stroke(hardware, screen.polygon, 2, Color("94766b"))
@@ -768,13 +838,13 @@ func _build_entry_defense(spawn: Vector2) -> void:
 
 func _build_service_passage(at: Callable, bay_fixtures: Node2D) -> void:
 	var fixtures := _group("Interior", 2, service_open)
-	var feeds := _group("Pipes", -8, service_open)
+	service_feeds = _group("Pipes", -8, service_open)
 	var marks := map.get_node("Markers")
 	# The maintenance run follows a separate, darker low-pressure return line.
 	var return_pipe := PackedVector2Array([at.call(1110, -473), at.call(1270, -465),
 		at.call(1390, -455), at.call(1920, -455), at.call(2140, -455),
 		at.call(2270, -418), at.call(2460, -368)])
-	_ribbon(feeds, "ServiceReturn", _curved_path(return_pipe), 26, Color("73303a"), 78, Tube.VESSEL)
+	_ribbon(service_feeds, "ServiceReturn", _curved_path(return_pipe), 26, Color("73303a"), 78, Tube.VESSEL)
 	for wall: Polygon2D in map.get_node("EntranceDefense/ServiceWalls").get_children():
 		_paint(wall, Color("5b3d43"), 1)
 		_stroke(fixtures, PackedVector2Array([wall.polygon[0], wall.polygon[1]]), 2, Color("8e615b"))
@@ -796,10 +866,10 @@ func _build_service_passage(at: Callable, bay_fixtures: Node2D) -> void:
 	lamp_glow.width = 64
 	lamp_glow.height = 64
 	for distance in [1438, 1534, 1630, 1818, 1914, 2010, 2106]:
-		_service_lamp(fixtures, at.call(distance, -408), FORWARD.angle(), lamp_glow)
+		service_lights.append(_service_lamp(fixtures, at.call(distance, -408), FORWARD.angle(), lamp_glow))
 	_service_lamp(bay_fixtures, at.call(1305, -158), FORWARD.angle() + PI, lamp_glow)
-	_service_lamp(fixtures, at.call(1310, -244), FORWARD.angle(), lamp_glow)
-	_service_lamp(fixtures, at.call(2322, -269), FORWARD.angle() + PI * 0.5, lamp_glow)
+	service_lights.append(_service_lamp(fixtures, at.call(1310, -244), FORWARD.angle(), lamp_glow))
+	service_lights.append(_service_lamp(fixtures, at.call(2322, -269), FORWARD.angle() + PI * 0.5, lamp_glow))
 	for key in ["MaintenanceHatch", "MaintenanceExit"]:
 		var mark: Node2D = marks.get_node(key)
 		_interaction_fixture(fixtures, &"service_threshold", mark.position,
@@ -808,22 +878,27 @@ func _build_service_passage(at: Callable, bay_fixtures: Node2D) -> void:
 			mark.rotation, mark.footprint).name = mark.name
 	var hatch: Node2D = marks.get_node("MaintenanceHatch")
 	_interaction_fixture(service_hint, &"service_hint", hatch.position, hatch.rotation, hatch.footprint)
-	var checkpoint: Node2D = map.get_node("Checkpoints/ServiceExit")
-	checkpoint_skin = _interaction_fixture(fixtures, &"checkpoint", checkpoint.position, FORWARD.angle())
-	checkpoint_skin.name = "ServiceCheckpoint"
+	_add_checkpoint_skin(fixtures, &"ServiceExit")
 
 	var window: Node2D = marks.get_node("MaintenanceWindow")
 	_fixture(fixtures, "inspection_window", window.position + DOWN * 30.0, FORWARD.angle(), window.footprint)
 
+func _add_checkpoint_skin(fixtures: Node2D, marker_name: StringName) -> void:
+	var marker: Node2D = map.get_node("Checkpoints/" + String(marker_name))
+	var fixture := _interaction_fixture(fixtures, &"checkpoint", marker.position, marker.rotation)
+	fixture.name = marker_name
+	checkpoint_skins[marker_name] = fixture
 
-func _service_lamp(group: Node2D, position: Vector2, angle: float, texture: Texture2D) -> void:
+
+func _service_lamp(group: Node2D, position: Vector2, angle: float, texture: Texture2D) -> PointLight2D:
 	var mount := _fixture(group, "service_lamp", position, angle)
 	var light := PointLight2D.new()
 	light.position = Vector2(0, 16)
 	light.texture = texture
 	light.color = Color("edb682")
-	light.energy = 0.44
+	light.energy = SERVICE_LAMP_ENERGY
 	mount.add_child(light)
+	return light
 
 func _build_entry_tunnel(spawn: Vector2) -> void:
 	var top: Polygon2D = map.get_node("Floors/SpineSegment00/Top")

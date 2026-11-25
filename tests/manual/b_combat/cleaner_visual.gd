@@ -97,7 +97,10 @@ func _physics_process(_delta: float) -> void:
 	previous = enemy.position
 	walked_this_tick = distance > 0.01 and distance < 30.0
 	if walked_this_tick:
-		stride = fmod(stride + distance / 9.0, float(WALK_CYCLE.size()))
+		if enemy.state == enemy.State.PATROL and enemy.paced_patrol_distance >= 0.0:
+			stride = fmod(enemy.paced_patrol_distance / 9.0, float(WALK_CYCLE.size()))
+		else:
+			stride = fmod(stride + distance / 9.0, float(WALK_CYCLE.size()))
 	else:
 		stride = 0.0
 	rotation = 0.0

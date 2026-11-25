@@ -61,7 +61,7 @@ size = Vector2(20, 116)
 polygon = PackedVector2Array(-10, -58, 10, -58, 10, 58, -10, 58)
 
 [sub_resource type="OccluderPolygon2D" id="Occluder_ProtocolBayScreen"]
-polygon = PackedVector2Array(5598.29106, 99.90749, 5839.36893, -12.50896, 5795.41663, -106.76497, 5811.73017, -114.37210, 5863.28960, -3.80255, 5605.89818, 116.22103)
+polygon = PackedVector2Array(5598.29106, 99.90749, 5839.36893, -12.50896, 5846.97605, 3.80458, 5605.89818, 116.22103)
 
 [sub_resource type="OccluderPolygon2D" id="Occluder_ProtocolGateCover"]
 polygon = PackedVector2Array(6793.35686, -280.82038, 6851.36056, -307.86795, 6895.31286, -213.61194, 6837.30916, -186.56437)
@@ -2810,14 +2810,14 @@ occluder = SubResource("Occluder_DefenseBayShield")
 
 [node name="Side" type="Polygon2D" parent="Covers/ProtocolBayScreen/Volume"]
 color = Color(0.28, 0.22, 0.26, 1)
-polygon = PackedVector2Array(5598.29106, 99.90749, 5839.36893, -12.50896, 5795.41663, -106.76497, 5811.73017, -114.37210, 5863.28960, -3.80255, 5605.89818, 116.22103)
+polygon = PackedVector2Array(5598.29106, 99.90749, 5839.36893, -12.50896, 5846.97605, 3.80458, 5605.89818, 116.22103)
 
 [node name="Top" type="Polygon2D" parent="Covers/ProtocolBayScreen/Volume"]
 color = Color(0.40, 0.34, 0.35, 1)
-polygon = PackedVector2Array(5598.29106, 87.90749, 5839.36893, -24.50896, 5795.41663, -118.76497, 5811.73017, -126.37210, 5863.28960, -15.80255, 5605.89818, 104.22103)
+polygon = PackedVector2Array(5598.29106, 87.90749, 5839.36893, -24.50896, 5846.97605, -8.19542, 5605.89818, 104.22103)
 
 [node name="Edge" type="Line2D" parent="Covers/ProtocolBayScreen/Volume"]
-points = PackedVector2Array(5598.29106, 87.90749, 5839.36893, -24.50896, 5795.41663, -118.76497, 5811.73017, -126.37210, 5863.28960, -15.80255, 5605.89818, 104.22103, 5598.29106, 87.90749)
+points = PackedVector2Array(5598.29106, 87.90749, 5839.36893, -24.50896, 5846.97605, -8.19542, 5605.89818, 104.22103, 5598.29106, 87.90749)
 width = 2.0
 default_color = Color(0.68, 0.61, 0.57, 1)
 
@@ -2825,7 +2825,7 @@ default_color = Color(0.68, 0.61, 0.57, 1)
 collision_mask = 0
 
 [node name="Collision" type="CollisionPolygon2D" parent="Covers/ProtocolBayScreen/Body"]
-polygon = PackedVector2Array(5598.29106, 99.90749, 5839.36893, -12.50896, 5795.41663, -106.76497, 5811.73017, -114.37210, 5863.28960, -3.80255, 5605.89818, 116.22103)
+polygon = PackedVector2Array(5598.29106, 99.90749, 5839.36893, -12.50896, 5846.97605, 3.80458, 5605.89818, 116.22103)
 
 [node name="Occluder" type="LightOccluder2D" parent="Covers/ProtocolBayScreen"]
 occluder = SubResource("Occluder_ProtocolBayScreen")
@@ -2983,12 +2983,20 @@ kind = "electric_floor"
 metadata/logic_implemented = false
 
 [node name="ProtocolZone" type="Node2D" parent="Reservations" unique_id=1256905660]
-position = Vector2(5592.97535, 97.97274)
+position = Vector2(5524.09596, 130.09172)
 rotation = -0.43633231
 script = ExtResource("4_zone")
-size = Vector2(1224, 288)
+size = Vector2(1180, 288)
 kind = "protocol"
 metadata/logic_implemented = false
+
+[node name="ProtocolApproach" type="Node2D" parent="Reservations"]
+visible = false
+position = Vector2(5437.09041, 170.66307)
+rotation = -0.43633231
+script = ExtResource("4_zone")
+size = Vector2(48, 288)
+kind = "protocol"
 
 [node name="Rooms" type="Node2D" parent="." unique_id=1364118929]
 
@@ -3020,6 +3028,15 @@ metadata/candidate_only = true
 
 [node name="ServiceExit" type="Marker2D" parent="Checkpoints"]
 position = Vector2(2477.6144, 1613.5819)
+rotation = -0.43633231
+
+[node name="PatrolApproach" type="Marker2D" parent="Checkpoints"]
+position = Vector2(5369, 359)
+rotation = -0.43633231
+
+[node name="BlueprintApproach" type="Marker2D" parent="Checkpoints"]
+position = Vector2(8052, -892)
+rotation = -0.43633231
 
 [node name="Markers" type="Node2D" parent="." unique_id=1802410421]
 z_index = 16
@@ -3313,7 +3330,17 @@ room_id = "p2_spine_middle"
 metadata/role = "protocol_gate_reader"
 footprint = Vector2(34, 30)
 metadata/interaction_range = 80.0
-linked_ids = Array[String](["p2_authorized_door"])
+linked_ids = Array[String](["p2_protocol_transfer_receiver"])
+
+[node name="ProtocolTransferReceiver" type="Marker2D" parent="Markers"]
+position = Vector2(6801.91185, -200.95292)
+script = ExtResource("3_marker")
+object_id = "p2_protocol_transfer_receiver"
+room_id = "p2_spine_middle"
+metadata/role = "protocol_gate_reader"
+footprint = Vector2(34, 30)
+metadata/interaction_range = 80.0
+linked_ids = Array[String](["p2_protocol_gate_reader"])
 
 [node name="ProtocolYieldRear" type="Marker2D" parent="Markers"]
 position = Vector2(6585.73416, -328.54683)
@@ -3387,7 +3414,7 @@ content_id = "p2_arc_maintenance_placeholder"
 metadata/optional = true
 
 [node name="ExitCleaner" type="Marker2D" parent="Markers" unique_id=716038637]
-position = Vector2(6159.41, 63.3416)
+position = Vector2(6391.78192, -25.15347)
 script = ExtResource("3_marker")
 object_id = "p2_cleaner_02"
 object_type = "cleaner"
@@ -3457,7 +3484,7 @@ metadata/return_entry_id = "p2_scatter_return_entry"
 metadata/logic_implemented = false
 
 [node name="ScatterReturnEntry" type="Marker2D" parent="Markers" unique_id=1820455866]
-position = Vector2(7665.6294, -833.2142)
+position = Vector2(7687, -958)
 script = ExtResource("3_marker")
 object_id = "p2_scatter_return_entry"
 room_id = "p2_spine_middle"
@@ -3485,21 +3512,21 @@ linked_ids = Array[String](["p2_spinal_fluid_tap"])
 metadata/role = "spinal_fluid_operator"
 
 [node name="Cleaner03" type="Marker2D" parent="Markers" unique_id=314145713]
-position = Vector2(6129.958, -37.6764)
+position = Vector2(6322.47253, -173.78795)
 script = ExtResource("3_marker")
 object_id = "p2_cleaner_03"
 object_type = "cleaner"
 room_id = "p2_spine_middle"
 
 [node name="Cleaner04" type="Marker2D" parent="Markers" unique_id=1586784409]
-position = Vector2(6294.2764, -26.0284)
+position = Vector2(6357.12722, -99.47071)
 script = ExtResource("3_marker")
 object_id = "p2_cleaner_04"
 object_type = "cleaner"
 room_id = "p2_spine_middle"
 
 [node name="Cleaner05" type="Marker2D" parent="Markers" unique_id=1842658175]
-position = Vector2(6591.15249, -264.87076)
+position = Vector2(6425.53757, -179.91961)
 script = ExtResource("3_marker")
 object_id = "p2_cleaner_05"
 object_type = "cleaner"
@@ -3508,7 +3535,7 @@ metadata/role = "protocol_gate_guard"
 linked_ids = Array[String](["p2_protocol_yield_rear"])
 
 [node name="Cleaner06" type="Marker2D" parent="Markers" unique_id=215598029]
-position = Vector2(6634.25955, -172.42737)
+position = Vector2(6462.72797, -100.16452)
 script = ExtResource("3_marker")
 object_id = "p2_cleaner_06"
 object_type = "cleaner"
@@ -3730,11 +3757,17 @@ position = Vector2(5647.30739, 25.19204)
 [node name="Point04" type="Marker2D" parent="RouteWaypoints/ProtocolBayRoute"]
 position = Vector2(5733.22342, -8.25099)
 
+[node name="Point05" type="Marker2D" parent="RouteWaypoints/ProtocolBayRoute"]
+position = Vector2(5843.49249, -65.18720)
+
+[node name="Point06" type="Marker2D" parent="RouteWaypoints/ProtocolBayRoute"]
+position = Vector2(5885.75432, 25.44358)
+
 [node name="FluidReturnRoute" type="Node2D" parent="RouteWaypoints"]
 
 
 [node name="Point00" type="Marker2D" parent="RouteWaypoints/FluidReturnRoute"]
-position = Vector2(7665.63043, -833.21411)
+position = Vector2(7687, -958)
 
 [node name="Point01" type="Marker2D" parent="RouteWaypoints/FluidReturnRoute"]
 position = Vector2(7717.48295, -897.11494)
@@ -3886,7 +3919,7 @@ width = 3.0
 default_color = Color(0.886, 0.718, 0.459, 1)
 
 [node name="ProtocolBayScreen" type="Line2D" parent="BoundaryDebug" unique_id=1734150807]
-points = PackedVector2Array(5598.291, 99.90749, 5839.369, -12.50896, 5795.4165, -106.76497, 5811.73, -114.3721, 5863.2896, -3.80255, 5605.898, 116.22103, 5598.291, 99.90749)
+points = PackedVector2Array(5598.29106, 99.90749, 5839.36893, -12.50896, 5846.97605, 3.80458, 5605.89818, 116.22103, 5598.29106, 99.90749)
 width = 3.0
 default_color = Color(0.8862745, 0.7176471, 0.45882353, 1)
 

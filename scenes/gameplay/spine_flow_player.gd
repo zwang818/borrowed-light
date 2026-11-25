@@ -1,6 +1,7 @@
 extends "res://scenes/player/xiaoyi_journey_player.gd"
 ## The production gun and swept pellets are unchanged; only the pressure budget is added.
 signal pressure_changed(remaining: int)
+signal scatter_empty
 var pressure_limited := false
 var pressure := 0
 var calibration_enabled := false
@@ -27,7 +28,10 @@ func set_attack_mode(mode: int) -> bool:
 	return result
 
 func fire_scatter(direction: Vector2) -> bool:
-	if pressure_limited and not calibration_enabled and pressure <= 0: return false
+	if pressure_limited and not calibration_enabled and pressure <= 0:
+		if scatter_unlocked and attack_mode == AttackMode.SCATTER and controls_enabled and not is_dead and not has_protocol:
+			scatter_empty.emit()
+		return false
 	var learned := scatter_unlocked
 	if calibration_enabled: scatter_unlocked = true
 	var fired := super.fire_scatter(direction)

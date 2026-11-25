@@ -108,9 +108,9 @@ func _update_interaction() -> void:
 		return
 	var bench = interaction_points[&"pulse_workbench"]
 	var duct = ducts[&"duct_arrival"].point
-	if bench.can_interact_from(player.global_position, 95.0):
+	if bench.can_interact_from(player.global_position, 47.5):
 		nearest_interactable = bench
-	elif duct.can_interact_from(player.global_position, 88.0):
+	elif duct.can_interact_from(player.global_position, 44.0):
 		nearest_interactable = duct
 
 func _point_prompt(id: StringName) -> String:

@@ -1,5 +1,5 @@
 extends Node2D
-## A non-solid beacon. Activation is checked against the player's foot position.
+## A non-solid beacon. Authored models can supply contact outlines in local space.
 signal touched
 signal activation_changed(active: bool)
 
@@ -9,6 +9,8 @@ const TOUCH_RADIUS := 22.0
 const PIXEL_BOUNDS := Rect2(314, 180, 634, 891)
 const WORLD_HEIGHT := 39.0
 var use_default_visual := true
+var contact_outlines: Array[PackedVector2Array] = []
+var contact_radius := 0.0
 var activated := false:
 	set(value):
 		activated = value
@@ -39,12 +41,26 @@ func _ready() -> void:
 	sprite.material = lamp_material
 	add_child(sprite)
 
-func check_contact(foot_position: Vector2) -> void:
-	if foot_position.distance_squared_to(global_position) > TOUCH_RADIUS * TOUCH_RADIUS:
+func check_contact(foot_position: Vector2, allow_reactivation := false) -> void:
+	if not _has_contact(foot_position):
 		contact_attempted = false
-	elif not activated and not contact_attempted:
+	elif not contact_attempted and (not activated or allow_reactivation):
 		contact_attempted = true
 		touched.emit()
+
+func _has_contact(foot_position: Vector2) -> bool:
+	if contact_outlines.is_empty():
+		return foot_position.distance_squared_to(global_position) <= TOUCH_RADIUS * TOUCH_RADIUS
+	var foot := to_local(foot_position)
+	var radius_squared := contact_radius * contact_radius
+	for outline in contact_outlines:
+		if Geometry2D.is_point_in_polygon(foot, outline):
+			return true
+		for i in range(outline.size()):
+			var edge := Geometry2D.get_closest_point_to_segment(foot, outline[i - 1], outline[i])
+			if foot.distance_squared_to(edge) <= radius_squared:
+				return true
+	return false
 
 func show_notice(message: String) -> void:
 	if banner == null:

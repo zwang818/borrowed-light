@@ -1,13 +1,14 @@
 extends Node2D
-## Proximity cue shared by abdomen devices and ducts.
+## Proximity cue shared by facilities and ducts.
 enum Cue { RECTANGLE, SEAM }
 
-const REACTION_RANGE := 112.0
+const REACTION_RANGE := 56.0
 const PROMPT_DELAY := 0.22
 
 var interaction_id: StringName
 var cue := Cue.RECTANGLE
 var cue_offset := Vector2.ZERO
+var target_body: RID
 var nearby := false
 var prompt_ready := false
 var _dwell := 0.0
@@ -18,6 +19,8 @@ func can_interact_from(origin: Vector2, reach: float) -> bool:
 	if origin.distance_squared_to(global_position) >= reach * reach:
 		return false
 	var query := PhysicsRayQueryParameters2D.create(origin, global_position, 1)
+	if target_body.is_valid():
+		query.exclude = [target_body]
 	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
 
 func update_approach(origin: Vector2, can_prompt: bool, still: bool, delta: float) -> void:
@@ -25,14 +28,18 @@ func update_approach(origin: Vector2, can_prompt: bool, still: bool, delta: floa
 	_dwell = minf(_dwell + delta, PROMPT_DELAY) if can_prompt and still else 0.0
 	prompt_ready = _dwell >= PROMPT_DELAY
 	if cue == Cue.RECTANGLE:
-		if _rectangle_focused != can_prompt:
-			_rectangle_focused = can_prompt
-			queue_redraw()
+		set_focused(can_prompt)
 		return
 	var strength := move_toward(_strength, 1.0 if nearby else 0.0, delta * 5.0)
 	if strength != _strength:
 		_strength = strength
 		queue_redraw()
+
+func set_focused(value: bool) -> void:
+	if _rectangle_focused == value:
+		return
+	_rectangle_focused = value
+	queue_redraw()
 
 func _ready() -> void:
 	z_index = 1

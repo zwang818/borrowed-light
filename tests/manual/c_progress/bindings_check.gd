@@ -212,7 +212,7 @@ func run() -> void:
 	check(paused,"Reserved Escape still pauses")
 	await press(KEY_ESCAPE)
 	check(not paused,"Reserved Escape still resumes")
-	player.global_position = level.interaction_points[&"workshop_origin"].global_position+Vector2(0,24)
+	player.global_position = level.interaction_points[&"workshop_origin"].global_position+Vector2(0,20)
 	await physics_frame
 	await physics_frame
 	check(level._point_prompt(&"workshop_origin").begins_with("[F]"),"World interaction prompt follows the rebound key")

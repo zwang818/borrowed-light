@@ -3,7 +3,8 @@ shader_type canvas_item;
 // Sample a stable one-world-unit grid, including at fractional camera zoom.
 uniform float pixel_world = 1.0;
 uniform vec2 axis = vec2(0.906308, -0.422618);
-uniform int finish = 0; // Shell, underside, distant bulkhead, grate.
+uniform int finish = 0; // Shell, underside, distant bulkhead, grate, untextured trim.
+uniform vec3 service_reveal = vec3(0.0);
 varying vec2 world_position;
 
 void vertex() {
@@ -16,14 +17,13 @@ float grain(vec2 p) {
 	return fract((q.x + q.y) * q.z);
 }
 
-void fragment() {
-	vec2 p = (floor(world_position / pixel_world) + 0.5) * pixel_world;
+vec3 metal_paint(vec2 p, vec3 paint) {
 	vec2 local = floor(vec2(dot(p, axis), dot(p, vec2(-axis.y, axis.x))));
 	vec2 size = finish == 2 ? vec2(224.0, 123.0) : vec2(96.0, 44.0);
 	vec2 shifted = local + vec2(mod(floor(local.y / size.y), 2.0) * size.x * 0.5, 0.0);
 	vec2 cell = floor(shifted / size);
 	vec2 tile = mod(shifted, size);
-	vec3 base = COLOR.rgb * (0.88 + grain(cell) * 0.20);
+	vec3 base = paint * (0.88 + grain(cell) * 0.20);
 	float grit = grain(p);
 	float stain = grain(floor(local / vec2(13.0, 8.0)));
 	float fleck = grain(floor(local / vec2(4.0, 2.0)));
@@ -71,5 +71,17 @@ void fragment() {
 			base += vec3(0.065, 0.021, 0.025) * falloff;
 		}
 	}
-	COLOR = vec4(base, COLOR.a);
+	return base;
+}
+
+void fragment() {
+	vec2 p = (floor(world_position / pixel_world) + 0.5) * pixel_world;
+	vec3 base = finish == 4 ? COLOR.rgb : metal_paint(p, COLOR.rgb);
+	float opacity = COLOR.a;
+	if (service_reveal.xy != vec2(0.0)) {
+		float depth = service_reveal.z - dot(p, service_reveal.xy);
+		opacity *= smoothstep(-1.0, 2.0, depth);
+		base = mix(base, vec3(0.65, 0.46, 0.34), (1.0 - smoothstep(2.0, 7.0, depth)) * 0.6);
+	}
+	COLOR = vec4(base, opacity);
 }

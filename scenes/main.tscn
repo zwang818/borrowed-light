@@ -1,7 +1,27 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://dgn1h58068l0x"]
 
 [ext_resource type="PackedScene" path="res://scenes/ui/title_screen/title_screen.tscn" id="1_title_screen"]
-[ext_resource type="PackedScene" path="res://scenes/gameplay/abdomen_level.tscn" id="2_abdomen_level"]
+[ext_resource type="PackedScene" uid="uid://cn7uabqfbv1p8" path="res://scenes/gameplay/abdomen_level.tscn" id="2_abdomen_level"]
 
-[node name="Main" instance=ExtResource("1_title_screen")]
+[node name="Main" unique_id=2010700854 instance=ExtResource("1_title_screen")]
 start_scene = ExtResource("2_abdomen_level")
+
+[node name="Presentation" parent="." index="1"]
+anchors_preset = 0
+
+[node name="WorldLayers" parent="Presentation" index="0"]
+anchors_preset = 0
+
+[node name="RobotAnchor" parent="Presentation/WorldLayers" index="4"]
+anchors_preset = 0
+
+[node name="Menu" parent="Presentation" index="1"]
+anchors_preset = 0
+offset_left = 2.0
+offset_right = 1282.0
+
+[node name="SaveOverlay" parent="Presentation" index="2"]
+anchors_preset = 0
+
+[node name="RestartOverlay" parent="Presentation" index="3"]
+anchors_preset = 0
